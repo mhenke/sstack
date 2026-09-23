@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { paginate } from "../src/pagination";
 import { lineTotal, parseOrder } from "../src/pricing";
-import { totalQuantity } from "../src/cart";
+import { maxQuantity, totalQuantity } from "../src/cart";
 
 describe("paginate", () => {
   it("returns the requested page", () => {
@@ -31,5 +31,13 @@ describe("cart", () => {
         { id: "b", qty: 5 },
       ]),
     ).toBe(7);
+  });
+  it("finds the max quantity", () => {
+    expect(
+      maxQuantity([
+        { id: "a", qty: 2 },
+        { id: "b", qty: 5 },
+      ]),
+    ).toBe(5);
   });
 });

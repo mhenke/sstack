@@ -41,12 +41,12 @@ Python — `paginate(items, page, size)` with 1-based `page`:
 # observed (bug): returns []  (start = -3 clamps past stop, silent empty)
 ```
 
-TypeScript — `totalQuantity(lines)` via reduce:
+TypeScript — `maxQuantity(lines)` via `Math.max(...map)`:
 
 ```ts
 // case: lines = []
-// oracle: returns 0
-// observed (bug): TypeError: Reduce of empty array with no initial value
+// oracle: throws Error("lines must not be empty")
+// observed (bug): returns -Infinity  (Math.max of nothing)
 ```
 
 ## When not to apply
