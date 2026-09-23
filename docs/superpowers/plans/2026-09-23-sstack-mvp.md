@@ -175,8 +175,8 @@ restructuring.
 
 - [ ] **Step 3: Verify content**
 
-Run: `grep -c "^\- \*\*" docs/ARCHITECTURE.md` → Expected: 6 (six definitions).
-Run: `grep -c "future" docs/ARCHITECTURE.md` → Expected: 10 (future lenses).
+Run: `sed -n '/## Six definitions/,/## Taxonomy/p' docs/ARCHITECTURE.md | grep -c "^- \*\*"` → Expected: 6 (six definitions).
+Run: `sed -n '/## Taxonomy/,/## Verification strategies/p' docs/ARCHITECTURE.md | grep -c "future"` → Expected: 10 (future lenses).
 Run: `grep -o "Discover\|Model\|Attack\|Observe\|Verify\|Minimize\|Regress\|Learn" docs/ARCHITECTURE.md | sort -u | wc -l` → Expected: 8.
 
 - [ ] **Step 4: Commit**
