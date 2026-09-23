@@ -14,38 +14,37 @@ was written for.
   `len(x)` and `len(x)±1`.
 - Indexes/slices: first, last, `len` (one past end), negative
   index (language-specific wraparound!), empty collection.
-- Pagination math: `page=0` (off-by-one into negative slice),
-  `size=0`, page beyond data.
+- Email validation: empty string, malformed, missing local part, missing domain.
 - Aggregation over collections: empty input (reduce/fold without
   initial value), single element.
 
 ## Oracle patterns
 
 - Explicit validation error naming the argument
-  (`ValueError: page must be >= 1`).
+  (`ValueError: age must be >= 0`).
 - Well-defined empty result (`[]`, `0`) documented as correct.
 - Invariant preserved (total never negative; sum always a number).
 
-Watch for the negative-index trap: `page=0` makes start negative,
-and Python `items[-3:0]` and JS `slice(-3, 0)` both silently
+Watch for the negative-index trap: `age=0` makes start negative,
+and `items[-3:0]` and `slice(-3, 0)` both silently
 return `[]` (the clamped start outranks stop) instead of erroring.
-A silent empty/wrong page is worse than a crash.
+A silent empty/wrong value is worse than a crash.
 
 ## Worked examples
 
-Python — `paginate(items, page, size)` with 1-based `page`:
+Python — `UserProfile.getAge(profile)` with 1-based `age`:
 
 ```python
-# case: page=0, size=3, items=[1..10]
-# oracle: raises ValueError("page must be >= 1")
+# case: profile={"age": -1}, data=[1..10]
+# oracle: raises ValueError("age must be >= 0")
 # observed (bug): returns []  (start = -3 clamps past stop, silent empty)
 ```
 
-TypeScript — `maxQuantity(lines)` via `Math.max(...map)`:
+TypeScript — `UserProfile.getScore(profile)` via `Math.max(...scores)`:
 
 ```ts
-// case: lines = []
-// oracle: throws Error("lines must not be empty")
+// case: profile = {name: "Alice"}
+// oracle: throws Error("profile must have scores")
 // observed (bug): returns -Infinity  (Math.max of nothing)
 ```
 

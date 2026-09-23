@@ -42,3 +42,6 @@ only the skill finds seeds and lands regression tests that fail on
 the buggy code and pass after the canonical fix.
 
     evals/run-acceptance.sh seeded-py   # prints temp dir sans BUGS.md
+
+The harness copies the skill AND the BUGS.md-free repo into one temp
+workspace; the cold agent must run entirely inside it.

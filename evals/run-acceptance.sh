@@ -10,7 +10,7 @@ case "$repo" in
 esac
 dir=$(mktemp -d "${TMPDIR:-/tmp}/sstack-$repo-XXXXXX")
 cd "$(dirname "$0")"
-rsync -a --exclude BUGS.md "$repo/" "$dir/"
+rsync -a --exclude BUGS.md --exclude '.pytest_cache' --exclude '__pycache__' --exclude '.vite' "$repo/" "$dir/"
 mkdir -p "$dir/skills/sstack"
 rsync -a ../skills/sstack/ "$dir/skills/sstack/"
 echo "$dir"

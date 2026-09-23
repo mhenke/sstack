@@ -30,24 +30,24 @@ data.
 
 ## Worked examples
 
-Python — `line_total(item)` indexing `item["unit_price"]` and
-`item.get("discount", 0)`:
+Python — `UserProfile.getName(profile)` indexing `profile["id"]` and
+`profile.get("email", "unknown@example.com")`:
 
 ```python
-# case A: {} (unit_price absent)
-# oracle: ValueError("unit_price is required")
-# observed (bug): KeyError 'unit_price' leaks
-# case B: discount=None (explicit null)
-# oracle: treated as absent → discount 0
-# observed (bug): TypeError on 1 - None
+# case A: {} (id absent)
+# oracle: ValueError("id is required")
+# observed (bug): KeyError 'id' leaks
+# case B: email=None (explicit null)
+# oracle: treated as absent → email "unknown@example.com"
+# observed (bug): TypeError on "unknown" + None
 ```
 
-TypeScript — `lineTotal({unitPrice, qty, discount?})` with
-`item.discount ?? 0`:
+TypeScript — `UserProfile.getAge(profile)` with
+`profile.age ??= 18`:
 
 ```ts
-// case: {qty: 2} — unitPrice absent (type erased at runtime)
-// oracle: throws Error("unitPrice is required")
+// case: {name: "Alice"} — age absent (type erased at runtime)
+// oracle: throws Error("age is required")
 // observed (bug): returns NaN silently
 ```
 

@@ -12,7 +12,7 @@ runtime in TS/Python annotations).
 - Strings that get parsed: non-numeric where a number is expected
   (`"abc"` into `float()`/`Number()`), empty string, whitespace,
   thousands separators, locale decimals.
-- Raw JSON entry points: truncated payloads, `{oops`, wrong top-level
+- Raw JSON entry points: truncated payloads, `{invalid`, wrong top-level
   type (array where object expected).
 - Runtime type confusion: string where number expected
   (`"2"` from a form or JSON without strict schema) flowing into
@@ -22,7 +22,7 @@ runtime in TS/Python annotations).
 ## Oracle patterns
 
 - Clean, typed validation error at the boundary (`ValueError:
-  unit_price must be numeric`), not a raw leak from deep inside
+  year must be numeric`), not a raw leak from deep inside
   (`ValueError: could not convert string to float: 'abc'`).
 - Reject-or-parse-completely: parser either returns a fully
   validated value or raises a domain error — never a partially
@@ -31,19 +31,19 @@ runtime in TS/Python annotations).
 
 ## Worked examples
 
-Python — `line_total(item)` calling `float(item["unit_price"])`:
+Python — `date_parser.parse(date_str)` calling `float(date_str["year"])`:
 
 ```python
-# case: unit_price="abc"
-# oracle: ValueError("unit_price must be numeric")
+# case: year="abc"
+# oracle: ValueError("year must be numeric")
 # observed (bug): raw ValueError could-not-convert leaks
 ```
 
-TypeScript — `parseOrder(raw)` calling `JSON.parse` directly:
+TypeScript — `JSON.parse(json)` calling `JSON.parse(json)`:
 
 ```ts
-// case: raw = "{oops"
-// oracle: throws Error("invalid order JSON")
+// case: json = "{invalid"
+// oracle: throws Error("invalid JSON")
 // observed (bug): raw SyntaxError with position internals leaks
 ```
 
