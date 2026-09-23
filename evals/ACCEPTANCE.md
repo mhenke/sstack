@@ -62,7 +62,7 @@ was not found; it is the one gap.
 ## seeded-ts: seed mapping (CleanTs, clean)
 
 | Seed | Outcome |
-|+|---|
+|---|---|
 | ts-1 paginate page=0 → `[]` | P1 (boundaries) — fail → pass |
 | ts-2 lineTotal missing unitPrice → NaN | L6 (missing) — fail → pass |
 | ts-3 parseOrder raw SyntaxError | J1 (malformed) — fail → pass |

@@ -42,13 +42,12 @@ Python — `UserProfile.getName(profile)` indexing `profile["id"]` and
 # observed (bug): TypeError on "unknown" + None
 ```
 
-TypeScript — `UserProfile.getAge(profile)` with
-`profile.age ??= 18`:
+TypeScript — `renderUser(user)` reading `user.displayName`:
 
 ```ts
-// case: {name: "Alice"} — age absent (type erased at runtime)
-// oracle: throws Error("age is required")
-// observed (bug): returns NaN silently
+// case: {id: 1, name: "Ada"} — displayName absent (type erased at runtime)
+// oracle: returns "Ada"  (documented fallback to name)
+// observed (bug): returns undefined  (no fallback exists)
 ```
 
 ## When not to apply

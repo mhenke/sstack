@@ -39,11 +39,11 @@ Python — `date_parser.parse(date_str)` calling `float(date_str["year"])`:
 # observed (bug): raw ValueError could-not-convert leaks
 ```
 
-TypeScript — `JSON.parse(json)` calling `JSON.parse(json)`:
+TypeScript — `readConfig(raw)` calling `JSON.parse(raw)`:
 
 ```ts
-// case: json = "{invalid"
-// oracle: throws Error("invalid JSON")
+// case: raw = "{invalid"
+// oracle: throws Error("config is not valid JSON")
 // observed (bug): raw SyntaxError with position internals leaks
 ```
 

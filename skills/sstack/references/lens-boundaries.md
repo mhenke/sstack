@@ -13,39 +13,44 @@ was written for.
 - Sizes/limits: `0`, negative, huge (memory-relevant), and
   `len(x)` and `len(x)±1`.
 - Indexes/slices: first, last, `len` (one past end), negative
-  index (language-specific wraparound!), empty collection.
-- Email validation: empty string, malformed, missing local part, missing domain.
+  index (language-specific behavior!), empty collection.
+- 1-based vs 0-based conventions: any arithmetic that derives an
+  index (`start = (page - 1) * size`) flips sign one step below
+  the declared minimum.
 - Aggregation over collections: empty input (reduce/fold without
-  initial value), single element.
+  initial value, `Math.max()` of nothing), single element, arrays
+  large enough to hit spread-argument stack limits.
 
 ## Oracle patterns
 
 - Explicit validation error naming the argument
-  (`ValueError: age must be >= 0`).
+  (`ValueError: lo must be <= hi`).
 - Well-defined empty result (`[]`, `0`) documented as correct.
-- Invariant preserved (total never negative; sum always a number).
+- Invariant preserved (total never negative; sum always a number;
+  large-but-legitimate input still returns a value).
 
-Watch for the negative-index trap: `age=0` makes start negative,
-and `items[-3:0]` and `slice(-3, 0)` both silently
-return `[]` (the clamped start outranks stop) instead of erroring.
-A silent empty/wrong value is worse than a crash.
+Watch for the negative-index trap: when a 1-based index goes to
+zero, the derived start goes negative, and Python `items[-3:0]` and
+JS `slice(-3, 0)` both silently return `[]` (the clamped start
+outranks stop) instead of erroring. A silent empty or wrong page
+is worse than a crash.
 
 ## Worked examples
 
-Python — `UserProfile.getAge(profile)` with 1-based `age`:
+Python — `clamp(value, lo, hi)` with `lo > hi`:
 
 ```python
-# case: profile={"age": -1}, data=[1..10]
-# oracle: raises ValueError("age must be >= 0")
-# observed (bug): returns []  (start = -3 clamps past stop, silent empty)
+# case: clamp(5, 10, 1)
+# oracle: raises ValueError("lo must be <= hi")
+# observed (bug): returns 1  (both branches fire; last guard wins)
 ```
 
-TypeScript — `UserProfile.getScore(profile)` via `Math.max(...scores)`:
+TypeScript — `windowFrom(items, start, count)` with `start = -1`:
 
 ```ts
-// case: profile = {name: "Alice"}
-// oracle: throws Error("profile must have scores")
-// observed (bug): returns -Infinity  (Math.max of nothing)
+// case: start = -1, count = 3, items = [1..10]
+// oracle: throws Error("start must be >= 0")
+// observed (bug): returns []  (slice(-4, -1) clamps past stop)
 ```
 
 ## When not to apply
