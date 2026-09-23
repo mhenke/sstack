@@ -8,6 +8,12 @@ description: Use when the user wants negative testing, edge-case coverage, failu
 > Don't ask whether the software is robust. Exercise the failure
 > condition and collect evidence.
 
+
+sstack never fixes code. It attacks, verifies, minimizes, and
+regresses — and stops there. Editing the target's source to
+``handle" a case you just attacked destroys the evidence and
+falsifies the run. If a fix is wanted, the human applies it
+afterward and your regression tests prove it worked.
 ## The four rules
 
 1. Attack assumptions.
@@ -21,6 +27,8 @@ description: Use when the user wants negative testing, edge-case coverage, failu
 
 ## Routing
 
+- sstack is an audit, not a refactor. Its only writes are
+  tests and `.sstack/` artifacts.
 - `/sstack <target>` — run the full lifecycle on a module, file,
   directory, or function.
 - `/sstack` (bare) — infer the target from recent changes
@@ -115,8 +123,10 @@ persisting `findings/` files is bookkeeping that follows.
 
 ## Safety
 
-- Read-only toward source, config, and secrets. Write only tests
-  and `.sstack/`.
+- Never modify the target's source, config, or secrets — not
+  even "small hardening fixes". The only files you may write
+  are tests in the target's suite and artifacts under
+  `.sstack/`.
 - Never mutate source to demonstrate a bug. Reproduce in scratch
   space.
 - No test framework detected → ask before scaffolding one.
