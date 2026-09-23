@@ -67,6 +67,11 @@ surface × lens:
 
 Never design the oracle after seeing the result.
 
+Cover every selected lens on every mapped surface before
+concluding. A lens with zero executed cases on a surface that
+consumes record/dict-shaped or string input is an incomplete
+run, not a clean result.
+
 ### 3. Verify
 
 Per case, compare oracle vs. observed:
@@ -86,11 +91,16 @@ that still violates the oracle. Update the repro command.
 
 Write a permanent test in the host repo's real suite — same
 directory and assert style as existing tests, asserting the
-oracle, not the bug:
+oracle. Never assert the observed buggy behavior: a test that
+passes against code you just confirmed broken has pinned the
+bug and is worthless. After writing each test, run it:
 
-- Test FAILS against current code → live bug; note it.
-- Test PASSES → already handled; keep it as a characterization
-  test and mark the finding accordingly.
+- Test FAILS against current code → correct live-bug
+  regression; note it as `fail`.
+- Test PASSES → either the bug is already handled (mark the
+  finding refuted and keep the test as characterization) or
+  the test is wrong — re-check it against the oracle before
+  accepting it.
 
 Run the new tests. Then deliver the report in chat FIRST;
 persisting `findings/` files is bookkeeping that follows.
@@ -118,3 +128,7 @@ One line per finding: `id | lens | surface | verdict | regression
 (file::test, fail|pass)`. Then per confirmed finding the full
 field set, with observed output quoted verbatim. End with counts:
 confirmed / refuted / inconclusive, regressions landed.
+
+If any finding is confirmed but every landed regression
+passes, the run is invalid: re-check those tests against
+their oracles.
