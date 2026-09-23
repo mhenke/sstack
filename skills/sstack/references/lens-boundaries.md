@@ -26,9 +26,10 @@ was written for.
 - Well-defined empty result (`[]`, `0`) documented as correct.
 - Invariant preserved (total never negative; sum always a number).
 
-Watch for the negative-index trap: Python `items[-3:0]` and JS
-`slice(-3, 0)` silently return tail-window or empty results
-instead of erroring. Silent wrong data is worse than a crash.
+Watch for the negative-index trap: `page=0` makes start negative,
+and Python `items[-3:0]` and JS `slice(-3, 0)` both silently
+return `[]` (the clamped start outranks stop) instead of erroring.
+A silent empty/wrong page is worse than a crash.
 
 ## Worked examples
 
@@ -37,7 +38,7 @@ Python — `paginate(items, page, size)` with 1-based `page`:
 ```python
 # case: page=0, size=3, items=[1..10]
 # oracle: raises ValueError("page must be >= 1")
-# observed (bug): returns [8, 9, 10]  (start = -3 wraps)
+# observed (bug): returns []  (start = -3 clamps past stop, silent empty)
 ```
 
 TypeScript — `totalQuantity(lines)` via reduce:
