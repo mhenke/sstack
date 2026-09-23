@@ -73,6 +73,13 @@ surface × lens:
    or a direct call through the repo's test framework.
 4. Record the actual output verbatim.
 
+An attack that never reached the function is not evidence. If the
+script raises `ImportError`, `TypeError: missing required
+positional argument`, or any error that is not the one your oracle
+predicted, fix the call — import path, arguments, signature — and
+re-run until the function itself executes. An error from your own
+harness is a broken case, never a verdict.
+
 Never design the oracle after seeing the result.
 
 Cover every selected lens on every mapped surface before
@@ -83,6 +90,12 @@ run, not a clean result.
 ### 3. Verify
 
 Per case, compare oracle vs. observed:
+
+Before comparing anything, check the observed output came from
+the function under attack and not from your harness. An observed
+`ImportError` or missing-argument error is a broken attack:
+mark the case inconclusive with the harness error quoted, fix
+it, and re-run.
 
 - **confirmed** — observed violates the oracle, and the case
   reproduces on a second run.
