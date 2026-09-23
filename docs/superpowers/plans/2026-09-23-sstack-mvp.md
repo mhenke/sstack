@@ -394,12 +394,12 @@ Python — `paginate(items, page, size)` with 1-based `page`:
 # observed (bug): returns []  (start = -3 clamps past stop, silent empty)
 ```
 
-TypeScript — `totalQuantity(lines)` via reduce:
+TypeScript — `maxQuantity(lines)` via `Math.max(...map)`:
 
 ```ts
 // case: lines = []
-// oracle: returns 0
-// observed (bug): TypeError: Reduce of empty array with no initial value
+// oracle: throws Error("lines must not be empty")
+// observed (bug): returns -Infinity  (Math.max of nothing)
 ```
 
 ## When not to apply
@@ -705,7 +705,7 @@ git commit -m "feat: python seeded eval repo (5 bugs across 3 lenses)"
 - Create: `evals/seeded-ts/BUGS.md`
 
 **Interfaces:**
-- Produces: `paginate<T>(items, page, size)`, `lineTotal(item)`, `parseOrder(raw)`, `totalQuantity(lines)` — consumed by Task 7 acceptance.
+- Produces: `paginate<T>(items, page, size)`, `lineTotal(item)`, `parseOrder(raw)`, `totalQuantity(lines)`, `maxQuantity(lines)` — consumed by Task 7 acceptance.
 
 Seeded bugs (5, one lens each):
 
@@ -713,7 +713,7 @@ Seeded bugs (5, one lens each):
 | ts-1 | pagination | boundaries | `paginate(items, 0, 3)` | returns `[]` silently (negative slice clamps; no validation) | `throw Error("page must be >= 1")` | validate page/size |
 | ts-2 | pricing | missing | `lineTotal({qty: 2})` | returns `NaN` silently | `throw Error("unitPrice is required")` | `Number.isFinite` check |
 | ts-3 | pricing | malformed | `parseOrder("{oops")` | raw `SyntaxError` leaks | `throw Error("invalid order JSON")` | try/catch, rethrow domain error |
-| ts-4 | cart | boundaries | `totalQuantity([])` | `TypeError: Reduce of empty array with no initial value` | returns `0` | `reduce(fn, 0)` |
+| ts-4 | cart | boundaries | `maxQuantity([])` | returns `-Infinity` | `throw Error("lines must not be empty")` | length check before `Math.max` |
 | ts-5 | cart | malformed | qty as string `"2"` in lines | returns `"023"` (string) | `throw Error("qty must be a number")` | `typeof l.qty === "number"` check |
 
 - [ ] **Step 1: Verify toolchain**
@@ -785,7 +785,11 @@ export interface CartLine {
 }
 
 export function totalQuantity(lines: CartLine[]): number {
-  return lines.reduce((acc, l) => acc + l.qty);
+  return lines.reduce((acc, l) => acc + l.qty, 0);
+}
+
+export function maxQuantity(lines: CartLine[]): number {
+  return Math.max(...lines.map((l) => l.qty));
 }
 ```
 
@@ -795,7 +799,7 @@ export function totalQuantity(lines: CartLine[]): number {
 import { describe, expect, it } from "vitest";
 import { paginate } from "../src/pagination";
 import { lineTotal, parseOrder } from "../src/pricing";
-import { totalQuantity } from "../src/cart";
+import { totalQuantity, maxQuantity } from "../src/cart";
 
 describe("paginate", () => {
   it("returns the requested page", () => {
@@ -826,6 +830,14 @@ describe("cart", () => {
       ]),
     ).toBe(7);
   });
+  it("finds the max quantity", () => {
+    expect(
+      maxQuantity([
+        { id: "a", qty: 2 },
+        { id: "b", qty: 5 },
+      ]),
+    ).toBe(5);
+  });
 });
 ```
 
@@ -842,8 +854,8 @@ bun -e "import {lineTotal} from './src/pricing'; console.log(lineTotal({qty: 2} 
 # expect: NaN
 bun -e "import {parseOrder} from './src/pricing'; parseOrder('{oops')"
 # expect: SyntaxError (raw, leaks position internals)
-bun -e "import {totalQuantity} from './src/cart'; console.log(totalQuantity([]))"
-# expect: TypeError: Reduce of empty array with no initial value
+bun -e "import {maxQuantity} from './src/cart'; console.log(maxQuantity([]))"
+# expect: -Infinity
 bun -e "import {totalQuantity} from './src/cart'; console.log(totalQuantity([{id:'a',qty:'2'},{id:'b',qty:'3'}] as any))"
 # expect: 023  (string accumulation)
 ```
