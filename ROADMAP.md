@@ -112,6 +112,73 @@ v0 is a content-only skill pack with a process-only evidence layer
   marketplace entry until a host needs one.
 - **Done when**: install and update are one command per host.
 
+## Language breadth — Python, JavaScript, TypeScript, Java, C++
+
+The process is language-agnostic. The *evidence* is not: v0 ships one
+Python and one TypeScript seeded repo, and the lens heuristics are
+illustrated in those two languages only. That gap is the item.
+
+Target set, in the order they should land:
+
+| Language | Status in v0 | Cost to add |
+|---|---|---|
+| Python | proven (`evals/seeded-py`) | done |
+| TypeScript | proven (`evals/seeded-ts`) | done |
+| JavaScript | none | lowest: the TS addendum covers it (types erased at runtime is the same point), needs a seeded repo only |
+| Java | none | high: null is load-bearing, overload resolution hides arity bugs, records vs maps differ from Python dicts |
+| C++ | none | highest: manual memory, UB, integer overflow, and the `missing` lens has no direct analogue (no null, just UB) |
+
+### Per-language lens addenda
+
+- **What**: a short section per language on how the three v0 lenses
+  actually manifest there. Where the generic heuristic misleads, say
+  so. The `boundaries` lens currently says "negative index
+  (language-specific behavior!)" and illustrates with Python and JS;
+  in Go a negative index panics, in Rust it panics at the bounds check,
+  and an agent working from the Python example will predict the wrong
+  failure. `missing` has the same problem: Python `dict.get(k, default)`
+  and TypeScript `??` treat explicit-null differently from `d[k]`, and a
+  Java or C++ agent is looking at zero-value structs and err returns.
+- **Done when**: every lens has an addendum for all five languages,
+  and each addendum names at least one case where that language's
+  behavior differs from the Python example.
+- **Note**: reference content, additive. One file per language under
+  `references/languages/`, pointed at from the lens index.
+
+### Seeded repos per language
+
+- **Why**: the eval discipline caught every real defect so far
+  because the seeds are language-specific. Without a Go repo, "we
+  support Go" is a claim.
+- **What**: one seeded repo per new language, five bugs each, mapped
+  one-to-one to the lenses, answer key in `BUGS.md`, verified by a
+  clean cold run plus a negative control.
+- **Done when**: a clean run on each new repo confirms seeds and
+  flips them green under the canonical fixes.
+- **Budget**: this is the expensive half. Three languages, three
+  repos, three cold runs, three negative controls. Sequence it after
+  the evidence schema lands, because a per-language run without
+  structured evidence is a transcript nobody can re-check.
+
+### Readme honesty line
+
+- **What**: one line in the README stating which languages have
+  acceptance evidence and which are process-only by inference. Right
+  now the eval directory implies more than the evidence supports.
+- **Done when**: a reader can tell the difference between "works" and
+  "should work" without reading the eval.
+
+### The JavaScript shortcut, stated honestly
+
+JavaScript is not really a new language for sstack. The `malformed`
+and `missing` lenses already reason about erased runtime types, which
+is the JavaScript condition; TypeScript just makes it visible at
+compile time. A JavaScript addendum is mostly a note that the
+TypeScript advice applies with the type checker removed, plus a seeded
+repo to prove it. If the budget is tight, ship it as a TypeScript
+addendum with the type-checker note rather than treating it as a peer
+language.
+
 ## Explicitly not planned
 
 - **A hosted runtime.** sstack runs where the agent runs (ADR-0002).
