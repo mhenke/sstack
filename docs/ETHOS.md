@@ -24,12 +24,11 @@ confirmed failures into permanent regression tests.
    finding that is not a test in the host repo's suite will be
    reintroduced.
 
-## What sstack is not
+## Scope
 
-- Not a security product. Security is one lens among many.
-- Not a mutation-testing product. Mutation is one verification
-  strategy, deferred past v0.
-- Not a happy-path test generator. Happy-path coverage is the host
-  repo's business.
-- Not adversarial-only. A timeout, null, or clock rollover is not
-  an attack; it is still a negative condition worth an oracle.
+- **Security** is one lens among many, not the identity of the
+  stack.
+- **Mutation** is one verification strategy, deferred past v0.
+- **Happy-path coverage** is the host repo's business.
+- **Adversarial** is not the filter. A timeout, null, or clock
+  rollover is not an attack, and still deserves an oracle.

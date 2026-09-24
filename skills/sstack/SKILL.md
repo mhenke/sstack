@@ -1,6 +1,6 @@
 ---
 name: sstack
-description: Use when the user wants negative testing, edge-case coverage, failure-mode analysis, robustness checks, hostile or unexpected input handling, "what happens if" questions about code, or to harden a module or API against bad input before shipping. Discovers failure surfaces, attacks them through lenses (boundaries, malformed, missing), verifies observed behavior against a pre-declared oracle, and turns confirmed failures into permanent regression tests. Not for happy-path feature work.
+description: Use when the user wants negative testing, edge-case coverage, failure-mode analysis, robustness checks, hostile or unexpected input handling, "what happens if" questions about code, or to harden a module or API against bad input before shipping. Discovers failure surfaces, attacks them through lenses (boundaries, malformed, missing), verifies observed behavior against a pre-declared oracle, and turns confirmed failures into permanent regression tests. Scope is existing behavior under adverse conditions; happy-path feature work belongs to the feature's own tests.
 ---
 
 # sstack — structured negative testing
@@ -27,8 +27,6 @@ afterward and your regression tests prove it worked.
 
 ## Routing
 
-- sstack is an audit, not a refactor. Its only writes are
-  tests and `.sstack/` artifacts.
 - `/sstack <target>` — run the full lifecycle on a module, file,
   directory, or function.
 - `/sstack` (bare) — infer the target from recent changes
@@ -47,7 +45,7 @@ All artifacts live under `.sstack/` in the host repo:
 - `findings/<slug>.md` — one per finding, fields:
   `lens, surface, case, oracle, observed (verbatim), verdict
   (confirmed | refuted | inconclusive), repro (command),
-  regression (test file + name + fail|pass)`
+  regression (test file + name + red|green)`
 - `scratch/` — throwaway scripts; delete at run end
 
 ## Stages
@@ -59,6 +57,9 @@ API routes, anything that parses external input, loops over
 collections, or indexes/slices. For each surface, record its
 assumed contract — types, ranges, preconditions gleaned from
 docstrings, types, and call sites. Write `.sstack/map.md`.
+
+Done when every public function, route, parser, loop, and indexer
+in the target has a row in `map.md` with its assumed contract.
 
 ### 2. Attack
 
@@ -80,7 +81,6 @@ predicted, fix the call — import path, arguments, signature — and
 re-run until the function itself executes. An error from your own
 harness is a broken case, never a verdict.
 
-Never design the oracle after seeing the result.
 
 Cover every selected lens on every mapped surface before
 concluding. A lens with zero executed cases on a surface that
@@ -108,20 +108,20 @@ it, and re-run.
 For each confirmed finding, strip the case to the smallest input
 that still violates the oracle. Update the repro command.
 
+Done when no smaller input still violates the oracle and the
+finding's repro command runs as written.
+
 ### 5. Regress
 
 Write a permanent test in the host repo's real suite — same
 directory and assert style as existing tests, asserting the
-oracle. Never assert the observed buggy behavior: a test that
-passes against code you just confirmed broken has pinned the
-bug and is worthless. After writing each test, run it:
+oracle.
 
-- Test FAILS against current code → correct live-bug
-  regression; note it as `fail`.
-- Test PASSES → either the bug is already handled (mark the
-  finding refuted and keep the test as characterization) or
-  the test is wrong — re-check it against the oracle before
-  accepting it.
+The test goes **red** on current code when the finding is real and
+the oracle is right. A **green** test on a confirmed finding pinned
+the observed behavior instead of the oracle. Rewrite it to assert
+the oracle, or mark the finding refuted and keep the test as
+characterization if the code already handles the case.
 
 Run the new tests. Then deliver the report in chat FIRST;
 persisting `findings/` files is bookkeeping that follows.
@@ -148,10 +148,9 @@ persisting `findings/` files is bookkeeping that follows.
 ## Report format
 
 One line per finding: `id | lens | surface | verdict | regression
-(file::test, fail|pass)`. Then per confirmed finding the full
+(file::test, red|green)`. Then per confirmed finding the full
 field set, with observed output quoted verbatim. End with counts:
 confirmed / refuted / inconclusive, regressions landed.
 
-If any finding is confirmed but every landed regression
-passes, the run is invalid: re-check those tests against
-their oracles.
+If any finding is confirmed but every landed regression is green,
+the run is invalid: re-check those tests against their oracles.
