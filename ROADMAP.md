@@ -1,57 +1,57 @@
 # Roadmap
 
-Where sstack goes after v0.1.0. Each item names the evidence that put
-it here; nothing on this list is speculative. The decision behind the
-shape of v0 lives in [`docs/adr/`](docs/adr/README.md).
+Where sstack goes after v0.1.0. Each item names the evidence that put it
+here; nothing on this list is speculative. The decisions behind the
+shape of v0 live in [`docs/adr/`](docs/adr/README.md).
 
-The organizing rule: **every item must either raise proof quality or
-lower the cost of a run.** Anything that does neither is out.
+The organizing rule: every item must either raise proof quality or
+lower the cost of a run. Anything that does neither is out.
 
-## The gap v0 left
+## What v0 left open
 
 v0 is a content-only skill pack with a process-only evidence layer
-(ADR-0002). Two consequences, both real, both measured:
+(ADR-0002). Two consequences, both measured:
 
-- **Cold-agent compliance is the weak axis.** Six acceptance runs each
+- Cold-agent compliance is the weak axis. Six acceptance runs each
   violated a rule in prose, and each violation forced a guardrail:
   bug-pinning regressions, source-fixing mid-run, a contaminated skill,
-  and broken harnesses scored as verdicts. The guardrails worked; the
-  pattern is the signal.
-- **No deterministic evidence schema.** A finding is only as
+  broken harnesses scored as verdicts. Every guardrail held, but the
+  repetition across four unrelated failures is the real finding.
+- No deterministic evidence schema, so a finding is only as
   reproducible as the agent's transcript.
 
-## v1 — raise proof quality
+## v1: raise proof quality
 
 ### Structured evidence with fingerprints
 
 - **Why**: the deferred half of ADR-0002. A confirmed finding should
   be re-checkable without re-reading a chat transcript.
-- **What**: a small JSON schema for `findings/` — command, exit code,
+- **What**: a small JSON schema for `findings/`: command, exit code,
   stdout/stderr, input fingerprint, oracle, verdict, regression
   pointer. Loose markdown stays the human view; the JSON is the
   machine view.
 - **Done when**: a cold run's finding can be re-verified from its
   evidence file alone, with the agent out of the loop.
 - **Add**: a thin `scripts/` verifier under the skill. First code in
-  the pack; still no CLI, still no daemon (ADR-0002 revisit trigger:
-  this is it).
+  the pack, and still no CLI or daemon. This is the item ADR-0002
+  named as its own revisit trigger.
 
 ### Mutation as a verification strategy
 
-- **Why**: ADR-0001 scoped mutation to "deferred, not the center."
-  It is the strongest signal that a generated test has teeth.
+- **Why**: ADR-0001 scoped mutation as deferred rather than central.
+  It is the strongest available signal that a generated test has
+  teeth, and it is the direct answer to weak assertions in generated
+  suites, which is sstack's own recurring failure mode.
 - **What**: the `mutation` lens and the mutation entry in the v1
   proof-gate menu. Only after structured evidence exists, so a
   mutation result is itself recorded as evidence.
+- **Tooling per language**, researched rather than guessed: PIT for
+  Java, Stryker for JS/TS, mutmut for Python, RapidCheck or Google
+  FuzzTest for C++. Roughly 80% mutation score on critical modules is
+  the practical bar, and it runs on changed code rather than
+  whole-repo sweeps.
 - **Done when**: a regression test can be shown to go red against a
   seeded mutant, not only against the original bug.
-- **Tooling per language** (researched, not guessed): PIT for Java,
-  Stryker for JS/TS, mutmut for Python, RapidCheck or Google FuzzTest
-  for C++. Target roughly 80% mutation score on critical modules as
-  the practical bar. Run it on changed code, not whole-repo sweeps.
-- **Relation to AI-generated tests**: mutation is the direct answer to
-  weak assertions in generated suites, which is sstack's own recurring
-  failure mode.
 
 ### Property-based testing as the Attack default
 
@@ -64,19 +64,19 @@ v0 is a content-only skill pack with a process-only evidence layer
 - **What**: an Attack-stage rule that checks for an installed
   property-based library and writes a property before hand-designing
   cases, plus a Minimize rule that delegates shrinking. Oracle-first
-  ordering stays sstack's and is not delegated: the library finds an
-  input that breaks an assumption, sstack declares what should have
+  ordering stays sstack's and is not delegated. A library finds an
+  input that breaks an assumption; sstack declares what should have
   happened instead.
-- **Done when**: a run against a seeded repo that has Hypothesis or
+- **Done when**: a run against a seeded repo with Hypothesis or
   fast-check installed lands property-based regressions, and the
   coverage rule still forces every mapped surface to be attacked.
 - **Risk**: over-delegation. An agent that finds a library may stop
-  reading surfaces. The per-surface coverage rule stays mandatory.
+  reading surfaces, so the per-surface coverage rule stays mandatory.
 
 ### Remaining input and behavior lenses
 
-- **What**: `state`, `ordering`, `concurrency`, `idempotency` next —
-  the behavior lenses catch more real defects than more input lenses.
+- **What**: `state`, `ordering`, `concurrency`, `idempotency` next.
+  The behavior lenses catch more real defects than more input lenses.
   Then `dependency-failure`, `resource-exhaustion`, `contract`.
 - **Done when**: the seeded repos carry at least one seed per shipped
   lens, and a clean run reaches a majority on both.
@@ -86,15 +86,15 @@ v0 is a content-only skill pack with a process-only evidence layer
 ### Run-end checklist
 
 - **Why**: the deferred hardening in ADR-0002. Prose guardrails have
-  been load-bearing four times; a mechanical check catches the fifth
-  without a new paragraph.
+  been load-bearing four times, and a mechanical check catches the
+  fifth without a new paragraph.
 - **What**: before the report, the skill verifies source is unchanged
   (`git status` when available), every confirmed finding has a
   regression, and every regression's state is reported honestly.
 - **Done when**: the checklist appears in the shipped skill and a
   deliberately-defective cold run is caught by it.
 
-## v2 — lower the cost of a run
+## v2: lower the cost of a run
 
 ### Containment that survives a curious agent
 
@@ -124,28 +124,53 @@ v0 is a content-only skill pack with a process-only evidence layer
 
 - **Why**: ARCHITECTURE.md defers agents-as-files. v0 has one agent
   adopt roles per stage.
-- **What**: only if separation earns it — an isolated oracle that
+- **What**: only if separation earns it. An isolated oracle that
   cannot see the attacker's reasoning is the obvious candidate, and
   the eval is the judge.
 - **Done when**: an isolated verifier measurably beats the inline
   oracle on the seeded repos. If it does not, it stays deferred.
+
+### An isolated oracle, and what already landed
+
+The one defect that survived the v0 acceptance record was a verdict
+the agent talked itself into: a disjunctive oracle ("throws TypeError
+or returns NaN") encoded as a single `toBeNaN()` assertion. The
+attack was sound and the regression was sound, so the failure sits in
+the judging. That is the specialised-agent problem in miniature, and
+the v1 response is prose rather than a subagent: Verify now requires
+steel-manning the observed behavior before recording `confirmed`, and
+naming the conditions that would break the verdict.
+
+The steel-man step is portable, carries no host dependency, and
+catches the disjunctive-oracle class directly. An isolated oracle
+subagent stays deferred, because its packaging (`model:` pinning,
+blocking gates) is host-specific and would break ADR-0002's
+host-agnostic choice.
+
+One observation is worth recording. A cold TypeScript run fanned out
+into per-stage subagents on its own, without being told to, which
+suggests the stage structure in the skill invites that shape. Whether
+an explicit oracle subagent beats the fan-out the agent picks for
+itself is measurable on the seeded repos, and the bar is beating both
+the inline oracle and that self-selected fan-out.
 
 ### Host packaging
 
 - **Why**: ADR-0002 chose host-agnostic for zero install friction. That
   costs a forced update path, so stale skill copies can linger.
 - **What**: a thin installer per host (Cursor, OpenCode, Claude Code)
-  that copies `skills/sstack/` and nothing else. No plugin API, no
+  that copies `skills/sstack/` and nothing else. No plugin API and no
   marketplace entry until a host needs one.
 - **Done when**: install and update are one command per host.
 
-## Language breadth — Python, JavaScript, TypeScript, Java, C++
+## Language breadth: Python, JavaScript, TypeScript, Java, C++
 
-The process is language-agnostic. The *evidence* is not: v0 ships one
+The process is language-agnostic, but the evidence is not. v0 ships one
 Python and one TypeScript seeded repo, and the lens heuristics are
-illustrated in those two languages only. That gap is the item.
+illustrated in those two languages only, so nothing yet supports
+"we support Java."
 
-Target set, in the order they should land:
+Target set, in the order it should land:
 
 | Language | Status in v0 | Cost to add |
 |---|---|---|
@@ -158,25 +183,25 @@ Target set, in the order they should land:
 ### Per-language lens addenda
 
 - **What**: a short section per language on how the three v0 lenses
-  actually manifest there. Where the generic heuristic misleads, say
-  so. The `boundaries` lens currently says "negative index
-  (language-specific behavior!)" and illustrates with Python and JS;
-  in Go a negative index panics, in Rust it panics at the bounds check,
-  and an agent working from the Python example will predict the wrong
-  failure. `missing` has the same problem: Python `dict.get(k, default)`
-  and TypeScript `??` treat explicit-null differently from `d[k]`, and a
+  manifest there, saying so where the generic heuristic misleads. The
+  `boundaries` lens currently says "negative index (language-specific
+  behavior!)" and illustrates with Python and JS; in Go a negative
+  index panics, in Rust it panics at the bounds check, and an agent
+  working from the Python example will predict the wrong failure.
+  `missing` has the same problem: Python `dict.get(k, default)` and
+  TypeScript `??` treat explicit-null differently from `d[k]`, and a
   Java or C++ agent is looking at zero-value structs and err returns.
 - **Done when**: every lens has an addendum for all five languages,
-  and each addendum names at least one case where that language's
-  behavior differs from the Python example.
+  and each addendum names at least one case where that language
+  behaves differently from the Python example.
 - **Note**: reference content, additive. One file per language under
   `references/languages/`, pointed at from the lens index.
 
 ### Seeded repos per language
 
 - **Why**: the eval discipline caught every real defect so far
-  because the seeds are language-specific. Without a Go repo, "we
-  support Go" is a claim.
+  because the seeds are language-specific. Without a repo, "we support
+  it" is a claim.
 - **What**: one seeded repo per new language, five bugs each, mapped
   one-to-one to the lenses, answer key in `BUGS.md`, verified by a
   clean cold run plus a negative control.
@@ -190,20 +215,20 @@ Target set, in the order they should land:
 ### Readme honesty line
 
 - **What**: one line in the README stating which languages have
-  acceptance evidence and which are process-only by inference. Right
-  now the eval directory implies more than the evidence supports.
+  acceptance evidence and which are process-only by inference. The
+  eval directory currently implies more than the evidence supports.
 - **Done when**: a reader can tell the difference between "works" and
   "should work" without reading the eval.
 
 ### The JavaScript shortcut, stated honestly
 
-JavaScript is not really a new language for sstack. The `malformed`
-and `missing` lenses already reason about erased runtime types, which
-is the JavaScript condition; TypeScript just makes it visible at
-compile time. A JavaScript addendum is mostly a note that the
-TypeScript advice applies with the type checker removed, plus a seeded
-repo to prove it. If the budget is tight, ship it as a TypeScript
-addendum with the type-checker note rather than treating it as a peer
+JavaScript is not really a new language for sstack. The `malformed` and
+`missing` lenses already reason about erased runtime types, which is
+the JavaScript condition; TypeScript just makes it visible at compile
+time. A JavaScript addendum is mostly a note that the TypeScript
+advice applies with the type checker removed, plus a seeded repo to
+prove it. If the budget is tight, ship it as a TypeScript addendum
+with the type-checker note rather than treating it as a peer
 language.
 
 ### C++ needs a second verification mode, not a lens addendum
@@ -212,7 +237,7 @@ language.
   understates it. C++ negative testing does not share sstack's proof
   model. libFuzzer and Google FuzzTest assert the *absence* of
   undefined behavior through sanitizers, often with no assertion in
-  the test at all. sstack is oracle-first throughout: every stage
+  the test at all. sstack is oracle-first throughout, and every stage
   assumes a declared expected behavior. That assumption does not hold
   for the highest-value C++ negative testing.
 - **What**: decide whether a sanitizer-driven mode is a second
