@@ -40,13 +40,11 @@ bug, and a pinned bug is worse than no test at all.
 
 ## Install
 
-Drop it in any agent's skills directory:
-
 ```bash
-cp -r skills/sstack ~/.claude/skills/         # Claude Code
-cp -r skills/sstack ~/.config/opencode/skills/ # OpenCode
-cp -r skills/sstack .cursor/skills/            # Cursor
+npx skills@latest add mhenke/sstack
 ```
+
+Then:
 
 ```
 /sstack src/checkout.ts
