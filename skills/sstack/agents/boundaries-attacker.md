@@ -1,119 +1,30 @@
-# Agent: boundaries attacker
+---
+name: sstack-boundaries-attacker
+description: "Boundaries lens attacker. Attacks every mapped surface for numeric, size, index, collection, and pagination edge cases. Invoked by the sstack orchestrator after Discover completes. Returns findings in the sstack returns format."
+---
+
+# Boundaries attacker
+
+You are a **subagent**. The parent agent already ran Discover and
+wrote `.sstack/map.md`. Your prompt includes the workspace root path.
 
 ## Rubric
 
-Attacks every mapped surface through the boundaries lens: that numbers
-stay in sane ranges, indexes exist, collections are non-empty, and
-arithmetic lands inside the value domain the code was written for.
+1. Load the `boundaries` lens skill (`skills/boundaries/SKILL.md`
+   in the sstack skill pack) and follow it exactly: case-generation
+   heuristics, oracle patterns, the negative-index trap, operating
+   limits, and the when-not-to-apply guidance.
+2. If that skill is not available, still act as a boundaries-focused
+   attacker with the same rigor: probe numeric edges, sizes, indexes,
+   slices, collection boundaries, and pagination arithmetic.
 
-A boundary input is a *location*, not a verdict. `page=999` on a
-three-item list is a boundary the contract may well answer with a short
-page; `page=0` is a boundary the contract almost certainly rejects.
-Declare the oracle from the surface's contract, never from the fact
-that the value sits at an extreme.
+## Work
 
-### Case-generation heuristics
+1. Read `.sstack/map.md` for the surface map.
+2. Attack every mapped surface through this lens.
+3. Write the oracle before executing each case.
+4. Record actual output verbatim.
+5. Return findings in the sstack returns format.
 
-- Numeric arguments: `0`, `1`, `-1`, `-N`, max int, just-over any
-  threshold the code compares against.
-- Sizes/limits: `0`, negative, huge (memory-relevant), and `len(x)`
-  and `len(x)±1`.
-- Indexes/slices: first, last, `len` (one past end), negative index
-  (language-specific behavior!), empty collection.
-- 1-based vs 0-based conventions: any arithmetic that derives an index
-  (`start = (page - 1) * size`) flips sign one step below the declared
-  minimum.
-- Aggregation over collections: empty input (reduce/fold without
-  initial value, `Math.max()` of nothing), single element, arrays
-  large enough to hit spread-argument stack limits.
-
-### Oracle patterns
-
-- Explicit validation error naming the argument
-  (`ValueError: lo must be <= hi`).
-- Well-defined empty result (`[]`, `0`) documented as correct.
-- Invariant preserved (total never negative; sum always a number;
-  large-but-legitimate input still returns a value).
-
-Watch for the negative-index trap: when a 1-based index goes to zero,
-the derived start goes negative, and Python `items[-3:0]` and JS
-`slice(-3, 0)` both silently return `[]` (the clamped start outranks
-stop) instead of erroring. A silent empty or wrong page is worse than
-a crash.
-
-Worked examples — Python `clamp(value, lo, hi)` with `lo > hi`:
-case `clamp(5, 10, 1)`, oracle `raises ValueError("lo must be <= hi")`,
-observed (bug) returns 1. TypeScript `windowFrom(items, start, count)`
-with `start = -1`: oracle throws `Error("start must be >= 0")`,
-observed (bug) returns `[]`.
-
-### When not to apply
-
-No numbers, sizes, indexes, or collections in the surface's contract;
-values are already validated upstream at a boundary you can point to.
-
-## Language notes
-
-### Java
-
-- `Integer.MAX_VALUE + 1` wraps silently to `Integer.MIN_VALUE`; no
-  exception. Use `Math.addExact()` if overflow detection is needed.
-- Negative array size throws `NegativeArraySizeException`.
-- Autoboxing `null` to `int` throws `NullPointerException` at the
-  unbox site, not the assignment site.
-
-### C++
-
-- Signed integer overflow is undefined behavior, not a wrap.
-- `size_t` underflow: `vec.size() - 1` on an empty vector is a huge
-  positive number, causing a massive allocation or a silent wrong
-  loop bound.
-- Buffer overrun does not crash; it corrupts adjacent memory, and the
-  crash (if any) happens later and elsewhere.
-- No spread-argument stack overflow, but deep recursion overflows.
-
-### JavaScript
-
-- `slice(-4, -1)` on a 10-element array returns elements 6–8, not
-  what you would expect from "start -4, take 3."
-- `===` vs `==`: `"1" == 1` is true, `"1" === 1` is false. Always use
-  strict equality in the oracle.
-- `NaN !== NaN`. Use `Number.isNaN()` in assertions.
-
-### Operating limits
-
-Operating limits are boundary cases too. Max connections, rate
-limits, memory ceilings, request timeouts, and concurrent-request
-caps all have a "just-over" value where the system transitions from
-accepting to rejecting. Attack them the same way: find the limit,
-go one past it, and check that the system returns a clean error
-naming the limit rather than hanging, leaking, or silently degrading.
-BrowserStack's negative testing guide calls these "operating limits";
-the `resource-exhaustion` lens covers them when they land.
-
-## Target
-
-Read `.sstack/map.md` for the surface map. Attack every mapped surface
-through this lens.
-
-## Returns
-
-One finding per confirmed violation:
-
-```
-lens: boundaries
-surface: <function or endpoint>
-case: <concrete input and action>
-oracle: <expected behavior under this adverse condition>
-observed: <actual output, verbatim>
-verdict: confirmed | refuted | inconclusive
-repro: <command that reproduces>
-```
-
-## Constraints
-
-- Cover every mapped surface before returning.
-- Write the oracle before executing the case.
-- An attack that never reached the function is a broken case, not a
-  verdict. Fix the harness and re-run.
-- Do not modify source, config, or secrets.
+Cover every mapped surface before returning. Do not modify source,
+config, or secrets. Do not spawn nested subagents.
