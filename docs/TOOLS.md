@@ -12,6 +12,7 @@ counterexamples.
 | Language | Tool | Notes |
 |---|---|---|
 | Python | [Hypothesis](https://hypothesis.readthedocs.io/) | The reference implementation. Seeded RNG for reproducibility. |
+| Python | [Atheris](https://github.com/google/atheris) | Coverage-guided fuzzing for Python, built on libFuzzer. Catches crashes, hangs, and sanitizer failures. |
 | TypeScript / JS | [fast-check](https://fast-check.dev/) | ~100 runs per property by default. Arbitraries compose. Seeded RNG. |
 | Java / Kotlin | [jqwik](https://jqwik.net/) | Ships as a JUnit 5 engine, so it inherits IDE and build support. |
 | C++ | [RapidCheck](https://github.com/emil-e/rapidcheck) | QuickCheck-style. Works with GoogleTest. |
@@ -47,6 +48,7 @@ proof model from every other language here.
 | AddressSanitizer (ASan) | Memory errors: buffer overflow, use-after-free. |
 | UndefinedBehaviorSanitizer (UBSan) | UB: signed overflow, misaligned access, null deref. |
 | [Google FuzzTest](https://github.com/google/fuzztest) | Fuzzing + property-based testing in one framework. Bridges both models. |
+| [Catch2](https://github.com/catchorg/Catch2) | BDD-style test framework for C++. Sections, generators, and matchers for negative test cases. Pairs with libFuzzer or ASan for UB detection. |
 
 Sanitizer-driven detection needs no assertions in the test; explicit
 correctness properties (round-trip invariants, pre/post-conditions)
