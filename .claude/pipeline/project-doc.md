@@ -7,109 +7,154 @@
 - **Language**: Markdown (skill + docs); POSIX `sh` (acceptance harness); Python 3.10+ and TypeScript 5.5+ exist only inside `evals/` as fixture code under test.
 - **Framework**: none for the pack itself. Eval repos: pytest (Python), vitest 2.x (TypeScript, run under Bun).
 - **Database / Styling / State Management**: none. Not applicable to this project.
-- **Host**: any agent that reads `skills/<name>/SKILL.md` (Claude Code, OpenCode, Cursor, Codex). Install = copy the directory.
+- **Host**: any agent that reads `skills/sstack/SKILL.md` (Claude Code, OpenCode, Cursor, Codex). Install = `npx skills@latest add mhenke/sstack` or copy the directory.
 
 ## Dependencies
 
-- **Core**: none. The pack has zero runtime dependencies by design (v0 is process-only).
+- **Core**: none. The pack has zero runtime dependencies by design.
 - **Dev / tooling (repo maintenance only)**: `rsync` (acceptance harness), `python3` + `pytest` (py eval), `bun` + `vitest` + `typescript` (ts eval).
 - **Testing**: pytest 9.x (py eval), vitest ^2.0.0 (ts eval).
-- Harness requirement: `rsync` must be on PATH for `evals/run-acceptance.sh`; `mktemp`, `dirname` assumed.
 
 ## Architecture Pattern
 
-Not a conventional app. A **content architecture with a strict noun taxonomy** — this is the project's central invariant, defined in `docs/ARCHITECTURE.md` as the "six definitions":
+Content architecture with a strict noun taxonomy (six definitions in ARCHITECTURE.md). The Thermos pattern is implemented: orchestrator skill dispatches per-lens attacker agents in parallel, each loading its own lens rubric from `skills/<lens>/SKILL.md`.
+
+**Lifecycle (9 canonical stages, 6 implemented in SKILL.md):**
+
+| Canonical | Implemented as | Stage # |
+|---|---|---|
+| Discover | Discover (stage 1) | 1 |
+| Model | folded into Discover output | — |
+| Attack | Attack (stage 2) | 2 |
+| Observe | folded into Attack execution | — |
+| Verify | Verify (stage 3) | 3 |
+| Minimize | Minimize (stage 4) | 4 |
+| Test | Test (stage 5) — writes regression, goes red | 5 |
+| Fix | Fix (stage 6) — applies minimal change, goes green | 6 |
+| Learn | deferred to v1 | — |
+
+**Six definitions (taxonomy):**
 
 | Noun | v0 realization | Where |
 |---|---|---|
-| **Skill** | the methodology for a stage | `skills/sstack/SKILL.md` (one entry skill) |
-| **Lens** | attack strategy over a failure class | `skills/sstack/references/lens-*.md` (content, loaded on demand) |
-| **Agent** | reasoning role | **deferred** — v0 has one agent adopt roles per stage, no agent files |
-| **Runner** | deterministic case execution | **deferred** — v0: the agent runs real commands and quotes real output |
-| **Oracle** | expected behavior declared *before* the attack | inline in SKILL.md stage instructions + lens files |
-| **Evidence** | observed vs. oracle | **loose** — markdown under `.sstack/`; structured schema is v1 |
+| Skill | methodology for a stage | `skills/sstack/SKILL.md` |
+| Lens | attack strategy per failure class | `skills/sstack/skills/<lens>/SKILL.md` |
+| Agent | per-lens attacker (Thermos pattern) | `skills/sstack/agents/<lens>-attacker.md` |
+| Runner | deferred — agent runs real commands | — |
+| Oracle | expected behavior declared before the attack | inline in SKILL.md + lens skills |
+| Evidence | observed vs. oracle, loose markdown | `.sstack/findings/` in the host repo |
 
-Lifecycle: Discover → Model → Attack → Observe → Verify → Minimize → Regress → Learn. v0 implements five numbered stages in SKILL.md; Model folds into Discover's output, Observe folds into Attack, Learn is documented-only.
+**Lens taxonomy (15 lenses, 3 shipped in v0):**
 
-Entry-point-on-demand layout: one `SKILL.md` (routing + rules + stage instructions + lens index) plus `references/` files read only when that lens is selected. Same shape as impeccable's `reference/` and pstack's playbooks.
+| Category | Lens | v0 |
+|---|---|---|
+| Input | boundaries, malformed, missing | ✅ |
+| Access | ownership | next (highest priority) |
+| Behavior | exceptional-conditions | next |
+| Behavior | state, ordering, concurrency, idempotency | future |
+| Environment | dependency-failure, resource-exhaustion | future |
+| Contracts | contract | future |
+| Evidence | mutation | future |
+| AI/Agent | agent | future |
+| Security | security | future |
+
+**Find-test-fix model (ADR-0005):** sstack attacks, writes a red regression test, applies the minimal fix, verifies the test goes green, and hardens existing suites with green characterization tests for refuted surfaces. Source changes only in the Fix stage, only minimal, only for confirmed findings.
 
 ## Folder Structure
 
 ```
-skills/sstack/          THE PRODUCT. Entry skill + 3 v0 lens references.
-docs/                   Concept freeze: ETHOS.md (4 rules), ARCHITECTURE.md (lifecycle, 6 defs, 13-lens taxonomy, v1 menu)
-docs/adr/                Decision records (ADR-0001 domain, 0002 content-only pack, 0003 eval-gated acceptance) + index + template
-evals/                  Proof of the skill
-evals/seeded-py/        Python fixture repo, 5 deliberate bugs + BUGS.md answer key
-evals/seeded-ts/        TypeScript fixture repo, 5 deliberate bugs + BUGS.md answer key
-evals/ACCEPTANCE.md     Cold-run acceptance record (history, verdicts, disclosed contamination + fix)
-evals/run-acceptance.sh Copies skill + BUGS.md-free repo into ONE temp workspace
-.claude/pipeline/       Scanner output (this file, AGENTS.md, state.json)
+skills/sstack/                     THE PRODUCT
+├── SKILL.md                       entry: routing, rules, 6 stages, lens index
+├── agents/                        per-lens attacker definitions (Thermos pattern)
+│   ├── boundaries-attacker.md     frontmatter + dispatch instructions
+│   ├── malformed-attacker.md
+│   ├── missing-attacker.md
+│   └── resource-exhaustion-attacker.md  (future lens, rubric inline)
+└── skills/                        per-lens rubrics (loaded by agents)
+    ├── boundaries/SKILL.md
+    ├── malformed/SKILL.md
+    └── missing/SKILL.md
+
+docs/
+├── ETHOS.md                       the four rules
+├── ARCHITECTURE.md                lifecycle, six definitions, 15-lens taxonomy
+├── TOOLS.md                       negative-testing tools by language
+├── RESEARCH.md                    index into the 30-day scan library
+├── LEARNED.md                     distilled research record
+└── adr/                           0001–0005 + README index + template
+
+evals/
+├── run-acceptance.sh              builds isolated cold-run workspace
+├── ACCEPTANCE.md                  run history, verdicts, contamination disclosure
+├── seeded-py/                     Python fixture, 5 bugs + BUGS.md answer key
+│   ├── shop/                      pagination.py, pricing.py, cart.py
+│   ├── tests/                     happy-path baseline (5 tests)
+│   └── BUGS.md                    answer key (never shipped to cold agent)
+├── seeded-ts/                     TypeScript fixture, 5 bugs + BUGS.md
+│   ├── src/                       pagination.ts, pricing.ts, cart.ts
+│   ├── tests/                     happy-path baseline (6 tests)
+│   └── BUGS.md                    answer key
+README.md                          install, lifecycle diagram, acceptance table, docs links
+ROADMAP.md                         v1 (proof quality), v2 (run cost), language breadth, deferred
+CHANGELOG.md                       Keep a Changelog format
+.claude/pipeline/                  scanner output (this file, state.json)
 ```
 
 ## Code Style Conventions
 
-Inferred from the actual files:
-
-- **Skill frontmatter**: exactly `name` + `description`; description is one long trigger-phrase sentence ("Use when the user wants negative testing, edge-case coverage, …"). `SKILL.md` must stay ≤ 500 lines (currently 157).
-- **Prose style**: hard-wrapped ~60–72 columns; imperative voice in instructions; em dash for asides; backticks for code identifiers and file paths.
-- **No title-case headers in stage bodies**; `### 1. Discover` style numbering in SKILL.md, `## What assumptions this lens attacks` sentence case in lens files.
-- **Python eval**: PEP 8, snake_case functions, module docstrings, no type hints, no classes, deliberately no validation (the bugs are the point).
-- **TypeScript eval**: ESM (`"type": "module"`), `export function`, `interface` per data shape, `strict: true`, 2-space indent, semicolons, double quotes.
+- **Skill frontmatter**: exactly `name` + `description`; description is one long trigger-phrase sentence. `SKILL.md` must stay ≤ 500 lines (currently 253).
+- **Agent files**: YAML frontmatter with `name` + `description`; body is a thin dispatch wrapper that loads its lens skill and returns findings.
+- **Lens skill files**: exactly 5 `##` sections: What assumptions this lens attacks · Case-generation heuristics · Oracle patterns · Worked examples · When not to apply. Plus Language notes. One `python` and one `ts` block with `# case:` / `# oracle:` / `# observed (bug):` comments.
+- **Prose style**: hard-wrapped ~60–72 columns, imperative voice, backticks for identifiers and paths.
+- **Python eval**: PEP 8, snake_case, module docstrings, no type hints, no classes, deliberately no validation.
+- **TypeScript eval**: ESM, `export function`, `interface` per shape, `strict: true`, 2-space indent, semicolons, double quotes.
 - **Commits**: Conventional Commits (`docs:`, `feat:`, `fix:`, `test:`, `chore:`).
-- **Lens file template** (all 3 files, non-negotiable shape): 5 `##` sections — What assumptions this lens attacks · Case-generation heuristics · Oracle patterns · Worked examples · When not to apply — with exactly one `python` and one `ts` fenced block carrying `# case:` / `# oracle:` / `# observed (bug):` comments. Files end with a trailing newline.
 
 ## Modularity Practices
 
-- One concern per file: the entry skill owns routing/rules; each lens owns one failure class; each docs file owns one abstraction level.
-- Lens content is **not** loaded unless selected — keeps invocation context small.
-- New lenses are additive: drop a `lens-<name>.md` into `references/` and add one index row. No restructuring.
-- Deferred subsystems (runners, evidence schema, learn loop, agents-as-files, host packaging) are named in ARCHITECTURE.md as v1 so additions have a documented home. **They are not stubbed — they do not exist in the tree.**
+- Orchestrator owns routing and rules; each lens skill owns one failure class; each agent wraps one lens for dispatch.
+- Lens content is not loaded unless selected.
+- New lenses are additive: `agents/<lens>-attacker.md` + `skills/<lens>/SKILL.md` + one index row.
+- Deferred subsystems (runners, evidence schema, learn loop, host packaging) are named in ARCHITECTURE.md as v1; they are not stubbed.
 
 ## Data Architecture
 
-None. No database, no ORM, no persistence layer.
+No database, no ORM. Data shapes:
 
-The only data shapes are:
-- **Fixture records** — Python dicts (`{"unit_price", "qty", "discount"}`) and TS `LineItem` / `CartLine` interfaces; the negative tests attack these shapes.
-- **Run artifacts** — `.sstack/` in the *host* repo at run time: `map.md`, `plan.md`, `findings/<slug>.md` (fields: `lens, surface, case, oracle, observed, verdict, repro, regression`), `scratch/`. Markdown, not schema-enforced in v0.
-- **Answer keys** — `evals/*/BUGS.md` tables (id, module, lens, trigger, buggy behavior, oracle, fix note). Never copied into a cold-run workspace.
+- **Fixture records**: Python dicts / TS interfaces (`LineItem`, `CartLine`)
+- **Run artifacts**: `.sstack/` in the host repo (`map.md`, `plan.md`, `findings/<slug>.md`, `scratch/`)
+- **Answer keys**: `evals/*/BUGS.md` (never shipped to cold agents)
 
 ## Cross-Cutting Concerns
 
-- **Error handling (in the fixture code)**: deliberately absent — raw `KeyError` / `TypeError` / `SyntaxError` leaks are seeded bugs, not oversights. Never "fix" them in the fixtures.
-- **Validation philosophy (the product)**: oracles distinguish *clean boundary validation* from *raw deep-inside leaks*. The skill rejects both silent wrong data and unhandled internal errors.
-- **Safety contract**: the skill writes only tests and `.sstack/`; it must never modify target source, config, or secrets. Enforced in three places in SKILL.md (title block, Routing, Safety) because a cold run violated it.
-- **Evidence discipline**: the agent quotes verbatim command output; harness errors (`ImportError`, missing-argument `TypeError`) are *broken cases*, never verdicts. This rule exists because a cold run once scored 105 broken scripts as satisfied oracles.
-- **Logging**: none. Evidence is the test result / observed output.
-- **Auth**: not applicable.
+- **Audit-not-fix**: replaced by ADR-0005 find-test-fix model. sstack writes tests and source fixes (minimal, oracle-driven). Config and secrets always read-only.
+- **Evidence discipline**: the agent quotes verbatim command output; harness errors are broken cases, never verdicts.
+- **Safety contract**: source writable only in the Fix stage, only minimal changes that turn a red test green. Every source change must trace to a finding.
+- **Containment**: the caller builds the temp workspace and dispatches the agent into it. Prompt-only containment has failed; the host-repo marker directs the agent to the right root, but enforcement is the caller's responsibility.
+- **Coverage rule**: every selected lens must have zero-or-more cases on every mapped surface. A lens with zero cases on a record/string-input surface is an incomplete run.
 
 ## Service Communication
 
-None. Single-process, local files only. The one cross-boundary move is `run-acceptance.sh` copying the skill + a decontaminated fixture into a temp dir; the cold agent communicates back only via its chat report.
+None. Single-process, local files. `run-acceptance.sh` copies the skill and a decontaminated fixture into a temp dir.
 
 ## Test Coverage
 
-- **Overall coverage: not measured** — no coverage tooling is configured, by design. The deliverable is prose, not shipped runtime code; there is nothing to instrument.
-- **Baselines that must stay green**: `evals/seeded-py` → `pytest -q` (5 passed); `evals/seeded-ts` → `bun run test` (6 passed).
-- **The real test suite is the cold acceptance run** — a fresh agent given only the skill + a BUGS.md-free fixture, scored on: seeds confirmed, oracle regressions failing pre-fix, and flipping to pass after canonical fixes. Record: `evals/ACCEPTANCE.md` (py 4/5 seeds, 9/9 flip; ts 5/5 seeds + 1 unseeded real bug, 34/35 flip).
-- **Test patterns**: fixture unit tests (happy path only) + behavioral acceptance via subagent. No e2e, no integration layer.
-- **Untested areas by design**: Learn stage, evidence schema, runner determinism — all deferred to v1.
+- **Overall coverage: not measured** — no coverage tooling, by design.
+- **Baselines**: `evals/seeded-py` → `pytest -q` (5 passed); `evals/seeded-ts` → `bun run test` (6 passed).
+- **Acceptance**: cold-run eval per ADR-0003, recorded in `evals/ACCEPTANCE.md`. Current status: **stale** (see staleness marker in the verdict table). The find-test-fix lifecycle has not been re-confirmed since the skill restructure.
 
 ## Entry Points
 
 | Path | Role |
 |---|---|
-| `skills/sstack/SKILL.md` | the product; agent entry point (`/sstack <target>`) |
-| `skills/sstack/references/lens-*.md` | on-demand lens content |
-| `docs/ETHOS.md` | the four rules — read before changing skill voice |
-| `docs/ARCHITECTURE.md` | lifecycle + six definitions + full 13-lens taxonomy |
-| `evals/run-acceptance.sh` | build the cold-run workspace |
-| `evals/ACCEPTANCE.md` | evidence + run history |
-| `evals/*/BUGS.md` | answer keys — **never** readable by a cold agent |
-
-No env vars, no build step, no CI.
+| `skills/sstack/SKILL.md` | product entry (`/sstack <target>`) |
+| `skills/sstack/agents/*.md` | per-lens attacker definitions |
+| `skills/sstack/skills/*/SKILL.md` | per-lens rubrics |
+| `docs/ETHOS.md` | four rules |
+| `docs/ARCHITECTURE.md` | lifecycle, six definitions, taxonomy |
+| `docs/adr/README.md` | decision index |
+| `evals/run-acceptance.sh` | acceptance harness |
+| `evals/ACCEPTANCE.md` | evidence record |
 
 ## Last Scanned
-
-2026-09-23
+2026-09-23 (second full scan, post-Thermos restructure)
