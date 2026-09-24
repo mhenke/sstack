@@ -11,6 +11,7 @@ the product. For *what* the code does, read [`../ARCHITECTURE.md`](../ARCHITECTU
 | [0001](0001-negative-testing-is-the-domain.md) | Negative testing is the product domain | Accepted | 2026-09-23 |
 | [0002](0002-content-only-agent-agnostic-skill.md) | Content-only, agent-agnostic skill pack | Accepted | 2026-09-23 |
 | [0003](0003-eval-gated-acceptance.md) | Eval-gated acceptance with seeded repos | Accepted | 2026-09-23 |
+| [0004](0004-delegate-to-target-existing-tools.md) | Lenses delegate to the target's existing tools | Accepted | 2026-09-23 |
 
 ## Status
 

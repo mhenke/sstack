@@ -45,6 +45,33 @@ v0 is a content-only skill pack with a process-only evidence layer
   mutation result is itself recorded as evidence.
 - **Done when**: a regression test can be shown to go red against a
   seeded mutant, not only against the original bug.
+- **Tooling per language** (researched, not guessed): PIT for Java,
+  Stryker for JS/TS, mutmut for Python, RapidCheck or Google FuzzTest
+  for C++. Target roughly 80% mutation score on critical modules as
+  the practical bar. Run it on changed code, not whole-repo sweeps.
+- **Relation to AI-generated tests**: mutation is the direct answer to
+  weak assertions in generated suites, which is sstack's own recurring
+  failure mode.
+
+### Property-based testing as the Attack default
+
+- **Why**: ADR-0004. Across Python, JS/TS, and Java the field's
+  answer to "which inputs break this" has moved from hand-written edge
+  cases to declared properties plus generated inputs plus shrinking
+  (Hypothesis, fast-check, jqwik). sstack currently hand-designs
+  every case and hand-minimizes every finding, which is both slower
+  and less complete than the tooling most target repos already ship.
+- **What**: an Attack-stage rule that checks for an installed
+  property-based library and writes a property before hand-designing
+  cases, plus a Minimize rule that delegates shrinking. Oracle-first
+  ordering stays sstack's and is not delegated: the library finds an
+  input that breaks an assumption, sstack declares what should have
+  happened instead.
+- **Done when**: a run against a seeded repo that has Hypothesis or
+  fast-check installed lands property-based regressions, and the
+  coverage rule still forces every mapped surface to be attacked.
+- **Risk**: over-delegation. An agent that finds a library may stop
+  reading surfaces. The per-surface coverage rule stays mandatory.
 
 ### Remaining input and behavior lenses
 
@@ -178,6 +205,25 @@ TypeScript advice applies with the type checker removed, plus a seeded
 repo to prove it. If the budget is tight, ship it as a TypeScript
 addendum with the type-checker note rather than treating it as a peer
 language.
+
+### C++ needs a second verification mode, not a lens addendum
+
+- **Why**: the items above file C++ as reference content, which
+  understates it. C++ negative testing does not share sstack's proof
+  model. libFuzzer and Google FuzzTest assert the *absence* of
+  undefined behavior through sanitizers, often with no assertion in
+  the test at all. sstack is oracle-first throughout: every stage
+  assumes a declared expected behavior. That assumption does not hold
+  for the highest-value C++ negative testing.
+- **What**: decide whether a sanitizer-driven mode is a second
+  verification path alongside the oracle path, or whether C++ support
+  stays inference-only. FuzzTest's own docs draw the line the decision
+  has to make: UB detection with no assertions, versus explicit
+  correctness properties.
+- **Done when**: the decision is written down as an ADR and the
+  language-breadth table above reflects it.
+- **Note**: settle this before writing a C++ seeded repo, or the seeds
+  encode an assumption that turns out wrong.
 
 ## Explicitly not planned
 
