@@ -371,6 +371,17 @@ language.
 - **Mutation as the identity.** It is a strategy under proof quality,
   never the frame (ADR-0001).
 
+## Deferred
+
+- **Acceptance re-runs.** Cold-run evidence for the current skill text
+  is pending. The last clean evidence is at `9979718` (runs #6 and
+  CleanTs). Re-run when tagging a release.
+- **Evidence schema with fingerprints.** See v1 above.
+- **Learn loop.** See v2 above.
+- **Host packaging.** See v2 above.
+- **Language breadth seeded repos.** See the language breadth section
+  above.
+
 ## How a roadmap item ships
 
 Every item lands the way v0 did: seeded bugs in `evals/`, a cold run
