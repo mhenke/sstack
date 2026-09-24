@@ -53,6 +53,25 @@ cp -r skills/sstack .cursor/skills/            # Cursor
 Zero runtime. No CLI, no daemon, no binary. It is Markdown, and it
 runs wherever your agent already does.
 
+## Languages
+
+The process is language-agnostic. The evidence is not.
+
+**Proven** - Python and TypeScript. Each has a seeded repo, a clean
+cold run, and a negative control. See the table below.
+
+**Works by inference, unproven** - JavaScript, Java, C++, and
+everything else. The lifecycle is language-independent, and the agent
+brings its own knowledge of the target's idioms, but no run has
+measured it. JavaScript is the closest to proven: the `malformed` and
+`missing` lenses already reason about erased runtime types, which is
+the JavaScript condition, so it mostly needs a seeded repo. C++ is the
+furthest - the `missing` lens has no clean analogue there, because
+there is no null, only undefined behavior.
+
+`ROADMAP.md` has the per-language plan. If you are about to point this
+at Java or C++ and the answer matters, run the eval first.
+
 ## What it leaves behind
 
 ```
@@ -96,6 +115,10 @@ in the answer key.
 
 Full record, including the runs that failed and what each one taught
 the skill: [`evals/ACCEPTANCE.md`](evals/ACCEPTANCE.md).
+
+Those numbers are from a run before the last two rounds of guardrail
+fixes. The skill text has changed since; re-running is the only way to
+refresh them.
 
 ## Docs
 
