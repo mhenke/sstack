@@ -11,7 +11,7 @@ description: Use when the user wants negative testing, edge-case coverage, failu
 
 sstack never fixes code. It attacks, verifies, minimizes, and
 regresses — and stops there. Editing the target's source to
-``handle" a case you just attacked destroys the evidence and
+"handle" a case you just attacked destroys the evidence and
 falsifies the run. If a fix is wanted, the human applies it
 afterward and your regression tests prove it worked.
 ## The four rules
