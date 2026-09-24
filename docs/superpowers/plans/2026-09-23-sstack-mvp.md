@@ -175,8 +175,8 @@ restructuring.
 
 - [ ] **Step 3: Verify content**
 
-Run: `grep -c "^\- \*\*" docs/ARCHITECTURE.md` → Expected: 6 (six definitions).
-Run: `grep -c "future" docs/ARCHITECTURE.md` → Expected: 10 (future lenses).
+Run: `sed -n '/## Six definitions/,/## Taxonomy/p' docs/ARCHITECTURE.md | grep -c "^- \*\*"` → Expected: 6 (six definitions).
+Run: `sed -n '/## Taxonomy/,/## Verification strategies/p' docs/ARCHITECTURE.md | grep -c "future"` → Expected: 10 (future lenses).
 Run: `grep -o "Discover\|Model\|Attack\|Observe\|Verify\|Minimize\|Regress\|Learn" docs/ARCHITECTURE.md | sort -u | wc -l` → Expected: 8.
 
 - [ ] **Step 4: Commit**
@@ -380,9 +380,10 @@ was written for.
 - Well-defined empty result (`[]`, `0`) documented as correct.
 - Invariant preserved (total never negative; sum always a number).
 
-Watch for the negative-index trap: Python `items[-3:0]` and JS
-`slice(-3, 0)` silently return tail-window or empty results
-instead of erroring. Silent wrong data is worse than a crash.
+Watch for the negative-index trap: `page=0` makes start negative, and
+Python `items[-3:0]` and JS `slice(-3, 0)` both silently return `[]`
+(the clamped start outranks stop) instead of erroring. A silent
+empty/wrong page is worse than a crash.
 
 ## Worked examples
 
@@ -390,16 +391,15 @@ Python — `paginate(items, page, size)` with 1-based `page`:
 
 ```python
 # case: page=0, size=3, items=[1..10]
-# oracle: raises ValueError("page must be >= 1")
-# observed (bug): returns [8, 9, 10]  (start = -3 wraps)
+# observed (bug): returns []  (start = -3 clamps past stop, silent empty)
 ```
 
-TypeScript — `totalQuantity(lines)` via reduce:
+TypeScript — `maxQuantity(lines)` via `Math.max(...map)`:
 
 ```ts
 // case: lines = []
-// oracle: returns 0
-// observed (bug): TypeError: Reduce of empty array with no initial value
+// oracle: throws Error("lines must not be empty")
+// observed (bug): returns -Infinity  (Math.max of nothing)
 ```
 
 ## When not to apply
@@ -561,8 +561,7 @@ git commit -m "feat: boundaries, malformed, missing lens references"
 Seeded bugs (5, one lens each; BUGS.md is the canonical record):
 
 | id | module | lens | trigger | buggy behavior | oracle | fix note |
-|---|---|---|---|---|---|---|
-| py-1 | pagination | boundaries | `paginate(items, 0, 3)` | returns tail window via negative slice | `ValueError: page must be >= 1` | validate `page >= 1`, `size >= 1` at top |
+| py-1 | pagination | boundaries | `paginate(items, 0, 3)` | returns `[]` silently (negative slice clamps; no validation) | `ValueError: page must be >= 1` | validate `page >= 1`, `size >= 1` at top |
 | py-2 | cart | boundaries | `add_item(c, "a", -5)` then `total_items(c)` | total `-5` | `ValueError: qty must be > 0` | validate qty in `add_item` |
 | py-3 | pricing | missing | `line_total({})` | raw `KeyError: 'unit_price'` | `ValueError: unit_price is required` | check keys explicitly |
 | py-4 | pricing | missing | `line_total({"unit_price": 10, "qty": 2, "discount": None})` | `TypeError: 1-None` | None treated as absent → 20.0 | `discount = item.get("discount") or 0` guard for None |
@@ -664,7 +663,7 @@ Run each from `evals/seeded-py`, expect the documented buggy output:
 
 ```bash
 python3 -c "from shop.pagination import paginate; print(paginate(list(range(1,11)), 0, 3))"
-# expect: [8, 9, 10]
+# expect: []
 python3 -c "from shop.cart import add_item, total_items; c = {}; add_item(c, 'a', -5); print(total_items(c))"
 # expect: -5
 python3 -c "from shop.pricing import line_total; line_total({})"
@@ -706,16 +705,15 @@ git commit -m "feat: python seeded eval repo (5 bugs across 3 lenses)"
 - Create: `evals/seeded-ts/BUGS.md`
 
 **Interfaces:**
-- Produces: `paginate<T>(items, page, size)`, `lineTotal(item)`, `parseOrder(raw)`, `totalQuantity(lines)` — consumed by Task 7 acceptance.
+- Produces: `paginate<T>(items, page, size)`, `lineTotal(item)`, `parseOrder(raw)`, `totalQuantity(lines)`, `maxQuantity(lines)` — consumed by Task 7 acceptance.
 
 Seeded bugs (5, one lens each):
 
 | id | module | lens | trigger | buggy behavior | oracle | fix note |
-|---|---|---|---|---|---|---|
-| ts-1 | pagination | boundaries | `paginate(items, 0, 3)` | tail window via negative slice | `throw Error("page must be >= 1")` | validate page/size |
+| ts-1 | pagination | boundaries | `paginate(items, 0, 3)` | returns `[]` silently (negative slice clamps; no validation) | `throw Error("page must be >= 1")` | validate page/size |
 | ts-2 | pricing | missing | `lineTotal({qty: 2})` | returns `NaN` silently | `throw Error("unitPrice is required")` | `Number.isFinite` check |
 | ts-3 | pricing | malformed | `parseOrder("{oops")` | raw `SyntaxError` leaks | `throw Error("invalid order JSON")` | try/catch, rethrow domain error |
-| ts-4 | cart | boundaries | `totalQuantity([])` | `TypeError: Reduce of empty array with no initial value` | returns `0` | `reduce(fn, 0)` |
+| ts-4 | cart | boundaries | `maxQuantity([])` | returns `-Infinity` | `throw Error("lines must not be empty")` | length check before `Math.max` |
 | ts-5 | cart | malformed | qty as string `"2"` in lines | returns `"023"` (string) | `throw Error("qty must be a number")` | `typeof l.qty === "number"` check |
 
 - [ ] **Step 1: Verify toolchain**
@@ -787,7 +785,11 @@ export interface CartLine {
 }
 
 export function totalQuantity(lines: CartLine[]): number {
-  return lines.reduce((acc, l) => acc + l.qty);
+  return lines.reduce((acc, l) => acc + l.qty, 0);
+}
+
+export function maxQuantity(lines: CartLine[]): number {
+  return Math.max(...lines.map((l) => l.qty));
 }
 ```
 
@@ -797,7 +799,7 @@ export function totalQuantity(lines: CartLine[]): number {
 import { describe, expect, it } from "vitest";
 import { paginate } from "../src/pagination";
 import { lineTotal, parseOrder } from "../src/pricing";
-import { totalQuantity } from "../src/cart";
+import { totalQuantity, maxQuantity } from "../src/cart";
 
 describe("paginate", () => {
   it("returns the requested page", () => {
@@ -828,6 +830,14 @@ describe("cart", () => {
       ]),
     ).toBe(7);
   });
+  it("finds the max quantity", () => {
+    expect(
+      maxQuantity([
+        { id: "a", qty: 2 },
+        { id: "b", qty: 5 },
+      ]),
+    ).toBe(5);
+  });
 });
 ```
 
@@ -839,13 +849,13 @@ Run (cwd `evals/seeded-ts`): `bun install && bun run test` (or `npm install && n
 
 ```bash
 bun -e "import {paginate} from './src/pagination'; console.log(paginate([1,2,3,4,5,6,7,8,9,10], 0, 3))"
-# expect: [ 8, 9, 10 ]
+# expect: []
 bun -e "import {lineTotal} from './src/pricing'; console.log(lineTotal({qty: 2} as any))"
 # expect: NaN
 bun -e "import {parseOrder} from './src/pricing'; parseOrder('{oops')"
 # expect: SyntaxError (raw, leaks position internals)
-bun -e "import {totalQuantity} from './src/cart'; console.log(totalQuantity([]))"
-# expect: TypeError: Reduce of empty array with no initial value
+bun -e "import {maxQuantity} from './src/cart'; console.log(maxQuantity([]))"
+# expect: -Infinity
 bun -e "import {totalQuantity} from './src/cart'; console.log(totalQuantity([{id:'a',qty:'2'},{id:'b',qty:'3'}] as any))"
 # expect: 023  (string accumulation)
 ```
