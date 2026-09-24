@@ -1,115 +1,103 @@
 # sstack
 
-**The sad stack.** Negative testing for AI coding agents.
+**sad stack** · negative testing for AI coding agents
 
-Every stack in your workflow is a happy-path stack. They plan the
-feature, write the code, review the diff, ship on green CI. All of
-that verifies the same thing: the software works when the world
-behaves.
+gstack. pstack. sstack. Same suffix, same shape — a `SKILL.md` your
+agent reads, a directory you copy in, a slash command you type. The
+family ships features and reviews diffs. This one is the sad member
+of the family: it goes looking for the **not-happy test cases**.
 
-Nobody schedules the other half. The empty string. The `null`. The
-duplicate webhook. The dependency that times out at 2am. The clock
-that rolls over midnight. The second request that arrives while the
-first is still running.
+The empty string. The `null`. The duplicate webhook. The dependency
+that dies at 2am. The second request that lands while the first is
+still running. Nobody writes tests for those on purpose — that's the
+job sstack was named for.
 
-That half is the sad path, and it is where the bugs live.
-
-sstack is a skill pack for it. Point it at a module, and it
-discovers the failure surfaces, attacks them through specialist
-lenses, checks what actually happened against an expectation written
-*before* the attack, and turns every confirmed failure into a
-permanent regression test.
-
-It never fixes your code. That's your job, and your regression tests
-are the proof you did it right.
-
-## The sad path, staged
-
-```
-DISCOVER   map the surfaces and the contracts they assume
-ATTACK     boundaries · malformed · missing
-VERIFY     observed vs. oracle → confirmed / refuted / inconclusive
-MINIMIZE   the smallest input that still breaks it
-REGRESS    a test in your suite that fails now and passes after
-           you fix it
-```
+It finds the ways your software fails, proves each one with a test
+that fails today and passes after you fix it, and hands you the
+evidence. It won't fix your code — it's an auditor, not a
+therapist. The repair is yours; the proof it worked is a green test.
 
 > Don't ask whether the software is robust.
 > Exercise the failure condition and collect evidence.
 
-The oracle comes first. "It crashes" is not an expectation; "it
-raises a validation error naming the field" is. A test that passes
-against code you just proved broken has pinned the bug, and pinned
-bugs are worse than no tests.
+## The not-happy cases, staged
+
+```
+DISCOVER   map the surfaces and the contracts they quietly assume
+ATTACK     boundaries · malformed · missing
+VERIFY     observed vs. oracle → confirmed / refuted / inconclusive
+MINIMIZE   the smallest input that still breaks it
+REGRESS    a test in your suite that fails now, passes after the fix
+```
+
+The oracle is written *before* the attack. "It crashes" isn't an
+expectation; "it raises a validation error naming the field" is. And
+a test that passes against code you just proved broken has pinned the
+bug — pinned bugs are worse than no tests.
 
 ## Install
 
-Copy or link `skills/sstack/` into any agent's skills directory:
+Drop it in any agent's skills directory:
 
 ```bash
-cp -r skills/sstack ~/.claude/skills/        # Claude Code
+cp -r skills/sstack ~/.claude/skills/         # Claude Code
 cp -r skills/sstack ~/.config/opencode/skills/ # OpenCode
 cp -r skills/sstack .cursor/skills/            # Cursor
 ```
-
-Then:
 
 ```
 /sstack src/checkout.ts
 ```
 
-Zero runtime dependencies. No CLI, no daemon, no binary. It is
-Markdown and it runs wherever your agent already does.
+Zero runtime. No CLI, no daemon, no binary. Markdown all the way
+down — it runs wherever your agent already does.
 
 ## What it leaves behind
-
-Everything lands in `.sstack/` in your repo:
 
 ```
 .sstack/
 ├── map.md        surfaces + assumed contracts
-├── plan.md       selected lenses, cases, oracles
-├── findings/     one file per finding: case, oracle, observed,
+├── plan.md       lenses, cases, oracles
+├── findings/     one per finding: case, oracle, observed,
 │                 verdict, repro, regression
-└── scratch/      throwaway attack scripts (deleted at run end)
+└── scratch/      throwaway attack scripts (gone at run end)
 ```
 
-The only other thing it writes is tests — in your suite, in your
-framework, in your directory. Your source, config, and secrets are
-read-only to it.
+Plus tests — in your suite, your framework, your directory. Your
+source, config, and secrets stay read-only.
 
-## Does it actually work?
+## Is it actually any good?
 
-Don't take our word — the eval is a cold agent with no memory, no
-answer key, and one copy of the skill:
+The eval is a cold agent with no memory, no answer key, one copy of
+the skill:
 
 ```bash
 evals/run-acceptance.sh seeded-py    # or seeded-ts
 ```
 
-It returns a temp workspace holding a deliberately broken repo and
-nothing else. A fresh agent runs `/sstack` inside it and is scored on
-what it finds.
+It hands back a temp workspace with a deliberately broken repo and
+nothing else. A fresh agent runs `/sstack` inside it, and gets scored
+on what it finds.
 
 | | seeded-py | seeded-ts |
 |---|---|---|
-| Seeds planted | 5 | 5 |
-| Seeds found | 4 | 5 |
-| Oracle regressions failing on the seed | 9 | 22 |
-| Still failing after the canonical fix | 0 | 1 * |
+| Bugs planted | 5 | 5 |
+| Bugs found | 4 | 5 |
+| Regression tests failing on the bug | 9 | 22 |
+| Still failing after the fix | 0 | 1 * |
 
-\* a test that asserted one branch of a two-branch oracle — the run's
-test writing, not the code.
+\* one test asserted a single branch of a two-branch oracle — the
+run's test writing, not the code.
 
-The TypeScript run also found a bug nobody planted: `Math.max(...arr)`
-overflows the call stack on a large-but-legitimate array. The answer
-key didn't have it. That's the whole pitch in one finding.
+The TypeScript run turned up a bug nobody planted: `Math.max(...arr)`
+overflows the call stack on a large-but-legitimate array. Not in the
+answer key. That's the whole pitch in a single finding.
 
-Full record, including the runs that failed and what each failure
-taught the skill: [`evals/ACCEPTANCE.md`](evals/ACCEPTANCE.md).
+Full record — including the runs that failed and what each one taught
+the skill: [`evals/ACCEPTANCE.md`](evals/ACCEPTANCE.md).
 
 ## Docs
 
 - [`docs/ETHOS.md`](docs/ETHOS.md) — the four rules
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — lifecycle, the six
-  definitions, the full 13-lens taxonomy, what v1 adds
+  definitions, the 13-lens taxonomy, what v1 adds
