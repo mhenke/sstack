@@ -38,7 +38,18 @@ afterward and your regression tests prove it worked.
 
 ## Workspace
 
-All artifacts live under `.sstack/` in the host repo:
+**Resolve the host repo first.** The host repo is the directory that
+contains `.sstack-host-repo`. If that file exists in the current
+working directory, the host repo is this directory. If it does not,
+search upward for it before writing anything. When no marker exists,
+the host repo is the directory the user pointed you at.
+
+Every path in this document — `.sstack/`, scratch scripts, repro
+commands — is relative to that host repo. Anchor each write to it
+explicitly (or `cd` there once) so nothing lands in whatever
+directory the agent happened to start in.
+
+All artifacts live under `<host-repo>/.sstack/`:
 
 - `map.md` — surfaces + assumed contracts (Discover output)
 - `plan.md` — scoped run plan: selected lenses, cases, oracles
