@@ -1,18 +1,16 @@
 ---
 name: sstack
-description: Use when the user wants negative testing, edge-case coverage, failure-mode analysis, robustness checks, hostile or unexpected input handling, "what happens if" questions about code, or to harden a module or API against bad input before shipping. Discovers failure surfaces, attacks them through lenses (boundaries, malformed, missing), verifies observed behavior against a pre-declared oracle, and turns confirmed failures into permanent regression tests. Scope is existing behavior under adverse conditions; happy-path feature work belongs to the feature's own tests.
+description: Use when the user wants negative testing, edge-case coverage, failure-mode analysis, robustness checks, hostile or unexpected input handling, "what happens if" questions about code, or to harden a module or API against bad input before shipping. Discovers failure surfaces, attacks them through lenses (boundaries, malformed, missing), verifies observed behavior against a pre-declared oracle, adds negative regression tests, fixes confirmed failures, and hardens existing suites against future regressions. Scope is existing behavior under adverse conditions; happy-path feature work belongs to the feature's own tests.
 ---
 
 # sstack — structured negative testing
 
 > Don't ask whether the software is robust. Exercise the failure
-> condition and collect evidence.
+> condition, write the test that proves it, and fix it.
 
-sstack never fixes code. It attacks, verifies, minimizes, and
-regresses — and stops there. Editing the target's source to
-"handle" a case you just attacked destroys the evidence and
-falsifies the run. If a fix is wanted, the human applies it
-afterward and your regression tests prove it worked.
+sstack finds the ways software fails, writes a test that goes red on
+the bug, applies the minimal fix that turns it green, and hardens the
+existing suite with negative test cases even where nothing is broken.
 
 ## The four rules
 
@@ -23,7 +21,8 @@ afterward and your regression tests prove it worked.
    validation error naming the field" is.
 3. Never accept an agent's claim as evidence. Run the real command,
    quote the real output.
-4. Turn confirmed failures into permanent regressions.
+4. Every confirmed failure gets a red test, a fix, and a green test.
+   Every refuted surface gets a green hardening test.
 
 ## Routing
 
@@ -33,7 +32,7 @@ afterward and your regression tests prove it worked.
   (`git status`, `git diff --stat`); ask only if nothing is
   inferable.
 - `/sstack <stage>` (discover | attack | verify | minimize |
-  regress) — enter that stage using existing `.sstack/` state.
+  test | fix) — enter that stage using existing `.sstack/` state.
 - `/sstack lenses` — print the lens index below.
 
 ## Workspace
@@ -56,7 +55,7 @@ All artifacts live under `<host-repo>/.sstack/`:
 - `findings/<slug>.md` — one per finding, fields:
   `lens, surface, case, oracle, observed (verbatim), verdict
   (confirmed | refuted | inconclusive), repro (command),
-  regression (test file + name + red|green)`
+  fix (description), regression (test file + name + red|green)`
 - `scratch/` — throwaway scripts; delete at run end
 
 ## Stages
@@ -116,6 +115,15 @@ concluding. A lens with zero executed cases on a surface that
 consumes record/dict-shaped or string input is an incomplete
 run, not a clean result.
 
+**Per-lens fan-out.** If your host supports subagent dispatch,
+spawn one subagent per selected lens rather than running them
+sequentially. Each subagent reads its own lens reference file,
+receives the `map.md` path and the workspace root, and attacks every
+mapped surface through that single lens. Results return to the
+orchestrator for Verify. If your host does not support subagent
+dispatch, run the lenses sequentially in this context. The per-surface
+coverage rule is the same either way.
+
 ### 3. Verify
 
 Per case, compare oracle vs. observed:
@@ -132,6 +140,15 @@ it, and re-run.
 - **inconclusive** — oracle unclear or execution unreliable.
   Inconclusive findings are never promoted to regressions.
 
+Before recording a `confirmed` verdict, let the system argue its way
+out: state the strongest case that the observed behavior is correct
+given the surface's contract. If that case holds, the oracle is wrong,
+not the code. Re-read the contract and mark the finding refuted. Then
+name the conditions that would make your verdict wrong: a re-run that
+passes, an oracle that turns out to permit the observed behavior, a
+contract you inferred rather than read. A verdict you cannot break is
+a verdict you did not check.
+
 ### 4. Minimize
 
 For each confirmed finding, strip the case to the smallest input
@@ -140,37 +157,54 @@ that still violates the oracle. Update the repro command.
 Done when no smaller input still violates the oracle and the
 finding's repro command runs as written.
 
-### 5. Regress
+### 5. Test
 
-Write a permanent test in the host repo's real suite — same
-directory and assert style as existing tests, asserting the
-oracle.
+Write a permanent negative test in the host repo's real suite — same
+directory and assert style as existing tests, asserting the oracle.
 
-The test goes **red** on current code when the finding is real and
-the oracle is right. A **green** test on a confirmed finding pinned
-the observed behavior instead of the oracle. Rewrite it to assert
-the oracle, or mark the finding refuted and keep the test as
-characterization if the code already handles the case.
+For **confirmed** findings: the test goes **red** on current code.
+That is the proof the test catches the bug. A green test on a
+confirmed finding pinned the observed behavior instead of the oracle.
+Rewrite it to assert the oracle.
+
+For **refuted** findings and surfaces that already handle the adverse
+condition: add the test as a hardening characterization test. It goes
+**green** immediately and locks in the correct behavior against future
+regressions.
+
+Run every new test and confirm the verdict matches: red for confirmed,
+green for refuted/hardened.
+
+### 6. Fix
+
+For each confirmed finding, apply the minimal change that satisfies
+the oracle. Smallest diff that turns the red test green.
+
+- Validation: add the guard the oracle describes.
+- Error handling: wrap the leak in a clean domain error.
+- Missing check: add the check the oracle names.
+
+Re-run the confirmed finding's test: it goes **green**. Then run the
+full suite: the fix must not break any existing test.
+
+Done when every confirmed finding's test is green and the full suite
+passes.
 
 If the target repo has a mutation testing tool installed, run it
 scoped to the surfaces you attacked and record the mutation score.
 PIT (Java), Stryker (JS/TS), mutmut (Python). Survived mutants in
-code you just confirmed as buggy are evidence your regression test
-is incomplete, not evidence the tool is wrong.
-
-Run the new tests. Then deliver the report in chat FIRST;
-persisting `findings/` files is bookkeeping that follows.
+code you just fixed are evidence your fix or your test is
+incomplete, not evidence the tool is wrong.
 
 ### Run-end checks
 
 Before delivering the report, verify all of the following:
 
-1. Source, config, and secrets are unchanged. `git status` if the
-   target repo is a git repo; the diff must show only new test files
-   and `.sstack/` artifacts.
-2. Every confirmed finding has a regression.
-3. Every regression's state is reported honestly (red or green).
-4. No confirmed finding has only a green regression.
+1. Every confirmed finding has a red test and a green post-fix test.
+2. Every refuted finding has a green hardening test (if the surface
+   consumes external input).
+3. Every fix is the minimal change that satisfies the oracle.
+4. The full suite passes.
 
 A run that fails any of these is invalid. Fix and re-run before
 reporting.
@@ -182,26 +216,36 @@ reporting.
 | boundaries | edge cases: numbers, sizes, indexes, slices, collections, pagination, loops | references/lens-boundaries.md |
 | malformed | strings parsed from outside, JSON, encodings, dynamic types | references/lens-malformed.md |
 | missing | optional fields, records from external data, null/None/undefined | references/lens-missing.md |
-| ownership | entities with an owner; valid request, wrong session. OWASP A01/A01:2025 broken access control, BOLA, IDOR | future: needs authenticated sessions |
-| exceptional-conditions | fail-open paths, diagnostic leakage, cascading failures, empty catch blocks. OWASP A10:2025 | future: needs injectable failure points |
+| ownership | entities with an owner; valid request, wrong session. OWASP A01 broken access control, BOLA, IDOR | future: unit tier works with mocks; integration tier needs sessions |
+| exceptional-conditions | fail-open paths, diagnostic leakage, cascading failures, empty catch blocks. OWASP A10 | future: unit tier works with mocks; integration tier needs injectable failures |
+| state | corrupted, stale, or shared state between calls | future |
+| ordering | operations applied out of sequence | future |
+| concurrency | race conditions, parallel access | future |
+| idempotency | same operation applied twice diverges | future |
+| dependency-failure | upstream timeout, partial response, unavailable service | future |
+| resource-exhaustion | large inputs, memory pressure, connection pool exhaustion | future |
+| contract | API contract violations between services | future |
+| mutation | proof that tests detect seeded faults | future |
+| agent | AI agent tool-call errors, truncated context, prompt injection | future |
+| security | injection, privilege escalation, data exposure | future |
 
 ## Safety
 
-- Never modify the target's source, config, or secrets — not
-  even "small hardening fixes". The only files you may write
-  are tests in the target's suite and artifacts under
-  `.sstack/`.
-- Never mutate source to demonstrate a bug. Reproduce in scratch
-  space.
+- Only modify target source in the Fix stage, only for confirmed
+  findings, and only the minimal change that turns a red test green.
+  Every source change must trace to a finding.
+- Never modify config or secrets.
 - No test framework detected → ask before scaffolding one.
 - Respect the repo's test conventions exactly.
 
 ## Report format
 
 One line per finding: `id | lens | surface | verdict | regression
-(file::test, red|green)`. Then per confirmed finding the full
-field set, with observed output quoted verbatim. End with counts:
-confirmed / refuted / inconclusive, regressions landed.
+(file::test, red→green)` or `id | lens | surface | refuted |
+hardening (file::test, green)`. Then per confirmed finding the full
+field set, with observed output quoted verbatim and the fix applied.
+End with counts: confirmed / refuted / inconclusive, fixes applied,
+regressions landed, hardening tests added.
 
-If any finding is confirmed but every landed regression is green,
-the run is invalid: re-check those tests against their oracles.
+If any finding is confirmed but its regression did not go red before
+the fix, the run is invalid: re-check the test against the oracle.
