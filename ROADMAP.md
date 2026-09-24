@@ -208,12 +208,14 @@ Remediation patterns that become oracle patterns:
 - **Why first**: authorization failures are the most exploitable class
   of bug and the least likely to be caught by input-generation lenses.
   The input is valid; the session is wrong.
-- **Execution model**: unlike boundaries/malformed/missing, this lens
-  needs authenticated sessions, multiple test users, and real state.
-  It cannot run as a scratch script calling a function. It is the
-  first lens that genuinely requires the evidence schema's structured
-  session/entity recording, and likely a verification skill in the
-  target repo that scripts the session setup.
+- **Execution model**: unit tier works with sstack's scratch-script
+  model: mock the user object, set the role, call the function, assert
+  the rejection. No authenticated sessions needed at this tier.
+  Integration tier needs real sessions, multiple test users, and a
+  live router to catch framework-level bypasses (routing files that
+  skip the handler entirely). sstack v0 covers the unit tier;
+  integration tier needs the evidence schema's session/entity
+  recording.
 - **Interaction with verification skill**: the target's verification
   skill (pstack `/create-verification-skill` or equivalent) already
   knows the entities, the ownership model, and the auth flow. The
@@ -254,9 +256,13 @@ input or a dying dependency.
 - **Interaction with `malformed`**: the `malformed` lens triggers the
   error. This lens tests what the error handler does with it. The two
   are complementary, not overlapping.
-- **Execution model**: needs a runnable target with injectable
-  failure points. The evidence schema must record which failure was
-  injected and what the system did.
+- **Execution model**: unit tier works with sstack's scratch-script
+  model: mock the failing dependency, call the function, assert that
+  the raised exception is sanitized (no stack trace, no internal IP,
+  no raw message). Integration tier needs a live server to catch
+  framework-level routing bypasses and infrastructure cascades. sstack
+  v0 covers the unit tier; integration tier needs the evidence
+  schema's structured failure recording.
 - **Done when**: a seeded repo with a fail-open path is confirmed by
   a cold run through this lens, and the regression test proves the
   fail-safe behavior exists.
