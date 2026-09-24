@@ -115,23 +115,26 @@ concluding. A lens with zero executed cases on a surface that
 consumes record/dict-shaped or string input is an incomplete
 run, not a clean result.
 
-**Per-lens fan-out.** Launch one subagent per selected lens in the
-same message with `run_in_background: true`:
+**Per-lens fan-out.** Dispatch one subagent per selected lens with
+your host's subagent tool (`runSubagent` here; Task with
+`subagent_type` on hosts that document it). One call per lens, same
+message:
 
-  - `subagent_type: "sstack-boundaries-attacker"` for numeric, size,
-    index, collection, and pagination edge cases.
-  - `subagent_type: "sstack-malformed-attacker"` for wrong types,
-    corrupt structures, encoding issues, and unvalidated parsing.
-  - `subagent_type: "sstack-missing-attacker"` for absent fields,
+  - agent `sstack-boundaries-attacker` for numeric, size, index,
+    collection, and pagination edge cases.
+  - agent `sstack-malformed-attacker` for wrong types, corrupt
+    structures, encoding issues, and unvalidated parsing.
+  - agent `sstack-missing-attacker` for absent fields,
     null/None/undefined, empty inputs, and silent degradation.
-  - `subagent_type: "sstack-resource-exhaustion-attacker"` for
-    connection pools, rate limits, memory ceilings, payload limits,
-    and disk pressure.
+  - agent `sstack-resource-exhaustion-attacker` for connection pools,
+    rate limits, memory ceilings, payload limits, and disk pressure.
 
-Pass each subagent the same scoped context and ask it to return
-findings in the sstack returns format: the workspace root path and
-the `.sstack/map.md` contents with labeled sections (typically
-`### Workspace root` and `### Surface map`).
+Pass each subagent the full context inline, not paths. Read
+`.sstack/map.md` and paste its contents with labeled sections
+(typically `### Workspace root` with the absolute path and
+`### Surface map` with the map contents). Also paste the matching
+lens skill's `SKILL.md` contents inline under `### Lens rubric`.
+Ask each subagent to return findings in the sstack returns format.
 
 ### 3. Verify
 
