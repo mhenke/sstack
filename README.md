@@ -24,13 +24,13 @@ job. The test is how you know you did it.
 ## The not-happy cases, staged
 
 ```mermaid
-flowchart LR
+flowchart TD
     D["Discover\nmap surfaces + contracts"] --> A["Attack\nboundaries · malformed · missing"]
     A --> V["Verify\nobserved vs. oracle"]
     V --> M["Minimize\nsmallest repro"]
     M --> T["Test\nwrite regression → red"]
     T --> F["Fix\napply minimal fix → green"]
-    F --> R["Report\nfindings + fixes in chat"]
+    F --> R["Report"]
 ```
 
 The oracle is written *before* the attack. "It crashes" isn't an
