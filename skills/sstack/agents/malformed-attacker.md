@@ -42,6 +42,31 @@ with position internals leaks.
 Input already passes through a strict schema validator (zod, pydantic)
 at a boundary you can point to. Attack the schema itself instead.
 
+## Language notes
+
+### Java
+
+- `Integer.parseInt("abc")` throws `NumberFormatException` (raw leak
+  unless wrapped in a domain error).
+- Unchecked casts compile but throw `ClassCastException` at runtime.
+- Autoboxing a null `String` into `int` throws `NullPointerException`.
+
+### C++
+
+- `std::stoi("abc")` throws `std::invalid_argument` (raw leak unless
+  wrapped).
+- `reinterpret_cast` compiles for anything, crashes at runtime.
+- Format string mismatches (`%s` with an `int`) are undefined
+  behavior.
+
+### JavaScript
+
+- `"2" + 2` returns `"22"` (string concatenation, no error). The
+  result type silently changes from number to string.
+- `parseInt("abc")` returns `NaN`, not an error. `NaN` propagates
+  through subsequent arithmetic.
+- `JSON.parse` throws raw `SyntaxError` with position internals.
+
 ## Target
 
 Read `.sstack/map.md` for the surface map. Attack every mapped surface

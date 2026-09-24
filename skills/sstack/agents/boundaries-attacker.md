@@ -52,6 +52,45 @@ observed (bug) returns `[]`.
 No numbers, sizes, indexes, or collections in the surface's contract;
 values are already validated upstream at a boundary you can point to.
 
+## Language notes
+
+### Java
+
+- `Integer.MAX_VALUE + 1` wraps silently to `Integer.MIN_VALUE`; no
+  exception. Use `Math.addExact()` if overflow detection is needed.
+- Negative array size throws `NegativeArraySizeException`.
+- Autoboxing `null` to `int` throws `NullPointerException` at the
+  unbox site, not the assignment site.
+
+### C++
+
+- Signed integer overflow is undefined behavior, not a wrap.
+- `size_t` underflow: `vec.size() - 1` on an empty vector is a huge
+  positive number, causing a massive allocation or a silent wrong
+  loop bound.
+- Buffer overrun does not crash; it corrupts adjacent memory, and the
+  crash (if any) happens later and elsewhere.
+- No spread-argument stack overflow, but deep recursion overflows.
+
+### JavaScript
+
+- `slice(-4, -1)` on a 10-element array returns elements 6–8, not
+  what you would expect from "start -4, take 3."
+- `===` vs `==`: `"1" == 1` is true, `"1" === 1` is false. Always use
+  strict equality in the oracle.
+- `NaN !== NaN`. Use `Number.isNaN()` in assertions.
+
+### Operating limits
+
+Operating limits are boundary cases too. Max connections, rate
+limits, memory ceilings, request timeouts, and concurrent-request
+caps all have a "just-over" value where the system transitions from
+accepting to rejecting. Attack them the same way: find the limit,
+go one past it, and check that the system returns a clean error
+naming the limit rather than hanging, leaking, or silently degrading.
+BrowserStack's negative testing guide calls these "operating limits";
+the `resource-exhaustion` lens covers them when they land.
+
 ## Target
 
 Read `.sstack/map.md` for the surface map. Attack every mapped surface

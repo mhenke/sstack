@@ -217,6 +217,7 @@ reporting.
 | missing | optional fields, records from external data, null/None/undefined | agents/missing-attacker.md |
 | ownership | entities with an owner; valid request, wrong session. OWASP A01 broken access control, BOLA, IDOR | future: unit tier works with mocks; integration tier needs sessions |
 | exceptional-conditions | fail-open paths, diagnostic leakage, cascading failures, empty catch blocks. OWASP A10 | future: unit tier works with mocks; integration tier needs injectable failures |
+| resource-exhaustion | connection pools, rate limits, memory ceilings, payload limits, disk | future: agent file ready |
 | state | corrupted, stale, or shared state between calls | future |
 | ordering | operations applied out of sequence | future |
 | concurrency | race conditions, parallel access | future |
