@@ -92,6 +92,19 @@ predicted, fix the call — import path, arguments, signature — and
 re-run until the function itself executes. An error from your own
 harness is a broken case, never a verdict.
 
+If the target repo already has a property-based testing library
+installed, write a property capturing the oracle and let the
+library's generator and shrinker find the counterexample instead of
+hand-designing cases the library would generate:
+
+- Python: Hypothesis
+- TypeScript / JS: fast-check
+- Java / Kotlin: jqwik
+- C++: RapidCheck, Google FuzzTest
+
+Hand-designed cases remain the fallback when no library is present,
+and the oracle is still written FIRST either way.
+
 Cover every selected lens on every mapped surface before
 concluding. A lens with zero executed cases on a surface that
 consumes record/dict-shaped or string input is an incomplete
@@ -133,8 +146,28 @@ the observed behavior instead of the oracle. Rewrite it to assert
 the oracle, or mark the finding refuted and keep the test as
 characterization if the code already handles the case.
 
+If the target repo has a mutation testing tool installed, run it
+scoped to the surfaces you attacked and record the mutation score.
+PIT (Java), Stryker (JS/TS), mutmut (Python). Survived mutants in
+code you just confirmed as buggy are evidence your regression test
+is incomplete, not evidence the tool is wrong.
+
 Run the new tests. Then deliver the report in chat FIRST;
 persisting `findings/` files is bookkeeping that follows.
+
+### Run-end checks
+
+Before delivering the report, verify all of the following:
+
+1. Source, config, and secrets are unchanged. `git status` if the
+   target repo is a git repo; the diff must show only new test files
+   and `.sstack/` artifacts.
+2. Every confirmed finding has a regression.
+3. Every regression's state is reported honestly (red or green).
+4. No confirmed finding has only a green regression.
+
+A run that fails any of these is invalid. Fix and re-run before
+reporting.
 
 ## Lens index
 
