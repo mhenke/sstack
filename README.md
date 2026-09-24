@@ -2,20 +2,21 @@
 
 **sad stack** · negative testing for AI coding agents
 
-gstack. pstack. sstack. Same suffix, same shape — a `SKILL.md` your
+gstack, pstack, sstack. Same suffix, same shape: a `SKILL.md` your
 agent reads, a directory you copy in, a slash command you type. The
-family ships features and reviews diffs. This one is the sad member
-of the family: it goes looking for the **not-happy test cases**.
+family ships features and reviews diffs. This one goes looking for
+the not-happy test cases, the ones nobody writes tests for on
+purpose:
 
-The empty string. The `null`. The duplicate webhook. The dependency
-that dies at 2am. The second request that lands while the first is
-still running. Nobody writes tests for those on purpose — that's the
-job sstack was named for.
+- the empty string
+- the `null`
+- the duplicate webhook
+- the dependency that dies at 2am
+- the second request that lands while the first is still running
 
-It finds the ways your software fails, proves each one with a test
-that fails today and passes after you fix it, and hands you the
-evidence. It won't fix your code — it's an auditor, not a
-therapist. The repair is yours; the proof it worked is a green test.
+It finds the ways your software fails and hands you a test for each
+one, failing today and passing after you fix it. Fixing it stays your
+job. The test is how you know you did it.
 
 > Don't ask whether the software is robust.
 > Exercise the failure condition and collect evidence.
@@ -31,9 +32,9 @@ REGRESS    a test in your suite that fails now, passes after the fix
 ```
 
 The oracle is written *before* the attack. "It crashes" isn't an
-expectation; "it raises a validation error naming the field" is. And
-a test that passes against code you just proved broken has pinned the
-bug — pinned bugs are worse than no tests.
+expectation; "it raises a validation error naming the field" is. A
+test that passes against code you just proved broken has pinned the
+bug, and a pinned bug is worse than no test at all.
 
 ## Install
 
@@ -49,8 +50,8 @@ cp -r skills/sstack .cursor/skills/            # Cursor
 /sstack src/checkout.ts
 ```
 
-Zero runtime. No CLI, no daemon, no binary. Markdown all the way
-down — it runs wherever your agent already does.
+Zero runtime. No CLI, no daemon, no binary. It is Markdown, and it
+runs wherever your agent already does.
 
 ## What it leaves behind
 
@@ -63,8 +64,8 @@ down — it runs wherever your agent already does.
 └── scratch/      throwaway attack scripts (gone at run end)
 ```
 
-Plus tests — in your suite, your framework, your directory. Your
-source, config, and secrets stay read-only.
+Plus tests, in your suite, in your framework, in your directory.
+Your source, config, and secrets stay read-only.
 
 ## Is it actually any good?
 
@@ -76,7 +77,7 @@ evals/run-acceptance.sh seeded-py    # or seeded-ts
 ```
 
 It hands back a temp workspace with a deliberately broken repo and
-nothing else. A fresh agent runs `/sstack` inside it, and gets scored
+nothing else. A fresh agent runs `/sstack` inside it and gets scored
 on what it finds.
 
 | | seeded-py | seeded-ts |
@@ -86,18 +87,18 @@ on what it finds.
 | Regression tests failing on the bug | 9 | 22 |
 | Still failing after the fix | 0 | 1 * |
 
-\* one test asserted a single branch of a two-branch oracle — the
-run's test writing, not the code.
+\* one test asserted a single branch of a two-branch oracle, which
+was the run's test writing rather than the code.
 
 The TypeScript run turned up a bug nobody planted: `Math.max(...arr)`
-overflows the call stack on a large-but-legitimate array. Not in the
-answer key. That's the whole pitch in a single finding.
+overflows the call stack on a large but legitimate array. It is not
+in the answer key.
 
-Full record — including the runs that failed and what each one taught
+Full record, including the runs that failed and what each one taught
 the skill: [`evals/ACCEPTANCE.md`](evals/ACCEPTANCE.md).
 
 ## Docs
 
-- [`docs/ETHOS.md`](docs/ETHOS.md) — the four rules
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — lifecycle, the six
+- [`docs/ETHOS.md`](docs/ETHOS.md): the four rules
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): lifecycle, the six
   definitions, the 13-lens taxonomy, what v1 adds
