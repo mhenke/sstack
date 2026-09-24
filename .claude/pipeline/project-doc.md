@@ -1,5 +1,5 @@
 # Project Documentation
-> Generated: 2026-09-23 | Mode: FULL
+> Generated: 2026-09-24 | Mode: DELTA
 
 ## Tech Stack
 
@@ -97,7 +97,7 @@ CHANGELOG.md                       Keep a Changelog format
 
 - **Skill frontmatter**: exactly `name` + `description`; description is one long trigger-phrase sentence. `SKILL.md` must stay ≤ 500 lines (currently 253).
 - **Agent files**: YAML frontmatter with `name` + `description`; body is a thin dispatch wrapper that loads its lens skill and returns findings.
-- **Lens skill files**: exactly 5 `##` sections: What assumptions this lens attacks · Case-generation heuristics · Oracle patterns · Worked examples · When not to apply. Plus Language notes. One `python` and one `ts` block with `# case:` / `# oracle:` / `# observed (bug):` comments.
+- **Lens skill files**: Case-generation heuristics, Oracle patterns with an inline `Worked example` paragraph, and When not to apply, with one `python` and one `ts` block whose comments read `# case:` / `# oracle:` / `# observed (bug):`. Extra sections (Operating limits, Language notes, Failure modes to watch for) allowed where the lens needs them.
 - **Prose style**: hard-wrapped ~60–72 columns, imperative voice, backticks for identifiers and paths.
 - **Python eval**: PEP 8, snake_case, module docstrings, no type hints, no classes, deliberately no validation.
 - **TypeScript eval**: ESM, `export function`, `interface` per shape, `strict: true`, 2-space indent, semicolons, double quotes.
@@ -128,7 +128,7 @@ No database, no ORM. Data shapes:
 
 ## Service Communication
 
-None. Single-process, local files. `run-acceptance.sh` copies the skill and a decontaminated fixture into a temp dir.
+None. Single-process, local files. `run-acceptance.sh` copies the orchestrator skill, the four peer lens skills, the four agents, and a decontaminated fixture into a temp dir.
 
 ## Test Coverage
 
@@ -141,13 +141,16 @@ None. Single-process, local files. `run-acceptance.sh` copies the skill and a de
 | Path | Role |
 |---|---|
 | `skills/sstack/SKILL.md` | product entry (`/sstack <target>`) |
-| `skills/sstack/agents/*.md` | per-lens attacker definitions |
-| `skills/sstack/skills/*/SKILL.md` | per-lens rubrics |
+| `agents/sstack-<lens>-attacker.md` | per-lens attacker definitions (Thermos dispatch by name) |
+| `skills/sstack-<lens>/SKILL.md` | per-lens rubrics |
 | `docs/ETHOS.md` | four rules |
 | `docs/ARCHITECTURE.md` | lifecycle, six definitions, taxonomy |
 | `docs/adr/README.md` | decision index |
 | `evals/run-acceptance.sh` | acceptance harness |
 | `evals/ACCEPTANCE.md` | evidence record |
 
+## Changed Files
+AGENTS.md, CHANGELOG.md, README.md, docs/ETHOS.md, evals/ACCEPTANCE.md (contradiction sweep: four-lens peer layout, find-test-fix taglines, peer paths, current run-end and containment wording)
+
 ## Last Scanned
-2026-09-23 (second full scan, post-Thermos restructure)
+2026-09-24 (delta: contradiction sweep for peer-layout restructure)
