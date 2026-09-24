@@ -116,9 +116,7 @@ consumes record/dict-shaped or string input is an incomplete
 run, not a clean result.
 
 **Per-lens fan-out.** Dispatch one subagent per selected lens with
-your host's subagent tool (`runSubagent` here; Task with
-`subagent_type` on hosts that document it). One call per lens, same
-message:
+`runSubagent`, one call per lens, same message:
 
   - agent `sstack-boundaries-attacker` for numeric, size, index,
     collection, and pagination edge cases.
@@ -131,10 +129,10 @@ message:
 
 Pass each subagent the full context inline, not paths. Read
 `.sstack/map.md` and paste its contents with labeled sections
-(typically `### Workspace root` with the absolute path and
-`### Surface map` with the map contents). Also paste the matching
-lens skill's `SKILL.md` contents inline under `### Lens rubric`.
-Ask each subagent to return findings in the sstack returns format.
+(`### Workspace root` with the absolute path and `### Surface map`
+with the map contents). Also paste the matching lens skill's
+`SKILL.md` contents inline under `### Lens rubric`. Ask each
+subagent to return findings in the sstack returns format.
 
 ### 3. Verify
 
