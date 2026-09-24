@@ -80,7 +80,7 @@ in the target has a row in `map.md` with its assumed contract.
 ### 2. Attack
 
 Pick applicable lenses from the index. Read each selected
-`references/lens-*.md` before designing cases. For each
+`agents/<lens>-attacker.md` before designing cases. For each
 surface × lens:
 
 1. Design the case (concrete input and action).
@@ -212,9 +212,9 @@ reporting.
 
 | Lens | Applies when | Reference |
 |---|---|---|
-| boundaries | edge cases: numbers, sizes, indexes, slices, collections, pagination, loops | references/lens-boundaries.md |
-| malformed | strings parsed from outside, JSON, encodings, dynamic types | references/lens-malformed.md |
-| missing | optional fields, records from external data, null/None/undefined | references/lens-missing.md |
+| boundaries | edge cases: numbers, sizes, indexes, slices, collections, pagination, loops | agents/boundaries-attacker.md |
+| malformed | strings parsed from outside, JSON, encodings, dynamic types | agents/malformed-attacker.md |
+| missing | optional fields, records from external data, null/None/undefined | agents/missing-attacker.md |
 | ownership | entities with an owner; valid request, wrong session. OWASP A01 broken access control, BOLA, IDOR | future: unit tier works with mocks; integration tier needs sessions |
 | exceptional-conditions | fail-open paths, diagnostic leakage, cascading failures, empty catch blocks. OWASP A10 | future: unit tier works with mocks; integration tier needs injectable failures |
 | state | corrupted, stale, or shared state between calls | future |
