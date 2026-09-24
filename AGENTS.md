@@ -53,8 +53,9 @@ the skill and the decontaminated fixture together in one temp dir.
   lens attacks · Case-generation heuristics · Oracle patterns · Worked
   examples · When not to apply) with one `python` and one `ts` block
   whose comments read `# case:` / `# oracle:` / `# observed (bug):`.
-- A new lens is a `references/lens-<name>.md` file plus one row in
-  SKILL.md's lens index. The index is the only routing mechanism.
+- A new lens is an `agents/<name>-attacker.md` file plus a
+  `skills/<name>/SKILL.md` rubric plus one row in SKILL.md's lens
+  index. The index is the only routing mechanism.
 - Conventional Commits: `docs:`, `feat:`, `fix:`, `test:`, `chore:`.
 
 ## Testing
@@ -64,7 +65,7 @@ Baselines, green before any commit:
 - `cd evals/seeded-py && pytest -q` → 5 passed
 - `cd evals/seeded-ts && bun run test` → 6 passed
 
-An edit to `skills/sstack/SKILL.md` or `references/` invalidates
+An edit to `skills/sstack/` (SKILL.md, agents, skills) invalidates
 `evals/ACCEPTANCE.md`, because the recorded evidence came from the
 exact shipped text. Re-run `evals/run-acceptance.sh <repo>` and update
 the record, or state that the evidence is stale.
@@ -86,13 +87,13 @@ not the harness.
 
 - `skills/sstack/SKILL.md` — routing, rules, stage instructions, lens
   index, and nothing else
-- `skills/sstack/references/lens-*.md` — one failure class each
+- `skills/sstack/agents/<lens>-attacker.md` — one failure class each
+- `skills/sstack/skills/<lens>/SKILL.md` — lens rubric
 - `docs/ETHOS.md` — the four rules
-- `docs/ARCHITECTURE.md` — lifecycle, six definitions, 13-lens taxonomy,
+- `docs/ARCHITECTURE.md` — lifecycle, six definitions, lens taxonomy,
   v1 menu
 - `docs/adr/` — why the product is shaped this way
 - `evals/` — proof, never product
-- `docs/superpowers/` — gitignored process history, not in the tree
 
 New artifacts fit one of six nouns: Skill, Lens, Agent, Runner, Oracle,
 Evidence. Anything that does not is not part of this pack.
@@ -151,4 +152,4 @@ catching it. Check that the run's artifacts landed under the temp
 workspace rather than the sstack repo.
 
 **Done when** each confirmed finding has a red-then-green regression
-and `evals/verify-isolation.sh check` reports the repo unchanged.
+and the full test suite passes after fixes.

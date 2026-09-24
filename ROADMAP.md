@@ -75,8 +75,9 @@ v0 is a content-only skill pack with a process-only evidence layer
   Then `dependency-failure`, `resource-exhaustion`, `contract`.
 - **Done when**: the seeded repos carry at least one seed per shipped
   lens, and a clean run reaches a majority on both.
-- **Note**: additive only. A lens is a `references/lens-<name>.md`
-  file plus one index row (ADR-0002).
+- **Note**: additive only. A lens is an `agents/<name>-attacker.md`
+  wrapper plus a `skills/<name>/SKILL.md` rubric plus one row in
+  SKILL.md's lens index (ADR-0002).
 
 ### Run-end checklist
 
@@ -92,13 +93,18 @@ v0 is a content-only skill pack with a process-only evidence layer
 
 ### Containment that survives a curious agent
 
-- **Status**: LANDED in `7381591`. The harness locks the worktree
-  read-only via `evals/verify-isolation.sh lock` before dispatching,
-  so the cold agent physically cannot write into the sstack repo.
-  Tested: new-file, tracked-edit, and fixture-edit attacks all return
-  Permission denied. The repo is unlocked after the run for scoring.
-  A residual `.sstack-host-repo` marker in a fixture was caught and
-  removed; the isolation check detected it.
+- **Status**: caller responsibility. The harness (`run-acceptance.sh`)
+  builds one temp workspace containing the skill and the
+  decontaminated fixture. The caller dispatches the cold agent into
+  that workspace. The skill resolves all paths via the
+  `.sstack-host-repo` marker inside the workspace.
+- **What was tried**: `evals/verify-isolation.sh` gained lock/unlock
+  subcommands that chmod the worktree read-only. Tested: new-file,
+  tracked-edit, and fixture-edit attacks all returned Permission
+  denied. Removed because the user rejected sh files in the repo.
+- **Residual risk**: prompt-only containment. A cold agent that
+  ignores the prompt can still reach the sstack repo. The isolation
+  check (`git status` before and after) detects it after the fact.
 
 ### Learn loop
 
@@ -157,8 +163,9 @@ because the lenses are independent of each other and all depend on
 Discover's output.
 
 - **What**: at the Attack stage, dispatch one subagent per lens. Each
-  reads one `references/lens-<name>.md`, receives the `map.md` path,
-  and attacks every mapped surface through that lens alone. Results
+  reads one lens rubric from `skills/<lens>/SKILL.md`, receives the
+  `map.md` path, and attacks every mapped surface through that lens
+  alone. Results
   return to the orchestrator for Verify, Minimize, and Regress. The
   orchestrator deduplicates, steel-mans, and reports.
 - **Why this over the current inline loop**: the per-lens attack is

@@ -32,8 +32,8 @@ belong in the pack.
 - **Skill** — the methodology for a stage. One entry skill owns
   routing and rules (`skills/sstack/SKILL.md`).
 - **Lens** — an attack strategy over a failure class. Content
-  (`references/lens-*.md`), not machinery. Selected per target by
-  the Attack stage.
+  (`agents/<lens>-attacker.md` loading `skills/<lens>/SKILL.md`), not
+  machinery. Selected per target by the Attack stage.
 - **Agent** — a reasoning role (scout, attacker, oracle,
   reproducer). In v0 these are roles the one agent adopts per
   stage, not separate files.
