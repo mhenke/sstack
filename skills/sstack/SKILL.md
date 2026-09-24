@@ -115,13 +115,16 @@ concluding. A lens with zero executed cases on a surface that
 consumes record/dict-shaped or string input is an incomplete
 run, not a clean result.
 
-**Per-lens fan-out.** Dispatch one subagent per selected lens using
-your Task tool. Do not run lenses sequentially in this context. Each
-subagent reads its assigned `agents/<lens>-attacker.md`, receives the
-`map.md` path and the workspace root, attacks every mapped surface
-through that single lens, and returns findings in that agent file's
-returns format. Collect all findings before proceeding to Verify.
-Dispatch them all in one message so they run in parallel.
+**Per-lens fan-out.** For each selected lens, read
+`agents/<lens>-attacker.md` and follow it against every mapped
+surface. Run lenses sequentially: one lens at a time, all surfaces,
+then the next lens. This is the default and works on every host.
+
+If your host exposes a subagent dispatch mechanism (Task tool,
+`runSubagent`, or equivalent), you may instead dispatch one subagent
+per lens in parallel for faster runs. Each subagent reads its
+assigned agent file and returns findings. Sequential and parallel
+produce the same coverage.
 
 ### 3. Verify
 
