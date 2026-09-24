@@ -1,6 +1,7 @@
 ---
 name: sstack
 description: Use when the user wants negative testing, edge-case coverage, failure-mode analysis, robustness checks, hostile or unexpected input handling, "what happens if" questions about code, or to harden a module or API against bad input before shipping. Discovers failure surfaces, attacks them through lenses (boundaries, malformed, missing, resource-exhaustion), verifies observed behavior against a pre-declared oracle, adds negative regression tests, fixes confirmed failures, and hardens existing suites against future regressions. Scope is existing behavior under adverse conditions; happy-path feature work belongs to the feature's own tests.
+disable-model-invocation: true
 ---
 
 # sstack — structured negative testing
@@ -114,14 +115,8 @@ concluding. A lens with zero executed cases on a surface that
 consumes record/dict-shaped or string input is an incomplete
 run, not a clean result.
 
-**Per-lens fan-out.** Attack one lens at a time, all surfaces, then
-the next lens. For each selected lens, load its attacker agent
-(`agents/sstack-<lens>-attacker.md`) and follow it against every
-mapped surface. Sequential is the default and works on every host.
-
-If your host exposes a Task tool with `subagent_type` dispatch, you
-may instead launch one subagent per lens in the same message with
-`run_in_background: true`:
+**Per-lens fan-out.** Launch one subagent per selected lens in the
+same message with `run_in_background: true`:
 
   - `subagent_type: "sstack-boundaries-attacker"` for numeric, size,
     index, collection, and pagination edge cases.
@@ -133,11 +128,10 @@ may instead launch one subagent per lens in the same message with
     connection pools, rate limits, memory ceilings, payload limits,
     and disk pressure.
 
-Pass each subagent the workspace root path and the `.sstack/map.md`
-path, and ask it to return findings in the sstack returns format.
-Never pass `run_in_background` or `subagent_type` on a host that does
-not document them — the call will be rejected before execution.
-Sequential and parallel produce the same coverage.
+Pass each subagent the same scoped context and ask it to return
+findings in the sstack returns format: the workspace root path and
+the `.sstack/map.md` contents with labeled sections (typically
+`### Workspace root` and `### Surface map`).
 
 ### 3. Verify
 
