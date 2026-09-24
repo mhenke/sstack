@@ -114,8 +114,14 @@ concluding. A lens with zero executed cases on a surface that
 consumes record/dict-shaped or string input is an incomplete
 run, not a clean result.
 
-**Per-lens fan-out.** Dispatch one subagent per selected lens, in the
-same message with `run_in_background: true`:
+**Per-lens fan-out.** Attack one lens at a time, all surfaces, then
+the next lens. For each selected lens, load its attacker agent
+(`agents/sstack-<lens>-attacker.md`) and follow it against every
+mapped surface. Sequential is the default and works on every host.
+
+If your host exposes a Task tool with `subagent_type` dispatch, you
+may instead launch one subagent per lens in the same message with
+`run_in_background: true`:
 
   - `subagent_type: "sstack-boundaries-attacker"` for numeric, size,
     index, collection, and pagination edge cases.
@@ -129,9 +135,9 @@ same message with `run_in_background: true`:
 
 Pass each subagent the workspace root path and the `.sstack/map.md`
 path, and ask it to return findings in the sstack returns format.
-Run lenses sequentially (one lens at a time, all surfaces, then the
-next lens) unless your host supports parallel subagent dispatch —
-sequential and parallel produce the same coverage.
+Never pass `run_in_background` or `subagent_type` on a host that does
+not document them — the call will be rejected before execution.
+Sequential and parallel produce the same coverage.
 
 ### 3. Verify
 
