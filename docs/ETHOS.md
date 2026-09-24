@@ -20,9 +20,10 @@ confirmed failures into permanent regression tests.
 3. **Never accept an agent's claim as evidence.** Run the real
    command, quote the real output. The agent interprets evidence;
    it does not manufacture it.
-4. **Turn confirmed failures into permanent regressions.** A
-   finding that is not a test in the host repo's suite will be
-   reintroduced.
+4. **Turn confirmed failures into a test and a fix.** Write the
+   regression test (goes red on the bug), apply the minimal fix
+   (turns it green), and add hardening tests for surfaces the system
+   already handles correctly.
 
 ## Scope
 

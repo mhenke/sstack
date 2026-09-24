@@ -19,7 +19,8 @@ resumable from its artifact (gstack's process lesson).
 | Observe | captured actual behavior (folded into Attack) | yes |
 | Verify | verdict per case: confirmed / refuted / inconclusive | yes |
 | Minimize | minimal repro per confirmed finding | yes |
-| Regress | permanent test in the host repo's suite | yes |
+| Test | permanent negative test in the host repo's suite (red on confirmed, green on hardened) | yes |
+| Fix | minimal source change that satisfies the oracle, turning red to green | yes |
 | Learn | `.sstack/learn/` failure classes feeding future planning | deferred |
 
 ## Six definitions

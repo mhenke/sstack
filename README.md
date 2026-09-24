@@ -83,8 +83,9 @@ at Java or C++ and the answer matters, run the eval first.
 └── scratch/      throwaway attack scripts (gone at run end)
 ```
 
-Plus tests, in your suite, in your framework, in your directory.
-Your source, config, and secrets stay read-only.
+Plus regression tests and fixes. Tests land in your suite; fixes land
+in your source, scoped to the minimal change that satisfies the
+oracle. Config and secrets stay read-only.
 
 ## Is it actually any good?
 
