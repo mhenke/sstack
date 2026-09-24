@@ -65,6 +65,20 @@ lens, never the identity.
 | AI / Agent | agent | future |
 | Security | security | future |
 
+### Vocabulary
+
+The QA field splits "negative testing" more narrowly than sstack does,
+and the split is load-bearing for oracle design:
+
+- **Edge case** — a location on a parameter's range. `0`, `-1`, `max`,
+  an empty string. Often still a *valid* input.
+- **Negative case** — a class of input the system should reject or
+  degrade on. Wrong type, malformed structure, absent field.
+
+`boundaries` is the edge-case lens. `malformed` and `missing` are
+negative-case lenses. Negative testing is the domain and covers both;
+the QA usage of the term usually means only the second.
+
 ## Verification strategies
 
 How a verified finding earns its verdict. v0 uses the first two;

@@ -140,7 +140,7 @@ persisting `findings/` files is bookkeeping that follows.
 
 | Lens | Applies when | Reference |
 |---|---|---|
-| boundaries | numbers, sizes, indexes, slices, collections, pagination, loops | references/lens-boundaries.md |
+| boundaries | edge cases: numbers, sizes, indexes, slices, collections, pagination, loops | references/lens-boundaries.md |
 | malformed | strings parsed from outside, JSON, encodings, dynamic types | references/lens-malformed.md |
 | missing | optional fields, records from external data, null/None/undefined | references/lens-missing.md |
 

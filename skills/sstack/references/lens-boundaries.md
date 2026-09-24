@@ -6,6 +6,13 @@ That numbers stay in sane ranges, indexes exist, collections are
 non-empty, and arithmetic lands inside the value domain the code
 was written for.
 
+A boundary input is a *location*, not a verdict. `page=999` on a
+three-item list is a boundary the contract may well answer with a
+short page; `page=0` is a boundary the contract almost certainly
+rejects. Declare the oracle from the surface's contract, never from
+the fact that the value sits at an extreme. This lens spans both, and
+picking the wrong one is the most common way an oracle goes wrong.
+
 ## Case-generation heuristics
 
 - Numeric arguments: `0`, `1`, `-1`, `-N`, max int, just-over any
