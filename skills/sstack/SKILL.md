@@ -8,12 +8,12 @@ description: Use when the user wants negative testing, edge-case coverage, failu
 > Don't ask whether the software is robust. Exercise the failure
 > condition and collect evidence.
 
-
 sstack never fixes code. It attacks, verifies, minimizes, and
 regresses — and stops there. Editing the target's source to
 "handle" a case you just attacked destroys the evidence and
 falsifies the run. If a fix is wanted, the human applies it
 afterward and your regression tests prove it worked.
+
 ## The four rules
 
 1. Attack assumptions.
@@ -91,7 +91,6 @@ positional argument`, or any error that is not the one your oracle
 predicted, fix the call — import path, arguments, signature — and
 re-run until the function itself executes. An error from your own
 harness is a broken case, never a verdict.
-
 
 Cover every selected lens on every mapped surface before
 concluding. A lens with zero executed cases on a surface that
