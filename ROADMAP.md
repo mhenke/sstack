@@ -147,6 +147,120 @@ an explicit oracle subagent beats the fan-out the agent picks for
 itself is measurable on the seeded repos, and the bar is beating both
 the inline oracle and that self-selected fan-out.
 
+### Specialised agents: Thermos pattern
+
+The [Thermos](https://github.com/cursor/plugins/tree/main/thermos)
+plugin demonstrates the architecture: an orchestrator dispatches N
+specialised subagents in parallel, each carrying a single rubric, then
+synthesizes. sstack's Attack stage maps directly onto this shape,
+because the lenses are independent of each other and all depend on
+Discover's output.
+
+- **What**: at the Attack stage, dispatch one subagent per lens. Each
+  reads one `references/lens-<name>.md`, receives the `map.md` path,
+  and attacks every mapped surface through that lens alone. Results
+  return to the orchestrator for Verify, Minimize, and Regress. The
+  orchestrator deduplicates, steel-mans, and reports.
+- **Why this over the current inline loop**: the per-lens attack is
+  embarrassingly parallel. A cold run against 3 surfaces x 3 lenses
+  currently runs 9 cases sequentially; the fan-out runs them
+  concurrently. Each subagent also carries a narrower context (one
+  lens, not three), which improves focus.
+- **Evidence this works**: a cold TypeScript run fanned out into
+  per-stage subagents on its own, without being told to. The stage
+  structure in the skill invites that shape. Thermos formalizes the
+  same pattern for review; sstack formalizes it for attack.
+- **Constraint**: Discover still runs as a single agent (one map).
+  Regress still runs as a single agent (test suite writes must be
+  coordinated). The parallel fan-out is Attack-only.
+- **Done when**: a per-lens fan-out cold run completes against a
+  seeded repo, finds at least as many seeds as the inline loop, and
+  completes in less wall clock.
+
+### The ownership lens (next lens, highest priority)
+
+Authorization-scope violations: user A's session returns user B's
+entity. Valid request, wrong session. OWASP A01:2025 Broken Access
+Control and API1:2023 BOLA. The check-number scenario: a user
+searches by check number and sees only their own checks. A missing
+authorization check means they see someone else's.
+
+Discovery strategies from OWASP A01:2025:
+
+- Swap entity IDs between sessions (`/api/user/101` to `/api/user/102`)
+  and confirm the response denies access.
+- Build a permission matrix mapping roles to permissions, and verify
+  that low-privileged roles cannot reach high-privileged endpoints.
+- Verify that every endpoint enforces centralized authorization
+  (middleware, decorator, guard) rather than relying on the client to
+  hide UI elements. sstack's Discover stage should flag any surface
+  that lacks a visible auth check.
+
+Remediation patterns that become oracle patterns:
+
+- **Deny by default**: an endpoint with no explicit authorization
+  should return 401/403, not 200. The absence of a check is itself
+  the bug.
+- **Indirect reference keys**: sequential database IDs in URLs are
+  enumerable. GUIDs are the remediation, but sstack's job is to prove
+  that sequential IDs are actually exposed, not to assume they aren't.
+
+- **Why first**: authorization failures are the most exploitable class
+  of bug and the least likely to be caught by input-generation lenses.
+  The input is valid; the session is wrong.
+- **Execution model**: unlike boundaries/malformed/missing, this lens
+  needs authenticated sessions, multiple test users, and real state.
+  It cannot run as a scratch script calling a function. It is the
+  first lens that genuinely requires the evidence schema's structured
+  session/entity recording, and likely a verification skill in the
+  target repo that scripts the session setup.
+- **Interaction with verification skill**: the target's verification
+  skill (pstack `/create-verification-skill` or equivalent) already
+  knows the entities, the ownership model, and the auth flow. The
+  ownership lens reads that map and attacks the boundaries between
+  users.
+- **Done when**: a seeded repo with an authorization-scope bug is
+  confirmed by a cold run through the ownership lens, and the
+  regression test proves the access-control check exists.
+
+### The exceptional-conditions lens (A10:2025)
+
+Fail-open scenarios, diagnostic leakage, cascading failures. OWASP
+A10:2025 Mishandling of Exceptional Conditions. The `malformed` lens
+tests input shape; this lens tests what the system does when
+something fails, regardless of whether the trigger was malformed
+input or a dying dependency.
+
+- **Why second**: a fail-open auth service, a stack trace leaking
+  database schema to the client, and a cascading cluster failure are
+  more damaging than most input-validation bugs. They are also the
+  least likely to be caught by happy-path tests, because they only
+  fire when something else breaks.
+- **Discovery strategies**:
+  - Drop a dependency or inject a timeout mid-request. Does the
+    system deny access (fail-safe) or grant access (fail-open)?
+  - Search for empty or overly generic catch blocks
+    (`catch (Exception e) { }`) that swallow errors silently.
+  - Attack with malformed input and inspect the error response:
+    does it leak stack traces, database schema, API keys, or
+    internal hostnames to the end user?
+- **Oracle patterns**:
+  - Fail-safe: when an upstream dependency fails, the system denies
+    access or degrades to a safe default, never grants access.
+  - Sanitized errors: the client sees a generic message and a unique
+    tracking ID. The detailed error goes to server-side logs only.
+  - No cascading failures: one component's timeout does not propagate
+    as a full-system outage.
+- **Interaction with `malformed`**: the `malformed` lens triggers the
+  error. This lens tests what the error handler does with it. The two
+  are complementary, not overlapping.
+- **Execution model**: needs a runnable target with injectable
+  failure points. The evidence schema must record which failure was
+  injected and what the system did.
+- **Done when**: a seeded repo with a fail-open path is confirmed by
+  a cold run through this lens, and the regression test proves the
+  fail-safe behavior exists.
+
 ### Host packaging
 
 - **Why**: ADR-0002 chose host-agnostic for zero install friction. That

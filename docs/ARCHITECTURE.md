@@ -54,6 +54,8 @@ lens, never the identity.
 | Input | boundaries | ✅ |
 | Input | malformed | ✅ |
 | Input | missing | ✅ |
+| Access | ownership | next (highest priority) |
+| Behavior | exceptional-conditions | next |
 | Behavior | state | future |
 | Behavior | ordering | future |
 | Behavior | concurrency | future |

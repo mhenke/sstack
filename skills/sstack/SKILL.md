@@ -69,6 +69,12 @@ collections, or indexes/slices. For each surface, record its
 assumed contract — types, ranges, preconditions gleaned from
 docstrings, types, and call sites. Write `.sstack/map.md`.
 
+If the target repo has a verification skill or feature map
+(pstack `/create-verification-skill`, or a project-local verify
+script), read it as a head start on the surface map. It already
+knows the entities, the ownership model, and the expected
+behaviors — do not re-derive what it documents.
+
 Done when every public function, route, parser, loop, and indexer
 in the target has a row in `map.md` with its assumed contract.
 
@@ -176,6 +182,8 @@ reporting.
 | boundaries | edge cases: numbers, sizes, indexes, slices, collections, pagination, loops | references/lens-boundaries.md |
 | malformed | strings parsed from outside, JSON, encodings, dynamic types | references/lens-malformed.md |
 | missing | optional fields, records from external data, null/None/undefined | references/lens-missing.md |
+| ownership | entities with an owner; valid request, wrong session. OWASP A01/A01:2025 broken access control, BOLA, IDOR | future: needs authenticated sessions |
+| exceptional-conditions | fail-open paths, diagnostic leakage, cascading failures, empty catch blocks. OWASP A10:2025 | future: needs injectable failure points |
 
 ## Safety
 
