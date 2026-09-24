@@ -7,59 +7,85 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.1.0] - 2026-09-23
-
-First release. A structured negative-testing skill pack for AI coding
-agents: it discovers failure surfaces, attacks them through specialist
-lenses, verifies observed behavior against an oracle declared before
-the attack, minimizes confirmed failures, and turns them into
-permanent regression tests.
-
 ### Added
 
-- **Orchestrator skill** (`skills/sstack/SKILL.md`): five-stage
-  lifecycle (Discover, Attack, Verify, Minimize, Regress), oracle-first
-  verification, audit-not-fix safety contract, `red`/`green` regression
-  vocabulary, and per-surface lens coverage requirements.
-- **Three input lenses** (`references/`): `boundaries` (numeric, size,
-  index, and collection edges), `malformed` (wrong types, corrupt
-  structures, unvalidated parsing), and `missing` (absent fields,
-  null/None/undefined, empty inputs).
-- **Concept freeze** (`docs/`): `ETHOS.md` (the four rules) and
-  `ARCHITECTURE.md` (canonical lifecycle, the six definitions, the full
-  13-lens taxonomy, the v1 verification menu).
-- **Architecture decision records** (`docs/adr/`): why negative testing
-  is the domain (0001), why the pack is content-only and
-  agent-agnostic (0002), and why acceptance is eval-gated (0003).
-- **Seeded-bug eval repos**: `evals/seeded-py` (Python/pytest) and
-  `evals/seeded-ts` (TypeScript/vitest), five deliberate bugs each, every
-  bug mapped to exactly one lens and recorded in a `BUGS.md` answer
-  key.
-- **Cold-run acceptance harness** (`evals/run-acceptance.sh`): copies
-  the skill and a BUGS.md-free, cache-free fixture into one isolated
-  temp workspace so a cold agent never needs the repo it came from.
-- **Acceptance record** (`evals/ACCEPTANCE.md`): seeds found, oracle
-  regressions that go red on the seed and green after the canonical
-  fix, every failed cold run, and the guardrail each failure forced.
+- ADR-0004: lenses delegate to the target's existing tools
+- ADR-0005: sstack finds, tests, and fixes (supersedes the
+  audit-not-fix portion of ADR-0002)
+- Per-lens attacker agents (`agents/`): boundaries, malformed, missing
+  — each self-contained with rubric, returns format, and constraints
+- Thermos pattern: per-lens fan-out at Attack stage, one agent per
+  lens, parallel when the host supports subagent dispatch
+- Property-based testing delegation: Attack stage checks for
+  Hypothesis, fast-check, jqwik, RapidCheck and writes a property
+  before hand-designing cases
+- Mutation testing references: PIT (Java), Stryker (JS/TS), mutmut
+  (Python)
+- Run-end checks: source unchanged, every finding has a regression,
+  regression states honest, no confirmed finding with only a green
+  regression
+- Steel-man Verify step: strongest case that the observed behavior is
+  correct, before recording confirmed
+- Edge-case vs negative-case vocabulary split in ARCHITECTURE.md and
+  the boundaries lens
+- Ownership lens (OWASP A01): authorization-scope violations, BOLA,
+  IDOR. Unit tier works with mocks; integration tier needs sessions
+- Exceptional-conditions lens (OWASP A10): fail-open paths,
+  diagnostic leakage, cascading failures. Unit tier works with mocks;
+  integration tier needs injectable failures
+- Containment: `evals/verify-isolation.sh` gains lock, unlock, and
+  check subcommands. Worktree locked read-only during cold runs
+- Tool inventory by language (`docs/TOOLS.md`)
+- Research index (`docs/RESEARCH.md`)
+- Research record (`docs/LEARNED.md`)
+- Language breadth on the roadmap: Python, JavaScript, TypeScript,
+  Java, C++
+- Roadmap: Thermos per-lens fan-out architecture, C++ second
+  verification mode question, Readme honesty line
 
 ### Changed
 
-- Skill guardrails hardened through six cold acceptance runs:
-  bug-pinning regressions forbidden, the audit-not-fix contract made
-  unmissable, lens examples decontaminated of seeded answer keys, and
-  attacks required to reach the function under test before scoring.
-  (The run-by-run record lives in `evals/ACCEPTANCE.md`.)
+- Lifecycle expanded: Regress split into Test (write regression, goes
+  red) and Fix (apply minimal change, goes green)
+- Verify requires steel-manning observed behavior before recording
+  confirmed
+- Discover reads a verification skill or feature map as a head start
+- AGENTS.md restructured for the always-loaded budget
+- ROADMAP.md humanized and expanded
+- README language support stated honestly
 
 ### Fixed
 
-- Seeded-bug expectations corrected to match real runtime behavior
-  (empty-slice clamping, `maxQuantity` on empty input).
-- Acceptance harness no longer ships pytest/bytecode caches that
-  carried oracle strings into cold-run workspaces.
+- Attack coverage paragraph restored after silent deletion
+- Acceptance harness and skill corrected after guardrail iterations
 
 ### Security
 
-- MIT license.
+- Acceptance containment hardened: worktree locked read-only during
+  cold runs
 
-[Unreleased]: https://github.com/mhenke/sstack/compare/v0.1.0...HEAD
+### Removed
+
+- `docs/superpowers/` (process artifacts, gitignored)
+- `references/lens-*.md` (content inlined into `agents/`)
+
+## [0.1.0] - 2026-09-23
+
+First release. A structured negative-testing skill pack for AI coding
+agents.
+
+### Added
+
+- Orchestrator skill (`skills/sstack/SKILL.md`): five-stage lifecycle
+  (Discover, Attack, Verify, Minimize, Regress), oracle-first
+  verification, red/green regression vocabulary, per-surface lens
+  coverage
+- Three input lenses (`references/`): boundaries, malformed, missing
+- Concept freeze (`docs/`): ETHOS.md, ARCHITECTURE.md
+- Seeded-bug eval repos: `evals/seeded-py` and `evals/seeded-ts`
+- Cold-run acceptance harness (`evals/run-acceptance.sh`)
+- Acceptance record (`evals/ACCEPTANCE.md`)
+- MIT license
+
+[unreleased]: https://github.com/mhenke/sstack/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/mhenke/sstack/releases/tag/v0.1.0
