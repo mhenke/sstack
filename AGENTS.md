@@ -42,7 +42,7 @@ Markdown skill pack (agent-skills `SKILL.md`) + POSIX sh harness; pytest/Python 
 - `skills/sstack/references/lens-*.md` — one failure class each.
 - `docs/ETHOS.md` — the four rules. `docs/ARCHITECTURE.md` — lifecycle, six definitions, full 13-lens taxonomy, v1 menu.
 - `evals/` — proof, never product. Fixtures + harness + acceptance record.
-- `docs/superpowers/` — process history (spec, plan). Do not treat as current behavior; it can drift from what shipped and did.
+- `docs/adr/` — decision records (why the product is shaped this way). `docs/ARCHITECTURE.md` is the concept freeze. `docs/superpowers/` is gitignored process history, not in the tree.
 
 ## Security Rules (All Agents)
 

@@ -1,0 +1,15 @@
+# Superpowers process artifacts (specs, plans, workspace) — local only.
+# The durable decisions live in docs/adr/.
+docs/superpowers/
+.superpowers/
+
+# Python
+__pycache__/
+*.pyc
+
+# sstack run artifacts (runtime output of the skill, not source)
+.sstack/
+.pytest_cache/
+
+# Node
+node_modules/

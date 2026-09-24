@@ -38,7 +38,7 @@ Entry-point-on-demand layout: one `SKILL.md` (routing + rules + stage instructio
 ```
 skills/sstack/          THE PRODUCT. Entry skill + 3 v0 lens references.
 docs/                   Concept freeze: ETHOS.md (4 rules), ARCHITECTURE.md (lifecycle, 6 defs, 13-lens taxonomy, v1 menu)
-docs/superpowers/       Process artifacts: specs/ (approved design) and plans/ (implementation plan) — history, not product
+docs/adr/                Decision records (ADR-0001 domain, 0002 content-only pack, 0003 eval-gated acceptance) + index + template
 evals/                  Proof of the skill
 evals/seeded-py/        Python fixture repo, 5 deliberate bugs + BUGS.md answer key
 evals/seeded-ts/        TypeScript fixture repo, 5 deliberate bugs + BUGS.md answer key
