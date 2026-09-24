@@ -23,12 +23,14 @@ job. The test is how you know you did it.
 
 ## The not-happy cases, staged
 
-```
-DISCOVER   map the surfaces and the contracts they quietly assume
-ATTACK     boundaries · malformed · missing
-VERIFY     observed vs. oracle → confirmed / refuted / inconclusive
-MINIMIZE   the smallest input that still breaks it
-REGRESS    a test in your suite that fails now, passes after the fix
+```mermaid
+flowchart LR
+    D["Discover\nmap surfaces + contracts"] --> A["Attack\nboundaries · malformed · missing"]
+    A --> V["Verify\nobserved vs. oracle"]
+    V --> M["Minimize\nsmallest repro"]
+    M --> T["Test\nwrite regression → red"]
+    T --> F["Fix\napply minimal fix → green"]
+    F --> R["Report\nfindings + fixes in chat"]
 ```
 
 The oracle is written *before* the attack. "It crashes" isn't an
