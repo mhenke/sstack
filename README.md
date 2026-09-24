@@ -126,5 +126,6 @@ refresh them.
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): lifecycle, the six
   definitions, the 13-lens taxonomy, what v1 adds
 - [`docs/adr/`](docs/adr/README.md): decision records
+- [`docs/TOOLS.md`](docs/TOOLS.md): negative-testing tools by language
 - [`docs/RESEARCH.md`](docs/RESEARCH.md): the research behind the
   decisions, and what is still open

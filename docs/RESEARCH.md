@@ -9,6 +9,8 @@ the index into them and the record of what each one changed.
 
 ### Negative testing across five languages (2026-09-23)
 
+Tool inventory from this scan: [`TOOLS.md`](TOOLS.md).
+
 Source: `negative-testing-edge-case-unit-testing-across-languages-raw-v3.md`
 in the library. Distilled into
 [LEARNED.md](LEARNED.md). Fed [ADR-0004](adr/0004-delegate-to-target-existing-tools.md)
