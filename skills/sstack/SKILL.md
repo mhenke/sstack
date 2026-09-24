@@ -115,13 +115,12 @@ concluding. A lens with zero executed cases on a surface that
 consumes record/dict-shaped or string input is an incomplete
 run, not a clean result.
 
-**Per-lens fan-out.** If your host supports subagent dispatch,
-spawn one subagent per selected lens rather than running them
-sequentially. Each subagent reads its own lens reference file,
-receives the `map.md` path and the workspace root, and attacks every
-mapped surface through that single lens. Results return to the
-orchestrator for Verify. If your host does not support subagent
-dispatch, run the lenses sequentially in this context. The per-surface
+**Per-lens fan-out.** Dispatch one agent per selected lens. Each
+agent is defined in `agents/` and reads its own lens reference file
+plus `map.md`. It attacks every mapped surface through that single
+lens and returns findings to this context for Verify. If your host
+does not support subagent dispatch, read each `agents/<lens>-attacker.md`
+definition and follow it inline, sequentially. The per-surface
 coverage rule is the same either way.
 
 ### 3. Verify
