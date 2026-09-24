@@ -6,6 +6,12 @@ BUGS.md-free copy of the seeded repo, in a temp workspace
 
 ## Verdict
 
+> **Stale**: the numbers below were produced by the skill text at
+> commit `9979718`. The skill has since gained PBT delegation, mutation
+> references, run-end checks, a steel-man Verify step, and the
+> edge-case/negative-case vocabulary split. Re-run before treating
+> these numbers as current.
+
 | Repo | Seeds confirmed | Failing oracle regressions | Negative control | Verdict |
 |---|---|---|---|---|
 | seeded-py | 4/5 (py-1, py-2, py-4, py-5); py-3 not found | 9 | 9/9 flip — 14/14 green | PASS |

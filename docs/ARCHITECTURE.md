@@ -76,8 +76,16 @@ and the split is load-bearing for oracle design:
   degrade on. Wrong type, malformed structure, absent field.
 
 `boundaries` is the edge-case lens. `malformed` and `missing` are
-negative-case lenses. Negative testing is the domain and covers both;
-the QA usage of the term usually means only the second.
+negative-case lenses. Negative testing is the domain and covers both.
+
+Sources disagree on where boundary values sit relative to negative
+testing. Tricentis includes boundary values under negative testing;
+TestinGil separates them. sstack follows the TestinGil split because
+the oracle differs: a boundary input may be valid (return a short
+page) while a negative input must be rejected or degraded. If the
+oracle for a boundary input is "raise an error," it has crossed into
+negative-case territory regardless of where it sits on the number
+line.
 
 ## Verification strategies
 

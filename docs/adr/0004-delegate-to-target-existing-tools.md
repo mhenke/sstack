@@ -12,12 +12,18 @@ smallest input that still violates the oracle. Both are reasonable
 approaches and both are now behind the field.
 
 Across Python, JavaScript/TypeScript, and Java, the answer to "which
-inputs break this" has shifted to declared properties plus generated
+inputs break this" is moving toward declared properties plus generated
 inputs plus automatic counterexample shrinking: Hypothesis, fast-check,
 and jqwik respectively, with RapidCheck and Google FuzzTest in C++. jqwik
 landed in Java partly because it ships as a JUnit 5 engine rather than a
 standalone framework, so teams inherit their existing IDE and build
 integration.
+
+Sources split on whether PBT replaces or complements hand-written
+cases. The library docs frame PBT as an alternative to example-based
+testing; practitioner threads treat them as complementary. Both
+positions agree the generator-and-shrinker catches cases hand-design
+misses, which is the part sstack should delegate.
 
 Mutation testing is in the same position. PIT for the JVM, Stryker for
 JS/TS, and mutmut for Python are mature, and mutation score is now a

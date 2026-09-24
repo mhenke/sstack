@@ -38,29 +38,24 @@ v0 is a content-only skill pack with a process-only evidence layer
 
 ### Mutation as a verification strategy
 
-- **Why**: ADR-0001 scoped mutation as deferred rather than central.
-  It is the strongest available signal that a generated test has
-  teeth, and it is the direct answer to weak assertions in generated
-  suites, which is sstack's own recurring failure mode.
+- **Status**: SHIPPED in skill text (`5de75b3`). Pending acceptance
+  evidence.
 - **What**: the `mutation` lens and the mutation entry in the v1
   proof-gate menu. Only after structured evidence exists, so a
   mutation result is itself recorded as evidence.
 - **Tooling per language**, researched rather than guessed: PIT for
   Java, Stryker for JS/TS, mutmut for Python, RapidCheck or Google
-  FuzzTest for C++. Roughly 80% mutation score on critical modules is
-  the practical bar, and it runs on changed code rather than
-  whole-repo sweeps.
+  FuzzTest for C++. One 2026 survey (softwaretestingbasics.io) puts
+  ~80% mutation score on critical modules as the practical bar;
+  PIT and Stryker publish no number. All advise running on changed
+  code rather than whole-repo sweeps.
 - **Done when**: a regression test can be shown to go red against a
   seeded mutant, not only against the original bug.
 
 ### Property-based testing as the Attack default
 
-- **Why**: ADR-0004. Across Python, JS/TS, and Java the field's
-  answer to "which inputs break this" has moved from hand-written edge
-  cases to declared properties plus generated inputs plus shrinking
-  (Hypothesis, fast-check, jqwik). sstack currently hand-designs
-  every case and hand-minimizes every finding, which is both slower
-  and less complete than the tooling most target repos already ship.
+- **Status**: SHIPPED in skill text (`5de75b3`). Pending acceptance
+  evidence.
 - **What**: an Attack-stage rule that checks for an installed
   property-based library and writes a property before hand-designing
   cases, plus a Minimize rule that delegates shrinking. Oracle-first
@@ -85,9 +80,8 @@ v0 is a content-only skill pack with a process-only evidence layer
 
 ### Run-end checklist
 
-- **Why**: the deferred hardening in ADR-0002. Prose guardrails have
-  been load-bearing four times, and a mechanical check catches the
-  fifth without a new paragraph.
+- **Status**: SHIPPED in skill text (`5de75b3`). Pending acceptance
+  evidence.
 - **What**: before the report, the skill verifies source is unchanged
   (`git status` when available), every confirmed finding has a
   regression, and every regression's state is reported honestly.
@@ -98,14 +92,13 @@ v0 is a content-only skill pack with a process-only evidence layer
 
 ### Containment that survives a curious agent
 
-- **Why**: two cold runs escaped their temp target, one editing the
-  main repo's seeds. The current harness works because the prompt is
-  strict, not because the boundary is hard.
-- **What**: run the cold agent with its working directory *inside* the
-  temp workspace, so the skill's relative `.sstack/` path cannot
-  resolve outside it. The escape we saw was exactly that.
-- **Done when**: an agent that ignores the prompt still cannot write
-  to the sstack repo.
+- **Status**: LANDED in `7381591`. The harness locks the worktree
+  read-only via `evals/verify-isolation.sh lock` before dispatching,
+  so the cold agent physically cannot write into the sstack repo.
+  Tested: new-file, tracked-edit, and fixture-edit attacks all return
+  Permission denied. The repo is unlocked after the run for scoring.
+  A residual `.sstack-host-repo` marker in a fixture was caught and
+  removed; the isolation check detected it.
 
 ### Learn loop
 
@@ -214,11 +207,9 @@ Target set, in the order it should land:
 
 ### Readme honesty line
 
-- **What**: one line in the README stating which languages have
-  acceptance evidence and which are process-only by inference. The
-  eval directory currently implies more than the evidence supports.
-- **Done when**: a reader can tell the difference between "works" and
-  "should work" without reading the eval.
+- **Status**: LANDED in `150d6c2`. The README's Languages section
+  states proven (Python, TypeScript) vs works-by-inference (JavaScript,
+  Java, C++, others).
 
 ### The JavaScript shortcut, stated honestly
 

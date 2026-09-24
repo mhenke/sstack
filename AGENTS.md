@@ -3,6 +3,11 @@
 > 2026-09-23. Scanner-generated sections may be rewritten; architectural
 > changes still need scanner detection plus human confirmation.
 
+## Reporting
+
+When reporting to Mike: be extremely concise. Sacrifice grammar for
+concision. Fragments over sentences. Findings over process.
+
 ## Stack Context
 
 A Markdown skill pack (agent-skills `SKILL.md`) plus a POSIX sh harness.
