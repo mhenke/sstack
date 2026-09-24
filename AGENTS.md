@@ -3,75 +3,147 @@
 > 2026-09-23. Scanner-generated sections may be rewritten; architectural
 > changes still need scanner detection plus human confirmation.
 
-
 ## Stack Context
 
-Markdown skill pack (agent-skills `SKILL.md`) + POSIX sh harness; pytest/Python and vitest/TypeScript exist only inside `evals/` as deliberately broken fixtures.
+A Markdown skill pack (agent-skills `SKILL.md`) plus a POSIX sh harness.
+`evals/` holds Python and TypeScript fixtures that are broken on purpose.
 
-## Code Style Rules
+## Rules
 
-- DO keep `skills/sstack/SKILL.md` under 500 lines. Frontmatter is exactly `name` + `description`; the description is one long trigger-phrase sentence.
-- DO give every lens file the exact 5-section template: What assumptions this lens attacks · Case-generation heuristics · Oracle patterns · Worked examples · When not to apply — with one `python` and one `ts` block whose comments read `# case:` / `# oracle:` / `# observed (bug):`.
-- DO hard-wrap prose at ~60–72 columns, imperative voice, backticks for identifiers and paths.
-- DO use Conventional Commits (`docs:`, `feat:`, `fix:`, `test:`, `chore:`).
-- DON'T add dependencies to the pack. It ships with zero runtime dependencies and no CLI. That is a locked v0 decision, not an oversight.
-- DON'T create `agents/`, `runners/`, `evidence/`, or `.sstack/learn/` files. They are documented v1 in `docs/ARCHITECTURE.md`; they do not exist in the tree and must not be stubbed.
-- DON'T add a lens without adding its index row in SKILL.md's lens index — the index is the only routing mechanism.
+### Scope lock (v0)
 
-## Architecture Guardrails
+The pack ships zero runtime dependencies and no CLI. `agents/`,
+`runners/`, `evidence/`, and `.sstack/learn/` are documented v1 in
+`docs/ARCHITECTURE.md`; they are absent from the tree and stay absent
+rather than stubbed.
 
-- **Six nouns, one pack.** Skill, Lens, Agent, Runner, Oracle, Evidence. A new artifact that does not fit one of them does not belong here.
-- **Audit, not refactor.** The skill writes tests and `.sstack/` artifacts; source, config, and secrets are read-only. Agents working *on this repo* hold to the same rule: leave seeded bugs seeded.
-- **The fixture bugs are load-bearing.** `evals/seeded-py/shop/*.py` and `evals/seeded-ts/src/*.ts` must keep their defects. Each maps to exactly one lens and is listed in that repo's `BUGS.md`. Fixing one silently invalidates every acceptance number in `evals/ACCEPTANCE.md`.
-- **The skill must never contain the answer key.** A cold agent reads all three lens files. If a lens worked example shares a trigger input *and* an oracle string with any `BUGS.md` row, the acceptance evidence is contaminated. This happened once; the re-review caught it.
-- **`BUGS.md` never ships into a cold-run workspace.** The harness strips it. If you add a cold-run path, preserve that exclusion.
-- **New lenses are additive.** Drop in `references/lens-<name>.md` + one index row. No restructuring, no re-plumbing.
+### Seeds are frozen
 
-## Testing Requirements
+`evals/seeded-py/shop/*.py` and `evals/seeded-ts/src/*.ts` must keep
+their defects. Each maps to one lens and is listed in that repo's
+`BUGS.md`. Fixing one silently invalidates every acceptance number in
+`evals/ACCEPTANCE.md`, so leave seeded bugs seeded even when the fix
+looks obvious.
 
-- Baselines, both must stay green before any commit:
-  - `cd evals/seeded-py && pytest -q` → 5 passed
-  - `cd evals/seeded-ts && bun run test` → 6 passed
-- **Any edit to `skills/sstack/SKILL.md` or `references/` invalidates `evals/ACCEPTANCE.md`.** The recorded evidence was produced by the exact shipped text. Re-run `evals/run-acceptance.sh <repo>` and update the record, or state explicitly that the evidence is stale.
-- The acceptance criterion is behavioral: a cold agent finds ≥1 seeded bug, lands a regression that goes **red** on the seed, and that regression goes **green** after the canonical fix. "The agent said it found bugs" is not evidence.
-- No coverage tooling exists and none is required. Do not add it.
+### The skill carries no answer key
 
-## Modularity Conventions
+A cold agent reads all three lens files. A worked example that shares a
+trigger input *and* an oracle string with any `BUGS.md` row
+contaminates the acceptance evidence. This happened once and the
+re-review caught it.
 
-- `skills/sstack/SKILL.md` — routing, rules, stage instructions, lens index. Nothing else.
-- `skills/sstack/references/lens-*.md` — one failure class each.
-- `docs/ETHOS.md` — the four rules. `docs/ARCHITECTURE.md` — lifecycle, six definitions, full 13-lens taxonomy, v1 menu.
-- `evals/` — proof, never product. Fixtures + harness + acceptance record.
-- `docs/adr/` — decision records (why the product is shaped this way). `docs/ARCHITECTURE.md` is the concept freeze. `docs/superpowers/` is gitignored process history, not in the tree.
+### Containment
 
-## Security Rules (All Agents)
+A cold-run workspace must not reach `BUGS.md` or the sstack repo. The
+harness strips `BUGS.md`; preserve that exclusion in any new cold-run
+path. Prompt-only boundaries have already failed three times, so keep
+the skill and the decontaminated fixture together in one temp dir.
 
-- Never hardcode secrets, tokens, or credentials. None exist in this repo; keep it that way.
-- The skill's safety contract is a product feature, not a suggestion: it must never instruct an agent to modify target source, config, or secrets. Do not weaken the Safety section.
-- A cold-run workspace must never be able to reach `BUGS.md` or the main repo. Containment has already failed three times via prompt-only boundaries; keep the skill + decontaminated fixture in ONE temp dir.
+### Conventions
 
-## Agent-Specific Instructions
+- `skills/sstack/SKILL.md` stays under 500 lines. Frontmatter is exactly
+  `name` + `description`, the description a single trigger-phrase
+  sentence.
+- Every lens file carries the same five sections (What assumptions this
+  lens attacks · Case-generation heuristics · Oracle patterns · Worked
+  examples · When not to apply) with one `python` and one `ts` block
+  whose comments read `# case:` / `# oracle:` / `# observed (bug):`.
+- A new lens is a `references/lens-<name>.md` file plus one row in
+  SKILL.md's lens index. The index is the only routing mechanism.
+- Conventional Commits: `docs:`, `feat:`, `fix:`, `test:`, `chore:`.
+
+## Testing
+
+Baselines, green before any commit:
+
+- `cd evals/seeded-py && pytest -q` → 5 passed
+- `cd evals/seeded-ts && bun run test` → 6 passed
+
+An edit to `skills/sstack/SKILL.md` or `references/` invalidates
+`evals/ACCEPTANCE.md`, because the recorded evidence came from the
+exact shipped text. Re-run `evals/run-acceptance.sh <repo>` and update
+the record, or state that the evidence is stale.
+
+A run passes when a cold agent finds at least one seeded bug, lands a
+regression that goes **red** on the seed, and that regression goes
+**green** after the canonical fix. An agent saying it found bugs is not
+evidence. No coverage tooling exists and none is needed.
+
+Failure modes this project has actually hit, all worth a regression
+check: tests that pin buggy behavior instead of the oracle; oracles
+designed after seeing the result; fixes applied to target source
+mid-run; broken harnesses whose errors get scored as verdicts;
+disjunctive oracles ("throws or returns NaN") asserted as a single
+branch. Confirm observed output came from the function under attack,
+not the harness.
+
+## Layout
+
+- `skills/sstack/SKILL.md` — routing, rules, stage instructions, lens
+  index, and nothing else
+- `skills/sstack/references/lens-*.md` — one failure class each
+- `docs/ETHOS.md` — the four rules
+- `docs/ARCHITECTURE.md` — lifecycle, six definitions, 13-lens taxonomy,
+  v1 menu
+- `docs/adr/` — why the product is shaped this way
+- `evals/` — proof, never product
+- `docs/superpowers/` — gitignored process history, not in the tree
+
+New artifacts fit one of six nouns: Skill, Lens, Agent, Runner, Oracle,
+Evidence. Anything that does not is not part of this pack.
+
+## Roles
 
 ### Orchestrator
 
-Ask before proceeding: does this change what the skill *tells* an agent to do (behavioral), or only its wording (cosmetic)? Wording changes still require an acceptance re-run, because every recorded number came from exact text. Does this touch the v0 scope lock (no runners, no CLI, no evidence schema)?
+Before dispatching, settle two questions. Does the change alter what the
+skill tells an agent to do, or only its wording? Wording changes still
+require a re-run, because every recorded number came from exact text.
+And does it cross the scope lock?
+
+**Done when** both answers are written down and the affected acceptance
+evidence is either refreshed or marked stale.
 
 ### Architect
 
-Before adding a subsystem, name the noun it belongs to and where it loads. v0 is content-on-demand on purpose: the entry skill stays small, lens files load per selection. The v1 list (runners, evidence schema, learn loop, agents-as-files, host packaging) extends without restructuring.
+Name the noun a new subsystem belongs to and where it loads. v0 is
+content-on-demand on purpose: the entry skill stays small, lens files
+load per selection, and the v1 list (runners, evidence schema, learn
+loop, agents-as-files, host packaging) extends without restructuring.
+
+**Done when** the noun is named, the loading tier is stated, and the
+change requires no edit to an existing lens file or stage.
 
 ### Developer
 
-Smallest change that closes the finding. In a lens file, edit sections in place rather than rewriting the file. Run the two baselines, plus a cold run for any skill-behavior change. The pack has no runtime, so a helper script is never the answer.
+Smallest change that closes the finding; in a lens file, edit sections
+in place rather than rewriting the file. Run the two baselines, plus a
+cold run for any skill-behavior change. The pack has no runtime, so a
+helper script is never the answer.
+
+**Done when** the baselines are green and, for a behavior change, a
+cold run's report is attached.
 
 ### PR Reviewer
 
-- 🔴 Critical: a fixture seed was fixed or removed; a `BUGS.md` row was altered; the skill gained a CLI/runner/evidence-schema (scope-lock violation); a lens file leaks a seed trigger+oracle pair; cold-run containment was weakened.
-- 🟡 Should Fix: SKILL.md over 500 lines; lens file missing a template section or a language block; `ACCEPTANCE.md` claims a seed/flip count the runs do not support; a skill guardrail was weakened.
-- ⚪ Note: wording, prose voice, README/docs drift.
+- 🔴 a fixture seed fixed or removed; a `BUGS.md` row altered; a CLI,
+  runner, or evidence schema added; a lens file leaking a seed
+  trigger-and-oracle pair; containment weakened
+- 🟡 SKILL.md over 500 lines; a lens file missing a section or language
+  block; `ACCEPTANCE.md` claiming a count the runs do not support; a
+  guardrail weakened
+- ⚪ wording, prose voice, docs drift
 
-Any change under `skills/sstack/` demands evidence of a re-run, or an explicit "evidence now stale" note in the PR body.
+**Done when** every 🔴 and 🟡 is resolved or explicitly waived in the
+PR body, and any `skills/sstack/` change carries a re-run or a stated
+staleness note.
 
 ### QA Agent
 
-The failure modes this project actually hit, and must regression-check: tests that pin the buggy behavior instead of the oracle; oracles designed after seeing the result; "fixes" applied to target source mid-run; broken attack harnesses whose errors get scored as verdicts; disjunctive oracles ("throws or returns NaN") encoded as a single-branch assertion. Always confirm the observed output came from the function under attack, not from the harness.
+Verify the negative-control flip, not just the finding: a regression
+that stays red after the canonical fix pinned the bug instead of
+catching it. Check that the run's artifacts landed under the temp
+workspace rather than the sstack repo.
+
+**Done when** each confirmed finding has a red-then-green regression
+and `evals/verify-isolation.sh check` reports the repo unchanged.
