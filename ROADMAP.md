@@ -2,7 +2,7 @@
 
 Where sstack goes after v0.1.0. Each item names the evidence that put
 it here; nothing on this list is speculative. The decision behind the
-shape of v0 lives in [`docs/adr/`](adr/README.md).
+shape of v0 lives in [`docs/adr/`](docs/adr/README.md).
 
 The organizing rule: **every item must either raise proof quality or
 lower the cost of a run.** Anything that does neither is out.
