@@ -158,6 +158,13 @@ passes, an oracle that turns out to permit the observed behavior, a
 contract you inferred rather than read. A verdict you cannot break is
 a verdict you did not check.
 
+Synthesizing parallel lens findings: deduplicate defects reported
+through more than one lens into a single finding (operating-limit
+overlap between `boundaries` and `resource-exhaustion` keeps the
+`resource-exhaustion` verdict). Weight overlapping confirmations more
+heavily, resolve disagreements against the surface's contract, and
+keep the report brief.
+
 ### 4. Minimize
 
 For each confirmed finding, strip the case to the smallest input

@@ -59,3 +59,10 @@ repro: <command that reproduces>
   verdict. Fix the harness and re-run.
 - Do not modify source, config, or secrets.
 - Stop sustained load and verify the system recovers before returning.
+
+## Parent orchestration
+
+Typical flow: the orchestrator writes `.sstack/map.md`, then invokes
+this agent with `subagent_type: "sstack-resource-exhaustion-attacker"`
+and a user prompt containing the workspace root path and the
+`.sstack/map.md` path.

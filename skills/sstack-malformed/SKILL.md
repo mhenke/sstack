@@ -1,6 +1,7 @@
 ---
 name: sstack-malformed
 description: "Malformed lens rubric. Case-generation heuristics, oracle patterns, and worked examples for wrong types, corrupt structures, encoding issues, and unvalidated parsing. Loaded by the sstack-malformed-attacker agent."
+disable-model-invocation: true
 ---
 
 # Malformed lens

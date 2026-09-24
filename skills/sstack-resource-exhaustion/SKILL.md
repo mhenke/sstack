@@ -1,6 +1,7 @@
 ---
 name: sstack-resource-exhaustion
 description: "Resource-exhaustion lens rubric. Case-generation heuristics, oracle patterns, failure modes, and worked examples for connection pool exhaustion, rate limits, memory ceilings, payload limits, and disk pressure. Loaded by the sstack-resource-exhaustion-attacker agent."
+disable-model-invocation: true
 ---
 
 # Resource-exhaustion lens

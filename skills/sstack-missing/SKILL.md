@@ -1,6 +1,7 @@
 ---
 name: sstack-missing
 description: "Missing lens rubric. Case-generation heuristics, oracle patterns, and worked examples for absent fields, null/None/undefined, and empty inputs. Loaded by the sstack-missing-attacker agent."
+disable-model-invocation: true
 ---
 
 # Missing lens

@@ -1,6 +1,7 @@
 ---
 name: sstack-boundaries
 description: "Boundaries lens rubric. Case-generation heuristics, oracle patterns, and worked examples for numeric, size, index, collection, and pagination edge cases. Loaded by the sstack-boundaries-attacker agent."
+disable-model-invocation: true
 ---
 
 # Boundaries lens
