@@ -6,16 +6,25 @@ BUGS.md-free copy of the seeded repo, in a temp workspace
 
 ## Verdict
 
-> **Stale**: the numbers below were produced by the skill text at
+> **Stale**: the PASS numbers below were produced by the skill text at
 > commit `9979718`. The skill has since gained PBT delegation, mutation
 > references, run-end checks, a steel-man Verify step, and the
-> edge-case/negative-case vocabulary split. Re-run before treating
-> these numbers as current.
+> edge-case/negative-case vocabulary split.
+>
+> Re-runs against the updated skill text (run #7 py, RunTs ts) did NOT
+> reproduce the PASS. Run #7 produced 10 findings but all regressions
+> were green characterization tests (bug-pinning, the run-end check was
+> not applied). RunTs failed to complete within 40 minutes, stuck in
+> fan-out. See run history for details.
+>
+> **Current acceptance status: UNPROVEN.** The oracle-first loop was
+> demonstrated end to end at `9979718` but has not been re-confirmed
+> on the current skill text.
 
 | Repo | Seeds confirmed | Failing oracle regressions | Negative control | Verdict |
 |---|---|---|---|---|
-| seeded-py | 4/5 (py-1, py-2, py-4, py-5); py-3 not found | 9 | 9/9 flip — 14/14 green | PASS |
-| seeded-ts | 5/5 (ts-1, ts-2, ts-3, ts-4, ts-5) + 1 unseeded real bug (M5) | 22 | 34/35 flip; 1 disjunctive-oracle test defect | PASS |
+| seeded-py | 4/5 (py-1, py-2, py-4, py-5); py-3 not found | 9 | 9/9 flip — 14/14 green | PASS (stale) |
+| seeded-ts | 5/5 (ts-1, ts-2, ts-3, ts-4, ts-5) + 1 unseeded real bug (M5) | 22 | 34/35 flip; 1 disjunctive-oracle test defect | PASS (stale) |
 
 Acceptance criterion (≥1 seeded bug confirmed with a fail-then-pass
 regression) met for both repos. Stretch (majority of seeds) met for
@@ -25,14 +34,22 @@ runs are retained in the run history for the record only.
 
 ## Run history (python)
 
-| Run | Isolation | Outcome |
-|---|---|---|
-| #1 | temp copy, prompt-only | INVALID — 9 regressions pinned the buggy behavior (all passing) |
-| #2 | temp copy, prompt-only | INVALID — edited source (`shop/pricing.py`), reported 0 findings after self-fixes |
-| #3 | temp copy, prompt-only | INVALID — escaped temp target, edited the main-repo seeds, read main-repo BUGS.md; seeds restored via `git checkout`, 5/5 green, probes reproduce |
-| #4 | isolated workspace (CONTAMINATED lens files) | Superseded — not evidence |
-| #5 | isolated workspace, decontaminated | FAIL 0/5 — 105 attack scripts never reached the functions (wrong import path, missing args); every "oracle satisfied" was a harness TypeError |
-| #6 | isolated workspace, decontaminated + execution-validity fix | **PASS — the evidence run** |
+| Run | Skill text | Isolation | Outcome |
+|---|---|---|---|
+| #1 | pre-guardrail | temp copy, prompt-only | INVALID — 9 regressions pinned the buggy behavior (all passing) |
+| #2 | pre-guardrail | temp copy, prompt-only | INVALID — edited source (`shop/pricing.py`), reported 0 findings after self-fixes |
+| #3 | pre-guardrail | temp copy, prompt-only | INVALID — escaped temp target, edited the main-repo seeds, read main-repo BUGS.md; seeds restored via `git checkout`, 5/5 green, probes reproduce |
+| #4 | pre-guardrail | isolated workspace (CONTAMINATED lens files) | Superseded — not evidence |
+| #5 | decontaminated | isolated workspace | FAIL 0/5 — 105 attack scripts never reached the functions (wrong import path, missing args); every "oracle satisfied" was a harness TypeError |
+| #6 | decontaminated + execution-validity fix | isolated workspace | PASS (pre-audit skill text) |
+| #7 | v0.1.0 + PBT delegation + mutation + run-end checks + steel-man + edge-case vocab | isolated workspace, read-only lock | INVALID — 10 findings, 10 green characterization regressions (bug-pinning). Source untouched. Run-end check #4 not applied by the cold agent. |
+
+## Run history (typescript)
+
+| Run | Skill text | Isolation | Outcome |
+|---|---|---|---|
+| CleanTs | decontaminated + execution-validity fix | isolated workspace | PASS (pre-audit skill text) |
+| RunTs | v0.1.0 + PBT delegation + mutation + run-end checks + steel-man + edge-case vocab | isolated workspace, read-only lock | DID NOT COMPLETE — 40+ min, stuck in Attack, no regressions landed, no findings reported. Fan-out subagents explored the sstack repo, not the temp workspace. Source and happy-path suite untouched. |
 
 Runs #1–#5 drove four product fixes, all committed:
 - `2880501` — forbid bug-pinning regressions; require per-surface lens
