@@ -22,9 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   before hand-designing cases
 - Mutation testing references: PIT (Java), Stryker (JS/TS), mutmut
   (Python)
-- Run-end checks: source unchanged, every finding has a regression,
-  regression states honest, no confirmed finding with only a green
-  regression
+- Run-end checks: every confirmed finding has a red test and a green
+  post-fix test, every refuted finding on external input has a green
+  hardening test, every fix is minimal, full suite passes
 - Steel-man Verify step: strongest case that the observed behavior is
   correct, before recording confirmed
 - Edge-case vs negative-case vocabulary split in ARCHITECTURE.md and
@@ -63,8 +63,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
-- Acceptance containment hardened: worktree locked read-only during
-  cold runs
+- Acceptance containment: cold runs ship all skills and agents into
+  one temp workspace with BUGS.md stripped; containment is caller
+  responsibility (prompt-only boundaries already failed)
 
 ### Removed
 

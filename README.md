@@ -25,7 +25,7 @@ that fails today, and applies the minimal fix that turns it green.
 
 ```mermaid
 flowchart TD
-    D["Discover\nmap surfaces + contracts"] --> A["Attack\nboundaries · malformed · missing"]
+    D["Discover\nmap surfaces + contracts"] --> A["Attack\nboundaries · malformed · missing · resource-exhaustion"]
     A --> V["Verify\nobserved vs. oracle"]
     V --> M["Minimize\nsmallest repro"]
     M --> T["Test\nwrite regression → red"]

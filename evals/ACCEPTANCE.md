@@ -1,8 +1,10 @@
 # Cold acceptance results — sstack v0
 
-Runs: fresh subagent given only a copy of `skills/sstack/` and a
-BUGS.md-free copy of the seeded repo, in a temp workspace
-(`evals/run-acceptance.sh` copies both into one isolated dir).
+Runs: fresh subagent given only a copy of the skills (`skills/sstack/`
+plus the four `skills/sstack-<lens>/` peers) and the four
+`agents/sstack-<lens>-attacker.md` files, and a BUGS.md-free copy of
+the seeded repo, in a temp workspace (`evals/run-acceptance.sh`
+copies all of it into one isolated dir).
 
 ## Verdict
 
@@ -55,8 +57,9 @@ Runs #1–#5 drove four product fixes, all committed:
 - `2880501` — forbid bug-pinning regressions; require per-surface lens
   coverage; invalid-run gate when confirmed findings have only passing
   regressions
-- `7c375b8` — audit-not-fix contract at the title, routing, and safety
-  (run #2 treated the skill as a hardening command)
+- `7c375b8` — find-only contract at the title, routing, and safety
+  (run #2 treated the skill as a hardening command; ADR-0005 later
+  added the confirmed-fix path)
 - `14a1139` — decontaminate the lens worked examples; harness excludes
   `.pytest_cache`, `__pycache__`, `.vite`; corrected this record
 - `f7f5ce6` — attacks must reach the function under attack; harness
@@ -115,7 +118,7 @@ landed under `src/` instead of the repo root.
 At the time of run #4 and the first ColdTs, the shipped lens reference
 files carried 8 of the 10 seed trigger+oracle pairs verbatim (inherited
 from the implementation plan's worked examples), and the cold agents
-read all three lens files. Those results are NOT evidence of
+read all four lens files. Those results are NOT evidence of
 independent bug-finding and are retained above only as run history.
 Fixed in `14a1139`: worked examples rewritten onto non-seed domains,
 harness excludes `.pytest_cache` / `__pycache__` / `.vite`, stale

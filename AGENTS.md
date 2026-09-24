@@ -17,10 +17,10 @@ A Markdown skill pack (agent-skills `SKILL.md`) plus a POSIX sh harness.
 
 ### Scope lock (v0)
 
-The pack ships zero runtime dependencies and no CLI. `agents/`,
-`runners/`, `evidence/`, and `.sstack/learn/` are documented v1 in
+The pack ships zero runtime dependencies and no CLI. `runners/`,
+`evidence/`, and `.sstack/learn/` are documented v1 in
 `docs/ARCHITECTURE.md`; they are absent from the tree and stay absent
-rather than stubbed.
+rather than stubbed. `agents/` holds the four shipped lens attackers.
 
 ### Seeds are frozen
 
@@ -32,7 +32,7 @@ looks obvious.
 
 ### The skill carries no answer key
 
-A cold agent reads all three lens files. A worked example that shares a
+A cold agent reads all four lens files. A worked example that shares a
 trigger input *and* an oracle string with any `BUGS.md` row
 contaminates the acceptance evidence. This happened once and the
 re-review caught it.
@@ -67,10 +67,10 @@ Baselines, green before any commit:
 - `cd evals/seeded-py && pytest -q` → 5 passed
 - `cd evals/seeded-ts && bun run test` → 6 passed
 
-An edit to `skills/sstack/` (SKILL.md, agents, skills) invalidates
-`evals/ACCEPTANCE.md`, because the recorded evidence came from the
-exact shipped text. Re-run `evals/run-acceptance.sh <repo>` and update
-the record, or state that the evidence is stale.
+An edit to `skills/` (orchestrator, lens skills) or `agents/`
+invalidates `evals/ACCEPTANCE.md`, because the recorded evidence came
+from the exact shipped text. Re-run `evals/run-acceptance.sh <repo>`
+and update the record, or state that the evidence is stale.
 
 A run passes when a cold agent finds at least one seeded bug, lands a
 regression that goes **red** on the seed, and that regression goes

@@ -1,7 +1,8 @@
 # sstack ethos
 
 > Don't ask the agent to say whether the software is robust.
-> Make it exercise the failure condition and collect evidence.
+> Make it exercise the failure condition, write the test that proves
+> it, and fix it.
 
 sstack is structured negative testing for AI coding agents: it
 systematically explores how software behaves outside the happy path,
