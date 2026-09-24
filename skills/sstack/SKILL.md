@@ -223,7 +223,6 @@ reporting.
 | concurrency | race conditions, parallel access | future |
 | idempotency | same operation applied twice diverges | future |
 | dependency-failure | upstream timeout, partial response, unavailable service | future |
-| resource-exhaustion | large inputs, memory pressure, connection pool exhaustion | future |
 | contract | API contract violations between services | future |
 | mutation | proof that tests detect seeded faults | future |
 | agent | AI agent tool-call errors, truncated context, prompt injection | future |
