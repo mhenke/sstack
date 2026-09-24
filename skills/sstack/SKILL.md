@@ -79,9 +79,8 @@ in the target has a row in `map.md` with its assumed contract.
 
 ### 2. Attack
 
-Pick applicable lenses from the index. Dispatch the matching
-attacker agent (`sstack-<lens>-attacker`) for each selected lens.
-For each surface × lens:
+For each applicable lens from the index, dispatch the matching
+attacker agent for each selected lens. For each surface × lens:
 
 1. Design the case (concrete input and action).
 2. Write its oracle in `plan.md` FIRST — the expected behavior
@@ -115,16 +114,24 @@ concluding. A lens with zero executed cases on a surface that
 consumes record/dict-shaped or string input is an incomplete
 run, not a clean result.
 
-**Per-lens fan-out.** For each selected lens, dispatch the matching
-attacker agent (`sstack-<lens>-attacker`) against every mapped
-surface. Run lenses sequentially: one lens at a time, all surfaces,
-then the next lens. This is the default and works on every host.
+**Per-lens fan-out.** Dispatch one subagent per selected lens, in the
+same message with `run_in_background: true`:
 
-If your host exposes a subagent dispatch mechanism (Task tool,
-`runSubagent`, or equivalent), you may instead dispatch one subagent
-per lens in parallel for faster runs. Each subagent loads its lens
-skill and returns findings. Sequential and parallel produce the same
-coverage.
+  - `subagent_type: "sstack-boundaries-attacker"` for numeric, size,
+    index, collection, and pagination edge cases.
+  - `subagent_type: "sstack-malformed-attacker"` for wrong types,
+    corrupt structures, encoding issues, and unvalidated parsing.
+  - `subagent_type: "sstack-missing-attacker"` for absent fields,
+    null/None/undefined, empty inputs, and silent degradation.
+  - `subagent_type: "sstack-resource-exhaustion-attacker"` for
+    connection pools, rate limits, memory ceilings, payload limits,
+    and disk pressure.
+
+Pass each subagent the workspace root path and the `.sstack/map.md`
+path, and ask it to return findings in the sstack returns format.
+Run lenses sequentially (one lens at a time, all surfaces, then the
+next lens) unless your host supports parallel subagent dispatch —
+sequential and parallel produce the same coverage.
 
 ### 3. Verify
 

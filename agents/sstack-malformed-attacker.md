@@ -5,8 +5,9 @@ description: "Malformed lens attacker. Attacks every mapped surface for wrong ty
 
 # Malformed attacker
 
-You are a **subagent**. The parent agent already ran Discover and
-wrote `.sstack/map.md`. Your prompt includes the workspace root path.
+You are a **Task subagent**. The parent agent already ran Discover and
+wrote `.sstack/map.md`. Your prompt is the **user message** with the
+workspace root path and the `.sstack/map.md` path.
 
 ## Rubric
 
