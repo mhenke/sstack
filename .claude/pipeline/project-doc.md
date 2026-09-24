@@ -38,13 +38,13 @@ Content architecture with a strict noun taxonomy (six definitions in ARCHITECTUR
 | Noun | v0 realization | Where |
 |---|---|---|
 | Skill | methodology for a stage | `skills/sstack/SKILL.md` |
-| Lens | attack strategy per failure class | `skills/sstack/skills/<lens>/SKILL.md` |
-| Agent | per-lens attacker (Thermos pattern) | `skills/sstack/agents/<lens>-attacker.md` |
+| Lens | attack strategy per failure class | `skills/sstack-<lens>/SKILL.md` |
+| Agent | per-lens attacker (Thermos pattern) | `agents/sstack-<lens>-attacker.md` |
 | Runner | deferred — agent runs real commands | — |
 | Oracle | expected behavior declared before the attack | inline in SKILL.md + lens skills |
 | Evidence | observed vs. oracle, loose markdown | `.sstack/findings/` in the host repo |
 
-**Lens taxonomy (15 lenses, 3 shipped in v0):**
+**Lens taxonomy (15 lenses, 4 shipped in v0):**
 
 | Category | Lens | v0 |
 |---|---|---|
@@ -52,7 +52,8 @@ Content architecture with a strict noun taxonomy (six definitions in ARCHITECTUR
 | Access | ownership | next (highest priority) |
 | Behavior | exceptional-conditions | next |
 | Behavior | state, ordering, concurrency, idempotency | future |
-| Environment | dependency-failure, resource-exhaustion | future |
+| Environment | dependency-failure | future |
+| Environment | resource-exhaustion | ✅ (peer skill + agent) |
 | Contracts | contract | future |
 | Evidence | mutation | future |
 | AI/Agent | agent | future |
@@ -63,17 +64,9 @@ Content architecture with a strict noun taxonomy (six definitions in ARCHITECTUR
 ## Folder Structure
 
 ```
-skills/sstack/                     THE PRODUCT
-├── SKILL.md                       entry: routing, rules, 6 stages, lens index
-├── agents/                        per-lens attacker definitions (Thermos pattern)
-│   ├── boundaries-attacker.md     frontmatter + dispatch instructions
-│   ├── malformed-attacker.md
-│   ├── missing-attacker.md
-│   └── resource-exhaustion-attacker.md  (future lens, rubric inline)
-└── skills/                        per-lens rubrics (loaded by agents)
-    ├── boundaries/SKILL.md
-    ├── malformed/SKILL.md
-    └── missing/SKILL.md
+skills/sstack/SKILL.md              orchestrator: routing, rules, 6 stages, lens index
+skills/sstack-<lens>/SKILL.md       peer lens skills (4: boundaries, malformed, missing, resource-exhaustion)
+agents/sstack-<lens>-attacker.md    per-lens attacker definitions (Thermos dispatch by name)
 
 docs/
 ├── ETHOS.md                       the four rules
@@ -114,7 +107,7 @@ CHANGELOG.md                       Keep a Changelog format
 
 - Orchestrator owns routing and rules; each lens skill owns one failure class; each agent wraps one lens for dispatch.
 - Lens content is not loaded unless selected.
-- New lenses are additive: `agents/<lens>-attacker.md` + `skills/<lens>/SKILL.md` + one index row.
+- New lenses are additive: `agents/sstack-<name>-attacker.md` + `skills/sstack-<name>/SKILL.md` + one index row.
 - Deferred subsystems (runners, evidence schema, learn loop, host packaging) are named in ARCHITECTURE.md as v1; they are not stubbed.
 
 ## Data Architecture

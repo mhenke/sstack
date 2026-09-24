@@ -49,13 +49,15 @@ the skill and the decontaminated fixture together in one temp dir.
 - `skills/sstack/SKILL.md` stays under 500 lines. Frontmatter is exactly
   `name` + `description`, the description a single trigger-phrase
   sentence.
-- Every lens file carries the same five sections (What assumptions this
-  lens attacks · Case-generation heuristics · Oracle patterns · Worked
-  examples · When not to apply) with one `python` and one `ts` block
-  whose comments read `# case:` / `# oracle:` / `# observed (bug):`.
-- A new lens is an `agents/<name>-attacker.md` file plus a
-  `skills/<name>/SKILL.md` rubric plus one row in SKILL.md's lens
-  index. The index is the only routing mechanism.
+- Every lens skill carries Case-generation heuristics, Oracle patterns
+  with an inline `Worked example` paragraph, and When not to apply,
+  with one `python` and one `ts` block whose comments read `# case:`
+  / `# oracle:` / `# observed (bug):`. Extra sections (Operating
+  limits, Language notes, Failure modes to watch for) are allowed
+  where the lens needs them.
+- A new lens is an `agents/sstack-<name>-attacker.md` file plus a
+  `skills/sstack-<name>/SKILL.md` rubric plus one row in SKILL.md's
+  lens index. The index is the only routing mechanism.
 - Conventional Commits: `docs:`, `feat:`, `fix:`, `test:`, `chore:`.
 
 ## Testing
@@ -87,8 +89,8 @@ not the harness.
 
 - `skills/sstack/SKILL.md` — routing, rules, stage instructions, lens
   index, and nothing else
-- `skills/sstack/agents/<lens>-attacker.md` — one failure class each
-- `skills/sstack/skills/<lens>/SKILL.md` — lens rubric
+- `agents/sstack-<lens>-attacker.md` — one failure class each
+- `skills/sstack-<lens>/SKILL.md` — lens rubric
 - `docs/ETHOS.md` — the four rules
 - `docs/ARCHITECTURE.md` — lifecycle, six definitions, lens taxonomy,
   v1 menu

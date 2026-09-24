@@ -32,11 +32,12 @@ belong in the pack.
 - **Skill** — the methodology for a stage. One entry skill owns
   routing and rules (`skills/sstack/SKILL.md`).
 - **Lens** — an attack strategy over a failure class. Content
-  (`agents/<lens>-attacker.md` loading `skills/<lens>/SKILL.md`), not
-  machinery. Selected per target by the Attack stage.
-- **Agent** — a reasoning role (scout, attacker, oracle,
-  reproducer). In v0 these are roles the one agent adopts per
-  stage, not separate files.
+  (`agents/sstack-<lens>-attacker.md` loading the peer
+  `skills/sstack-<lens>/SKILL.md`), not machinery. Selected per
+  target by the Attack stage.
+- **Agent** — a Thermos dispatch handle. One file per shipped lens
+  (`agents/sstack-<lens>-attacker.md`); the orchestrator dispatches
+  it by name at the Attack stage.
 - **Runner** — deterministic execution of generated cases. Deferred:
   v0 has the agent run real commands itself and quote real output.
 - **Oracle** — the expected-behavior declaration written *before*
@@ -62,7 +63,7 @@ lens, never the identity.
 | Behavior | concurrency | future |
 | Behavior | idempotency | future |
 | Environment | dependency-failure | future |
-| Environment | resource-exhaustion | future |
+| Environment | resource-exhaustion | ✅ (peer skill + agent; future: rubric depth) |
 | Contracts | contract | future |
 | Evidence | mutation | future |
 | AI / Agent | agent | future |
@@ -106,11 +107,12 @@ the rest are the v1 proof-gate menu.
 
 ## v0 scope
 
-`skills/sstack/SKILL.md` + 3 lens references + this docs pair +
-two seeded eval repos. Everything else (agents-as-files, runners,
-evidence schema, learn loop, 10 lenses, host packaging) is additive
-later via new `references/` files or a `scripts/` dir — no
-restructuring.
+`skills/sstack/SKILL.md` (orchestrator) + 4 peer lens skills
+(`skills/sstack-<lens>/SKILL.md`) + 4 attacker agents
+(`agents/sstack-<lens>-attacker.md`) + this docs pair + two seeded
+eval repos. Everything else (runners, evidence schema, learn loop,
+11 remaining lenses, host packaging) is additive later via new
+peer skill and agent files — no restructuring.
 
 ## Prior art
 
@@ -119,4 +121,5 @@ restructuring.
   copied.
 - **pstack** — one launcher skill + on-demand content files.
 - **impeccable** — `references/` per subcommand; `scripts/`
-  evidence layer addable later; audit-not-fix stance.
+  evidence layer addable later. (sstack rejects impeccable's
+  audit-not-fix stance per ADR-0005.)

@@ -62,8 +62,8 @@ service) is explicitly not copied.
 - Mutation, the strongest proof technique, is not in v0, so a v0
   finding rests on expected-error assertion plus reproducibility
   alone.
-- The taxonomy (13 lenses) is large enough to look like a sprawl
-  risk, mitigated by shipping three lenses and disclosing the rest.
+- The taxonomy (15 lenses) is large enough to look like a sprawl
+  risk, mitigated by shipping four lenses and disclosing the rest.
 
 **Risks**
 

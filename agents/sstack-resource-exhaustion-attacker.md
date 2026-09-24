@@ -10,8 +10,8 @@ wrote `.sstack/map.md`. Your prompt includes the workspace root path.
 
 ## Rubric
 
-1. Read `skills/resource-exhaustion/SKILL.md` (shipped alongside this
-   agent in the sstack skill pack) and follow it exactly: case-
+1. Load the `sstack-resource-exhaustion` lens skill (the peer skill
+   installed alongside sstack) and follow it exactly: case-
    generation heuristics, oracle patterns, failure modes to watch
    for, and the when-not-to-apply guidance.
 2. If that skill is not available, still act as a

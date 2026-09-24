@@ -12,8 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ADR-0004: lenses delegate to the target's existing tools
 - ADR-0005: sstack finds, tests, and fixes (supersedes the
   audit-not-fix portion of ADR-0002)
-- Per-lens attacker agents (`agents/`): boundaries, malformed, missing
-  — each self-contained with rubric, returns format, and constraints
+- Per-lens attacker agents (`agents/sstack-<lens>-attacker.md`):
+  boundaries, malformed, missing, resource-exhaustion — each loading
+  its peer lens skill, with returns format and constraints
 - Thermos pattern: per-lens fan-out at Attack stage, one agent per
   lens, parallel when the host supports subagent dispatch
 - Property-based testing delegation: Attack stage checks for
@@ -33,8 +34,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Exceptional-conditions lens (OWASP A10): fail-open paths,
   diagnostic leakage, cascading failures. Unit tier works with mocks;
   integration tier needs injectable failures
-- Containment: `evals/verify-isolation.sh` gains lock, unlock, and
-  check subcommands. Worktree locked read-only during cold runs
+- Containment: `evals/verify-isolation.sh` gained lock, unlock, and
+  check subcommands, then was removed per the no-sh-files rule.
+  Containment is caller responsibility going forward
 - Tool inventory by language (`docs/TOOLS.md`)
 - Research index (`docs/RESEARCH.md`)
 - Research record (`docs/LEARNED.md`)
@@ -67,7 +69,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - `docs/superpowers/` (process artifacts, gitignored)
-- `references/lens-*.md` (content inlined into `agents/`)
+- `references/lens-*.md` (superseded by peer skills and agents)
 
 ## [0.1.0] - 2026-09-23
 

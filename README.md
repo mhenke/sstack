@@ -14,12 +14,12 @@ purpose:
 - the dependency that dies at 2am
 - the second request that lands while the first is still running
 
-It finds the ways your software fails and hands you a test for each
-one, failing today and passing after you fix it. Fixing it stays your
-job. The test is how you know you did it.
+It finds the ways your software fails, writes a test for each one
+that fails today, and applies the minimal fix that turns it green.
 
 > Don't ask whether the software is robust.
-> Exercise the failure condition and collect evidence.
+> Exercise the failure condition, write the test that proves it, and
+> fix it.
 
 ## The not-happy cases, staged
 
@@ -125,7 +125,7 @@ refresh them.
 
 - [`docs/ETHOS.md`](docs/ETHOS.md): the four rules
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): lifecycle, the six
-  definitions, the 13-lens taxonomy, what v1 adds
+  definitions, the 15-lens taxonomy, what v1 adds
 - [`docs/adr/`](docs/adr/README.md): decision records
 - [`docs/TOOLS.md`](docs/TOOLS.md): negative-testing tools by language
 - [`docs/RESEARCH.md`](docs/RESEARCH.md): the research behind the

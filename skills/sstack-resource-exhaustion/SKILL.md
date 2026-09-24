@@ -42,6 +42,13 @@ oracle at that transition is the test.
 - The system recovers when the pressure is removed. Send the
   overload, stop, then send a normal request. It must succeed.
 
+Worked example — 100 concurrent checkout requests against a pool of
+10: oracle excess requests get `503 Service Unavailable` naming the
+pool, observed (bug) requests hang and valid traffic stalls behind
+stuck connections. Request body 1 byte over a 1 MB limit: oracle
+`413 Payload Too Large` naming the limit, observed (bug) body parsed
+and downstream OOM on the untruncated buffer.
+
 ## Failure modes to watch for
 
 - Hang: the system accepts the connection but never responds,

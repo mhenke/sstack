@@ -1,6 +1,6 @@
 ---
 name: sstack
-description: Use when the user wants negative testing, edge-case coverage, failure-mode analysis, robustness checks, hostile or unexpected input handling, "what happens if" questions about code, or to harden a module or API against bad input before shipping. Discovers failure surfaces, attacks them through lenses (boundaries, malformed, missing), verifies observed behavior against a pre-declared oracle, adds negative regression tests, fixes confirmed failures, and hardens existing suites against future regressions. Scope is existing behavior under adverse conditions; happy-path feature work belongs to the feature's own tests.
+description: Use when the user wants negative testing, edge-case coverage, failure-mode analysis, robustness checks, hostile or unexpected input handling, "what happens if" questions about code, or to harden a module or API against bad input before shipping. Discovers failure surfaces, attacks them through lenses (boundaries, malformed, missing, resource-exhaustion), verifies observed behavior against a pre-declared oracle, adds negative regression tests, fixes confirmed failures, and hardens existing suites against future regressions. Scope is existing behavior under adverse conditions; happy-path feature work belongs to the feature's own tests.
 ---
 
 # sstack — structured negative testing
@@ -79,9 +79,9 @@ in the target has a row in `map.md` with its assumed contract.
 
 ### 2. Attack
 
-Pick applicable lenses from the index. Read each selected
-`agents/<lens>-attacker.md` before designing cases. For each
-surface × lens:
+Pick applicable lenses from the index. Dispatch the matching
+attacker agent (`sstack-<lens>-attacker`) for each selected lens.
+For each surface × lens:
 
 1. Design the case (concrete input and action).
 2. Write its oracle in `plan.md` FIRST — the expected behavior
@@ -115,16 +115,16 @@ concluding. A lens with zero executed cases on a surface that
 consumes record/dict-shaped or string input is an incomplete
 run, not a clean result.
 
-**Per-lens fan-out.** For each selected lens, read
-`agents/<lens>-attacker.md` and follow it against every mapped
+**Per-lens fan-out.** For each selected lens, dispatch the matching
+attacker agent (`sstack-<lens>-attacker`) against every mapped
 surface. Run lenses sequentially: one lens at a time, all surfaces,
 then the next lens. This is the default and works on every host.
 
 If your host exposes a subagent dispatch mechanism (Task tool,
 `runSubagent`, or equivalent), you may instead dispatch one subagent
-per lens in parallel for faster runs. Each subagent reads its
-assigned agent file and returns findings. Sequential and parallel
-produce the same coverage.
+per lens in parallel for faster runs. Each subagent loads its lens
+skill and returns findings. Sequential and parallel produce the same
+coverage.
 
 ### 3. Verify
 
@@ -215,12 +215,12 @@ reporting.
 
 | Lens | Applies when | Reference |
 |---|---|---|
-| boundaries | edge cases: numbers, sizes, indexes, slices, collections, pagination, loops | agents/boundaries-attacker.md |
-| malformed | strings parsed from outside, JSON, encodings, dynamic types | agents/malformed-attacker.md |
-| missing | optional fields, records from external data, null/None/undefined | agents/missing-attacker.md |
+| boundaries | edge cases: numbers, sizes, indexes, slices, collections, pagination, loops | sstack-boundaries-attacker |
+| malformed | strings parsed from outside, JSON, encodings, dynamic types | sstack-malformed-attacker |
+| missing | optional fields, records from external data, null/None/undefined | sstack-missing-attacker |
 | ownership | entities with an owner; valid request, wrong session. OWASP A01 broken access control, BOLA, IDOR | future: unit tier works with mocks; integration tier needs sessions |
 | exceptional-conditions | fail-open paths, diagnostic leakage, cascading failures, empty catch blocks. OWASP A10 | future: unit tier works with mocks; integration tier needs injectable failures |
-| resource-exhaustion | connection pools, rate limits, memory ceilings, payload limits, disk | agents/resource-exhaustion-attacker.md |
+| resource-exhaustion | connection pools, rate limits, memory ceilings, payload limits, disk | sstack-resource-exhaustion-attacker |
 | state | corrupted, stale, or shared state between calls | future |
 | ordering | operations applied out of sequence | future |
 | concurrency | race conditions, parallel access | future |

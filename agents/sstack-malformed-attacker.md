@@ -10,8 +10,8 @@ wrote `.sstack/map.md`. Your prompt includes the workspace root path.
 
 ## Rubric
 
-1. Load the `malformed` lens skill (`skills/malformed/SKILL.md`
-   in the sstack skill pack) and follow it exactly: case-generation
+1. Load the `sstack-malformed` lens skill (the peer skill installed
+   alongside sstack) and follow it exactly: case-generation
    heuristics, oracle patterns, and the when-not-to-apply guidance.
 2. If that skill is not available, still act as a malformed-input
    attacker with the same rigor: probe wrong types, corrupt

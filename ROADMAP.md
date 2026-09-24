@@ -72,11 +72,13 @@ v0 is a content-only skill pack with a process-only evidence layer
 
 - **What**: `state`, `ordering`, `concurrency`, `idempotency` next.
   The behavior lenses catch more real defects than more input lenses.
-  Then `dependency-failure`, `resource-exhaustion`, `contract`.
+  Then `dependency-failure`, `contract`. (`resource-exhaustion`
+  already shipped as a peer skill + agent.)
 - **Done when**: the seeded repos carry at least one seed per shipped
   lens, and a clean run reaches a majority on both.
-- **Note**: additive only. A lens is an `agents/<name>-attacker.md`
-  wrapper plus a `skills/<name>/SKILL.md` rubric plus one row in
+- **Note**: additive only. A lens is an
+  `agents/sstack-<name>-attacker.md` wrapper plus a
+  `skills/sstack-<name>/SKILL.md` rubric plus one row in
   SKILL.md's lens index (ADR-0002).
 
 ### Run-end checklist
@@ -163,16 +165,15 @@ because the lenses are independent of each other and all depend on
 Discover's output.
 
 - **What**: at the Attack stage, dispatch one subagent per lens. Each
-  reads one lens rubric from `skills/<lens>/SKILL.md`, receives the
-  `map.md` path, and attacks every mapped surface through that lens
-  alone. Results
+  loads its `sstack-<lens>` skill, receives the `map.md` path, and
+  attacks every mapped surface through that lens alone. Results
   return to the orchestrator for Verify, Minimize, and Regress. The
   orchestrator deduplicates, steel-mans, and reports.
 - **Why this over the current inline loop**: the per-lens attack is
-  embarrassingly parallel. A cold run against 3 surfaces x 3 lenses
-  currently runs 9 cases sequentially; the fan-out runs them
+  embarrassingly parallel. A cold run against 3 surfaces x 4 lenses
+  currently runs 12 cases sequentially; the fan-out runs them
   concurrently. Each subagent also carries a narrower context (one
-  lens, not three), which improves focus.
+  lens, not four), which improves focus.
 - **Evidence this works**: a cold TypeScript run fanned out into
   per-stage subagents on its own, without being told to. The stage
   structure in the skill invites that shape. Thermos formalizes the
