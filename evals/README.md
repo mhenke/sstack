@@ -43,8 +43,8 @@ Creates a temporary workspace and prints its path. The workspace gets:
 
 - one broken fixture
 - the current `skills/sstack/` orchestrator
-- the six peer lens skills
-- the six attacker agents
+- the seven peer lens skills
+- the seven attacker agents
 - `.sstack-host-repo`
 
 It strips `BUGS.md`, `.git`, caches, `node_modules/`, `target/`, and

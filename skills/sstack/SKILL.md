@@ -1,6 +1,6 @@
 ---
 name: sstack
-description: Use when the user wants negative testing, edge-case coverage, failure-mode analysis, robustness checks, hostile or unexpected input handling, "what happens if" questions about code, or to harden a module or API against bad input before shipping. Discovers failure surfaces, attacks them through lenses (boundaries, malformed, missing, ownership, exceptional-conditions, resource-exhaustion), verifies observed behavior against a pre-declared oracle, adds negative regression tests, fixes confirmed failures, and hardens existing suites against future regressions. Scope is existing behavior under adverse conditions; happy-path feature work belongs to the feature's own tests.
+description: Use when the user wants negative testing, edge-case coverage, failure-mode analysis, robustness checks, hostile or unexpected input handling, "what happens if" questions about code, or to harden a module or API against bad input before shipping. Discovers failure surfaces, attacks them through lenses (boundaries, malformed, missing, ownership, exceptional-conditions, resource-exhaustion, state), verifies observed behavior against a pre-declared oracle, adds negative regression tests, fixes confirmed failures, and hardens existing suites against future regressions. Scope is existing behavior under adverse conditions; happy-path feature work belongs to the feature's own tests.
 disable-model-invocation: true
 ---
 
@@ -58,10 +58,33 @@ All artifacts live under `<host-repo>/.sstack/`:
 - `learn/` — failure classes from prior runs (Discover input,
   Learn output). One line per class:
   `lens | signal | adjacent surfaces to re-test`
-- `findings/<slug>.md` — one human view per finding, fields:
-  `lens, surface, case, oracle, observed (verbatim), verdict
-  (confirmed | refuted | inconclusive), repro (command),
-  fix (description), regression (test file + name + red|green)`
+- `findings/<slug>.md` — the human view, rendered by the emitter in
+  exactly this shape (no front-matter, no restated summary, the
+  finding's fields in place):
+
+```
+# <surface> — <one-line case>
+
+lens: <lens> | verdict: <confirmed | refuted | inconclusive>
+
+## Case
+<concrete input and action>
+
+## Oracle
+<expected behavior under the adverse condition>
+
+## Observed
+<verbatim output in a fenced block>
+
+## Repro
+<fenced command>, exit <exit_code>, fingerprint <fingerprint>
+
+## Fix
+<description, confirmed only>
+
+## Regression
+`<file>::<test>` — <before> → <after>
+```
 - `findings/<slug>.json` — the machine view, exact keys:
   `{"command": <shell string>, "exit_code": <int>, "stdout": <str>,
   "stderr": <str>, "fingerprint": "<sha256[:16] of stdout+stderr>",
@@ -76,8 +99,15 @@ All artifacts live under `<host-repo>/.sstack/`:
   an attack creates, one directory per lens
 - `pristine-src/` — the target's originals, snapshotted before Fix, so
   a repro command still shows the buggy behavior after the fix lands
-- `emit_artifacts.py` — the single script that runs each repro,
-  captures real output, and writes the evidence and report JSON
+
+The emitter is `scripts/emit_findings.py`, beside this skill: run it,
+never rewrite or copy it. Once per finding, as that case verifies —
+`python3 <pack>/skills/sstack/scripts/emit_findings.py --workspace
+<host-repo> --fixture <name>` with the finding as JSON on stdin. It
+executes the repro, captures real output, computes the fingerprint
+itself, and is the only writer of `<slug>.md`, `<slug>.json`, and
+`report.json`. The run's human report is the chat summary;
+`report.json` is the only report file.
 
 Everything sstack creates lives under `.sstack/` — never the workspace
 root, never a temp folder elsewhere. Delete `scratch/` at run end; keep
@@ -171,6 +201,9 @@ run, not a clean result.
   - agent `sstack-resource-exhaustion-attacker` with the
     `sstack-resource-exhaustion` skill inline: pools, rate limits,
     memory ceilings, payload limits, disk.
+  - agent `sstack-state-attacker` with the `sstack-state` skill
+    inline: stale cached reads, write-through to caller data, partial
+    updates after failure, escaped internal references.
 
 Pass each subagent the full context inline, not paths. Read
 `.sstack/map.md` and paste its contents with labeled sections
@@ -326,7 +359,7 @@ reporting.
 | ownership | entities with an owner; valid request, wrong session. OWASP A01 broken access control, BOLA, IDOR | sstack-ownership-attacker |
 | exceptional-conditions | fail-open paths, diagnostic leakage, cascading failures, empty catch blocks. OWASP A10 | sstack-exceptional-conditions-attacker |
 | resource-exhaustion | connection pools, rate limits, memory ceilings, payload limits, disk | sstack-resource-exhaustion-attacker |
-| state | object mutated mid-operation; stale views, partial updates | future |
+| state | object with lifetime: cached/derived reads, mutable input written through, partial update after failure, internal collection escaped to callers | sstack-state-attacker |
 | ordering | operations applied out of sequence | future |
 | concurrency | race conditions, parallel access | future |
 | idempotency | same operation applied twice diverges | future |
@@ -367,13 +400,10 @@ reads — one object per finding: `{"fixture", "findings":
 "verdict", "repro", "regression": {"file","test","before","after"}}]}`.
 `seed_id` is your best guess at which planted bug this is (or
 "other"); the finding's content is what carries the outcome, so a
-wrong guess costs nothing. One emitter script writes both files: per
-finding it runs the command, captures its real output, computes
-`fingerprint = sha256(stdout+stderr)[:16]` in the same process
-(`hashlib`/`crypto`), writes `findings/<slug>.json`, and rewrites
-`report.json` from the evidence files on disk — invoked as each case
-verifies, so a crash keeps every finding written so far. A report or
-evidence file that does not parse is not evidence.
+wrong guess costs nothing. The emitter in Workspace writes it, per
+finding, as each case verifies — so a crash keeps every finding
+written so far. A report or evidence file that does not parse is not
+evidence.
 
 In the chat report, one line per finding: `id | lens | surface |
 verdict | regression (file::test, red→green)` or `id | lens |

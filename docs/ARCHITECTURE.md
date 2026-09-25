@@ -31,7 +31,7 @@ belong in the pack.
 
 - **Skill** — the methodology for a stage. One entry skill owns
   routing and rules (`skills/sstack/SKILL.md`).
-- **Lens** — an attack strategy over a failure class. Six peer skills
+- **Lens** — an attack strategy over a failure class. Seven peer skills
   (`skills/sstack-<lens>/SKILL.md`) loaded inline under
   `### Lens rubric`, never by name. Selected per target by the Attack
   stage.
@@ -61,7 +61,7 @@ lens, never the identity.
 | Input | missing | ✅ |
 | Access | ownership | ✅ (peer skill + agent) |
 | Behavior | exceptional-conditions | ✅ (peer skill + agent) |
-| Behavior | state | future |
+| Behavior | state | ✅ (peer skill + agent) |
 | Behavior | ordering | future |
 | Behavior | concurrency | future |
 | Behavior | idempotency | future |
@@ -110,8 +110,8 @@ the rest are the v1 proof-gate menu.
 
 ## v0 scope
 
-`skills/sstack/SKILL.md` (orchestrator) + 6 peer lens skills
-(`skills/sstack-<lens>/SKILL.md`) + 6 attacker agents
+`skills/sstack/SKILL.md` (orchestrator) + 7 peer lens skills
+(`skills/sstack-<lens>/SKILL.md`) + 7 attacker agents
 (`agents/sstack-<lens>-attacker.md`) + five seeded eval fixtures.
 Discover consumes `create-verification-skill` and
 `maintain-verification-skill`; Attack consumes

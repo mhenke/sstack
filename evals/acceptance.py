@@ -20,8 +20,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 EVALS = ROOT / "evals"
 FIXTURES = ("seeded-py", "seeded-ts", "seeded-js", "seeded-java", "seeded-cpp")
-EXCLUDED = {".git", ".pytest_cache", "__pycache__", ".vite", "node_modules", "target", "build"}
-LENSES = ("boundaries", "malformed", "missing", "ownership", "exceptional-conditions", "resource-exhaustion")
+EXCLUDED = {".git", ".sstack", ".pytest_cache", "__pycache__", ".vite", "node_modules", "target", "build"}
+LENSES = ("boundaries", "malformed", "missing", "ownership", "exceptional-conditions", "resource-exhaustion", "state")
 
 
 def copy_fixture(source: Path, destination: Path) -> None:

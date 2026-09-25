@@ -9,8 +9,8 @@ of a run. Anything that does neither is out.
 
 ## Current state
 
-- Six lenses shipped: boundaries, malformed, missing, ownership,
-  exceptional-conditions, resource-exhaustion.
+- Seven lenses shipped: boundaries, malformed, missing, ownership,
+  exceptional-conditions, resource-exhaustion, state.
 - Five seeded fixtures: Python, TypeScript, JavaScript, Java, C++.
 - Cold-run evidence (2026-09-25, content-match grader): **all five
   fixtures PASS**. Seeds matched: py 5/5 (ColdPy-4 re-run on current
@@ -25,9 +25,10 @@ of a run. Anything that does neither is out.
 
 ### 1. Remaining lenses
 
-- **What**: `state`, `ordering`, `concurrency`, `idempotency` next,
-  then `dependency-failure`, `contract`. Additive: one agent file,
-  one skill file, one index row each.
+- **What**: `ordering`, `concurrency`, `idempotency` next, then
+  `dependency-failure`, `contract`. Additive: one agent file, one
+  skill file, one index row each. (`state` shipped 2026-09-25: rubric
+  + attacker; seeds pending.)
 - **Done when**: new seeds per shipped lens, majority confirmed per
   fixture.
 

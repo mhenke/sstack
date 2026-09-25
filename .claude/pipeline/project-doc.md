@@ -65,7 +65,7 @@ Content architecture with a strict noun taxonomy (six definitions in ARCHITECTUR
 
 ```
 skills/sstack/SKILL.md              orchestrator: routing, rules, 7 stages, lens index
-skills/sstack-<lens>/SKILL.md       peer lens skills (6: boundaries, malformed, missing, ownership, exceptional-conditions, resource-exhaustion)
+skills/sstack-<lens>/SKILL.md       peer lens skills (7: boundaries, malformed, missing, ownership, exceptional-conditions, resource-exhaustion, state)
 agents/sstack-<lens>-attacker.md    per-lens attacker definitions (Thermos dispatch by name)
 
 docs/
@@ -130,7 +130,7 @@ No database, no ORM. Data shapes:
 
 ## Service Communication
 
-None. Single-process, local files. `evals/acceptance.py` copies the orchestrator skill, the six peer lens skills, the six agents, and a decontaminated fixture into a temp dir.
+None. Single-process, local files. `evals/acceptance.py` copies the orchestrator skill, the seven peer lens skills, the seven agents, and a decontaminated fixture into a temp dir.
 
 ## Test Coverage
 

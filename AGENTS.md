@@ -22,11 +22,14 @@ running sstack agent must obey may live solely here.
 
 ### Scope lock (v0)
 
-The pack ships zero runtime dependencies and no CLI. `runners/` is
+The pack ships no CLI, daemon, or binary, and no runtime dependency
+beyond the Python standard library. One stdlib-only reference script
+travels with the entry skill: `skills/sstack/scripts/emit_findings.py`,
+the evidence emitter that writes findings and `report.json` — it is
+run as-is and never rewritten by a cold agent. `runners/` is
 documented v1 in `docs/ARCHITECTURE.md`; it is absent from the tree
-and stays absent rather than stubbed. The evidence schema and learn
-loop ship as skill text plus `evals/replay.py`, not as a runtime.
-`agents/` holds the six shipped lens attackers.
+and stays absent rather than stubbed. `agents/` holds the seven
+shipped lens attackers.
 
 ### Seeds are frozen
 
@@ -38,7 +41,7 @@ looks obvious.
 
 ### The skill carries no answer key
 
-A cold agent reads all six lens files. A worked example that shares a
+A cold agent reads all seven lens files. A worked example that shares a
 trigger input *and* an oracle string with any `BUGS.md` row
 contaminates the acceptance evidence. This happened once and the
 re-review caught it.

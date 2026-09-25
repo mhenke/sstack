@@ -18,6 +18,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   fallback, constraints, and an inline-rubric handoff
 - Thermos pattern: per-lens fan-out at Attack stage, one agent per
   lens, parallel when the host supports subagent dispatch
+- `state` lens (`skills/sstack/state` + `sstack-state-attacker`):
+  stale cached/derived reads, mutable input written through, partial
+  update after a failed call, internal collections escaped to callers.
+  Seeds pending; rubric + attacker shipped
+- Evidence emitter ships with the entry skill
+  (`skills/sstack/scripts/emit_findings.py`): stdlib-only, run per
+  finding as it verifies; it executes the repro, captures the output,
+  fingerprints it, and is the only writer of `findings/<slug>.{md,json}`
+  and `report.json`. Every cold run so far re-invented this code
+  (2 zombie runs, 1 unparseable report, 1 fabricated-hash wave), and
+  each invented its own `findings/*.md` layout. Scope lock narrowed:
+  no CLI/daemon/binary, stdlib-only reference scripts allowed
 - Property-based testing delegation: Attack stage checks for
   Hypothesis, fast-check, jqwik, RapidCheck and writes a property
   before hand-designing cases
