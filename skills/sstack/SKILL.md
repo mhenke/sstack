@@ -34,6 +34,7 @@ existing suite with negative test cases even where nothing is broken.
   inferable.
 - `/sstack <stage>` (discover | attack | verify | minimize |
   test | fix) — enter that stage using existing `.sstack/` state.
+- `/sstack learn` — update `.sstack/learn/` from confirmed findings.
 - `/sstack lenses` — print the lens index below.
 
 ## Workspace
@@ -50,13 +51,18 @@ explicitly (or `cd` there once) so nothing lands in whatever
 directory the agent happened to start in.
 
 All artifacts live under `<host-repo>/.sstack/`:
-
 - `map.md` — surfaces + assumed contracts (Discover output)
-- `plan.md` — scoped run plan: selected lenses, cases, oracles
-- `findings/<slug>.md` — one per finding, fields:
+- `learn/` — failure classes from prior runs (Discover input,
+  Learn output). One line per class:
+  `lens | signal | adjacent surfaces to re-test`
+- `findings/<slug>.md` — one human view per finding, fields:
   `lens, surface, case, oracle, observed (verbatim), verdict
   (confirmed | refuted | inconclusive), repro (command),
   fix (description), regression (test file + name + red|green)`
+- `findings/<slug>.json` — the machine view: command, exit code,
+  stdout, stderr, input fingerprint, oracle, verdict, and regression
+  pointer. The JSON must be sufficient to re-verify the finding with
+  the agent out of the loop.
 - `scratch/` — throwaway scripts; delete at run end
 
 ## Stages
@@ -65,9 +71,11 @@ All artifacts live under `<host-repo>/.sstack/`:
 
 Map the target's failure surfaces: public functions and classes,
 API routes, anything that parses external input, loops over
-collections, or indexes/slices. For each surface, record its
-assumed contract — types, ranges, preconditions gleaned from
-docstrings, types, and call sites. Write `.sstack/map.md`.
+collections, or indexes/slices. Read `.sstack/learn/` first and
+prioritize adjacent surfaces of recorded failure classes. For each
+surface, record its assumed contract — types, ranges, preconditions
+gleaned from docstrings, types, and call sites. Write
+`.sstack/map.md`.
 
 If available, use `principle-foundational-thinking` to identify the
 target's real invariants, `principle-model-the-domain` to name its
@@ -89,12 +97,10 @@ in the target has a row in `map.md` with its assumed contract.
 
 For each applicable lens from the index, dispatch the matching
 attacker agent for each selected lens. If available, use
-`principle-boundary-discipline` to identify the actual limits,
-`principle-laziness-protocol` to avoid speculative cases, and
-`principle-build-the-lever` when repeated failures share a premise.
-Use `principle-exhaust-the-design-space` to cover materially
-different attacks. Use `principle-attack-the-premise` whenever two
-or more fixes share one premise and fail the same gate. Write the
+`principle-boundary-discipline` to identify the actual limits and
+`principle-exhaust-the-design-space` to cover materially different
+attacks. If available, use `principle-attack-the-premise` whenever
+two or more fixes share one premise and fail the same gate. Write the
 premise down, count the actors and failure classes, and question the
 premise before trying another fix. For each surface × lens:
 
@@ -139,11 +145,14 @@ run, not a clean result.
     structures, encoding issues, and unvalidated parsing.
   - agent `sstack-missing-attacker` for absent fields,
     null/None/undefined, empty inputs, and silent degradation.
+  - agent `sstack-ownership-attacker` for authorization scope, BOLA,
+    IDOR, and deny-by-default behavior.
+  - agent `sstack-exceptional-conditions-attacker` for fail-open
+    paths, diagnostic leakage, and cascading failures.
   - agent `sstack-resource-exhaustion-attacker` for connection pools,
     rate limits, memory ceilings, payload limits, and disk pressure.
 
 Pass each subagent the full context inline, not paths. Read
-`.sstack/map.md` and paste its contents with labeled sections
 (`### Workspace root` with the absolute path and `### Surface map`
 with the map contents). Also paste the matching lens skill's
 `SKILL.md` contents inline under `### Lens rubric`. Ask each
@@ -154,7 +163,11 @@ subagent to return findings in the sstack returns format.
 If available, use `principle-prove-it-works` before accepting a
 verdict and `principle-outcome-oriented-execution` to keep the result
 focused on observable behavior. Per case, compare oracle vs. observed.
-Use `principle-exhaust-the-design-space` to check materially distinct
+Write both `findings/<slug>.md` and `findings/<slug>.json` for every
+finding: the markdown is the human view, the JSON is the machine view
+with command, exit code, stdout, stderr, input fingerprint, oracle,
+verdict, and regression pointer. Use
+`principle-exhaust-the-design-space` to check materially distinct
 attack families before declaring a surface covered.
 Before comparing anything, check the observed output came from
 the function under attack and not from your harness. An observed
@@ -278,10 +291,9 @@ reporting.
 | boundaries | edge cases: numbers, sizes, indexes, slices, collections, pagination, loops | sstack-boundaries-attacker |
 | malformed | strings parsed from outside, JSON, encodings, dynamic types | sstack-malformed-attacker |
 | missing | optional fields, records from external data, null/None/undefined | sstack-missing-attacker |
-| ownership | entities with an owner; valid request, wrong session. OWASP A01 broken access control, BOLA, IDOR | future: unit tier works with mocks; integration tier needs sessions |
-| exceptional-conditions | fail-open paths, diagnostic leakage, cascading failures, empty catch blocks. OWASP A10 | future: unit tier works with mocks; integration tier needs injectable failures |
+| ownership | entities with an owner; valid request, wrong session. OWASP A01 broken access control, BOLA, IDOR | sstack-ownership-attacker |
+| exceptional-conditions | fail-open paths, diagnostic leakage, cascading failures, empty catch blocks. OWASP A10 | sstack-exceptional-conditions-attacker |
 | resource-exhaustion | connection pools, rate limits, memory ceilings, payload limits, disk | sstack-resource-exhaustion-attacker |
-| state | corrupted, stale, or shared state between calls | future |
 | ordering | operations applied out of sequence | future |
 | concurrency | race conditions, parallel access | future |
 | idempotency | same operation applied twice diverges | future |
@@ -309,5 +321,15 @@ field set, with observed output quoted verbatim and the fix applied.
 End with counts: confirmed / refuted / inconclusive, fixes applied,
 regressions landed, hardening tests added.
 
-If any finding is confirmed but its regression did not go red before
-the fix, the run is invalid: re-check the test against the oracle.
+## Learn loop
+
+### 7. Learn
+
+If available, dispatch `agents-memory-updater` from the
+`continual-learning` plugin with the confirmed findings and the
+host repo path. Otherwise record one line per confirmed failure
+class in `.sstack/learn/<lens>.md`:
+`lens | signal | adjacent surfaces to re-test`. Treat learned
+classes as prioritization for the next Discover, never as proof.
+Never write secrets, transcripts, or one-off instructions into
+`.sstack/learn/`.

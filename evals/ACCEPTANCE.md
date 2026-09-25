@@ -13,15 +13,13 @@ prepare` copies all of it into one isolated dir).
 > references, run-end checks, a steel-man Verify step, and the
 > edge-case/negative-case vocabulary split.
 >
-> Re-runs against the updated skill text (run #7 py, RunTs ts) did NOT
-> reproduce the PASS. Run #7 produced 10 findings but all regressions
-> were green characterization tests (bug-pinning, the run-end check was
-> not applied). RunTs failed to complete within 40 minutes, stuck in
-> fan-out. See run history for details.
->
-> **Current acceptance status: UNPROVEN.** The oracle-first loop was
-> demonstrated end to end at `9979718` but has not been re-confirmed
-> on the current skill text.
+> **Fresh runs 2026-09-25** (skill text `d7f5ad3` plus uncommitted
+> lens/runSubagent work): Python PASS (1 confirmed boundary finding,
+> red→green, seed_id malformed but content matches py-1).
+> TypeScript INVALID (one empty finding object). JavaScript reported
+> 2 confirmed + 1 refuted, ungraded (seed_id null). C++ reported 5
+> confirmed, ungraded. Java report pending (task returned scaffolding,
+> not findings).
 
 The current acceptance record covers the original Python and
 TypeScript runs. JavaScript, Java, and C++ fixtures now exist for
