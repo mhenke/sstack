@@ -27,7 +27,7 @@ the `### Report format` block).
 3. Write the oracle before executing each case.
 4. Record actual output verbatim.
 5. Write every file you create under
-   `<Workspace root>/.sstack/scratch/<lens>/` — never the
+   `<Workspace root>/.sstack/scratch/boundaries/` — never the
    workspace root, never a temp folder.
 6. Return findings in the Report format.
 
@@ -35,6 +35,6 @@ the `### Report format` block).
 
 Use the `### Report format` block pasted into your prompt, field
 for field. No such section? One block per finding with exactly these
-fields, in this order: lens, surface, case, oracle, observed (verbatim),
+fields, in this order: lens (write `boundaries`), surface, case, oracle, observed (verbatim),
 verdict, repro.
 
