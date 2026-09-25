@@ -317,6 +317,19 @@ reporting.
 
 ## Report format
 
+One finding per confirmed violation, in this exact shape (agents use
+this block; the lens name fills the `lens:` field):
+
+```
+lens: <lens>
+surface: <function or endpoint>
+case: <concrete input and action>
+oracle: <expected behavior under the adverse condition>
+observed: <actual output, verbatim>
+verdict: confirmed | refuted | inconclusive
+repro: <command that reproduces>
+```
+
 One line per finding: `id | lens | surface | verdict | regression
 (file::test, red→green)` or `id | lens | surface | refuted |
 hardening (file::test, green)`. Then per confirmed finding the full

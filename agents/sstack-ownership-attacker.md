@@ -31,20 +31,7 @@ prompt is the **user message** with labeled sections (typically
 
 ## Returns
 
-One finding per confirmed violation:
-
-```
-lens: ownership
-surface: <function or endpoint>
-case: <principal A requesting principal B's entity, plus operation>
-oracle: <401/403 or named domain rejection>
-observed: <actual output, verbatim>
-verdict: confirmed | refuted | inconclusive
-repro: <command that reproduces>
-```
-
-Cover every principal boundary before returning. Do not modify
-source, config, or secrets. Do not spawn nested subagents.
+Use the orchestrator Report format with this lens name.
 
 ## Parent orchestration
 

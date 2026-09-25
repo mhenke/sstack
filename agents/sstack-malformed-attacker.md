@@ -28,20 +28,7 @@ prompt is the **user message** with labeled sections (typically
 
 ## Returns
 
-One finding per confirmed violation:
-
-```
-lens: malformed
-surface: <function or endpoint>
-case: <concrete input and action>
-oracle: <expected behavior under the adverse condition>
-observed: <actual output, verbatim>
-verdict: confirmed | refuted | inconclusive
-repro: <command that reproduces>
-```
-
-Cover every mapped surface before returning. Do not modify source,
-config, or secrets. Do not spawn nested subagents.
+Use the orchestrator Report format with this lens name.
 
 ## Parent orchestration
 

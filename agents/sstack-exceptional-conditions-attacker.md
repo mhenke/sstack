@@ -29,20 +29,7 @@ prompt is the **user message** with labeled sections (typically
 
 ## Returns
 
-One finding per confirmed violation:
-
-```
-lens: exceptional-conditions
-surface: <function or endpoint>
-case: <failed dependency or trigger, plus the operation>
-oracle: <fail-safe behavior or sanitized error>
-observed: <actual output, verbatim>
-verdict: confirmed | refuted | inconclusive
-repro: <command that reproduces>
-```
-
-Cover every failure path before returning. Do not modify source,
-config, or secrets. Do not spawn nested subagents.
+Use the orchestrator Report format with this lens name.
 
 ## Parent orchestration
 

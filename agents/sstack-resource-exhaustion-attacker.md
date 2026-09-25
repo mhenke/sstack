@@ -29,21 +29,7 @@ prompt is the **user message** with labeled sections (typically
 
 ## Returns
 
-One finding per confirmed violation:
-
-```
-lens: resource-exhaustion
-surface: <function or endpoint>
-case: <concrete input and action, including the resource pressure applied>
-oracle: <expected behavior when the resource limit is hit>
-observed: <actual output, verbatim>
-verdict: confirmed | refuted | inconclusive
-repro: <command that reproduces>
-```
-
-Cover every mapped surface before returning. Do not modify source,
-config, or secrets. Do not spawn nested subagents. Stop sustained
-load and verify the system recovers before returning.
+Use the orchestrator Report format with this lens name.
 
 ## Parent orchestration
 
