@@ -54,6 +54,11 @@ Then:
 Zero runtime. No CLI, no daemon, no binary. It is Markdown, and it
 runs wherever your agent already does.
 
+`npx skills add` ships exactly `skills/` and `agents/` — the Markdown
+your agent reads. `docs/`, `evals/`, and the acceptance record live
+only in a git checkout: they are the contributor lane, the place the
+evidence gets produced and audited.
+
 ### Optional lifecycle skills
 
 Install only the skills sstack uses across its lifecycle:

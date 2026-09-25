@@ -21,7 +21,8 @@ _Avoid_: results file, output
 **Report format**:
 The seven-field per-finding block (lens, surface, case, oracle,
 observed, verdict, repro) an attacker returns and the orchestrator
-deduplicates. One name, one shape, carried in every attacker file.
+deduplicates. Defined once in the skill; the dispatch paste under
+`### Report format` is its only carrier to a subagent.
 _Avoid_: returns format, findings format
 
 **Lens rubric**:

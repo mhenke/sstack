@@ -92,24 +92,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   informational after a landed fix)
 - Report contract: JSON emitted by script with in-process
   fingerprint; hand-typed reports grade INVALID
-- Fan-out contract proven by micro-test (3 reps per arm, fresh-context
-  subagents on a seeded probe): with the old pointer text, 0/3 returned
-  the seven-field block (improvised: JSON envelopes, markdown tables,
-  one-line summaries); with the block inline, 3/3 returned it
-- Consistency pass across skills, agents, docs, and root files:
-  one name for the per-finding block ("Report format", replacing
-  "sstack returns format"); each attacker file carries the block;
-  lens-skill frontmatter delivery clause unified; stale "proof open"
-  and "acceptance pending" claims corrected in ARCHITECTURE, ROADMAP,
-  RESEARCH, and the scanner doc; AGENTS.md conventions now match the
-  shipped lens shape (prose worked examples, not `# case:` blocks)
+- Report format carrier redesigned after the lane audit: the block is
+  defined once in the skill and reaches a subagent only pasted into
+  its dispatch under `### Report format`; attacker files keep the
+  seven field names as fallback. The earlier design (a verbatim copy
+  in all seven files) was a drift cache — it contradicted itself
+  within the hour. Re-probed on fresh-context subagents: pasted 5/5
+  exact blocks, paste omitted 2/4 all-seven — paste is the carrier
+- Lane audit: `npx skills add` ships only `skills/` and `agents/`;
+  AGENTS.md, CONTEXT.md, docs/, and evals/ exist only in a git
+  checkout. Three shipped-text references to checkout machinery
+  (`evals/replay.py`, "the grader", "grading matches by content")
+  rewritten verifier-neutral; AGENTS.md's failure-modes paragraph
+  deleted — all six modes proved to have authoritative shipped
+  homes; the disjunctive-oracle guard that lacked one moved into
+  rule 2 of the skill and ETHOS
 
 ### Fixed
 
 - Attack coverage paragraph restored after silent deletion
 - Acceptance harness and skill corrected after guardrail iterations
 - SKILL.md lens index gains the missing `state` row; Report format
-  block named once and carried by every attacker
+  block named once ("Report format", replacing "sstack returns
+  format")
 - writing-for-agents sweep: restored eaten verbs, co-located skill
   names, single "attacker" term
 

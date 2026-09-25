@@ -17,7 +17,7 @@
 
 ## Architecture Pattern
 
-Content architecture with a strict noun taxonomy (six definitions in ARCHITECTURE.md). The Thermos pattern is implemented: orchestrator skill dispatches per-lens attacker agents in parallel, each loading its own lens rubric from `skills/<lens>/SKILL.md`.
+Content architecture with a strict noun taxonomy (six definitions in ARCHITECTURE.md). The Thermos pattern is implemented: orchestrator skill dispatches per-lens attacker agents in parallel, each loading its own lens rubric from `skills/<lens>/SKILL.md`. Lanes: `npx skills add` ships only `skills/` + `agents/`; AGENTS.md, CONTEXT.md, docs/, evals/ are checkout-only — runtime rules live in shipped text, contributor rules in the checkout.
 
 **Lifecycle (9 canonical stages, 6 implemented in SKILL.md):**
 
@@ -97,8 +97,8 @@ CHANGELOG.md                       Keep a Changelog format
 
 ## Code Style Conventions
 
-- **Skill frontmatter**: exactly `name` + `description`; description is one long trigger-phrase sentence. `SKILL.md` must stay ≤ 500 lines (currently 377).
-- **Agent files**: YAML frontmatter with `name` + `description`; body carries the rubric fallback, the work steps, and the Report format block byte-identical to SKILL.md's (seven copies, one commit; a dispatched subagent never sees the orchestrator's file).
+- **Skill frontmatter**: exactly `name` + `description`; description is one long trigger-phrase sentence. `SKILL.md` must stay ≤ 500 lines (currently 387).
+- **Agent files**: YAML frontmatter with `name` + `description`; body carries the rubric fallback, the work steps, and the seven Report format field names as fallback. The block itself lives only in SKILL.md and reaches a subagent pasted under `### Report format`.
 - **Lens skill files**: Case-generation heuristics, Oracle patterns with an inline `Worked example` paragraph (one python plus one ts/js example; `observed (bug)` marks the defect), and When not to apply. Extra sections (Operating limits, Language notes, Failure modes to watch for) allowed where the lens needs them.
 - **Prose style**: hard-wrapped ~60–72 columns, imperative voice, backticks for identifiers and paths.
 - **Python eval**: PEP 8, snake_case, module docstrings, no type hints, no classes, deliberately no validation.
@@ -153,7 +153,7 @@ None. Single-process, local files. `evals/acceptance.py` copies the orchestrator
 | `CONTEXT.md` | judging glossary (integrity, drift, content match, INVALID) |
 
 ## Changed Files
-AGENTS.md, CHANGELOG.md, docs/ARCHITECTURE.md, agents/sstack-*-attacker.md (`lens: <this lens>` → `lens: <lens>`, block now byte-identical across all seven copies; micro-test recorded)
+AGENTS.md, CHANGELOG.md, CONTEXT.md, README.md, docs/ARCHITECTURE.md, docs/ETHOS.md, skills/sstack/SKILL.md (dispatch paste, disjunctive-oracle guard, verifier-neutral wording), agents/sstack-*-attacker.md (block removed, field-name fallback)
 
 ## Last Scanned
-2026-09-25 (delta: fan-out micro-test result + block-sync convention)
+2026-09-25 (delta: user/contributor lane split — paste carrier, reverse-leak sweep, carrier re-probe)

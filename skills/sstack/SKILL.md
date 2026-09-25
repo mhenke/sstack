@@ -19,7 +19,10 @@ existing suite with negative test cases even where nothing is broken.
 2. Define the oracle before the attack. Expected behavior under the
    adverse condition — error, degradation, retry bound, invariant,
    rejection. "It crashes" is not an oracle; "it raises a
-   validation error naming the field" is.
+   validation error naming the field" is. One oracle, one observable
+   outcome: "throws or returns NaN" is two verdicts wearing one
+   sentence — name the one the contract promises; when the contract
+   genuinely permits both, the case is inconclusive.
 3. Never accept an agent's claim as evidence. Run the real command,
    quote the real output.
 4. Every confirmed failure gets a red test, a fix, and a green test.
@@ -64,10 +67,11 @@ All artifacts live under `<host-repo>/.sstack/`:
   "stderr": <str>, "fingerprint": "<sha256[:16] of stdout+stderr>",
   "oracle": <str>, "verdict": <confirmed|refuted|inconclusive>,
   "regression": {"file","test","before","after"}}`. `before`/`after`
-  are the literal state tokens "red"/"green" (what the test did,
-  before-fix / after-fix), not output snippets. `evals/replay.py`
-  re-runs `command` and compares exit code + fingerprint with the
-  agent out of the loop; any other shape is unverifiable.
+  are the literal state tokens "red"/"green" — the test's state
+  before-fix / after-fix — not output snippets. Verification re-runs
+  `command` and recomputes the fingerprint from the recorded bytes,
+  agent out of the loop; a hand-typed hash fails it. Any other shape
+  is unverifiable.
 - `scratch/` — throwaway scripts; delete at run end
 
 ## Stages
@@ -162,9 +166,10 @@ run, not a clean result.
 Pass each subagent the full context inline, not paths. Read
 `.sstack/map.md` and paste its contents with labeled sections
 (`### Workspace root` with the absolute path and `### Surface map`
-with the map contents). Also paste the matching lens skill's
-`SKILL.md` contents inline under `### Lens rubric`. Ask each
-subagent to return findings in the Report format.
+with the map contents). Paste the matching lens skill's `SKILL.md`
+contents inline under `### Lens rubric`, and the Report format block
+below under `### Report format` — a subagent starts blank and cannot
+see this file, so anything not pasted does not exist for it.
 
 No subagent tool available, or dispatch fails twice? Run the lenses
 yourself, one at a time, in the same order: read the lens skill,
@@ -347,20 +352,19 @@ repro: <command that reproduces>
 ```
 
 Write the machine-readable run report to exactly
-`<host-repo>/.sstack/report.json` (the grader's canonical path), one
-object per finding: `{"fixture", "findings": [{"seed_id", "lens",
-"surface", "case", "oracle", "observed", "verdict", "repro",
-"regression": {"file","test","before","after"}}]}`. `seed_id` is your
-best guess at which planted bug this is (or "other"); grading matches
-by content, so a wrong guess is a warning, never a pass. One emitter
-script writes both files: per finding it runs the command, captures
-its real output, computes `fingerprint = sha256(stdout+stderr)[:16]`
-in the same process (`hashlib`/`crypto`), writes
-`findings/<slug>.json`, and rewrites `report.json` from the evidence
-files on disk — invoked as each case verifies, so a crash keeps every
-finding written so far. `evals/replay.py` recomputes the fingerprint;
-a typed-in value grades as fabricated. An unparseable report or
-evidence file grades INVALID.
+`<host-repo>/.sstack/report.json` — the canonical path any verifier
+reads — one object per finding: `{"fixture", "findings":
+[{"seed_id", "lens", "surface", "case", "oracle", "observed",
+"verdict", "repro", "regression": {"file","test","before","after"}}]}`.
+`seed_id` is your best guess at which planted bug this is (or
+"other"); the finding's content is what carries the outcome, so a
+wrong guess costs nothing. One emitter script writes both files: per
+finding it runs the command, captures its real output, computes
+`fingerprint = sha256(stdout+stderr)[:16]` in the same process
+(`hashlib`/`crypto`), writes `findings/<slug>.json`, and rewrites
+`report.json` from the evidence files on disk — invoked as each case
+verifies, so a crash keeps every finding written so far. A report or
+evidence file that does not parse is not evidence.
 
 In the chat report, one line per finding: `id | lens | surface |
 verdict | regression (file::test, red→green)` or `id | lens |

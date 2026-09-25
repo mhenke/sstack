@@ -14,6 +14,10 @@ A Markdown skill pack (agent-skills `SKILL.md`) plus a Python eval
 harness (`evals/acceptance.py`). `evals/` holds Python, TypeScript,
 JavaScript, Java, and C++ fixtures that are broken on purpose.
 
+End users install only `skills/` and `agents/`. This file, `docs/`,
+`CONTEXT.md`, and `evals/` exist only in the checkout — nothing a
+running sstack agent must obey may live solely here.
+
 ## Rules
 
 ### Scope lock (v0)
@@ -56,11 +60,11 @@ the skill and the decontaminated fixture together in one temp dir.
   example; `observed (bug)` marks the defect), and When not to apply.
   Extra sections (Operating limits, Language notes, Failure modes to
   watch for) are allowed where the lens needs them.
-- The seven-field Report format block is defined once in
-  `skills/sstack/SKILL.md` and carried verbatim by every attacker file
-  (a dispatched subagent starts blank; its own file is the guaranteed
-  carrier). Changing the block means changing all seven copies in one
-  commit.
+- The Report format block lives once in `skills/sstack/SKILL.md` and
+  reaches a subagent only pasted under `### Report format`; attacker
+  files keep the seven field names as fallback. Verified by
+  fresh-context probes: pasted, 5/5 exact blocks; paste omitted,
+  2/4 kept all seven fields — paste is the carrier, not the file.
 - A new lens is an `agents/sstack-<name>-attacker.md` file plus a
   `skills/sstack-<name>/SKILL.md` rubric plus one row in SKILL.md's
   lens index. The index is the only routing mechanism.
@@ -80,14 +84,6 @@ The unified eval entry point is `python3 evals/acceptance.py`:
 `replay <workspace>`. It never launches a host-specific cold agent.
 `grade` matches findings to goldens by content, not by seed labels.
 No coverage tooling exists and none is needed.
-
-Failure modes this project has actually hit, all worth a regression
-check: tests that pin buggy behavior instead of the oracle; oracles
-designed after seeing the result; fixes applied to target source
-mid-run; broken harnesses whose errors get scored as verdicts;
-disjunctive oracles ("throws or returns NaN") asserted as a single
-branch. Confirm observed output came from the function under attack,
-not the harness.
 
 ## Layout
 
