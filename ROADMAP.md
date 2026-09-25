@@ -12,25 +12,21 @@ of a run. Anything that does neither is out.
 - Six lenses shipped: boundaries, malformed, missing, ownership,
   exceptional-conditions, resource-exhaustion.
 - Five seeded fixtures: Python, TypeScript, JavaScript, Java, C++.
-- Cold-run evidence (2026-09-24, content-match grader): Python PASS
-  twice — Learn-run-2 matched 5/5 seeds; Java PASS (3/5 seeds); C++
-  FAIL (evidence intact, regressions never landed); TS FAIL (zombie,
-  nothing landed); JS INVALID first wave. Reruns in progress:
-  ColdJs-2, ColdTs-3, ColdCpp-2.
+- Cold-run evidence (2026-09-24, content-match grader): four of five
+  fixtures PASS on current text — Python 5/5 seeds (twice; Learn-run-2
+  also proved the loop), JS 5/5 (rerun), TS 4/5 (rerun), Java 3/5.
+  C++ rerun in flight; wave 1 caught regressions never landing.
+  Every PASS fixture's evidence replays with integrity ok.
 - Findings JSON shipped with a pinned schema and out-of-loop replay
   (`b05b94b`); Learn loop proven cold (see item 3).
 
 ## Open, in order
 
-### 1. Acceptance re-runs
+### 1. Acceptance re-runs — one left
 
-- **Why**: no current claim is proven. Fresh runs exist but are
-  ungraded or malformed; historical passes are stale.
-- **What**: cold runs against all five fixtures on the current skill
-  text, graded by `evals/acceptance.py grade`, recorded in
-  `evals/ACCEPTANCE.md`.
-- **Done when**: every fixture has a graded verdict and every PASS has
-  a red→green negative control.
+- Every fixture has a graded verdict on current text; py/ts/js/java
+  PASS with landed red→green regressions verified on disk. Done when
+  Cpp-2 lands its verdict.
 
 ### 2. Evidence re-verification — nearly done
 
