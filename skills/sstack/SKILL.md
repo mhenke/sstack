@@ -96,7 +96,7 @@ in the target has a row in `map.md` with its assumed contract.
 ### 2. Attack
 
 For each applicable lens from the index, dispatch the matching
-attacker agent for each selected lens. If available, use
+attacker for each selected lens. If available, use
 `principle-boundary-discipline` to identify the actual limits and
 `principle-exhaust-the-design-space` to cover materially different
 attacks. If available, use `principle-attack-the-premise` whenever
@@ -139,20 +139,23 @@ run, not a clean result.
 **Per-lens fan-out.** Dispatch one subagent per selected lens with
 `runSubagent`, one call per lens, same message:
 
-  - agent `sstack-boundaries-attacker` for numeric, size, index,
-    collection, and pagination edge cases.
-  - agent `sstack-malformed-attacker` for wrong types, corrupt
-    structures, encoding issues, and unvalidated parsing.
-  - agent `sstack-missing-attacker` for absent fields,
-    null/None/undefined, empty inputs, and silent degradation.
-  - agent `sstack-ownership-attacker` for authorization scope, BOLA,
-    IDOR, and deny-by-default behavior.
-  - agent `sstack-exceptional-conditions-attacker` for fail-open
-    paths, diagnostic leakage, and cascading failures.
-  - agent `sstack-resource-exhaustion-attacker` for connection pools,
-    rate limits, memory ceilings, payload limits, and disk pressure.
+  - agent `sstack-boundaries-attacker` with the `sstack-boundaries`
+    skill inline: numeric, size, index, collection, pagination edges.
+  - agent `sstack-malformed-attacker` with the `sstack-malformed`
+    skill inline: wrong types, corrupt structures, encodings.
+  - agent `sstack-missing-attacker` with the `sstack-missing`
+    skill inline: absent fields, nulls, empty inputs.
+  - agent `sstack-ownership-attacker` with the `sstack-ownership`
+    skill inline: authorization scope, BOLA, IDOR, deny-by-default.
+  - agent `sstack-exceptional-conditions-attacker` with the
+    `sstack-exceptional-conditions` skill inline: fail-open paths,
+    diagnostic leakage, cascading failures.
+  - agent `sstack-resource-exhaustion-attacker` with the
+    `sstack-resource-exhaustion` skill inline: pools, rate limits,
+    memory ceilings, payload limits, disk.
 
 Pass each subagent the full context inline, not paths. Read
+`.sstack/map.md` and paste its contents with labeled sections
 (`### Workspace root` with the absolute path and `### Surface map`
 with the map contents). Also paste the matching lens skill's
 `SKILL.md` contents inline under `### Lens rubric`. Ask each
