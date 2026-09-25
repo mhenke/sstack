@@ -69,11 +69,6 @@ collections, or indexes/slices. For each surface, record its
 assumed contract — types, ranges, preconditions gleaned from
 docstrings, types, and call sites. Write `.sstack/map.md`.
 
-If available, use `principle-attack-the-premise` whenever two or more
-fixes share one premise and fail the same gate. Write the premise
-down, count the actors and failure classes, and question the premise
-before trying another fix.
-
 If available in the target repo, use `create-verification-skill` to
 create or refresh the verification map before mapping, and
 `maintain-verification-skill` to keep it current as the target changes.
@@ -89,7 +84,11 @@ in the target has a row in `map.md` with its assumed contract.
 ### 2. Attack
 
 For each applicable lens from the index, dispatch the matching
-attacker agent for each selected lens. For each surface × lens:
+attacker agent for each selected lens. If available, use
+`principle-attack-the-premise` whenever two or more fixes share one
+premise and fail the same gate. Write the premise down, count the
+actors and failure classes, and question the premise before trying
+another fix. For each surface × lens:
 
 1. Design the case (concrete input and action).
 2. Write its oracle in `plan.md` FIRST — the expected behavior
