@@ -388,8 +388,10 @@ language.
 - **Evidence schema with fingerprints.** See v1 above.
 - **Learn loop.** See v2 above.
 - **Host packaging.** See v2 above.
-- **Language breadth seeded repos.** See the language breadth section
-  above.
+
+Language breadth is no longer deferred: Python, JavaScript, TypeScript,
+Java, and C++ each have a seeded fixture and happy-path baseline. Their
+cold-run acceptance remains pending, so they are not yet proven.
 
 ## How a roadmap item ships
 
