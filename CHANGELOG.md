@@ -31,8 +31,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   SSRF, static resources, error-based enumeration, and decommissioned
   accounts. Attacker gained the tuple-first work order and a rule that
   a check on the read path proves nothing about the write path
-  update after a failed call, internal collections escaped to callers.
-  Seeds pending; rubric + attacker shipped
+- Collection surfaces added to the ownership lens, after a user
+  reported a real incident: a signed-in user saw other users' data in
+  search results. A list, search, index, feed, export, or report
+  surface has no single object to protect, so no per-object check
+  fails; the subject is simply absent from the query while every
+  individual record check passes. The lens now derives the tuple per
+  surface, requires establishing a two-subject population before
+  probing, and compares result *contents* and counts against
+  entitlement. Seven probe-table rows, a collection oracle, and an
+  attacker work step. Blinded carrier test: a cold attacker given
+  only the rubric found the seeded leak with four distinct confirmed
+  findings (shared-sku match, wildcard query, count/volume leak,
+  absent principal) and correctly refuted itself on the two surfaces
+  that were implemented correctly
+- `state` lens (`skills/sstack-state` + `sstack-state-attacker`):
+  stale cached/derived reads, mutable input written through, partial
+  update after a failed call, internal collections escaped to callers
 - Evidence emitter ships with the entry skill
   (`skills/sstack/scripts/emit_findings.py`): stdlib-only, run per
   finding as it verifies; it executes the repro, captures the output,

@@ -26,10 +26,20 @@ deduplicates. Defined once in the skill; the dispatch paste under
 _Avoid_: returns format, findings format
 
 **Lens rubric**:
+
 A lens skill's body, delivered inline to its attacker under that
 heading. The attacker's only source of attack strategy; absent it,
 the attacker falls back to its own lens description.
 _Avoid_: prompt, instructions
+
+**Collection surface**:
+A surface that returns many records: list, search, index, feed,
+export, report, autocomplete. Its authorization obligation is the
+membership of the result, not the reachability of any one row, so it
+needs its own probe: a subject absent from the query leaks even when
+every per-object check passes.
+_Avoid_: listing endpoint, read surface (names the transport, not the
+obligation)
 
 **Content match**:
 The grader's finding↔golden link, made from surface, case, and oracle
