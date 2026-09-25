@@ -28,9 +28,24 @@ def copy_fixture(source: Path, destination: Path) -> None:
     shutil.copytree(source, destination, dirs_exist_ok=True, ignore=shutil.ignore_patterns(*EXCLUDED, "BUGS.md"))
 
 
+JUNIT_JAR = "junit-console.jar"
+JUNIT_URL = "https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/1.10.2/junit-platform-console-standalone-1.10.2.jar"
+
+
+def ensure_junit() -> Path:
+    """The java fixture needs a JUnit launcher; Maven is not installed. Fetch on demand, never commit."""
+    jar = EVALS / "seeded-java" / JUNIT_JAR
+    if not jar.exists():
+        import urllib.request
+
+        urllib.request.urlretrieve(JUNIT_URL, jar)
+    return jar
+
 def prepare(fixture: str) -> Path:
     if fixture not in FIXTURES:
         raise SystemExit(f"unknown fixture: {fixture}; choose one of {', '.join(FIXTURES)}")
+    if fixture == "seeded-java":
+        ensure_junit()
     workspace = Path(tempfile.mkdtemp(prefix=f"sstack-{fixture}-"))
     copy_fixture(EVALS / fixture, workspace)
     skills = workspace / "skills"
