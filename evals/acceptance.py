@@ -64,21 +64,22 @@ def prepare(fixture: str) -> Path:
     return workspace
 
 
-def resolve_report(path: Path) -> Path:
+def resolve_report(path: Path) -> tuple[Path, Path | None]:
     """Accept the workspace dir or the report file; canonical location is .sstack/report.json."""
     if path.is_dir():
         for candidate in (path / ".sstack" / "report.json", path / "report.json"):
             if candidate.is_file():
-                return candidate
+                return candidate, path
         raise SystemExit(f"no report.json under {path} (checked .sstack/ then root)")
-    return path
+    return path, None
 
 
 def grade(report_path: Path) -> int:
     sys.path.insert(0, str(EVALS / "graders"))
     from seeded_acceptance import grade_file
 
-    result = grade_file(str(resolve_report(report_path)), str(EVALS / "goldens.jsonl"))
+    report, workspace = resolve_report(report_path)
+    result = grade_file(str(report), str(EVALS / "goldens.jsonl"), str(workspace) if workspace else None)
     print(json.dumps(result, indent=2, sort_keys=True))
     return 0 if result["pass"] else 1
 

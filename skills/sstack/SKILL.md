@@ -304,6 +304,7 @@ reporting.
 | ownership | entities with an owner; valid request, wrong session. OWASP A01 broken access control, BOLA, IDOR | sstack-ownership-attacker |
 | exceptional-conditions | fail-open paths, diagnostic leakage, cascading failures, empty catch blocks. OWASP A10 | sstack-exceptional-conditions-attacker |
 | resource-exhaustion | connection pools, rate limits, memory ceilings, payload limits, disk | sstack-resource-exhaustion-attacker |
+| state | object mutated mid-operation; stale views, partial updates | future |
 | ordering | operations applied out of sequence | future |
 | concurrency | race conditions, parallel access | future |
 | idempotency | same operation applied twice diverges | future |
@@ -341,11 +342,15 @@ Write the machine-readable run report to exactly
 `<host-repo>/.sstack/report.json` (the grader's canonical path), one
 object per finding: `{"fixture", "findings": [{"seed_id", "lens",
 "surface", "case", "oracle", "observed", "verdict", "repro",
-"regression": {"file","test","before","after"}}]}`. Emit both this
-file and each `findings/<slug>.json` from a script (`json.dump` of a
-dict holding the verbatim outputs), never by typing JSON by hand —
-quoted output breaks hand-written escaping, and an unparseable
-report grades INVALID.
+"regression": {"file","test","before","after"}}]}`. `seed_id` is your
+best guess at which planted bug this is (or "other"); grading matches
+by content, so a wrong guess is a warning, never a pass. Emit both
+this file and each `findings/<slug>.json` from one script that runs
+the command, captures its real output, and computes
+`fingerprint = sha256(stdout+stderr)[:16]` in the same process
+(`hashlib`/`crypto`) — `evals/replay.py` recomputes it and a typed-in
+value grades as fabricated. An unparseable report or evidence file
+grades INVALID.
 
 In the chat report, one line per finding: `id | lens | surface |
 verdict | regression (file::test, red→green)` or `id | lens |

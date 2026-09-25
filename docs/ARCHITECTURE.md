@@ -43,9 +43,9 @@ belong in the pack.
 - **Oracle** — the expected-behavior declaration written *before*
   the attack. Errors, degradation, retry bounds, invariants,
   rejections — not only crashes.
-- **Evidence** — observed output vs. oracle. Loose markdown plus a
-  machine JSON in `.sstack/findings/`; agent-out-of-loop
-  re-verification still open.
+- **Evidence** — observed output vs. oracle, recorded as markdown
+  plus machine JSON in `.sstack/findings/`. `evals/replay.py`
+  re-verifies the fingerprint with the agent out of the loop.
 
 ## Taxonomy
 
@@ -116,9 +116,10 @@ Discover consumes `create-verification-skill` and
 `principle-attack-the-premise`; Test consumes
 `principle-test-behavior-not-implementation`; Fix consumes
 `principle-fix-root-causes` when available, with docs/types/call-sites
-fallback. Everything else (runners, evidence schema, learn loop, 11
-remaining lenses, host packaging) is additive later via new peer skill
-and agent files — no restructuring.
+fallback. Every optional dependency carries an inline fallback
+(ADR-0007). Extension stays additive — one lens skill, one agent
+file, one index row per lens — and the evidence schema and replay
+verifier shipped as one example of that shape.
 
 
 ## Prior art

@@ -86,9 +86,12 @@ Example report shape:
 ### `replay <workspace>`
 
 Re-verifies each `.sstack/findings/<slug>.json` evidence file from a
-finished run with no agent in the loop: re-runs the recorded command,
-compares exit code and output fingerprint against the record. Exit 0
-only when every finding replays verified.
+finished run with no agent in the loop. Checks integrity first: the
+recorded `fingerprint` must equal sha256[:16] of the recorded
+`stdout`+`stderr` (a typed-in value grades `fabricated`). Then
+re-runs the recorded command and reports `drift` — expected after a
+landed fix, evidence against a `refuted` verdict. Exit 0 only when
+every evidence file is intact.
 
 ## Fixtures
 
