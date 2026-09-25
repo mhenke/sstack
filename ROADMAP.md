@@ -95,11 +95,11 @@ v0 is a content-only skill pack with a process-only evidence layer
 
 ### Containment that survives a curious agent
 
-- **Status**: harness-backed containment. `run-acceptance.sh` builds
-  one temp workspace containing the skill, all four lens skills, the
-  four agents, and the decontaminated fixture. The caller dispatches
-  the cold agent into that workspace. The skill resolves all paths via
-  the `.sstack-host-repo` marker.
+- **Status**: harness-backed containment. `python3 evals/acceptance.py
+  prepare <fixture>` builds one temp workspace containing the skill,
+  all four lens skills, the four agents, and the decontaminated
+  fixture. The caller dispatches the cold agent into that workspace.
+  The skill resolves all paths via the `.sstack-host-repo` marker.
 - **What is enforced**: the harness strips `BUGS.md`, caches,
   `node_modules`, `target`, and `build`; the cold agent receives no
   answer key in its workspace.

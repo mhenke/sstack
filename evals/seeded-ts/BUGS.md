@@ -1,7 +1,7 @@
 # Seeded bugs (KEEP OUT OF ACCEPTANCE RUNS)
 
-This file is the answer key. `evals/run-acceptance.sh` strips it
-when copying the repo for a cold run. Fixes below are the canonical
+This file is the answer key. `evals/acceptance.py` strips it when
+copying the repo for a cold run. Fixes below are the canonical
 negative-control fixes.
 
 | id | module | lens | trigger | buggy behavior | oracle | fix note |

@@ -4,7 +4,7 @@
 ## Tech Stack
 
 - **Deliverable type**: agent-agnostic skill pack — Markdown (agent-skills `SKILL.md` format). No runtime, no CLI, no daemon.
-- **Language**: Markdown (skill + docs); POSIX `sh` (acceptance harness); Python 3.10+, TypeScript 5.5+, JavaScript, Java 17+, and C++17 exist only inside `evals/` as fixture code under test.
+- **Language**: Markdown (skill + docs); Python 3 stdlib (unified eval entry point); Python 3.10+, TypeScript 5.5+, JavaScript, Java 17+, and C++17 exist only inside `evals/` as fixture code under test.
 - **Framework**: pytest (Python), vitest 2.x (TypeScript/Bun), Node test runner (JavaScript), JUnit 5/Maven (Java), CMake/CTest (C++).
 - **Database / Styling / State Management**: none. Not applicable to this project.
 - **Host**: any agent that reads `skills/sstack/SKILL.md` (Claude Code, OpenCode, Cursor, Codex). Install = `npx skills@latest add mhenke/sstack` or copy the directory.
@@ -12,7 +12,7 @@
 ## Dependencies
 
 - **Core**: none. The pack has zero runtime dependencies by design.
-- **Dev / tooling**: `rsync` (acceptance harness), `python3` + `pytest`, `bun` + `vitest` + `typescript`, `node --test`, `javac`, `cmake` + `ctest`.
+- **Dev / tooling**: `python3` + `pytest`, `bun` + `vitest` + `typescript`, `node --test`, `javac`, `cmake` + `ctest`.
 - **Testing**: pytest, vitest, Node test runner, JUnit 5, CTest.
 
 ## Architecture Pattern
@@ -77,7 +77,7 @@ docs/
 └── adr/                           0001–0005 + README index + template
 
 evals/
-├── run-acceptance.sh              builds isolated cold-run workspace
+├── acceptance.py                   unified prepare/grade entry point
 ├── ACCEPTANCE.md                  run history, verdicts, contamination disclosure
 ├── goldens.jsonl                  seeded expectations
 ├── graders/                       deterministic seeded-acceptance grader
@@ -129,12 +129,12 @@ No database, no ORM. Data shapes:
 
 ## Service Communication
 
-None. Single-process, local files. `run-acceptance.sh` copies the orchestrator skill, the four peer lens skills, the four agents, and a decontaminated fixture into a temp dir.
+None. Single-process, local files. `evals/acceptance.py` copies the orchestrator skill, the four peer lens skills, the four agents, and a decontaminated fixture into a temp dir.
 
 ## Test Coverage
 
 - **Overall coverage: not measured** — no coverage tooling, by design.
-- **Baselines**: `evals/seeded-py` → `pytest -q` (5 passed); `evals/seeded-ts` → `bun run test` (6 passed).
+- **Baselines**: `evals/seeded-py` → `pytest -q`; `evals/seeded-ts` → `bun run test`; `evals/seeded-js` → `npm test`; `evals/seeded-cpp` → CMake/CTest; `evals/seeded-java` → `javac` compile.
 - **Acceptance**: cold-run eval per ADR-0003, recorded in `evals/ACCEPTANCE.md`. Current status: **stale** (see staleness marker in the verdict table). The find-test-fix lifecycle has not been re-confirmed since the skill restructure.
 
 ## Entry Points
@@ -147,7 +147,7 @@ None. Single-process, local files. `run-acceptance.sh` copies the orchestrator s
 | `docs/ETHOS.md` | four rules |
 | `docs/ARCHITECTURE.md` | lifecycle, six definitions, taxonomy |
 | `docs/adr/README.md` | decision index |
-| `evals/run-acceptance.sh` | acceptance harness |
+| `evals/acceptance.py` | unified prepare/grade entry point |
 | `evals/ACCEPTANCE.md` | evidence record |
 
 ## Changed Files

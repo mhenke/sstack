@@ -1,6 +1,6 @@
 frozen_benchmarks: []
 domain_adjacent:
-  path: eval/goldens.jsonl
+  path: evals/goldens.jsonl
   filter: "bucket == 'seeded-acceptance'"
   n_items: 10
 drift_budget:

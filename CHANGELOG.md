@@ -34,9 +34,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Exceptional-conditions lens (OWASP A10): fail-open paths,
   diagnostic leakage, cascading failures. Unit tier works with mocks;
   integration tier needs injectable failures
-- Containment: `evals/verify-isolation.sh` gained lock, unlock, and
-  check subcommands, then was removed per the no-sh-files rule.
-  Containment is caller responsibility going forward
+- Containment: the earlier `evals/verify-isolation.sh` lock/unlock
+  experiment was removed; workspace preparation is now unified under
+  `evals/acceptance.py`, with containment enforced by the caller.
 - Tool inventory by language (`docs/TOOLS.md`)
 - Research index (`docs/RESEARCH.md`)
 - Research record (`docs/LEARNED.md`)
@@ -82,8 +82,8 @@ agents.
 - Orchestrator skill (`skills/sstack/SKILL.md`): five-stage lifecycle
   (Discover, Attack, Verify, Minimize, Regress), oracle-first
   verification, red/green regression vocabulary, per-surface lens
-  coverage
-- Three input lenses (`references/`): boundaries, malformed, missing
+- Three input lenses (historical v0.1.0 layout): boundaries, malformed,
+  missing
 - Concept freeze (`docs/`): ETHOS.md, ARCHITECTURE.md
 - Seeded-bug eval repos: `evals/seeded-py` and `evals/seeded-ts`
 - Unified Python eval entry point (`evals/acceptance.py`) prepares
