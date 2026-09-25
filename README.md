@@ -55,11 +55,14 @@ runs wherever your agent already does.
 
 ### Optional verification skills
 
-Discover uses Cursor's verification skills when they are available.
-Install them globally alongside sstack:
+Install only the three skills sstack uses or mirrors during Discover:
 
 ```bash
-npx skills@latest cursor/plugins --skills --global
+npx skills@latest add cursor/plugins \
+  --skill create-verification-skill \
+  --skill maintain-verification-skill \
+  --skill thermos \
+  --global
 ```
 
 This provides:
