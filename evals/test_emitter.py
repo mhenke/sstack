@@ -85,3 +85,14 @@ def test_skill_documents_every_required_payload_key():
     assert doc, "SKILL.md does not document the emitter payload"
     missing = [k for k in PAYLOAD_KEYS if k not in doc.group(1)]
     assert not missing, f"emitter payload paragraph never mentions: {missing}"
+
+
+def test_readme_runtime_claim_matches_the_tree():
+    """README promises what the pack ships. It used to say 'it is
+    Markdown' while the pack carried a Python script."""
+    readme = (ROOT / "README.md").read_text()
+    if "It is Markdown" in readme:
+        raise AssertionError(
+            "README claims the pack is Markdown-only; "
+            f"the tree ships {EMITTER.relative_to(ROOT)}")
+    assert "emit_findings.py" in readme or "Markdown plus" in readme

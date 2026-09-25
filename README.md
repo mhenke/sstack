@@ -25,7 +25,7 @@ applies the minimal fix that turns it green.
 
 ```mermaid
 flowchart TD
-    D["Discover\nmap surfaces + contracts"] --> A["Attack\n6 lenses"]
+    D["Discover\nmap surfaces + contracts"] --> A["Attack\n7 lenses"]
     A --> V["Verify\nobserved vs. oracle"]
     V --> M["Minimize\nsmallest repro"]
     M --> T["Test\nwrite regression → red"]
@@ -45,14 +45,12 @@ bug, and a pinned bug is worse than no test at all.
 npx skills@latest add mhenke/sstack
 ```
 
-That installs the skills. Two things it does not do:
-
-- **Copy the attacker agents.** The seven
-  `agents/sstack-*-attacker.md` files are not part of
-  `npx skills add`. Use the install prompt below.
-- **Register a slash command on every host.** Claude Code turns the
-  skill directory into `/sstack`. Other hosts load the skill through
-  their own mechanism instead.
+That installs the skills. It leaves out the seven
+`agents/sstack-*-attacker.md` files, which `npx skills add` does not
+carry; the install prompt below covers those. It also registers
+`/sstack` in Claude Code only. Cursor, Windsurf, Codex, and the rest
+have no command to install: open the skill directory in your editor
+and ask for it in your own words.
 
 ### Attacker agent install prompt
 
@@ -65,14 +63,26 @@ Copy the seven agents/*.md files from https://github.com/mhenke/sstack into ~/.a
 Claude Code: also copy them to `~/.claude/agents/`. Per-repo VS Code:
 `.github/agents/`.
 
-Where your host registers the command:
+### Running it
 
-```
+The command takes what to test. In Claude Code:
+
+```text
 /sstack src/checkout.ts
 ```
 
-Zero runtime. No CLI, no daemon, no binary. It is Markdown, and it
-runs wherever your agent already does.
+The argument is the scope: a file, a directory, a module, a package,
+or a URL. sstack reads that scope, maps the surfaces inside it, and
+works only within what you named. A narrow scope keeps the run small;
+a directory keeps it broad.
+
+In an agent without slash commands, say the same thing in a prompt:
+"use the sstack skill on src/checkout.ts".
+
+No CLI, no daemon, no binary, nothing to install. The pack is
+Markdown plus one stdlib-only Python script the agent runs to write
+its own evidence; where Python is absent, the same evidence is two
+shell commands (see [Evidence](#evidence)).
 
 ### For contributors
 
@@ -110,18 +120,39 @@ Lifecycle mapping:
 All are optional. If they are not installed, sstack falls back to its
 built-in prose and the target's documentation, types, and call sites.
 
+## Evidence
+
+Every finding carries a fingerprint of the output it was judged on:
+the first 16 hex characters of `sha256(stdout + stderr)`. The
+`replay` auditor recomputes it from the recorded bytes, so a
+fingerprint that could not have come from that output is detectable.
+
+Where Python is available, the shipped script does the whole thing:
+it runs the repro, captures the output, hashes it, writes the
+finding, and rebuilds the report.
+
+```bash
+echo "$FINDING_JSON" | python3 skills/sstack/scripts/emit_findings.py \
+  --workspace "$(pwd)" --fixture my-fixture
+```
+
+Where Python is absent, two shell commands produce the same evidence:
+
+```bash
+"$REPRO" > o.txt 2> e.txt; code=$?
+fp=$(cat o.txt e.txt | sha256sum | cut -c1-16)   # macOS: shasum -a 256
+```
+
+Write the streams to files. A `$(...)` substitution strips trailing
+newlines, so the hash would cover different bytes than the evidence
+records, and every fingerprint would read as fabricated.
+
 ## Languages
 
-The process is language-agnostic. The evidence is not.
-
-**Supported fixture coverage** - Python, TypeScript, JavaScript, Java,
-and C++. Each has a seeded repo under `evals/` and a happy-path
-baseline. Only Python and TypeScript have recorded cold-run
-acceptance; the other three are baseline coverage, not proof.
-
-The lifecycle is language-independent. JavaScript, Java, and C++
-remain unproven for cold-agent acceptance until their runs are
-recorded. `ROADMAP.md` tracks that gap.
+The process is language-agnostic. The evidence is not. Python,
+TypeScript, JavaScript, Java, and C++ each have a seeded repo under
+`evals/` with a happy-path baseline, and the table below shows how
+far each one has been carried.
 
 ## What it leaves behind
 
@@ -148,7 +179,8 @@ python3 evals/acceptance.py prepare seeded-py
 ```
 
 It hands back a temp workspace with a deliberately broken repo and
-nothing else. Launch your host's cold agent in that directory, then:
+nothing else. Start a fresh agent session with no memory of this
+repository, point it at that directory, and let it work:
 
 ```bash
 python3 evals/acceptance.py grade path/to/workspace
@@ -162,16 +194,16 @@ reads `BUGS.md`; cold-agent dispatch stays outside the repository.
 
 | Fixture | Seeds | Current cold evidence |
 |---|---|---|
-| seeded-py | 5 | PASS; 5/5 seeds content-matched, 22/22 evidence replay intact (rerun on current text) |
+| seeded-py | 7 | PASS; 5/5 seeds content-matched (ColdPy-5), 12/12 evidence replay intact. The state and ownership seeds have not had a full cold pass yet |
 | seeded-ts | 5 | PASS; 5/5 seeds content-matched, 19/19 evidence replay intact (rerun) |
 | seeded-js | 5 | PASS; 5/5 seeds content-matched, 12/12 evidence replay intact (rerun) |
 | seeded-java | 5 | PASS; 3/5 seeds content-matched, 7/7 evidence replay intact (rerun on current text) |
 | seeded-cpp | 5 | PASS; 3/5 seeds content-matched, 13/13 evidence replay intact (rerun) |
 
-All five grade PASS with replayed evidence; py and java re-run fresh
-on the current text (2026-09-25), ts/js/cpp PASSes stand on their
-recorded text. Earlier waves' failures (fabricated fingerprints,
-regressions that never landed) are recorded in the run histories.
+Each row is the most recent cold pass for that fixture, and only the
+seeded-py one has been re-run since the current lens set landed.
+Earlier waves' failures, including fabricated fingerprints and
+regressions that never landed, are in the run histories.
 
 Full record, including the runs that failed and what each one taught
 the skill: [`evals/ACCEPTANCE.md`](evals/ACCEPTANCE.md).
