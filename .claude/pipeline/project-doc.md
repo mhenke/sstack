@@ -3,15 +3,15 @@
 
 ## Tech Stack
 
-- **Deliverable type**: agent-agnostic skill pack — Markdown (agent-skills `SKILL.md` format). No runtime, no CLI, no daemon.
-- **Language**: Markdown (skill + docs); Python 3 stdlib (unified eval entry point); Python 3.10+, TypeScript 5.5+, JavaScript, Java 17+, and C++17 exist only inside `evals/` as fixture code under test.
+- **Deliverable type**: agent-agnostic skill pack — Markdown (agent-skills `SKILL.md` format) plus one stdlib-only reference script (`skills/sstack/scripts/emit_findings.py`). No CLI, no daemon, no binary.
+- **Language**: Markdown (skill + docs); Python 3 stdlib (unified eval entry point + shipped evidence emitter); Python 3.10+, TypeScript 5.5+, JavaScript, Java 17+, and C++17 exist only inside `evals/` as fixture code under test.
 - **Framework**: pytest (Python), vitest 2.x (TypeScript/Bun), Node test runner (JavaScript), JUnit 5/Maven (Java), CMake/CTest (C++).
 - **Database / Styling / State Management**: none. Not applicable to this project.
 - **Host**: any agent that reads `skills/sstack/SKILL.md` (Claude Code, OpenCode, Cursor, Codex). Install = `npx skills@latest add mhenke/sstack` or copy the directory.
 
 ## Dependencies
 
-- **Core**: none. The pack has zero runtime dependencies by design.
+- **Core**: none. No runtime dependency beyond the Python standard library, by design.
 - **Dev / tooling**: `python3` + `pytest`, `bun` + `vitest` + `typescript`, `node --test`, `javac`, `cmake` + `ctest`.
 - **Testing**: pytest, vitest, Node test runner, JUnit 5, CTest.
 
@@ -44,14 +44,13 @@ Content architecture with a strict noun taxonomy (six definitions in ARCHITECTUR
 | Oracle | expected behavior declared before the attack | inline in SKILL.md + lens skills |
 | Evidence | observed vs. oracle, loose markdown | `.sstack/findings/` in the host repo |
 
-**Lens taxonomy (15 lenses, 6 shipped in v0):**
+**Lens taxonomy (15 lenses, 7 shipped in v0):**
 
 | Category | Lens | v0 |
 |---|---|---|
 | Input | boundaries, malformed, missing | ✅ |
 | Access | ownership | ✅ (peer skill + agent) |
-| Behavior | exceptional-conditions | ✅ (peer skill + agent) |
-| Behavior | state, ordering, concurrency, idempotency | future |
+| Behavior | exceptional-conditions, state | ✅ |
 | Environment | dependency-failure | future |
 | Environment | resource-exhaustion | ✅ (peer skill + agent) |
 | Contracts | contract | future |
@@ -66,7 +65,6 @@ Content architecture with a strict noun taxonomy (six definitions in ARCHITECTUR
 ```
 skills/sstack/SKILL.md              orchestrator: routing, rules, 7 stages, lens index
 skills/sstack-<lens>/SKILL.md       peer lens skills (7: boundaries, malformed, missing, ownership, exceptional-conditions, resource-exhaustion, state)
-agents/sstack-<lens>-attacker.md    per-lens attacker definitions (Thermos dispatch by name)
 
 docs/
 ├── ETHOS.md                       the four rules
@@ -79,13 +77,11 @@ docs/
 evals/
 ├── acceptance.py                   unified prepare/grade/replay entry point
 ├── ACCEPTANCE.md                  run history, verdicts, contamination disclosure
-├── goldens.jsonl                  seeded expectations (25 rows, all five fixtures)
-├── graders/                       content-match seeded-acceptance grader
+├── goldens.jsonl                  seeded expectations (27 rows, all five fixtures)
 ├── replay.py                      out-of-loop evidence integrity auditor
 ├── drift-suite.yaml               frozen eval configuration
 ├── baseline-base.json             gate token, currently not_run
-├── seeded-py/                     Python fixture, 5 bugs + BUGS.md answer key
-├── seeded-ts/                     TypeScript fixture, 5 bugs + BUGS.md
+├── seeded-py/                     Python fixture, 7 bugs (incl. state + ownership seeds) + BUGS.md answer key
 ├── seeded-js/                     JavaScript fixture, 5 bugs + BUGS.md
 ├── seeded-java/                   Java fixture, 5 bugs + BUGS.md
 └── seeded-cpp/                    C++ fixture, 5 bugs + BUGS.md
@@ -97,8 +93,7 @@ CHANGELOG.md                       Keep a Changelog format
 
 ## Code Style Conventions
 
-- **Skill frontmatter**: exactly `name` + `description`; description is one long trigger-phrase sentence. `SKILL.md` must stay ≤ 500 lines (currently 387).
-- **Agent files**: YAML frontmatter with `name` + `description`; body carries the rubric fallback, the work steps, and the seven Report format field names as fallback. The block itself lives only in SKILL.md and reaches a subagent pasted under `### Report format`.
+- **Skill frontmatter**: exactly `name` + `description`; description is one long trigger-phrase sentence. `SKILL.md` must stay ≤ 500 lines (currently 428).
 - **Lens skill files**: Case-generation heuristics, Oracle patterns with an inline `Worked example` paragraph (one python plus one ts/js example; `observed (bug)` marks the defect), and When not to apply. Extra sections (Operating limits, Language notes, Failure modes to watch for) allowed where the lens needs them.
 - **Prose style**: hard-wrapped ~60–72 columns, imperative voice, backticks for identifiers and paths.
 - **Python eval**: PEP 8, snake_case, module docstrings, no type hints, no classes, deliberately no validation.

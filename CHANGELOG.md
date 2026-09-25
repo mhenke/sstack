@@ -14,8 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   audit-not-fix portion of ADR-0002)
 - Per-lens attacker agents (`agents/sstack-<lens>-attacker.md`):
   boundaries, malformed, missing, ownership, exceptional-conditions,
-  resource-exhaustion — each with the Report format field names as
-  fallback, constraints, and an inline-rubric handoff
+  resource-exhaustion, state — each with the Report format field names
+  as fallback, constraints, and an inline-rubric handoff
 - Thermos pattern: per-lens fan-out at Attack stage, one agent per
   lens, parallel when the host supports subagent dispatch
 - Ownership lens rebuilt against OWASP ASVS V8 and A01:2025, not just
