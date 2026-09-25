@@ -59,10 +59,13 @@ All artifacts live under `<host-repo>/.sstack/`:
   `lens, surface, case, oracle, observed (verbatim), verdict
   (confirmed | refuted | inconclusive), repro (command),
   fix (description), regression (test file + name + red|green)`
-- `findings/<slug>.json` — the machine view: command, exit code,
-  stdout, stderr, input fingerprint, oracle, verdict, and regression
-  pointer. The JSON must be sufficient to re-verify the finding with
-  the agent out of the loop.
+- `findings/<slug>.json` — the machine view, exact keys:
+  `{"command": <shell string>, "exit_code": <int>, "stdout": <str>,
+  "stderr": <str>, "fingerprint": "<sha256[:16] of stdout+stderr>",
+  "oracle": <str>, "verdict": <confirmed|refuted|inconclusive>,
+  "regression": {"file","test","before","after"}}`. `evals/replay.py`
+  re-runs `command` and compares exit code + fingerprint with the
+  agent out of the loop; any other shape is unverifiable.
 - `scratch/` — throwaway scripts; delete at run end
 
 ## Stages
@@ -173,9 +176,7 @@ If available, use `principle-prove-it-works` before accepting a
 verdict and `principle-outcome-oriented-execution` to keep the result
 focused on observable behavior. Per case, compare oracle vs. observed.
 Write both `findings/<slug>.md` and `findings/<slug>.json` for every
-finding: the markdown is the human view, the JSON is the machine view
-with command, exit code, stdout, stderr, input fingerprint, oracle,
-verdict, and regression pointer. Use
+finding, in the exact shapes given under Workspace. Use
 `principle-exhaust-the-design-space` to check materially distinct
 attack families before declaring a surface covered.
 Before comparing anything, check the observed output came from

@@ -81,12 +81,18 @@ def main() -> int:
     sub.add_parser("prepare-all", help="create isolated workspaces for all fixtures")
     grade_parser = sub.add_parser("grade", help="grade a JSON cold-agent report")
     grade_parser.add_argument("report", type=Path)
+    replay_parser = sub.add_parser("replay", help="re-verify .sstack/findings/*.json evidence, no agent")
+    replay_parser.add_argument("workspace", type=Path)
     args = parser.parse_args()
     if args.command == "prepare":
         print(prepare(args.fixture))
     elif args.command == "prepare-all":
         for fixture in FIXTURES:
             print(prepare(fixture))
+    elif args.command == "replay":
+        sys.path.insert(0, str(EVALS))
+        from replay import main as replay_main
+        return replay_main([str(args.workspace)])
     else:
         return grade(args.report)
     return 0
