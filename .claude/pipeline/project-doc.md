@@ -129,13 +129,13 @@ No database, no ORM. Data shapes:
 
 ## Service Communication
 
-None. Single-process, local files. `evals/acceptance.py` copies the orchestrator skill, the four peer lens skills, the four agents, and a decontaminated fixture into a temp dir.
+None. Single-process, local files. `evals/acceptance.py` copies the orchestrator skill, the six peer lens skills, the six agents, and a decontaminated fixture into a temp dir.
 
 ## Test Coverage
 
 - **Overall coverage: not measured** — no coverage tooling, by design.
 - **Baselines**: `evals/seeded-py` → `pytest -q`; `evals/seeded-ts` → `bun run test`; `evals/seeded-js` → `npm test`; `evals/seeded-cpp` → CMake/CTest; `evals/seeded-java` → `javac` compile.
-- **Acceptance**: cold-run eval per ADR-0003, recorded in `evals/ACCEPTANCE.md`. Current status: **stale** (see staleness marker in the verdict table). The find-test-fix lifecycle has not been re-confirmed since the skill restructure.
+- **Acceptance**: cold-run eval per ADR-0003, recorded in `evals/ACCEPTANCE.md`. Fresh 2026-09-25 runs: Python PASS (seed_id malformed), TypeScript INVALID (empty finding), JavaScript/C++ reported-ungraded, Java pending. Last clean evidence remains `9979718`.
 
 ## Entry Points
 
@@ -151,7 +151,7 @@ None. Single-process, local files. `evals/acceptance.py` copies the orchestrator
 | `evals/ACCEPTANCE.md` | evidence record |
 
 ## Changed Files
-AGENTS.md, CHANGELOG.md, README.md, docs/ETHOS.md, evals/ACCEPTANCE.md (contradiction sweep: four-lens peer layout, find-test-fix taglines, peer paths, current run-end and containment wording)
+README.md, docs/ARCHITECTURE.md, evals/ACCEPTANCE.md (six-lens five-fixture current-state rewrite: 6-lens diagram, Learn stage, findings JSON, per-fixture evidence table)
 
 ## Last Scanned
-2026-09-24 (delta: contradiction sweep for peer-layout restructure)
+2026-09-25 (delta: six-lens five-fixture current-state rewrite)
