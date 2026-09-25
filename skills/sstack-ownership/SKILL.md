@@ -57,7 +57,10 @@ separate tier and needs session/entity evidence recording.
 
 Read the target's verification skill or feature map first. It usually
 knows entities, ownership, roles, and auth flow. Attack the boundaries
-between principals rather than re-deriving the ownership model.
+between principals rather than re-deriving the ownership model. When
+neither exists, derive the ownership model from the surface's
+parameters (session, user id, tenant id, role) and the call sites;
+record it in `map.md` before attacking.
 
 ## When not to apply
 

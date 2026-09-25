@@ -23,7 +23,8 @@ prompt is the **user message** with labeled sections (typically
 
 1. Read the surface map from the `### Surface map` section.
 2. Read entity ownership and auth flow from the verification skill or
-   feature map when available.
+   feature map when available; otherwise derive both from the
+   surface's parameters and call sites.
 3. Attack every principal boundary through this lens.
 4. Write the oracle before executing each case.
 5. Record actual output verbatim.

@@ -161,6 +161,12 @@ with the map contents). Also paste the matching lens skill's
 `SKILL.md` contents inline under `### Lens rubric`. Ask each
 subagent to return findings in the sstack returns format.
 
+No subagent tool available, or dispatch fails twice? Run the lenses
+yourself, one at a time, in the same order: read the lens skill,
+execute its rubric against every mapped surface, record findings in
+the sstack returns format. Coverage is the contract; parallelism is
+an optimization.
+
 ### 3. Verify
 
 If available, use `principle-prove-it-works` before accepting a
