@@ -29,7 +29,10 @@ the `### Report format` block).
 3. Attack every principal boundary through this lens.
 4. Write the oracle before executing each case.
 5. Record actual output verbatim.
-6. Return findings in the Report format below.
+6. Write every file you create under
+   `<Workspace root>/.sstack/scratch/<lens>/` — never the
+   workspace root, never a temp folder.
+7. Return findings in the Report format.
 
 ## Returns
 

@@ -72,7 +72,16 @@ All artifacts live under `<host-repo>/.sstack/`:
   `command` and recomputes the fingerprint from the recorded bytes,
   agent out of the loop; a hand-typed hash fails it. Any other shape
   is unverifiable.
-- `scratch/` — throwaway scripts; delete at run end
+- `scratch/<lens>/` — every probe, case script, and compiled artifact
+  an attack creates, one directory per lens
+- `pristine-src/` — the target's originals, snapshotted before Fix, so
+  a repro command still shows the buggy behavior after the fix lands
+- `emit_artifacts.py` — the single script that runs each repro,
+  captures real output, and writes the evidence and report JSON
+
+Everything sstack creates lives under `.sstack/` — never the workspace
+root, never a temp folder elsewhere. Delete `scratch/` at run end; keep
+`pristine-src/` so evidence replays.
 
 ## Stages
 

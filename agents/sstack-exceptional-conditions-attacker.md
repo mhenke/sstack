@@ -26,7 +26,10 @@ the `### Report format` block).
 2. Attack every failure path through this lens.
 3. Write the oracle before executing each case.
 4. Record actual output verbatim.
-5. Return findings in the Report format.
+5. Write every file you create under
+   `<Workspace root>/.sstack/scratch/<lens>/` — never the
+   workspace root, never a temp folder.
+6. Return findings in the Report format.
 
 ## Returns
 
