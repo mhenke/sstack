@@ -337,12 +337,18 @@ verdict: confirmed | refuted | inconclusive
 repro: <command that reproduces>
 ```
 
-One line per finding: `id | lens | surface | verdict | regression
-(file::test, red→green)` or `id | lens | surface | refuted |
-hardening (file::test, green)`. Then per confirmed finding the full
-field set, with observed output quoted verbatim and the fix applied.
-End with counts: confirmed / refuted / inconclusive, fixes applied,
-regressions landed, hardening tests added.
+Write the machine-readable run report to exactly
+`<host-repo>/.sstack/report.json` (the grader's canonical path), one
+object per finding: `{"fixture", "findings": [{"seed_id", "lens",
+"surface", "case", "oracle", "observed", "verdict", "repro",
+"regression": {"file","test","before","after"}}]}`.
+
+In the chat report, one line per finding: `id | lens | surface |
+verdict | regression (file::test, red→green)` or `id | lens |
+surface | refuted | hardening (file::test, green)`. Then per confirmed
+finding the full field set, with observed output quoted verbatim and
+the fix applied. End with counts: confirmed / refuted / inconclusive,
+fixes applied, regressions landed, hardening tests added.
 
 ## Learn loop
 

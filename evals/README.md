@@ -16,7 +16,7 @@ python3 evals/acceptance.py prepare seeded-py
 # Run /sstack against the fixture.
 
 # Score the JSON report.
-python3 evals/acceptance.py grade path/to/report.json
+python3 evals/acceptance.py grade path/to/workspace
 ```
 
 For every fixture:
@@ -56,11 +56,12 @@ cold agent must run from the printed directory.
 Runs `prepare` for all five fixtures. This only creates workspaces; it
 does not launch five agents.
 
-### `grade <report.json>`
+### `grade <workspace>`
 
-Reads a cold-agent report and returns binary pass/fail JSON. A pass
-requires at least one confirmed seeded finding with a regression that
-was red on the seed and green after the fix.
+Reads the cold-agent report — resolved from `<workspace>/.sstack/report.json`
+(first) or `<workspace>/report.json` — and returns binary pass/fail JSON.
+A pass requires at least one confirmed seeded finding with a regression
+that was red on the seed and green after the fix.
 
 Example report shape:
 

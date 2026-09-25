@@ -4,7 +4,7 @@
 Usage:
   python3 evals/acceptance.py prepare seeded-py
   python3 evals/acceptance.py prepare-all
-  python3 evals/acceptance.py grade path/to/report.json
+  python3 evals/acceptance.py grade path/to/workspace
 
 `prepare` creates an isolated workspace and prints its path. The host
 launches its cold agent there. `prepare-all` does this for every fixture.
@@ -64,11 +64,21 @@ def prepare(fixture: str) -> Path:
     return workspace
 
 
+def resolve_report(path: Path) -> Path:
+    """Accept the workspace dir or the report file; canonical location is .sstack/report.json."""
+    if path.is_dir():
+        for candidate in (path / ".sstack" / "report.json", path / "report.json"):
+            if candidate.is_file():
+                return candidate
+        raise SystemExit(f"no report.json under {path} (checked .sstack/ then root)")
+    return path
+
+
 def grade(report_path: Path) -> int:
     sys.path.insert(0, str(EVALS / "graders"))
     from seeded_acceptance import grade_file
 
-    result = grade_file(str(report_path), str(EVALS / "goldens.jsonl"))
+    result = grade_file(str(resolve_report(report_path)), str(EVALS / "goldens.jsonl"))
     print(json.dumps(result, indent=2, sort_keys=True))
     return 0 if result["pass"] else 1
 

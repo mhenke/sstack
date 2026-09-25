@@ -13,6 +13,8 @@ the product. For *what* the code does, read [`../ARCHITECTURE.md`](../ARCHITECTU
 | [0003](0003-eval-gated-acceptance.md) | Eval-gated acceptance with seeded repos | Accepted | 2026-09-23 |
 | [0004](0004-delegate-to-target-existing-tools.md) | Lenses delegate to the target's existing tools | Accepted | 2026-09-23 |
 | [0005](0005-sstack-finds-tests-and-fixes.md) | sstack finds, tests, and fixes | Accepted | 2026-09-23 |
+| [0006](0006-evidence-re-verifiable-by-machine.md) | Finding evidence is machine-re-verifiable | Accepted | 2026-09-24 |
+| [0007](0007-optional-deps-degrade-inline.md) | Optional dependencies degrade inline | Accepted | 2026-09-24 |
 
 ## Status
 
