@@ -128,9 +128,8 @@ change requires no edit to an existing lens file or stage.
 ### Developer
 
 Smallest change that closes the finding; in a lens file, edit sections
-in place rather than rewriting the file. Run the two baselines, plus a
-cold run for any skill-behavior change. The pack has no runtime, so a
-helper script is never the answer.
+in place rather than rewriting the file. Run the baselines, plus a
+cold run for any skill-behavior change.
 
 **Done when** the baselines are green and, for a behavior change, a
 cold run's report is attached.
@@ -138,8 +137,8 @@ cold run's report is attached.
 ### PR Reviewer
 
 - 🔴 a fixture seed fixed or removed; a `BUGS.md` row altered; a CLI,
-  runner, or evidence schema added; a lens file leaking a seed
-  trigger-and-oracle pair; containment weakened
+  daemon, or binary added; the evidence contract changed; a lens file
+  leaking a seed trigger-and-oracle pair; containment weakened
 - 🟡 SKILL.md over 500 lines; a lens file missing a section or language
   block; `ACCEPTANCE.md` claiming a count the runs do not support; a
   guardrail weakened

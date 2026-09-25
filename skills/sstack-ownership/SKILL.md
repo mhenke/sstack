@@ -105,12 +105,14 @@ other subject's data in the result, in a count, or in a facet is a
 confirmed leak, and `403` is not the only possible oracle: a silently
 wider result set is the more common observation.
 
-Worked example — `search_orders(session, q)` filters on `q` alone:
-oracle returns only A's orders, observed returns A's and B's. A detail
-route `get_order(session, id)` is correctly scoped, so swapping the ID
-finds nothing: the collection is the hole, and ID swapping is the wrong
-probe for it. Related but distinct: an unscoped count is a leak of
-existence and volume rather than of contents.
+Worked example — `find_invoices(account_id, query)` filters on the
+query text alone and ignores which account asked: the oracle returns
+only that account's invoices, the observed result returns every
+matching invoice across all accounts. A sibling `get_invoice(session,
+invoice_id)` is correctly scoped, so swapping the ID finds nothing:
+the collection is the hole, and ID swapping is the wrong probe for it.
+Related but distinct: an unscoped count is a leak of existence and
+volume rather than of contents.
 
 ## Oracle patterns
 
@@ -125,9 +127,8 @@ existence and volume rather than of contents.
 - Response fields and accepted write fields match the documented grant.
   A field the subject may not read, or set, is BOPLA.
 - Cross-tenant and cross-entity enumeration returns denials, not records.
-- A collection returns only the caller's rows, and its counts, totals,
-  and facets agree with them. A correct row filter with a leaked total
-  is still a confirmed leak.
+- Collection surfaces obey the oracle stated above; see that section
+  before probing a list, search, export, or report.
 - After logout or revocation the old credential no longer works.
 - A new account, a newly added route, and an unregistered endpoint are
   denied until explicitly granted.
