@@ -112,14 +112,14 @@ CHANGELOG.md                       Keep a Changelog format
 No database, no ORM. Data shapes:
 
 - **Fixture records**: Python dicts / TS interfaces (`LineItem`, `CartLine`)
-- **Run artifacts**: `.sstack/` in the host repo (`map.md`, `plan.md`, `report.json`, `findings/<slug>.md` + `.json`, `learn/`, `scratch/`)
+- **Run artifacts**: `.sstack/` in the host repo (`map.md`, `plan.md`, `report.json`, `findings/<slug>.md` + `.json`, `learn/`, `scratch/<lens>/`, `pristine-src/`) — every file a run creates lives here, nothing at the workspace root
 - **Answer keys**: `evals/*/BUGS.md` (never shipped to cold agents)
 
 ## Cross-Cutting Concerns
 
 - **Audit-not-fix**: replaced by ADR-0005 find-test-fix model. sstack writes tests and source fixes (minimal, oracle-driven). Config and secrets always read-only.
 - **Evidence discipline**: the agent quotes verbatim command output; harness errors are broken cases, never verdicts.
-- **Safety contract**: source writable only in the Fix stage, only minimal changes that turn a red test green. Every source change must trace to a finding.
+- **Evidence contract**: the shipped emitter (`skills/sstack/scripts/emit_findings.py`) is the only writer of `findings/<slug>.{json,md}` and `report.json`; it runs each repro itself and fingerprints `sha256(stdout+stderr)[:16]`. `regression.before`/`after` are the literal tokens `red`/`green`.
 - **Containment**: the caller builds the temp workspace and dispatches the agent into it. Prompt-only containment has failed; the host-repo marker directs the agent to the right root, but enforcement is the caller's responsibility.
 - **Coverage rule**: every selected lens must have zero-or-more cases on every mapped surface. A lens with zero cases on a record/string-input surface is an incomplete run.
 
@@ -131,7 +131,7 @@ None. Single-process, local files. `evals/acceptance.py` copies the orchestrator
 
 - **Overall coverage: not measured** — no coverage tooling, by design.
 - **Baselines**: `evals/seeded-py` → `pytest -q`; `evals/seeded-ts` → `bun run test`; `evals/seeded-js` → `npm test`; `evals/seeded-cpp` → CMake/CTest; `evals/seeded-java` → javac + junit-console (jar auto-fetched; `RUN_TESTS.md`).
-- **Acceptance**: cold-run eval per ADR-0003, recorded in `evals/ACCEPTANCE.md`. 2026-09-25: **all five fixtures PASS**, every one with landed regressions verified on disk and replayed evidence (py re-run 5/5 seeds 22/22 intact, ts 5/5 19/19, js 5/5 12/12, java re-run 3/5 7/7, cpp 3/5 13/13).
+- **Acceptance**: cold-run eval per ADR-0003, recorded in `evals/ACCEPTANCE.md`. 2026-09-25: **all five fixtures PASS** (py re-run 5/5 seeds 22/22 intact, ts 5/5 19/19, js 5/5 12/12, java re-run 3/5 7/7, cpp 3/5 13/13). **Stale since 2026-09-25**: these predate the `state` lens, the emitter, and the collection-surface lens work. ColdPy-5 is mid-flight; the ownership lens is separately carrier-verified.
 
 ## Entry Points
 
@@ -148,7 +148,7 @@ None. Single-process, local files. `evals/acceptance.py` copies the orchestrator
 | `CONTEXT.md` | judging glossary (integrity, drift, content match, INVALID) |
 
 ## Changed Files
-AGENTS.md, CHANGELOG.md, CONTEXT.md, README.md, docs/ARCHITECTURE.md, docs/ETHOS.md, skills/sstack/SKILL.md (dispatch paste, disjunctive-oracle guard, verifier-neutral wording), agents/sstack-*-attacker.md (block removed, field-name fallback)
+AGENTS.md, CHANGELOG.md, CONTEXT.md, ROADMAP.md, docs/ARCHITECTURE.md, evals/README.md, evals/acceptance.py, evals/goldens.jsonl, skills/sstack/SKILL.md, skills/sstack/scripts/emit_findings.py (new), skills/sstack-ownership/SKILL.md (rebuilt: tuple model + collection surfaces), skills/sstack-state/SKILL.md (new), agents/sstack-state-attacker.md (new), agents/sstack-ownership-attacker.md (rebuilt), evals/seeded-py/shop/{cart,orders}.py (2 new seeds)
 
 ## Last Scanned
-2026-09-25 (delta: user/contributor lane split — paste carrier, reverse-leak sweep, carrier re-probe)
+2026-09-25 (delta: state lens + shipped emitter, scope lock narrowed, ownership lens rebuilt against C1/V8/A01 with collection surfaces)
