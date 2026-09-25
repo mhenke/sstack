@@ -57,10 +57,13 @@ resolves outside the target is skipped with a note in the report. This
 is `discoverProjectLocalSkillNames` translated: the guard is the point,
 not a detail.
 
-Config lives under `.sstack/`, kept out of the ignore list by negation
-(`.sstack/*` plus `!.sstack/config.md` and `!.sstack/lenses/`). Run
-output stays ignored; authored content becomes committable, so a team
-shares lenses through git.
+Config lives under `.sstack/`, which the pack makes committable by
+writing its own `.sstack/.gitignore` on first use: ignore everything,
+negate `.gitignore`, `config.md`, and `lenses`. The rule has to live
+inside `.sstack/` rather than in the target's root `.gitignore`,
+because git cannot re-include a file under an ignored directory. A root
+`.sstack/` entry would make a user's lenses permanently
+uncommittable.
 
 ## Consequences
 

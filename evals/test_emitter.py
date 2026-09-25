@@ -112,15 +112,42 @@ def test_custom_lens_contract_is_documented():
     assert "append" in body, "custom lens must append to the built-in rubric"
 
 
-def test_custom_lens_files_stay_versionable():
-    """Run output is ignored, authored config is not. If the negation
-    is lost, a team's lenses vanish with the next clean."""
-    probe = ROOT / ".sstack/config.md"
-    ignored = subprocess.run(
-        ["git", "check-ignore", "-q", str(probe)],
-        cwd=ROOT, capture_output=True)
-    assert ignored.returncode != 0, (
-        ".sstack/config.md is gitignored; authored lenses cannot be shared")
+def test_custom_lens_survive_git_in_a_target_repo():
+    """A user's repo, not this one. Our .gitignore rules say nothing
+    about the repo a user copies the pack into, so this builds one and
+    checks the ignore file the emitter leaves behind. A root `.sstack/`
+    rule is a trap: git cannot re-include a file under an ignored
+    directory, so a lens committed there would be uncommittable."""
+    with tempfile.TemporaryDirectory() as tmp:
+        repo = Path(tmp)
+        subprocess.run(["git", "init", "-q", "."], cwd=repo, check=True)
+        result = emit(repo, base())
+        assert result.returncode == 0, result.stderr
+        stack = repo / ".sstack"
+        (stack / "lenses").mkdir(exist_ok=True)
+        (stack / "config.md").write_text("lenses.add: ordering\n")
+        (stack / "lenses" / "ordering.md").write_text("---\nname: ordering\n---\n")
+        (stack / "map.md").write_text("surfaces\n")
+        (stack / "scratch").mkdir(exist_ok=True)
+        (stack / "scratch" / "p.py").write_text("print(1)\n")
+
+        def ignored(path):
+            return subprocess.run(["git", "check-ignore", "-q", str(path)],
+                                  cwd=repo).returncode == 0
+
+        assert not ignored(stack / "config.md"), "config.md is ignored"
+        assert not ignored(stack / "lenses" / "ordering.md"), "lens is ignored"
+        for generated in (stack / "map.md", stack / "scratch" / "p.py"):
+            assert ignored(generated), f"{generated.name} should be ignored"
+
+        staged = subprocess.run(["git", "add", "-A"], cwd=repo,
+                                capture_output=True, text=True)
+        assert staged.returncode == 0, staged.stderr
+        names = subprocess.run(["git", "diff", "--cached", "--name-only"],
+                               cwd=repo, capture_output=True, text=True).stdout.split()
+        assert ".sstack/config.md" in names, names
+        assert ".sstack/lenses/ordering.md" in names, names
+        assert ".sstack/map.md" not in names, names
 
 
 def test_every_attacker_scratch_path_follows_its_lens():

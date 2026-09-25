@@ -120,6 +120,26 @@ def rebuild_report(findings_dir: Path, workspace: Path, fixture: str) -> int:
     return len(entries)
 
 
+# Written once, on first use, so a target repo keeps its own lenses and
+# config while discarding run output. Written into .sstack/ rather than
+# the repo root because a root `.sstack/` ignore cannot be overridden
+# from inside: git never re-includes a file under an ignored directory.
+IGNORE_FILE = """# sstack run output. Everything here is generated and disposable.
+*
+!.gitignore
+!config.md
+!lenses
+!lenses/**
+"""
+
+
+def ensure_ignore_file(stack: Path) -> None:
+    """Never overwrite: a user may have narrowed it."""
+    path = stack / ".gitignore"
+    if not path.exists():
+        path.write_text(IGNORE_FILE)
+
+
 def warn_unlanded(finding: dict, workspace: Path) -> None:
     """Advisory only: during Verify the regression test may legitimately not exist yet."""
     regression = finding["regression"]
@@ -139,6 +159,7 @@ def main() -> int:
     workspace = args.workspace.resolve()
     stack = workspace / ".sstack"
     stack.mkdir(parents=True, exist_ok=True)
+    ensure_ignore_file(stack)
     findings_dir = stack / "findings"
     findings_dir.mkdir(exist_ok=True)
 

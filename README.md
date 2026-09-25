@@ -183,6 +183,13 @@ Write the streams to files. A `$(...)` substitution strips trailing
 newlines, so the hash would cover different bytes than the evidence
 records, and every fingerprint would read as fabricated.
 
+Without the script, create `.sstack/.gitignore` yourself so your lenses
+stay committable:
+
+```bash
+mkdir -p .sstack && printf '*\n!.gitignore\n!config.md\n!lenses\n!lenses/**\n' > .sstack/.gitignore
+```
+
 ## Languages
 
 The process is language-agnostic. The evidence is not. Python,
@@ -194,12 +201,23 @@ far each one has been carried.
 
 ```
 .sstack/
+├── .gitignore    keeps your lenses, discards run output
+├── config.md     your lenses.add / lenses.remove (optional)
+├── lenses/       your custom lens rubrics (optional)
 ├── map.md        surfaces + assumed contracts
 ├── plan.md       lenses, cases, oracles
 ├── learn/        failure classes for the next run
 ├── findings/     one .md and one .json per finding
 └── scratch/      throwaway attack scripts (gone at run end)
 ```
+
+The `.gitignore` inside `.sstack/` is written on the first run, so
+`config.md` and `lenses/` stay committable while everything generated
+is ignored. Commit those two if your team shares lenses; nothing else
+in there is worth a commit. If your repo already ignores `.sstack/`
+at the root, remove that entry: git cannot re-include a file under an
+ignored directory, and the rule has to live inside the directory it
+governs.
 
 Plus regression tests and fixes. Tests land in your suite; fixes land
 in your source, scoped to the minimal change that satisfies the

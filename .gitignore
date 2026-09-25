@@ -8,10 +8,10 @@ __pycache__/
 *.pyc
 
 # sstack run artifacts (runtime output of the skill, not source).
-# config.md and lenses/ are authored, not generated: keep them versionable.
-.sstack/*
-!.sstack/config.md
-!.sstack/lenses/
+# Authored content inside is kept by .sstack/.gitignore, which a user
+# repo gets from the pack. Do not use `.sstack/` or `.sstack` here: git
+# cannot re-include a file under an ignored parent directory.
+.sstack/
 .pytest_cache/
 
 # Node
