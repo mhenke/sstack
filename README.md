@@ -137,7 +137,7 @@ reads `BUGS.md`; cold-agent dispatch stays outside the repository.
 | seeded-ts | 5 | INVALID; empty finding object |
 | seeded-js | 5 | INVALID; hand-typed JSON unparseable |
 | seeded-java | 5 | PASS; 3/5 seeds content-matched with landed regressions |
-| seeded-cpp | 5 | 7 confirmed claimed, regressions not landed |
+| seeded-cpp | 5 | FAIL; 7 confirmed with replayable evidence, but regression files never landed — caught by landed-check |
 
 Historical clean evidence remains `9979718`: Python 4/5 seeds with 9
 red→green regressions, TypeScript 5/5 plus one unseeded real bug with

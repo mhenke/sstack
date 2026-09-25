@@ -286,6 +286,10 @@ user-facing output.
 Before delivering the report, verify all of the following:
 
 1. Every confirmed finding has a red test and a green post-fix test.
+   The regression must be a test FILE in the repo's own suite (added
+   to its build/test runner), not a scratch binary you compiled and
+   ran yourself. `regression.file` is the path a stranger can open
+   and re-run.
 2. Every refuted finding has a green hardening test (if the surface
    consumes external input).
 3. Every fix is the minimal change that satisfies the oracle.

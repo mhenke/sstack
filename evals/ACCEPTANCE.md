@@ -21,7 +21,7 @@ isolated dir).
 | seeded-java | PASS | 4 confirmed; java-1, java-2, java-4 content-matched, 4/4 red→green claims verified against workspace test files |
 | seeded-ts | INVALID | one empty finding object; run still in progress |
 | seeded-js | INVALID | report hand-typed, unparseable JSON (line 33); evidence fingerprints placeholder (`a1b2c3d4...`) — replay grades them fabricated |
-| seeded-cpp | not landed | 7 confirmed claimed but regression shape non-compliant (no `before`/`after`); run still in progress |
+| seeded-cpp | FAIL | 7 confirmed, 7/7 evidence files replay intact, content matches cpp-1/3/4 — but every `regression.file` (`test_functions.cpp`) is absent from disk and `src/shop.cpp` gained no fix; claimed red→green, nothing landed |
 
 The historical PASS numbers below were produced by the skill text at
 commit `9979718` and are stale for the current text. JavaScript, Java,
@@ -55,7 +55,7 @@ language support as proven beyond what this table shows.
 |---|---|---|
 | ColdJs | seeded-js | INVALID — finished 3 confirmed + fixes + 4 test files, but hand-typed `report.json` unparseable (unescaped quotes, line 33) and all evidence fingerprints placeholder (`a1b2c3d4...`); replay grades them fabricated |
 | ColdJava | seeded-java | PASS — 4 confirmed red→green; java-1/2/4 content-matched; self-labels shifted (advisory only) |
-| ColdCpp | seeded-cpp | in progress — 7 confirmed claimed, regression object non-compliant (`status:"red"` instead of `before`/`after`), evidence JSONs not yet emitted |
+| ColdCpp | seeded-cpp | FAIL — genuine attacks (7 confirmed, script-emitted evidence, all fingerprints intact, cases match cpp-1/3/4) but the regression objects name a `test_functions.cpp` that was never written and source was never fixed. First false-claim caught by landed-regression verification |
 
 ## Evidence replay (roadmap item 2)
 
@@ -67,6 +67,8 @@ command with the agent out of the loop.
 |---|---|---|
 | seeded-js (ColdJs, first wave) | 2 fabricated (placeholder hex hashes), 1 unparseable | n/a — INVALID run |
 | seeded-py (ColdPy-2) | 8/8 intact | 4 drifted: fix landed, re-run shows corrected output |
+
+| seeded-cpp (ColdCpp) | 7/7 intact | 7 drifted — but no regression file exists and no fix landed, so the drift is scratch-binary behavior, not proof |
 
 Drift after a landed fix is expected and informational; a fabricated
 fingerprint is the disqualifier. seeded-py is the first PASS whose
