@@ -176,7 +176,9 @@ If available, use `principle-prove-it-works` before accepting a
 verdict and `principle-outcome-oriented-execution` to keep the result
 focused on observable behavior. Per case, compare oracle vs. observed.
 Write both `findings/<slug>.md` and `findings/<slug>.json` for every
-finding, in the exact shapes given under Workspace. Use
+finding, in the exact shapes given under Workspace — through the
+emitter script, as each case verifies. Evidence batched to run end is
+evidence a crash deletes. Use
 `principle-exhaust-the-design-space` to check materially distinct
 attack families before declaring a surface covered.
 Before comparing anything, check the observed output came from
@@ -348,13 +350,15 @@ object per finding: `{"fixture", "findings": [{"seed_id", "lens",
 "surface", "case", "oracle", "observed", "verdict", "repro",
 "regression": {"file","test","before","after"}}]}`. `seed_id` is your
 best guess at which planted bug this is (or "other"); grading matches
-by content, so a wrong guess is a warning, never a pass. Emit both
-this file and each `findings/<slug>.json` from one script that runs
-the command, captures its real output, and computes
-`fingerprint = sha256(stdout+stderr)[:16]` in the same process
-(`hashlib`/`crypto`) — `evals/replay.py` recomputes it and a typed-in
-value grades as fabricated. An unparseable report or evidence file
-grades INVALID.
+by content, so a wrong guess is a warning, never a pass. One emitter
+script writes both files: per finding it runs the command, captures
+its real output, computes `fingerprint = sha256(stdout+stderr)[:16]`
+in the same process (`hashlib`/`crypto`), writes
+`findings/<slug>.json`, and rewrites `report.json` from the evidence
+files on disk — invoked as each case verifies, so a crash keeps every
+finding written so far. `evals/replay.py` recomputes the fingerprint;
+a typed-in value grades as fabricated. An unparseable report or
+evidence file grades INVALID.
 
 In the chat report, one line per finding: `id | lens | surface |
 verdict | regression (file::test, red→green)` or `id | lens |
