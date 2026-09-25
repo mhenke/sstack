@@ -61,6 +61,41 @@ and downstream OOM on the untruncated buffer.
 - Leak: the system returns an error but does not release the
   resource, so subsequent valid requests also fail.
 
+## Language notes
+
+### JavaScript / TypeScript
+
+- `Math.max(...largeArray)` can throw `RangeError: Maximum call
+  stack size exceeded`; use a reduce loop for large collections.
+- A rejected promise without a handler can terminate the process;
+  exhaustion paths must settle every request.
+- `Buffer.alloc` throws on an oversized allocation; `Buffer.concat`
+  may grow until the process is killed.
+
+### Java
+
+- An exhausted `ExecutorService` rejects with `RejectedExecutionException`,
+  not a hang. A bounded queue with no rejection policy throws
+  `OutOfMemoryError` under sustained load.
+- Streams and `try`-with-resources can retain resources until
+  consumption finishes; verify closure on an error path.
+
+### C++
+
+- Allocation failure is commonly signaled by `std::bad_alloc`, but
+  unchecked `new` may terminate the process. Prefer the
+  nothrow-aware or smart-pointer path.
+- File descriptors are finite OS resources; exceeding `RLIMIT_NOFILE`
+  yields `EMFILE`, and leaked descriptors keep the pressure high.
+
+### Python
+
+- `ThreadPoolExecutor` raises `RuntimeError: cannot schedule new
+  futures after shutdown` and queues unbounded by default; bound the
+  queue before testing exhaustion.
+- Large `bytes` or `list` allocations raise `MemoryError` in-process,
+  while some native allocations are killed by the OS instead.
+
 ## When not to apply
 
 The surface has no shared resources (no connection pool, no cache,
