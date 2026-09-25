@@ -69,11 +69,14 @@ collections, or indexes/slices. For each surface, record its
 assumed contract — types, ranges, preconditions gleaned from
 docstrings, types, and call sites. Write `.sstack/map.md`.
 
-If the target repo has a verification skill or feature map
-(pstack `/create-verification-skill`, or a project-local verify
-script), read it as a head start on the surface map. It already
-knows the entities, the ownership model, and the expected
-behaviors — do not re-derive what it documents.
+If available in the target repo, use `create-verification-skill` to
+create or refresh the verification map before mapping, and
+`maintain-verification-skill` to keep it current as the target changes.
+Read their output, existing feature maps, and project-local verify
+scripts as head starts. They already document entities, ownership,
+and expected behavior; do not re-derive what they provide. If neither
+skill is available, continue with the target's own docs, types, and
+call sites.
 
 Done when every public function, route, parser, loop, and indexer
 in the target has a row in `map.md` with its assumed contract.
