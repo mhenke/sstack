@@ -35,7 +35,7 @@ def replay_one(path: Path) -> dict:
 
     run = subprocess.run(ev["command"], shell=True, capture_output=True, text=True, cwd=path.parents[2], timeout=120)
     live_fp = fingerprint(run.stdout + run.stderr)
-    recorded_fp = ev.get("fingerprint") or fingerprint(ev["stdout"])
+    recorded_fp = ev.get("fingerprint") or fingerprint(ev["stdout"] + ev.get("stderr", ""))
     ok = run.returncode == ev["exit_code"] and live_fp == recorded_fp
     return {"finding": path.stem, "verdict": "verified" if ok else "mismatch",
             "exit": (ev["exit_code"], run.returncode), "fingerprint": (recorded_fp, live_fp)}
