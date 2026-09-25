@@ -69,11 +69,13 @@ npx skills@latest add cursor/plugins \
 
 Lifecycle mapping:
 
-- `principle-attack-the-premise` — Attack
-- `create-verification-skill` — Discover
-- `maintain-verification-skill` — Discover
-- `principle-test-behavior-not-implementation` — Test
-- `principle-fix-root-causes` — Fix
+- Discover → `principle-foundational-thinking`, `principle-model-the-domain`, `principle-exhaust-the-design-space`, `create-verification-skill`, `maintain-verification-skill`
+- Attack → `principle-attack-the-premise`, `principle-boundary-discipline`, `principle-exhaust-the-design-space`
+- Verify → `principle-prove-it-works`, `principle-outcome-oriented-execution`
+- Minimize → `principle-minimize-reader-load`, `principle-sequence-verifiable-units`
+- Test → `principle-test-behavior-not-implementation`, `principle-encode-lessons-in-structure`
+- Fix → `principle-fix-root-causes`, `principle-subtract-before-you-add`, `principle-type-system-discipline`
+- Run-end → `principle-prove-it-works`, `principle-outcome-oriented-execution`, `principle-guard-the-context-window`
 
 All are optional. If they are not installed, sstack falls back to its
 built-in prose and the target's documentation, types, and call sites.

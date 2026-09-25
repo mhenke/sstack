@@ -69,14 +69,18 @@ collections, or indexes/slices. For each surface, record its
 assumed contract — types, ranges, preconditions gleaned from
 docstrings, types, and call sites. Write `.sstack/map.md`.
 
-If available in the target repo, use `create-verification-skill` to
-create or refresh the verification map before mapping, and
-`maintain-verification-skill` to keep it current as the target changes.
-Read their output, existing feature maps, and project-local verify
-scripts as head starts. They already document entities, ownership,
-and expected behavior; do not re-derive what they provide. If neither
-skill is available, continue with the target's own docs, types, and
-call sites.
+If available, use `principle-foundational-thinking` to identify the
+target's real invariants, `principle-model-the-domain` to name its
+entities and transitions, `principle-experience-first` to anchor the
+map in user-observable behavior, and
+`principle-exhaust-the-design-space` to cover materially different
+failure surfaces rather than variants of one assumption. If available
+in the target repo, use `create-verification-skill` to create or
+refresh the verification map before mapping, and
+`maintain-verification-skill` to keep it current. Read their output,
+existing feature maps, and project-local verify scripts as head starts.
+If these skills are unavailable, continue with the target's own docs,
+types, and call sites.
 
 Done when every public function, route, parser, loop, and indexer
 in the target has a row in `map.md` with its assumed contract.
@@ -85,10 +89,14 @@ in the target has a row in `map.md` with its assumed contract.
 
 For each applicable lens from the index, dispatch the matching
 attacker agent for each selected lens. If available, use
-`principle-attack-the-premise` whenever two or more fixes share one
-premise and fail the same gate. Write the premise down, count the
-actors and failure classes, and question the premise before trying
-another fix. For each surface × lens:
+`principle-boundary-discipline` to identify the actual limits,
+`principle-laziness-protocol` to avoid speculative cases, and
+`principle-build-the-lever` when repeated failures share a premise.
+Use `principle-exhaust-the-design-space` to cover materially
+different attacks. Use `principle-attack-the-premise` whenever two
+or more fixes share one premise and fail the same gate. Write the
+premise down, count the actors and failure classes, and question the
+premise before trying another fix. For each surface × lens:
 
 1. Design the case (concrete input and action).
 2. Write its oracle in `plan.md` FIRST — the expected behavior
@@ -143,8 +151,11 @@ subagent to return findings in the sstack returns format.
 
 ### 3. Verify
 
-Per case, compare oracle vs. observed:
-
+If available, use `principle-prove-it-works` before accepting a
+verdict and `principle-outcome-oriented-execution` to keep the result
+focused on observable behavior. Per case, compare oracle vs. observed.
+Use `principle-exhaust-the-design-space` to check materially distinct
+attack families before declaring a surface covered.
 Before comparing anything, check the observed output came from
 the function under attack and not from your harness. An observed
 `ImportError` or missing-argument error is a broken attack:
@@ -175,11 +186,15 @@ keep the report brief.
 
 ### 4. Minimize
 
-For each confirmed finding, strip the case to the smallest input
-that still violates the oracle. Update the repro command.
+If available, use `principle-minimize-reader-load` to keep the
+minimal case and repro easy to inspect, and
+`principle-sequence-verifiable-units` to reduce it in independently
+checkable steps. For each confirmed finding, strip the case to the
+smallest input that still violates the oracle. Update the repro command.
 
 Done when no smaller input still violates the oracle and the
 finding's repro command runs as written.
+
 
 ### 5. Test
 
@@ -187,7 +202,9 @@ If available, use `principle-test-behavior-not-implementation` for
 every regression and hardening test. Call the subject as its users do,
 assert a literal expected value or observable effect, and delete or
 rewrite any test that would pass when every imported function returns
-`undefined`.
+`undefined`. Use `principle-encode-lessons-in-structure` to preserve
+the oracle and failure mode, and `principle-foundational-thinking` to
+keep the test tied to the behavior that matters.
 
 Write a permanent negative test in the host repo's real suite — same
 directory and assert style as existing tests, asserting the oracle.
@@ -211,7 +228,10 @@ For each confirmed finding, trace the observed behavior to its root
 cause before editing. If available, use `principle-fix-root-causes`:
 reproduce the failure, ask why until the shared cause is found, and fix
 that cause rather than adding a symptom guard. Check every sibling
-caller of the same behavior before applying the fix.
+caller of the same behavior before applying the fix. Use
+`principle-subtract-before-you-add` to remove obsolete complexity,
+`principle-type-system-discipline` to keep boundaries explicit, and
+`principle-sequence-verifiable-units` to keep each change checkable.
 
 Then apply the minimal change that satisfies the oracle. Smallest diff
 that turns the red test green.
@@ -233,6 +253,12 @@ code you just fixed are evidence your fix or your test is
 incomplete, not evidence the tool is wrong.
 
 ### Run-end checks
+
+Use `principle-prove-it-works` and
+`principle-outcome-oriented-execution` to keep the report focused on
+observable results. Use `principle-guard-the-context-window` to keep
+the final report concise and the discarded scratch evidence out of the
+user-facing output.
 
 Before delivering the report, verify all of the following:
 
