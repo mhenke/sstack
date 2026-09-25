@@ -9,35 +9,24 @@ isolated dir).
 
 ## Verdict
 
-> **Stale**: the PASS numbers below were produced by the skill text at
-> commit `9979718`. The skill has since gained PBT delegation, mutation
-> references, run-end checks, a steel-man Verify step, and the
-> edge-case/negative-case vocabulary split.
->
-> **Fresh runs 2026-09-25** (skill text `d7f5ad3` plus uncommitted
-> lens/runSubagent work): Python PASS (1 confirmed boundary finding,
-> red→green, seed_id malformed but content matches py-1).
-> TypeScript INVALID (one empty finding object). JavaScript reported
-> 2 confirmed + 1 refuted, ungraded (seed_id null). C++ reported 5
-> confirmed, ungraded. Java report pending (task returned scaffolding,
-> not findings).
+> **Graded 2026-09-24** with the content-match grader (`b05b94b`)
+> against the current skill text. Findings link to goldens by
+> trigger content (function name / trigger words across surface,
+> case, oracle); self-reported `seed_id` is advisory, landed
+> regressions are verified on disk.
 
-The current acceptance record covers the original Python and
-TypeScript runs. JavaScript, Java, and C++ fixtures now exist for
-baseline validation, but their cold-run acceptance is **not yet
-recorded**. Do not report language support as proven until a cold run
-lands in this file for that fixture.
+| Repo | Verdict | Detail |
+|---|---|---|
+| seeded-py | PASS | 7 findings; py-1, py-3 content-matched with landed red→green regressions; label contradictions recorded as warnings |
+| seeded-java | PASS | 4 confirmed; java-1, java-2, java-4 content-matched, 4/4 red→green claims verified against workspace test files |
+| seeded-ts | INVALID | one empty finding object; run still in progress |
+| seeded-js | INVALID | report hand-typed, unparseable JSON (line 33); evidence fingerprints placeholder (`a1b2c3d4...`) — replay grades them fabricated |
+| seeded-cpp | not landed | 7 confirmed claimed but regression shape non-compliant (no `before`/`after`); run still in progress |
 
-| Repo | Seeds confirmed | Failing oracle regressions | Negative control | Verdict |
-|---|---|---|---|---|
-| seeded-py | 4/5 (py-1, py-2, py-4, py-5); py-3 not found | 9 | 9/9 flip — 14/14 green | PASS (stale) |
-| seeded-ts | 5/5 (ts-1, ts-2, ts-3, ts-4, ts-5) + 1 unseeded real bug (M5) | 22 | 34/35 flip; 1 disjunctive-oracle test defect | PASS (stale) |
-
-Acceptance criterion (≥1 seeded bug confirmed with a fail-then-pass
-regression) met for both original repos. Stretch (majority of seeds)
-met for both. All numbers below are from the CLEAN re-runs (#6 py,
-CleanTs ts) performed after the final-review decontamination; earlier
-contaminated runs are retained in the run history for the record only.
+The historical PASS numbers below were produced by the skill text at
+commit `9979718` and are stale for the current text. JavaScript, Java,
+and C++ cold-run acceptance is now recorded above; do not report
+language support as proven beyond what this table shows.
 
 ## Run history (python)
 
@@ -46,17 +35,27 @@ contaminated runs are retained in the run history for the record only.
 | #1 | pre-guardrail | temp copy, prompt-only | INVALID — 9 regressions pinned the buggy behavior (all passing) |
 | #2 | pre-guardrail | temp copy, prompt-only | INVALID — edited source (`shop/pricing.py`), reported 0 findings after self-fixes |
 | #3 | pre-guardrail | temp copy, prompt-only | INVALID — escaped temp target, edited the main-repo seeds, read main-repo BUGS.md; seeds restored via `git checkout`, 5/5 green, probes reproduce |
-| #4 | pre-guardrail | isolated workspace (CONTAMINATED lens files) | Superseded — not evidence |
+| #4 | decontaminated (CONTAMINATED lens files) | isolated workspace | Superseded — not evidence |
 | #5 | decontaminated | isolated workspace | FAIL 0/5 — 105 attack scripts never reached the functions (wrong import path, missing args); every "oracle satisfied" was a harness TypeError |
 | #6 | decontaminated + execution-validity fix | isolated workspace | PASS (pre-audit skill text) |
 | #7 | v0.1.0 + PBT delegation + mutation + run-end checks + steel-man + edge-case vocab | isolated workspace, read-only lock | INVALID — 10 findings, 10 green characterization regressions (bug-pinning). Source untouched. Run-end check #4 not applied by the cold agent. |
+| ColdPy-2 | current text (`e29af03`+) | isolated workspace | PASS on root `report.json` (7 findings, py-1/py-3 matched); `.sstack/report.json` re-emit hit a control-char parse error; evidence files still being written |
 
 ## Run history (typescript)
 
 | Run | Skill text | Isolation | Outcome |
 |---|---|---|---|
 | CleanTs | decontaminated + execution-validity fix | isolated workspace | PASS (pre-audit skill text) |
-| RunTs | v0.1.0 + PBT delegation + mutation + run-end checks + steel-man + edge-case vocab | isolated workspace, read-only lock | DID NOT COMPLETE — 40+ min, stuck in Attack, no regressions landed, no findings reported. Fan-out subagents explored the sstack repo, not the temp workspace. Source and happy-path suite untouched. |
+| RunTs | v0.1.0 + PBT delegation + mutation + run-end checks + steel-man + edge-case vocab | isolated workspace, read-only lock | DID NOT COMPLETE — 40+ min, stuck in Attack, no regressions landed, no findings reported. Fan-out subagents explored the sstack repo, not the temp workspace. Source and tests untouched. |
+| ColdTs-2 | current text (`e29af03`+) | isolated workspace | in progress; draft report had one empty finding object (INVALID as of 2026-09-24 21:45) |
+
+## Run history (js / java / cpp, current text)
+
+| Run | Fixture | Outcome |
+|---|---|---|
+| ColdJs | seeded-js | INVALID — finished 3 confirmed + fixes + 4 test files, but hand-typed `report.json` unparseable (unescaped quotes, line 33) and all evidence fingerprints placeholder (`a1b2c3d4...`); replay grades them fabricated |
+| ColdJava | seeded-java | PASS — 4 confirmed red→green; java-1/2/4 content-matched; self-labels shifted (advisory only) |
+| ColdCpp | seeded-cpp | in progress — 7 confirmed claimed, regression object non-compliant (`status:"red"` instead of `before`/`after`), evidence JSONs not yet emitted |
 
 Runs #1–#5 drove four product fixes, all committed:
 - `2880501` — forbid bug-pinning regressions; require per-surface lens
@@ -148,3 +147,13 @@ decontaminated skill; their results are the verdict table above.
   workspace. Prompt-only containment failed three times.
 - The tool found a bug the answer key did not contain (M5, spread
   overflow). That is the strongest signal in this record.
+- The 2026-09-24 wave graded INVALID for artifact reasons, not
+  judgment reasons: hand-typed JSON (unescaped quotes, control chars,
+  placeholder fingerprints, wrong regression shape). The fixes are
+  contractual, not polite: script-emitted reports with in-process
+  fingerprints, content-match grading, out-of-loop replay. A finding
+  whose evidence cannot replay is not proven, however sharp the
+  prose.
+- Self-reported seed labels are unreliable across all five fixtures
+  (Java shifted by one; Python invented `py-6`–`py-8`). The grader
+  treats them as advisory; content match carries every pass.
