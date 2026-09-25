@@ -37,7 +37,9 @@ belong in the pack.
   stage.
 - **Agent** — a `runSubagent` dispatch handle. One file per shipped
   lens (`agents/sstack-<lens>-attacker.md`); the orchestrator passes
-  workspace, surface map, and rubric inline.
+  workspace, surface map, and rubric inline. The attacker file itself
+  carries the Report format block: a dispatched subagent starts blank
+  and cannot resolve a reference into the orchestrator's file.
 - **Runner** — deterministic execution of generated cases. Deferred:
   v0 has the agent run real commands itself and quote real output.
 - **Oracle** — the expected-behavior declaration written *before*

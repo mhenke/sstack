@@ -84,10 +84,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   informational after a landed fix)
 - Report contract: JSON emitted by script with in-process
   fingerprint; hand-typed reports grade INVALID
+- Fan-out contract proven by micro-test (3 reps per arm, fresh-context
+  subagents on a seeded probe): with the old pointer text, 0/3 returned
+  the seven-field block (improvised: JSON envelopes, markdown tables,
+  one-line summaries); with the block inline, 3/3 returned it
 - Consistency pass across skills, agents, docs, and root files:
   one name for the per-finding block ("Report format", replacing
-  "sstack returns format"); each attacker file carries that block
-  inline (a dispatched subagent never reads the orchestrator's file);
+  "sstack returns format"); each attacker file carries the block;
   lens-skill frontmatter delivery clause unified; stale "proof open"
   and "acceptance pending" claims corrected in ARCHITECTURE, ROADMAP,
   RESEARCH, and the scanner doc; AGENTS.md conventions now match the

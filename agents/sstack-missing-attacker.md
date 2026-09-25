@@ -31,7 +31,7 @@ prompt is the **user message** with labeled sections (typically
 Return every finding as one block, exactly these seven fields:
 
 ```
-lens: <this lens>
+lens: <lens>
 surface: <function or endpoint>
 case: <concrete input and action>
 oracle: <expected behavior under the adverse condition>

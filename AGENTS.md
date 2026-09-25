@@ -56,6 +56,11 @@ the skill and the decontaminated fixture together in one temp dir.
   example; `observed (bug)` marks the defect), and When not to apply.
   Extra sections (Operating limits, Language notes, Failure modes to
   watch for) are allowed where the lens needs them.
+- The seven-field Report format block is defined once in
+  `skills/sstack/SKILL.md` and carried verbatim by every attacker file
+  (a dispatched subagent starts blank; its own file is the guaranteed
+  carrier). Changing the block means changing all seven copies in one
+  commit.
 - A new lens is an `agents/sstack-<name>-attacker.md` file plus a
   `skills/sstack-<name>/SKILL.md` rubric plus one row in SKILL.md's
   lens index. The index is the only routing mechanism.

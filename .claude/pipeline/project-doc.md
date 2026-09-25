@@ -98,7 +98,7 @@ CHANGELOG.md                       Keep a Changelog format
 ## Code Style Conventions
 
 - **Skill frontmatter**: exactly `name` + `description`; description is one long trigger-phrase sentence. `SKILL.md` must stay ≤ 500 lines (currently 377).
-- **Agent files**: YAML frontmatter with `name` + `description`; body carries the rubric fallback, the work steps, and the Report format block inline (co-located: a dispatched subagent never sees the orchestrator's file).
+- **Agent files**: YAML frontmatter with `name` + `description`; body carries the rubric fallback, the work steps, and the Report format block byte-identical to SKILL.md's (seven copies, one commit; a dispatched subagent never sees the orchestrator's file).
 - **Lens skill files**: Case-generation heuristics, Oracle patterns with an inline `Worked example` paragraph (one python plus one ts/js example; `observed (bug)` marks the defect), and When not to apply. Extra sections (Operating limits, Language notes, Failure modes to watch for) allowed where the lens needs them.
 - **Prose style**: hard-wrapped ~60–72 columns, imperative voice, backticks for identifiers and paths.
 - **Python eval**: PEP 8, snake_case, module docstrings, no type hints, no classes, deliberately no validation.
@@ -153,7 +153,7 @@ None. Single-process, local files. `evals/acceptance.py` copies the orchestrator
 | `CONTEXT.md` | judging glossary (integrity, drift, content match, INVALID) |
 
 ## Changed Files
-agents/sstack-*-attacker.md (inline Report format, Parent-orchestration section removed), skills/sstack-*/SKILL.md (frontmatter unified), skills/sstack/SKILL.md + docs/RESEARCH.md + docs/ARCHITECTURE.md + ROADMAP.md + AGENTS.md + CONTEXT.md (consistency pass)
+AGENTS.md, CHANGELOG.md, docs/ARCHITECTURE.md, agents/sstack-*-attacker.md (`lens: <this lens>` → `lens: <lens>`, block now byte-identical across all seven copies; micro-test recorded)
 
 ## Last Scanned
-2026-09-25 (delta: skills/agents consistency review — returns-format naming, co-located Report block, stale-claim sweep, CONTEXT.md additions)
+2026-09-25 (delta: fan-out micro-test result + block-sync convention)
