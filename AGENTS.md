@@ -10,18 +10,19 @@ concision. Fragments over sentences. Findings over process.
 
 ## Stack Context
 
-A Markdown skill pack (agent-skills `SKILL.md`) plus a POSIX sh harness.
-`evals/` holds Python, TypeScript, JavaScript, Java, and C++ fixtures
-that are broken on purpose.
+A Markdown skill pack (agent-skills `SKILL.md`) plus a Python eval
+harness (`evals/acceptance.py`). `evals/` holds Python, TypeScript,
+JavaScript, Java, and C++ fixtures that are broken on purpose.
 
 ## Rules
 
 ### Scope lock (v0)
 
-The pack ships zero runtime dependencies and no CLI. `runners/`,
-`evidence/`, and `.sstack/learn/` are documented v1 in
-`docs/ARCHITECTURE.md`; they are absent from the tree and stay absent
-rather than stubbed. `agents/` holds the four shipped lens attackers.
+The pack ships zero runtime dependencies and no CLI. `runners/` is
+documented v1 in `docs/ARCHITECTURE.md`; it is absent from the tree
+and stays absent rather than stubbed. The evidence schema and learn
+loop ship as skill text plus `evals/replay.py`, not as a runtime.
+`agents/` holds the six shipped lens attackers.
 
 ### Seeds are frozen
 
@@ -68,11 +69,12 @@ Baselines, green before any commit:
 - `cd evals/seeded-ts && bun run test` → 6 passed
 - `cd evals/seeded-js && npm test` → 1 passed
 - `cd evals/seeded-cpp && cmake -S . -B build && cmake --build build && ctest --test-dir build` → 1 passed
-- `cd evals/seeded-java && javac -d /tmp/seeded-java-classes src/main/java/com/sstack/Shop.java` → compiles
+- `cd evals/seeded-java && javac -d target/classes src/main/java/com/sstack/Shop.java && javac -cp target/classes:junit-console.jar -d target/test-classes src/test/java/com/sstack/ShopTest.java && java -jar junit-console.jar execute --class-path target/classes:target/test-classes --scan-class-path` → 3 passed (jar auto-fetched by `prepare`; see `evals/seeded-java/RUN_TESTS.md`)
 
 The unified eval entry point is `python3 evals/acceptance.py`:
-`prepare <fixture>`, `prepare-all`, and `grade <report.json>`. It never
-launches a host-specific cold agent.
+`prepare <fixture>`, `prepare-all`, `grade <workspace>`, and
+`replay <workspace>`. It never launches a host-specific cold agent.
+`grade` matches findings to goldens by content, not by seed labels.
 An agent saying it found bugs is not evidence. No coverage tooling exists and none is needed.
 
 Failure modes this project has actually hit, all worth a regression
@@ -114,8 +116,8 @@ evidence is either refreshed or marked stale.
 
 Name the noun a new subsystem belongs to and where it loads. v0 is
 content-on-demand on purpose: the entry skill stays small, lens files
-load per selection, and the v1 list (runners, evidence schema, learn
-loop, agents-as-files, host packaging) extends without restructuring.
+load per selection, and extension (runners, new lenses, host
+packaging) adds files without restructuring.
 
 **Done when** the noun is named, the loading tier is stated, and the
 change requires no edit to an existing lens file or stage.

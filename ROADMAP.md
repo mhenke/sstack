@@ -12,11 +12,12 @@ of a run. Anything that does neither is out.
 - Six lenses shipped: boundaries, malformed, missing, ownership,
   exceptional-conditions, resource-exhaustion.
 - Five seeded fixtures: Python, TypeScript, JavaScript, Java, C++.
-- Cold-run evidence: Python PASS (2026-09-25, seed_id malformed),
-  TypeScript INVALID (empty finding), JavaScript/C++ reported but
-  ungraded, Java pending. Last clean evidence remains `9979718`.
-- Findings JSON and `/sstack learn` shipped in skill text; neither has
-  cold-run proof yet.
+- Cold-run evidence (2026-09-24, content-match grader): Python PASS,
+  Java PASS (3/5 seeds, landed regressions), C++ 7 confirmed but
+  regressions not landed, JS INVALID (hand-typed JSON), TS INVALID
+  (empty finding). `9979718` remains the last fully clean record.
+- Findings JSON shipped with a pinned schema and out-of-loop replay
+  (`b05b94b`); `/sstack learn` shipped in skill text, no cold proof.
 
 ## Open, in order
 
@@ -34,11 +35,12 @@ of a run. Anything that does neither is out.
 
 - **Why**: findings JSON exists but nobody has re-verified a finding
   from the file alone.
-- **What**: pick one graded PASS finding per fixture and re-run its
-  recorded command, exit code, and regression pointer with the agent
-  out of the loop.
-- **Done when**: all five re-verify green, or the failures are filed
-  as skill bugs.
+- **What**: `evals/acceptance.py replay <workspace>` recomputes each
+  evidence file's fingerprint (integrity) and re-runs its command
+  (drift, informational post-fix). Run it on every graded PASS
+  fixture and record the result.
+- **Done when**: every graded PASS fixture replays with integrity ok,
+  or the failures are filed as skill bugs.
 
 ### 3. Learn-loop proof
 
@@ -76,6 +78,8 @@ of a run. Anything that does neither is out.
 - Unified eval entry point `evals/acceptance.py` (`2aa556f`).
 - Learn loop in skill text (`4da9a5f`); proof open.
 - Lifecycle principle mapping (`f7e053a`).
+- Content-match grader + integrity replay (`b05b94b`).
+- Goldens backfilled for js/java/cpp; junit jar auto-fetch (`fd3004e`).
 
 ## Explicitly not planned
 

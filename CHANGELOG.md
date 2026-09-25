@@ -45,6 +45,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Java, C++
 - Roadmap: Thermos per-lens fan-out architecture, C++ second
   verification mode question, Readme honesty line
+- ADR-0006: finding evidence is machine-re-verifiable; evidence
+  schema pinned in skill text; `evals/acceptance.py replay` audits
+  fingerprints out of the agent loop
+- ADR-0007: optional dependencies degrade inline; coverage is the
+  contract, parallelism is an optimization
+- Java test baseline: javac + junit-console with auto-fetched jar
+  (`evals/seeded-java/RUN_TESTS.md`); goldens backfilled for js,
+  java, and cpp fixtures
 
 ### Changed
 
@@ -56,11 +64,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - AGENTS.md restructured for the always-loaded budget
 - ROADMAP.md humanized and expanded
 - README language support stated honestly
+- Grader rewritten from first principles: findings match goldens by
+  content (trigger function/words across surface, case, oracle), not
+  by self-reported seed_id; landed regressions verified on disk;
+  `grade` takes a workspace and resolves `.sstack/report.json`
+- Replay semantics split: integrity (recomputed fingerprint vs
+  record; typed-in hashes grade fabricated) and drift (live re-run,
+  informational after a landed fix)
+- Report contract: JSON emitted by script with in-process
+  fingerprint; hand-typed reports grade INVALID
 
 ### Fixed
 
 - Attack coverage paragraph restored after silent deletion
 - Acceptance harness and skill corrected after guardrail iterations
+- SKILL.md lens index gains the missing `state` row; returns format
+  deduplicated to one canonical block in the orchestrator
+- writing-for-agents sweep: restored eaten verbs, co-located skill
+  names, single "attacker" term
 
 ### Security
 

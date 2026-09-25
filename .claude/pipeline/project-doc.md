@@ -74,13 +74,14 @@ docs/
 ├── TOOLS.md                       negative-testing tools by language
 ├── RESEARCH.md                    index into the 30-day scan library
 ├── LEARNED.md                     distilled research record
-└── adr/                           0001–0005 + README index + template
+└── adr/                           0001–0007 + README index + template
 
 evals/
-├── acceptance.py                   unified prepare/grade entry point
+├── acceptance.py                   unified prepare/grade/replay entry point
 ├── ACCEPTANCE.md                  run history, verdicts, contamination disclosure
-├── goldens.jsonl                  seeded expectations
-├── graders/                       deterministic seeded-acceptance grader
+├── goldens.jsonl                  seeded expectations (25 rows, all five fixtures)
+├── graders/                       content-match seeded-acceptance grader
+├── replay.py                      out-of-loop evidence integrity auditor
 ├── drift-suite.yaml               frozen eval configuration
 ├── baseline-base.json             gate token, currently not_run
 ├── seeded-py/                     Python fixture, 5 bugs + BUGS.md answer key
@@ -134,8 +135,8 @@ None. Single-process, local files. `evals/acceptance.py` copies the orchestrator
 ## Test Coverage
 
 - **Overall coverage: not measured** — no coverage tooling, by design.
-- **Baselines**: `evals/seeded-py` → `pytest -q`; `evals/seeded-ts` → `bun run test`; `evals/seeded-js` → `npm test`; `evals/seeded-cpp` → CMake/CTest; `evals/seeded-java` → `javac` compile.
-- **Acceptance**: cold-run eval per ADR-0003, recorded in `evals/ACCEPTANCE.md`. Fresh 2026-09-25 runs: Python PASS (seed_id malformed), TypeScript INVALID (empty finding), JavaScript/C++ reported-ungraded, Java pending. Last clean evidence remains `9979718`.
+- **Baselines**: `evals/seeded-py` → `pytest -q`; `evals/seeded-ts` → `bun run test`; `evals/seeded-js` → `npm test`; `evals/seeded-cpp` → CMake/CTest; `evals/seeded-java` → javac + junit-console (jar auto-fetched; `RUN_TESTS.md`).
+- **Acceptance**: cold-run eval per ADR-0003, recorded in `evals/ACCEPTANCE.md`. Fresh 2026-09-24 runs on current text (content-match grader): Python PASS, Java PASS, C++ regressions not landed, JS/TS INVALID (hand-typed artifacts). Last fully clean record remains `9979718`.
 
 ## Entry Points
 
@@ -147,11 +148,12 @@ None. Single-process, local files. `evals/acceptance.py` copies the orchestrator
 | `docs/ETHOS.md` | four rules |
 | `docs/ARCHITECTURE.md` | lifecycle, six definitions, taxonomy |
 | `docs/adr/README.md` | decision index |
-| `evals/acceptance.py` | unified prepare/grade entry point |
+| `evals/acceptance.py` | unified prepare/grade/replay entry point |
 | `evals/ACCEPTANCE.md` | evidence record |
+| `CONTEXT.md` | judging glossary (integrity, drift, content match, INVALID) |
 
 ## Changed Files
-README.md, docs/ARCHITECTURE.md, evals/ACCEPTANCE.md (six-lens five-fixture current-state rewrite: 6-lens diagram, Learn stage, findings JSON, per-fixture evidence table)
+AGENTS.md, CHANGELOG.md, README.md, ROADMAP.md, docs/ARCHITECTURE.md, evals/README.md, evals/acceptance.py, evals/graders/seeded_acceptance.py, evals/replay.py, skills/sstack/SKILL.md (content-match grader, integrity replay, evidence schema pin, docs propagation)
 
 ## Last Scanned
-2026-09-25 (delta: six-lens five-fixture current-state rewrite)
+2026-09-24 (delta: first-principles eval redesign propagated through docs; CONTEXT.md glossary added)

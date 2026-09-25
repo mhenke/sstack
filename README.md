@@ -122,20 +122,22 @@ It hands back a temp workspace with a deliberately broken repo and
 nothing else. Launch your host's cold agent in that directory, then:
 
 ```bash
-python3 evals/acceptance.py grade path/to/report.json
+python3 evals/acceptance.py grade path/to/workspace
 ```
 
-`prepare-all` creates workspaces for all five fixtures. The entry point
-never launches an agent or reads `BUGS.md`; host-specific cold-agent
-dispatch stays outside the repository.
+`prepare-all` creates workspaces for all five fixtures. `grade`
+matches findings to the answer key by content, not by the labels an
+agent guesses; `replay` re-audits each finding's evidence file with
+the agent out of the loop. The entry point never launches an agent or
+reads `BUGS.md`; cold-agent dispatch stays outside the repository.
 
 | Fixture | Seeds | Current cold evidence |
 |---|---|---|
-| seeded-py | 5 | 1 confirmed boundary finding, red→green; seed_id malformed |
-| seeded-ts | 5 | INVALID; one empty finding object |
-| seeded-js | 5 | 2 confirmed + 1 refuted as reported, ungraded |
-| seeded-java | 5 | pending; task returned scaffolding, not findings |
-| seeded-cpp | 5 | 5 confirmed as reported, ungraded |
+| seeded-py | 5 | PASS; seeds content-matched red→green, evidence re-emit in progress |
+| seeded-ts | 5 | INVALID; empty finding object |
+| seeded-js | 5 | INVALID; hand-typed JSON unparseable |
+| seeded-java | 5 | PASS; 3/5 seeds content-matched with landed regressions |
+| seeded-cpp | 5 | 7 confirmed claimed, regressions not landed |
 
 Historical clean evidence remains `9979718`: Python 4/5 seeds with 9
 red→green regressions, TypeScript 5/5 plus one unseeded real bug with
