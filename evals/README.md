@@ -43,12 +43,13 @@ Creates a temporary workspace and prints its path. The workspace gets:
 
 - one broken fixture
 - the current `skills/sstack/` orchestrator
-- the four peer lens skills
-- the four attacker agents
+- the six peer lens skills
+- the six attacker agents
 - `.sstack-host-repo`
 
 It strips `BUGS.md`, `.git`, caches, `node_modules/`, `target/`, and
-`build/`. The cold agent must run from the printed directory.
+`build/` (the java workspace gets its JUnit launcher re-fetched). The
+cold agent must run from the printed directory.
 
 ### `prepare-all`
 
@@ -75,11 +76,18 @@ Example report shape:
       "observed": "returns []",
       "verdict": "confirmed",
       "repro": "pytest -q tests/test_shop.py",
-      "regression": {"before": "red", "after": "green"}
+      "regression": {"file": "tests/test_shop.py", "test": "test_page_zero", "before": "red", "after": "green"}
     }
   ]
 }
 ```
+
+### `replay <workspace>`
+
+Re-verifies each `.sstack/findings/<slug>.json` evidence file from a
+finished run with no agent in the loop: re-runs the recorded command,
+compares exit code and output fingerprint against the record. Exit 0
+only when every finding replays verified.
 
 ## Fixtures
 
