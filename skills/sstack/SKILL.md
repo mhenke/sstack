@@ -183,6 +183,12 @@ finding's repro command runs as written.
 
 ### 5. Test
 
+If available, use `principle-test-behavior-not-implementation` for
+every regression and hardening test. Call the subject as its users do,
+assert a literal expected value or observable effect, and delete or
+rewrite any test that would pass when every imported function returns
+`undefined`.
+
 Write a permanent negative test in the host repo's real suite — same
 directory and assert style as existing tests, asserting the oracle.
 

@@ -53,28 +53,30 @@ Then:
 Zero runtime. No CLI, no daemon, no binary. It is Markdown, and it
 runs wherever your agent already does.
 
-### Optional verification skills
+### Optional lifecycle skills
 
-Install only the three skills sstack uses during Discover and premise
-checks:
+Install only the skills sstack uses across its lifecycle:
 
 ```bash
 npx skills@latest add cursor/plugins \
   --skill principle-attack-the-premise \
   --skill create-verification-skill \
   --skill maintain-verification-skill \
+  --skill principle-test-behavior-not-implementation \
+  --skill principle-fix-root-causes \
   --global
-This provides:
+```
 
-- `principle-attack-the-premise` — challenge shared assumptions when
-  repeated fixes fail the same gate
-- `create-verification-skill` — create or refresh the target's
-  verification map
-- `maintain-verification-skill` — keep that map current as the target
-  changes
+Lifecycle mapping:
 
-All three are optional. If they are not installed, sstack falls back to
-the target's documentation, types, and call sites.
+- `principle-attack-the-premise` — Attack
+- `create-verification-skill` — Discover
+- `maintain-verification-skill` — Discover
+- `principle-test-behavior-not-implementation` — Test
+- `principle-fix-root-causes` — Fix
+
+All are optional. If they are not installed, sstack falls back to its
+built-in prose and the target's documentation, types, and call sites.
 
 ## Languages
 
