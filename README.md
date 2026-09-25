@@ -57,20 +57,14 @@ runs wherever your agent already does.
 
 The process is language-agnostic. The evidence is not.
 
-**Proven** - Python and TypeScript. Each has a seeded repo, a clean
-cold run, and a negative control. See the table below.
+**Supported fixture coverage** - Python, TypeScript, JavaScript, Java,
+and C++. Each has a seeded repo under `evals/` and a happy-path
+baseline. Only Python and TypeScript have recorded cold-run
+acceptance; the other three are baseline coverage, not proof.
 
-**Works by inference, unproven** - JavaScript, Java, C++, and
-everything else. The lifecycle is language-independent, and the agent
-brings its own knowledge of the target's idioms, but no run has
-measured it. JavaScript is the closest to proven: the `malformed` and
-`missing` lenses already reason about erased runtime types, which is
-the JavaScript condition, so it mostly needs a seeded repo. C++ is the
-furthest - the `missing` lens has no clean analogue there, because
-there is no null, only undefined behavior.
-
-`ROADMAP.md` has the per-language plan. If you are about to point this
-at Java or C++ and the answer matters, run the eval first.
+The lifecycle is language-independent. JavaScript, Java, and C++
+remain unproven for cold-agent acceptance until their runs are
+recorded. `ROADMAP.md` tracks that gap.
 
 ## What it leaves behind
 

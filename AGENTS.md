@@ -11,7 +11,8 @@ concision. Fragments over sentences. Findings over process.
 ## Stack Context
 
 A Markdown skill pack (agent-skills `SKILL.md`) plus a POSIX sh harness.
-`evals/` holds Python and TypeScript fixtures that are broken on purpose.
+`evals/` holds Python, TypeScript, JavaScript, Java, and C++ fixtures
+that are broken on purpose.
 
 ## Rules
 
@@ -95,7 +96,7 @@ not the harness.
 - `docs/ARCHITECTURE.md` — lifecycle, six definitions, lens taxonomy,
   v1 menu
 - `docs/adr/` — why the product is shaped this way
-- `evals/` — proof, never product
+- `evals/` — fixtures, goldens, graders, and acceptance evidence
 
 New artifacts fit one of six nouns: Skill, Lens, Agent, Runner, Oracle,
 Evidence. Anything that does not is not part of this pack.

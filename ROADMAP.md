@@ -286,20 +286,22 @@ input or a dying dependency.
 
 ## Language breadth: Python, JavaScript, TypeScript, Java, C++
 
-The process is language-agnostic, but the evidence is not. v0 ships one
-Python and one TypeScript seeded repo, and the lens heuristics are
-illustrated in those two languages only, so nothing yet supports
-"we support Java."
+The process is language-agnostic. v0 now carries one seeded fixture
+per supported language. Each fixture has five seeds and its own
+`BUGS.md` answer key; the answer key is stripped by the cold-run
+harness.
 
-Target set, in the order it should land:
-
-| Language | Status in v0 | Cost to add |
+| Language | Fixture | Baseline |
 |---|---|---|
-| Python | proven (`evals/seeded-py`) | done |
-| TypeScript | proven (`evals/seeded-ts`) | done |
-| JavaScript | none | lowest: the TS addendum covers it (types erased at runtime is the same point), needs a seeded repo only |
-| Java | none | high: null is load-bearing, overload resolution hides arity bugs, records vs maps differ from Python dicts |
-| C++ | none | highest: manual memory, UB, integer overflow, and the `missing` lens has no direct analogue (no null, just UB) |
+| Python | `evals/seeded-py` | `pytest -q` |
+| TypeScript | `evals/seeded-ts` | `bun run test` |
+| JavaScript | `evals/seeded-js` | `node --test` |
+| Java | `evals/seeded-java` | `mvn test` |
+| C++ | `evals/seeded-cpp` | `cmake` + `ctest` |
+
+These are fixture baselines, not cold-run acceptance results. The
+current acceptance record remains stale until a cold agent runs each
+fixture against the current skill text.
 
 ### Per-language lens addenda
 

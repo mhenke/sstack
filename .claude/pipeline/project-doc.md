@@ -4,16 +4,16 @@
 ## Tech Stack
 
 - **Deliverable type**: agent-agnostic skill pack — Markdown (agent-skills `SKILL.md` format). No runtime, no CLI, no daemon.
-- **Language**: Markdown (skill + docs); POSIX `sh` (acceptance harness); Python 3.10+ and TypeScript 5.5+ exist only inside `evals/` as fixture code under test.
-- **Framework**: none for the pack itself. Eval repos: pytest (Python), vitest 2.x (TypeScript, run under Bun).
+- **Language**: Markdown (skill + docs); POSIX `sh` (acceptance harness); Python 3.10+, TypeScript 5.5+, JavaScript, Java 17+, and C++17 exist only inside `evals/` as fixture code under test.
+- **Framework**: pytest (Python), vitest 2.x (TypeScript/Bun), Node test runner (JavaScript), JUnit 5/Maven (Java), CMake/CTest (C++).
 - **Database / Styling / State Management**: none. Not applicable to this project.
 - **Host**: any agent that reads `skills/sstack/SKILL.md` (Claude Code, OpenCode, Cursor, Codex). Install = `npx skills@latest add mhenke/sstack` or copy the directory.
 
 ## Dependencies
 
 - **Core**: none. The pack has zero runtime dependencies by design.
-- **Dev / tooling (repo maintenance only)**: `rsync` (acceptance harness), `python3` + `pytest` (py eval), `bun` + `vitest` + `typescript` (ts eval).
-- **Testing**: pytest 9.x (py eval), vitest ^2.0.0 (ts eval).
+- **Dev / tooling**: `rsync` (acceptance harness), `python3` + `pytest`, `bun` + `vitest` + `typescript`, `node --test`, `javac`, `cmake` + `ctest`.
+- **Testing**: pytest, vitest, Node test runner, JUnit 5, CTest.
 
 ## Architecture Pattern
 
@@ -79,14 +79,15 @@ docs/
 evals/
 ├── run-acceptance.sh              builds isolated cold-run workspace
 ├── ACCEPTANCE.md                  run history, verdicts, contamination disclosure
+├── goldens.jsonl                  seeded expectations
+├── graders/                       deterministic seeded-acceptance grader
+├── drift-suite.yaml               frozen eval configuration
+├── baseline-base.json             gate token, currently not_run
 ├── seeded-py/                     Python fixture, 5 bugs + BUGS.md answer key
-│   ├── shop/                      pagination.py, pricing.py, cart.py
-│   ├── tests/                     happy-path baseline (5 tests)
-│   └── BUGS.md                    answer key (never shipped to cold agent)
 ├── seeded-ts/                     TypeScript fixture, 5 bugs + BUGS.md
-│   ├── src/                       pagination.ts, pricing.ts, cart.ts
-│   ├── tests/                     happy-path baseline (6 tests)
-│   └── BUGS.md                    answer key
+├── seeded-js/                     JavaScript fixture, 5 bugs + BUGS.md
+├── seeded-java/                   Java fixture, 5 bugs + BUGS.md
+└── seeded-cpp/                    C++ fixture, 5 bugs + BUGS.md
 README.md                          install, lifecycle diagram, acceptance table, docs links
 ROADMAP.md                         v1 (proof quality), v2 (run cost), language breadth, deferred
 CHANGELOG.md                       Keep a Changelog format

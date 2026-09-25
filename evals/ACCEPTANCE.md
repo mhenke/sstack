@@ -23,16 +23,22 @@ copies all of it into one isolated dir).
 > demonstrated end to end at `9979718` but has not been re-confirmed
 > on the current skill text.
 
+The current acceptance record covers the original Python and
+TypeScript runs. JavaScript, Java, and C++ fixtures now exist for
+baseline validation, but their cold-run acceptance is **not yet
+recorded**. Do not report language support as proven until a cold run
+lands in this file for that fixture.
+
 | Repo | Seeds confirmed | Failing oracle regressions | Negative control | Verdict |
 |---|---|---|---|---|
 | seeded-py | 4/5 (py-1, py-2, py-4, py-5); py-3 not found | 9 | 9/9 flip — 14/14 green | PASS (stale) |
 | seeded-ts | 5/5 (ts-1, ts-2, ts-3, ts-4, ts-5) + 1 unseeded real bug (M5) | 22 | 34/35 flip; 1 disjunctive-oracle test defect | PASS (stale) |
 
 Acceptance criterion (≥1 seeded bug confirmed with a fail-then-pass
-regression) met for both repos. Stretch (majority of seeds) met for
-both. All numbers below are from the CLEAN re-runs (#6 py, CleanTs ts)
-performed after the final-review decontamination; earlier contaminated
-runs are retained in the run history for the record only.
+regression) met for both original repos. Stretch (majority of seeds)
+met for both. All numbers below are from the CLEAN re-runs (#6 py,
+CleanTs ts) performed after the final-review decontamination; earlier
+contaminated runs are retained in the run history for the record only.
 
 ## Run history (python)
 
