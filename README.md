@@ -133,8 +133,8 @@ reads `BUGS.md`; cold-agent dispatch stays outside the repository.
 
 | Fixture | Seeds | Current cold evidence |
 |---|---|---|
-| seeded-py | 5 | PASS; 3/5 seeds content-matched, 8/8 evidence files replay intact |
-| seeded-ts | 5 | INVALID; empty finding object |
+| seeded-py | 5 | PASS; Learn-run-2 matched 5/5 seeds, 10/10 evidence replay intact |
+| seeded-ts | 5 | FAIL; zombie run landed nothing (pristine files), fingerprints typed in |
 | seeded-js | 5 | INVALID; hand-typed JSON unparseable |
 | seeded-java | 5 | PASS; 3/5 seeds content-matched with landed regressions |
 | seeded-cpp | 5 | FAIL; 7 confirmed with replayable evidence, but regression files never landed — caught by landed-check |

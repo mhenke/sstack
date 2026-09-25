@@ -56,6 +56,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Learn loop proven cold: run 2 cited run 1's `.sstack/learn/`
+  entries verbatim in Discover and matched 5/5 seeded-py bugs
+  (run 1: 3/5), 10/10 evidence replay intact
+- Grader rejects a regression whose file is byte-identical to the
+  frozen fixture original (ColdTs-2 claimed tests it never wrote)
+- Run-end check #1 forbids scratch-binary regressions: the file must
+  live in the repo's own suite (ColdCpp named `test_functions.cpp`,
+  absent from disk)
 - Lifecycle expanded: Regress split into Test (write regression, goes
   red) and Fix (apply minimal change, goes green)
 - Verify requires steel-manning observed behavior before recording
