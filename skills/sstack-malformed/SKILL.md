@@ -33,9 +33,9 @@ annotations).
   value or raises a domain error. Never a partially parsed result.
 - Arithmetic never silently changes type (result stays numeric).
 
-Worked example — Python `line_total(item)` calling
-`float(item["unit_price"])`: case `unit_price="abc"`, oracle
-`ValueError("unit_price must be numeric")`, observed (bug) raw
+Worked example — Python `fare_for(trip)` calling
+`float(trip["distance_km"])`: case `distance_km="far"`, oracle
+`ValueError("distance_km must be numeric")`, observed (bug) raw
 ValueError could-not-convert leaks. TypeScript `readConfig(raw)`
 calling `JSON.parse(raw)`: case `raw = "{invalid"`, oracle throws
 `Error("config is not valid JSON")`, observed (bug) raw SyntaxError

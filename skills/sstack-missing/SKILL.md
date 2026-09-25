@@ -32,15 +32,15 @@ absent data is distinguished from default data.
 - Result never silently degrades: no `NaN` totals, no `None`
   propagated into arithmetic.
 
-Worked example — Python `line_total(item)` indexing `item["unit_price"]`
-and `item.get("discount", 0)`: case A `{}` (unit_price absent), oracle
-`ValueError("unit_price is required")`, observed (bug) `KeyError`
+Worked example — Python `fare_for(trip)` indexing `trip["distance_km"]`
+and `trip.get("discount", 0)`: case A `{}` (distance absent), oracle
+`ValueError("distance_km is required")`, observed (bug) `KeyError`
 leaks. Case B `discount=None` (explicit null), oracle treated as absent
 so discount 0 applies, observed (bug) `TypeError` on `1 - None`.
 
-TypeScript `lineTotal({unitPrice, qty, discount?})` with
-`item.discount ?? 0`: case `{qty: 2}` (unitPrice absent, type erased at
-runtime), oracle throws `Error("unitPrice is required")`, observed (bug)
+TypeScript `priceFor({weightKg, zone, discount?})` reading
+`order.discount ?? 0`: case `{zone: 2}` (weightKg absent, type erased at
+runtime), oracle throws `Error("weightKg is required")`, observed (bug)
 returns `NaN` silently.
 
 ## When not to apply

@@ -19,6 +19,12 @@ SKILL = ROOT / "skills/sstack/SKILL.md"
 PAYLOAD_KEYS = ["slug", "lens", "surface", "case", "oracle", "verdict",
                 "repro", "fix", "regression"]
 
+GENERIC = {
+    "get", "set", "add", "run", "main", "init", "load", "save", "read",
+    "write", "count", "total", "index", "apply", "reset", "update", "delete",
+    "create", "remove", "parse", "print", "value", "values", "items", "data",
+}
+
 
 def emit(workspace, finding, fixture="seeded-py"):
     return subprocess.run(
@@ -126,3 +132,35 @@ def test_every_attacker_scratch_path_follows_its_lens():
             f"{attacker.name} does not name its own lens")
         assert "appended custom lens" in text, (
             f"{attacker.name} does not route an appended lens elsewhere")
+
+
+def test_shipped_text_names_no_fixture_identifier():
+    """A worked example that names a fixture's function or class lets a
+    cold run match a golden by echoing the prompt instead of finding the
+    bug. This has shipped three times: the ownership lens named
+    `search_orders`, the state lens named `Cart`, and the missing and
+    malformed lenses both named `line_total`/`lineTotal` with the three
+    planted pricing oracles."""
+    shipped = [p for p in list((ROOT / "skills").rglob("*.md"))
+               + list((ROOT / "agents").rglob("*.md"))]
+    fixture_ids = set()
+
+    patterns = (r"^\s*(?:class|def)\s+([A-Za-z_]\w{4,})",
+                r"export\s+(?:function|const|class)\s+([A-Za-z_]\w{4,})",
+                r"\b(?:public|private)?\s*(?:function|def)\s+([A-Za-z_]\w{4,})")
+    for path in (ROOT / "evals").glob("seeded-*/*/*"):
+        if path.suffix not in (".py", ".ts", ".js", ".java", ".cpp"):
+            continue
+        text = path.read_text(errors="replace")
+        for pattern in patterns:
+            fixture_ids.update(re.findall(pattern, text, re.M))
+    # Short, generic method names ("count", "get") collide with ordinary
+    # English and every host language; only distinctive names can leak an
+    # answer. Contamination that matters names a domain noun.
+    fixture_ids = {n for n in fixture_ids if len(n) >= 6 and n not in GENERIC}
+    assert fixture_ids, "no fixture identifiers parsed; the check is broken"
+    for path in shipped:
+        text = path.read_text()
+        for name in sorted(fixture_ids):
+            assert not re.search(rf"\b{re.escape(name)}\b", text), (
+                f"{path.relative_to(ROOT)} names fixture identifier {name!r}")
