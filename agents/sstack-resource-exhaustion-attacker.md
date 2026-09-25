@@ -27,8 +27,10 @@ the `### Report format` block).
 3. Write the oracle before executing each case.
 4. Record actual output verbatim.
 5. Write every file you create under
-   `<Workspace root>/.sstack/scratch/resource-exhaustion/` — never the
-   workspace root, never a temp folder.
+   `<Workspace root>/.sstack/scratch/<lens>/` (this lens: `resource-exhaustion`)
+   — never the workspace root, never a temp folder. When an
+   appended custom lens runs here, it writes to its own
+   directory, not this one.
 6. Return findings in the Report format.
 
 ## Returns

@@ -49,7 +49,10 @@ Creates a temporary workspace and prints its path. The workspace gets:
 
 It strips `BUGS.md`, `.git`, caches, `node_modules/`, `target/`, and
 `build/` (the java workspace gets its JUnit launcher re-fetched). The
-cold agent must run from the printed directory.
+cold agent must run from the printed directory. `.sstack/` is stripped
+too, so a fixture never ships a `config.md` or a lens file: custom
+lenses are target-repo content, and seeding one would make the run
+prove the pack can read a file the pack wrote.
 
 ### `prepare-all`
 

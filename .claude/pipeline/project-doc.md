@@ -122,6 +122,7 @@ No database, no ORM. Data shapes:
 - **Evidence contract**: the shipped emitter (`skills/sstack/scripts/emit_findings.py`) is the only writer of `findings/<slug>.{json,md}` and `report.json`; it runs each repro itself and fingerprints `sha256(stdout+stderr)[:16]`. `regression.before`/`after` are the literal tokens `red`/`green`.
 - **Containment**: the caller builds the temp workspace and dispatches the agent into it. Prompt-only containment has failed; the host-repo marker directs the agent to the right root, but enforcement is the caller's responsibility.
 - **Coverage rule**: every selected lens must have zero-or-more cases on every mapped surface. A lens with zero cases on a record/string-input surface is an incomplete run.
+- **Extension point**: a target repo authors attack strategy in `.sstack/lenses/<name>.md` and selects it in `.sstack/config.md` (`lenses.add` / `lenses.remove`). A custom lens appends its rubric to an existing attacker's `### Lens rubric` dispatch; it does not add an agent. Identity is the `name` frontmatter field, not the filename. Lens files resolving outside the target are skipped (realpath guard, mirrored from omos `discoverProjectLocalSkillNames`). Config and lenses are committable: `.sstack/*` is gitignored with `!.sstack/config.md` and `!.sstack/lenses/` negated. The eight `future` lens-index rows are activatable this way. ADR-0008 records the cost, that the pack cannot test this because the agent is the loader.
 
 ## Service Communication
 

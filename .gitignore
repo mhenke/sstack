@@ -7,8 +7,11 @@ docs/superpowers/
 __pycache__/
 *.pyc
 
-# sstack run artifacts (runtime output of the skill, not source)
-.sstack/
+# sstack run artifacts (runtime output of the skill, not source).
+# config.md and lenses/ are authored, not generated: keep them versionable.
+.sstack/*
+!.sstack/config.md
+!.sstack/lenses/
 .pytest_cache/
 
 # Node

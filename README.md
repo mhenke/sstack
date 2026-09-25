@@ -84,6 +84,42 @@ Markdown plus one stdlib-only Python script the agent runs to write
 its own evidence; where Python is absent, the same evidence is two
 shell commands (see [Evidence](#evidence)).
 
+### Custom lenses
+
+The seven shipped lenses are a floor. A repo can add its own under
+`.sstack/lenses/`, and sstack picks them up on the next run with no
+change to the pack:
+
+```
+.sstack/
+├── config.md        lenses.add / lenses.remove
+└── lenses/
+    └── ordering.md  name, description, applies-when, then the rubric
+```
+
+```markdown
+---
+name: ordering
+description: Operations applied out of sequence.
+applies-when: operations whose order changes the result
+---
+
+# Ordering lens rubric
+
+Case-generation heuristics, oracle patterns, worked examples, and
+when-not-to-apply guidance.
+```
+
+```markdown
+lenses.add: ordering, idempotency
+lenses.remove: ownership
+```
+
+`lenses.add` runs your lenses alongside the built-ins, not instead of
+them, and `lenses.remove` is reported in the summary so a dropped lens
+cannot hide. Both files are committable: run output is ignored, so a
+team's lenses travel with the repo they protect.
+
 ### For contributors
 
 `docs/`, `evals/`, and the acceptance record live only in a git

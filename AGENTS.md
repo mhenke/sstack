@@ -68,9 +68,14 @@ the skill and the decontaminated fixture together in one temp dir.
   files keep the seven field names as fallback. Verified by
   fresh-context probes: pasted, 5/5 exact blocks; paste omitted,
   2/4 kept all seven fields — paste is the carrier, not the file.
-- A new lens is an `agents/sstack-<name>-attacker.md` file plus a
-  `skills/sstack-<name>/SKILL.md` rubric plus one row in SKILL.md's
-  lens index. The index is the only routing mechanism.
+- A new shipped lens is an `agents/sstack-<name>-attacker.md` file
+  plus a `skills/sstack-<name>/SKILL.md` rubric plus one row in
+  SKILL.md's lens index. The index is the only routing mechanism.
+- A target-repo lens is `.sstack/lenses/<name>.md` selected by
+  `.sstack/config.md`; it needs no pack change and appends to an
+  existing attacker's dispatch. Both paths are open. Do not edit a
+  target's lens or config, and never weaken a lens's rules from a
+  custom file.
 - Conventional Commits: `docs:`, `feat:`, `fix:`, `test:`, `chore:`.
 
 ## Testing

@@ -34,7 +34,8 @@ belong in the pack.
 - **Lens** — an attack strategy over a failure class. Seven peer skills
   (`skills/sstack-<lens>/SKILL.md`) loaded inline under
   `### Lens rubric`, never by name. Selected per target by the Attack
-  stage.
+  stage. A target repo can add more without changing the pack: see
+  **Custom lens**.
 - **Agent** — a `runSubagent` dispatch handle. One file per shipped
   lens (`agents/sstack-<lens>-attacker.md`); the orchestrator pastes
   workspace, surface map, rubric, and the Report format block into
@@ -49,6 +50,15 @@ belong in the pack.
   plus machine JSON in `.sstack/findings/`. `evals/replay.py`
   re-verifies the fingerprint with the agent out of the loop.
 
+
+- **Custom lens** — a repo-authored attack strategy in
+  `.sstack/lenses/<name>.md`, selected by `.sstack/config.md`. The
+  seven shipped lenses are a floor, not a ceiling: a custom lens
+  appends its rubric to an existing attacker agent's dispatch rather
+  than adding a new agent, and runs under the same Report format,
+  emitter, and run-end checks. Config and lenses are the only
+  `.sstack/` entries kept out of the ignore list, so a team can
+  commit them.
 ## Taxonomy
 
 Negative testing is the domain; lenses explore it. Security is a
@@ -119,9 +129,12 @@ Discover consumes `create-verification-skill` and
 `principle-test-behavior-not-implementation`; Fix consumes
 `principle-fix-root-causes` when available, with docs/types/call-sites
 fallback. Every optional dependency carries an inline fallback
-(ADR-0007). Extension stays additive — one lens skill, one agent
-file, one index row per lens — and the evidence schema and replay
-verifier shipped as one example of that shape.
+(ADR-0007). Extension is additive and goes two ways: a pack
+extension is one lens skill, one agent file, one index row, and a
+target-repo extension is one file in `.sstack/lenses/`, selected by
+`.sstack/config.md` and appended to an existing attacker's dispatch,
+with no pack change at all. The evidence schema and replay verifier
+shipped as one example of the first shape.
 
 
 ## Prior art

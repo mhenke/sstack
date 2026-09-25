@@ -47,8 +47,10 @@ the `### Report format` block).
 7. For credential cases, record the exact request as sent, not the
    intent, and never record a live secret in the evidence.
 8. Write every file you create under
-   `<Workspace root>/.sstack/scratch/ownership/` — never the
-   workspace root, never a temp folder.
+   `<Workspace root>/.sstack/scratch/<lens>/` (this lens: `ownership`)
+   — never the workspace root, never a temp folder. When an
+   appended custom lens runs here, it writes to its own
+   directory, not this one.
 9. Return findings in the Report format.
 
 ## Returns

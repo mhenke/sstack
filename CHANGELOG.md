@@ -9,13 +9,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Target-repo custom lenses. A repo adds an attack strategy under
+  `.sstack/lenses/<name>.md` and selects it in `.sstack/config.md` with
+  `lenses.add` / `lenses.remove`, and the run picks it up with no pack
+  change. Modeled on oh-my-opencode-slim's project-local
+  customization: a custom lens **appends** its rubric to an existing
+  attacker's `### Lens rubric` rather than adding an agent, mirroring
+  how `<agent>_append.md` composes onto a resolved base prompt;
+  identity comes from `name` frontmatter, not the filename, matching
+  `discoverProjectLocalSkillNames`; and lens files resolving outside
+  the target are skipped, the same realpath guard that keeps a
+  symlinked `.opencode` from becoming arbitrary content injection.
+  Config and lenses are committable (`.sstack/*` ignored, the two
+  paths negated), so a team's lenses version with the repo they
+  protect. The eight `future` rows in the lens index, `ordering` and
+  `concurrency` among them, are now activatable by anyone. ADR-0008
+  records the decision and its cost: this is an extension point the
+  pack cannot test, since the agent is the loader
+- ADR-0008: the target repo authors its own lenses
 - Emitter/skill contract closed. The Report format block names
   seven fields, but the emitter also requires `slug`, `fix`, and
   `regression`; a cold agent following the skill verbatim had its
   findings rejected with exit 2. SKILL.md now enumerates the
-  payload, and `evals/test_emitter.py` (5 tests) pins the
-  contract in the repo's own runner, including a negative
-  control proving it turns red when the paragraph is removed
+  payload, and `evals/test_emitter.py` (9 tests) pins the contract in
+  the repo's own runner, including negative controls proving each test
+  turns red when its guarantee is reverted
 - ADR-0004: lenses delegate to the target's existing tools
 - ADR-0005: sstack finds, tests, and fixes (supersedes the
   audit-not-fix portion of ADR-0002)
