@@ -1,0 +1,9 @@
+{
+  "model": "base",
+  "status": "not_run",
+  "harness": "eval/graders/seeded_acceptance.py",
+  "goldens": "eval/goldens.jsonl",
+  "drift_suite": "eval/drift-suite.yaml",
+  "pass_rate": null,
+  "reason": "No model under test is defined; run the cold-agent acceptance harness before using this file as a promotion gate."
+}

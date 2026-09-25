@@ -1,0 +1,8 @@
+frozen_benchmarks: []
+domain_adjacent:
+  path: eval/goldens.jsonl
+  filter: "bucket == 'seeded-acceptance'"
+  n_items: 10
+drift_budget:
+  noise_tolerance_pts: 0
+  hard_fail_threshold_pts: 1
