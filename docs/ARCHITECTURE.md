@@ -23,7 +23,7 @@ resumable from its artifact (gstack's process lesson).
 | Fix | minimal source change that satisfies the oracle, turning red to green | shipped |
 | Learn | `.sstack/learn/` failure classes feeding future planning | shipped, proven cold 2026-09-24 |
 
-## Six definitions
+## Seven definitions
 
 These prevent drift back into "a big bag of negative-testing
 skills". If a new file does not fit one of these nouns, it does not
@@ -31,11 +31,12 @@ belong in the pack.
 
 - **Skill** — the methodology for a stage. One entry skill owns
   routing and rules (`skills/sstack/SKILL.md`).
-- **Lens** — an attack strategy over a failure class. Seven peer skills
-  (`skills/sstack-<lens>/SKILL.md`) loaded inline under
-  `### Lens rubric`, never by name. Selected per target by the Attack
-  stage. A target repo can add more without changing the pack: see
-  **Custom lens**.
+- **Lens** — an attack strategy over a failure class. Seven peer
+  skills ship (`skills/sstack-<lens>/SKILL.md`), loaded inline under
+  `### Lens rubric`, never by name, and selected per target by the
+  Attack stage. Seven is the shipped count, not the total: the index
+  carries eight more rows the pack has not built, and a target repo
+  can add any number. See **Custom lens**.
 - **Agent** — a `runSubagent` dispatch handle. One file per shipped
   lens (`agents/sstack-<lens>-attacker.md`); the orchestrator pastes
   workspace, surface map, rubric, and the Report format block into

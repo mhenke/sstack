@@ -122,8 +122,11 @@ fields alone are rejected. A finding with no regression yet is
 legitimate during Verify: the emitter warns and records the rest.
 
 Everything sstack creates lives under `.sstack/` — never the workspace
-root, never a temp folder elsewhere. Delete `scratch/` at run end; keep
-`pristine-src/` so evidence replays.
+root, never a temp folder elsewhere. That directory is created here,
+in the target repo, by this run: the pack is installed into a user's
+repo and brings only skills and agents, so nothing in it is inherited
+from wherever the pack was published. Delete `scratch/` at run end;
+keep `pristine-src/` so evidence replays.
 
 ## Custom lenses
 
@@ -139,21 +142,18 @@ lenses.add: ordering, idempotency
 lenses.remove: ownership
 ```
 
-`lenses.add` names lenses in `.sstack/lenses/`, matched by the `name`
-frontmatter field rather than the filename. Omit it to run every lens
-file found. `lenses.remove` drops built-ins by name; report each one in
-the chat summary, because a silent skip is a weakened run that reads
-as a clean one.
+`lenses.add` takes any number of lens names, matched in
+`.sstack/lenses/` by the `name` frontmatter field rather than the
+filename. Omit the directive to run every lens file found, which is
+the zero-config case. `lenses.remove` drops built-ins by name; report
+each one in the chat summary, because a silent skip is a weakened run
+that reads as a clean one.
 
 Only read a lens file that resolves inside the target repo. A symlink
 pointing elsewhere is skipped with a note in the report: a run must
 not take attack strategy from a path the user did not scope here. A
 malformed lens file is skipped with a one-line note, never a failed
-run. `.sstack/.gitignore` is written on the first emit, keeping
-`config.md` and `lenses/` committable; never edit it, and never add a
-root `.sstack/` rule to the target's `.gitignore`, because git cannot
-re-include a file under an ignored directory. Say so if the target
-already has one.
+run.
 
 A lens file carries `name`, `description`, and `applies-when`
 frontmatter, then the rubric body: heuristics, oracle patterns,
@@ -472,12 +472,11 @@ Write the machine-readable run report to exactly
 reads — one object per finding: `{"fixture", "findings":
 [{"seed_id", "lens", "surface", "case", "oracle", "observed",
 "verdict", "repro", "regression": {"file","test","before","after"}}]}`.
-`seed_id` is your best guess at which planted bug this is (or
-"other"); the finding's content is what carries the outcome, so a
-wrong guess costs nothing. The emitter in Workspace writes it, per
-finding, as each case verifies — so a crash keeps every finding
-written so far. A report or evidence file that does not parse is not
-evidence.
+`seed_id` is an optional free-form label for the finding, or "other";
+the content of a finding is what carries its outcome, so nothing
+depends on the label. The emitter in Workspace writes it, per finding,
+as each case verifies — so a crash keeps every finding written so
+far. A report or evidence file that does not parse is not evidence.
 
 In the chat report, one line per finding: `id | lens | surface |
 verdict | regression (file::test, red→green)` or `id | lens |

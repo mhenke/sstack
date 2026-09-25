@@ -21,7 +21,7 @@ isolated dir).
 
 | Repo | Verdict | Detail |
 |---|---|---|
-| seeded-py | PASS | ColdPy-4 on current text: 5/5 seeds, 13 confirmed red→green landed, 22/22 evidence replay intact, 0 drift (serial; earlier Learn-run-2 5/5 on `b9803cf`) |
+| seeded-py | PASS | ColdPy-5 on current text: 5/5 seeds (py-1/3/4/5/6), 8 confirmed + 4 refuted, 12/12 evidence replay intact, 0 drift, 17 tests green (5 baseline + 12 landed). Agent process exited 1 but every artifact passed objective grade and replay. The `state` and `ownership` seeds are in the fixture and unrun on a full cold pass |
 | seeded-java | PASS | ColdJava-3 on current text: java-1/2/4 content-matched, 5 confirmed red→green, 10 tests green, 7/7 evidence replay intact — the pre-schema-pin gap is closed |
 | seeded-ts | PASS | 15 confirmed red→green, 5/5 seeds content-matched, 37/37 tests, 19/19 evidence replay intact (ColdTs-4 on post-consistency text, orchestrator-resumed; prior: ColdTs-3 4/5) |
 | seeded-js | PASS | 7 confirmed; 5/5 seeds content-matched, landed regressions, 12/12 evidence files replay intact (ColdJs-2, rerun) |
@@ -45,6 +45,7 @@ grader caught, and every failure converted to a PASS on rerun.
 | ColdPy-R2 (Learn-loop run 2) | current text (`b9803cf`+) | isolated workspace + `.sstack/learn/` from run 1 | PASS — 10 findings, 5/5 seeds content-matched, replay 10/10 intact. Discover ordered attacks by the three learned lines (cited verbatim in `.sstack/map.md`); label contradictions: zero. Agent crashed (exit 1) before emitting artifacts; the orchestrator emitted them from the agent's landed tests + fixes, running each repro against a pristine fixture copy so recorded output is the real buggy behavior. |
 | ColdPy-3 (fan-out attempt) | current text (`13947ce`+) | isolated workspace | CANCELLED — dispatched six lens subagents; one attacker stalled past 50 min blocking its parent; host picked read-only `scout` subagents that cannot execute probes. Re-run in serial mode as ColdPy-4 |
 | ColdPy-4 | current text (`13947ce`+) | isolated workspace, serial lenses by dispatch override | PASS — 5/5 seeds, 13 confirmed red→green landed in `tests/test_shop.py`, 22 findings script-emitted, replay 22/22 intact, 0 drift. Mid-run report.json transiently named tests before the Test stage wrote them — incremental emission means grade after yield, not during |
+| ColdPy-5 | post-state-lens text (7 lenses, shipped emitter) | isolated workspace, serial lenses | PASS — 5/5 seeds content-matched (py-1/3/4/5/6), 8 confirmed + 4 refuted, 12 findings emitted through the shipped `emit_findings.py`, replay 12/12 intact, 0 drift, 17 tests green. Found an unseeded state defect beyond `py-6`: `Cart.__init__` stores the caller's mutable dict by reference, so `track()` writes through to the caller's data. Agent process exited 1; artifacts passed objective grade and replay, so the exit is recorded as a harness observation, not a verdict. Label contradictions (`py-b1!=py-1`, `py-b4!=py-3`, `py-m1!=py-5`, `py-n2!=py-4`, `py-s1!=py-6`) are advisory: grading is content-based |
 
 ## Run history (typescript)
 
@@ -84,6 +85,7 @@ command with the agent out of the loop.
 | seeded-cpp (ColdCpp-2, rerun) | 13/13 intact | 11 drifted (fix landed), 2 stable hardening refutes |
 | seeded-py (ColdPy-4, current text) | 22/22 intact | 0 drifted — repros ran against a pristine source copy |
 | seeded-java (ColdJava-3, current text) | 7/7 intact | 0 drifted — first java run with evidence JSONs |
+| seeded-py (ColdPy-5, current text) | 12/12 intact | 0 drifted — repros ran against a pristine source copy |
 
 Drift after a landed fix is expected and informational; a fabricated
 fingerprint is the disqualifier. Every PASS — all five — now carries
@@ -106,20 +108,29 @@ Also: `python3 evals/acceptance.py prepare` copies the skill INTO the
 temp workspace so a cold agent never needs to touch the sstack repo
 (run #3 escaped by editing the main-repo seeds and reading BUGS.md).
 
-## seeded-py: seed mapping (run #6, clean)
+## seeded-py: seed mapping (ColdPy-5, current text)
 
 | Seed | Found as | Regression |
 |---|---|---|
-| py-1 page=0 → `[]` | F2 (boundaries) | fail → pass |
-| py-2 add_item qty -1 → total -1 | F6 (boundaries) | fail → pass |
-| py-3 line_total({}) KeyError | not found | — |
-| py-4 discount=None TypeError | F7 (missing; oracle "treat as absent → 20.0" matches BUGS.md) | fail → pass |
-| py-5 unit_price="abc" raw ValueError | F8 (malformed) | fail → pass |
+| py-1 page=0 → `[]` | `py-b1` boundaries, `paginate` | `test_paginate_rejects_page_below_one` |
+| py-2 add_item qty -1 → total -1 | `py-b4` boundaries, `line_total` | `test_line_total_rejects_discount_out_of_range` |
+| py-3 line_total({}) KeyError | `py-n1` missing, `line_total` | `test_line_total_requires_unit_price_and_qty` |
+| py-4 discount=None TypeError | `py-n2` missing, `line_total` | `test_line_total_null_discount_defaults_to_zero` |
+| py-5 unit_price="abc" raw ValueError | `py-m1` malformed, `line_total` | `test_line_total_non_numeric_unit_price` |
+| py-6 stale cached `Cart.count` | `py-s1` state, `Cart.count` | `test_cart_count_reflects_tracked_items` |
+| py-7 unscoped `search_orders` | not found | — |
 
-9 confirmed findings, 9 failing oracle regressions, source and happy
-suite untouched. After canonical fixes: **14/14 pass, zero residuals**
-— no pinned-bug second file, no oracle divergence. py-3 (empty dict)
-was not found; it is the one gap.
+8 confirmed findings, 8 red→green regressions landed, 4 refuted
+hardening tests (including two refutes that prove the shipped lenses
+do not manufacture defects: `paginate` beyond the last page and
+`total_items` on an empty cart are both correct).
+
+`py-7` is the gap. The `ownership` lens has had a targeted carrier run
+that found the planted collection leak, but the full cold pass that
+produced this mapping did not reach it, so `py-7` is unrun end to end.
+`py-s2` is not a seed: the agent found an unseeded state defect,
+`Cart.__init__` storing the caller's dict by reference so `track()`
+writes through, which no golden covers.
 
 ## seeded-ts: seed mapping (CleanTs, clean)
 

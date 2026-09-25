@@ -32,6 +32,15 @@ heading. The attacker's only source of attack strategy; absent it,
 the attacker falls back to its own lens description.
 _Avoid_: prompt, instructions
 
+**Custom lens**:
+A repo-authored attack strategy in `.sstack/lenses/<name>.md`,
+selected by `.sstack/config.md`. Any number of them; they run
+alongside the shipped lenses and append to an existing attacker's
+rubric rather than adding an agent. It adds a lens, never a lifecycle
+stage: the seven stages are fixed.
+_Avoid_: plugin, extension (both imply code the pack loads; this is
+prose the agent reads)
+
 **Decision site**:
 A place in the code where an access decision is made: middleware, a
 guard, a decorator, a query filter, a row policy, a gateway rule, or a

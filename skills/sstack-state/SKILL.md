@@ -40,13 +40,13 @@ call; this lens attacks the sequence around it.
 - A failed update leaves the object exactly as it was, or the
   partial state is documented. Half-applied with no note is a bug.
 
-Worked example — Python `Cart.total()` caching a running sum while
-`add_item()` appends to the dict without invalidating the cache: case
-`total()` then `add_item(...)` then `total()` again, oracle the second
-read includes the new line, observed (bug) the first cached number is
-served forever.
+Worked example — Python `Ledger.balance()` caching the summed total
+while `record(entry)` appends to the entries list without invalidating
+the cache: case `balance()` then `record(...)` then `balance()` again,
+oracle the second read includes the new entry, observed (bug) the
+first cached number is served forever.
 
-TypeScript `topDiscount(lines)` calling `lines.sort()` before picking:
+TypeScript `sortByRank(rows)` calling `rows.sort()` before picking:
 oracle the caller's array is untouched and a sorted copy is returned,
 observed (bug) the input array arrives reordered at the next call
 site — write-through through a parameter.

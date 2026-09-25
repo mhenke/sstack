@@ -20,6 +20,27 @@ running sstack agent must obey may live solely here.
 
 ## Rules
 
+### Two lanes, two copies of nothing
+
+`skills/` and `agents/` are the end-user product: `npx skills add`
+copies those, and nothing else. `AGENTS.md`, `CONTEXT.md`, `docs/`,
+`evals/`, `CHANGELOG.md`, and this repo's `.gitignore` are the
+contributor lane and never reach a user.
+
+Concretely: a user installs the pack into their own repo and gets
+`skills/` and `agents/`. They do not clone this repository, and nothing
+here is copied into their tree. The `.sstack/` a run creates is created
+in *their* repo, on their machine, by their own `/sstack` invocation.
+Our `.sstack/` is our own run output, ignored like every other
+artifact, and has no relationship to theirs. A rule, template, or file
+that must exist in a user's repo has to be written by the run into that
+repo, or the user has to create it; it cannot live in this repository
+and be expected to arrive. Do not design a feature that assumes a user
+receives our copy of anything. The custom-lens feature got this wrong
+twice, first assuming a gitignore rule in this repo would reach a
+user's, then replacing it with a file the emitter invented for the
+same reason.
+
 ### Scope lock (v0)
 
 The pack ships no CLI, daemon, or binary, and no runtime dependency
@@ -100,7 +121,7 @@ No coverage tooling exists and none is needed.
 - `agents/sstack-<lens>-attacker.md` — one failure class each
 - `skills/sstack-<lens>/SKILL.md` — lens rubric
 - `docs/ETHOS.md` — the four rules
-- `docs/ARCHITECTURE.md` — lifecycle, six definitions, lens taxonomy,
+- `docs/ARCHITECTURE.md` — lifecycle, seven definitions, lens taxonomy,
   v1 menu
 - `docs/adr/` — why the product is shaped this way
 - `evals/` — fixtures, goldens, graders, and acceptance evidence

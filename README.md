@@ -86,15 +86,15 @@ shell commands (see [Evidence](#evidence)).
 
 ### Custom lenses
 
-The seven shipped lenses are a floor. A repo can add its own under
-`.sstack/lenses/`, and sstack picks them up on the next run with no
-change to the pack:
+The seven shipped lenses are a floor, and a repo can add as many of its
+own as it needs under `.sstack/lenses/`. sstack picks them up on the
+next run with no change to the pack:
 
 ```
 .sstack/
 ├── config.md        lenses.add / lenses.remove
 └── lenses/
-    └── ordering.md  name, description, applies-when, then the rubric
+    └── <name>.md     name, description, applies-when, then the rubric
 ```
 
 ```markdown
@@ -117,8 +117,8 @@ lenses.remove: ownership
 
 `lenses.add` runs your lenses alongside the built-ins, not instead of
 them, and `lenses.remove` is reported in the summary so a dropped lens
-cannot hide. Both files are committable: run output is ignored, so a
-team's lenses travel with the repo they protect.
+cannot hide. Commit `config.md` and `lenses/` if your team shares
+them; ignore the rest of `.sstack/`.
 
 ### For contributors
 
@@ -183,12 +183,6 @@ Write the streams to files. A `$(...)` substitution strips trailing
 newlines, so the hash would cover different bytes than the evidence
 records, and every fingerprint would read as fabricated.
 
-Without the script, create `.sstack/.gitignore` yourself so your lenses
-stay committable:
-
-```bash
-mkdir -p .sstack && printf '*\n!.gitignore\n!config.md\n!lenses\n!lenses/**\n' > .sstack/.gitignore
-```
 
 ## Languages
 
@@ -201,7 +195,6 @@ far each one has been carried.
 
 ```
 .sstack/
-├── .gitignore    keeps your lenses, discards run output
 ├── config.md     your lenses.add / lenses.remove (optional)
 ├── lenses/       your custom lens rubrics (optional)
 ├── map.md        surfaces + assumed contracts
@@ -211,13 +204,13 @@ far each one has been carried.
 └── scratch/      throwaway attack scripts (gone at run end)
 ```
 
-The `.gitignore` inside `.sstack/` is written on the first run, so
-`config.md` and `lenses/` stay committable while everything generated
-is ignored. Commit those two if your team shares lenses; nothing else
-in there is worth a commit. If your repo already ignores `.sstack/`
-at the root, remove that entry: git cannot re-include a file under an
-ignored directory, and the rule has to live inside the directory it
-governs.
+That directory is created in your repo, on your machine, the first
+time you run `/sstack`. The pack you installed is only `skills/` and
+`agents/`; nothing from the sstack repository comes with it. Commit
+`config.md` and `lenses/` if your team shares them, and ignore the
+rest as `/.sstack/*`: ignore the directory as `/.sstack/` and git will
+not re-include the two files inside it, because nothing under an
+ignored directory can be un-ignored.
 
 Plus regression tests and fixes. Tests land in your suite; fixes land
 in your source, scoped to the minimal change that satisfies the
@@ -248,7 +241,7 @@ reads `BUGS.md`; cold-agent dispatch stays outside the repository.
 
 | Fixture | Seeds | Current cold evidence |
 |---|---|---|
-| seeded-py | 7 | PASS; 5/5 seeds content-matched (ColdPy-5), 12/12 evidence replay intact. The state and ownership seeds have not had a full cold pass yet |
+| seeded-py | 7 | PASS; 5/5 matched (ColdPy-5, state seed included), 12/12 replay intact, 0 drift. The ownership seed has not had a full cold pass |
 | seeded-ts | 5 | PASS; 5/5 seeds content-matched, 19/19 evidence replay intact (rerun) |
 | seeded-js | 5 | PASS; 5/5 seeds content-matched, 12/12 evidence replay intact (rerun) |
 | seeded-java | 5 | PASS; 3/5 seeds content-matched, 7/7 evidence replay intact (rerun on current text) |
@@ -265,7 +258,7 @@ the skill: [`evals/ACCEPTANCE.md`](evals/ACCEPTANCE.md).
 ## Docs
 
 - [`docs/ETHOS.md`](docs/ETHOS.md): the four rules
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): lifecycle, the six
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): lifecycle, the seven
   definitions, the 15-lens taxonomy, what v1 adds
 - [`docs/adr/`](docs/adr/README.md): decision records
 - [`docs/TOOLS.md`](docs/TOOLS.md): negative-testing tools by language

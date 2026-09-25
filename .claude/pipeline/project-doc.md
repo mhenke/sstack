@@ -17,7 +17,7 @@
 
 ## Architecture Pattern
 
-Content architecture with a strict noun taxonomy (six definitions in ARCHITECTURE.md). The Thermos pattern is implemented: orchestrator skill dispatches per-lens attacker agents in parallel, each loading its own lens rubric from `skills/<lens>/SKILL.md`. Lanes: `npx skills add` ships only `skills/` + `agents/`; AGENTS.md, CONTEXT.md, docs/, evals/ are checkout-only — runtime rules live in shipped text, contributor rules in the checkout.
+Content architecture with a strict noun taxonomy (seven definitions in ARCHITECTURE.md). The Thermos pattern is implemented: orchestrator skill dispatches per-lens attacker agents in parallel, each loading its own lens rubric from `skills/<lens>/SKILL.md`. Lanes: `npx skills add` ships only `skills/` + `agents/`; AGENTS.md, CONTEXT.md, docs/, evals/ are checkout-only — runtime rules live in shipped text, contributor rules in the checkout.
 
 **Lifecycle (9 canonical stages, 6 implemented in SKILL.md):**
 
@@ -33,7 +33,7 @@ Content architecture with a strict noun taxonomy (six definitions in ARCHITECTUR
 | Fix | Fix (stage 6) — applies minimal change, goes green | 6 |
 | Learn | deferred to v1 | — |
 
-**Six definitions (taxonomy):**
+**Seven definitions (taxonomy):**
 
 | Noun | v0 realization | Where |
 |---|---|---|
@@ -42,7 +42,8 @@ Content architecture with a strict noun taxonomy (six definitions in ARCHITECTUR
 | Agent | per-lens attacker (Thermos pattern) | `agents/sstack-<lens>-attacker.md` |
 | Runner | deferred — agent runs real commands | — |
 | Oracle | expected behavior declared before the attack | inline in SKILL.md + lens skills |
-| Evidence | observed vs. oracle, loose markdown | `.sstack/findings/` in the host repo |
+| Evidence | observed vs. oracle, written by the emitter with a verifiable fingerprint | `.sstack/findings/` in the target repo |
+| Custom lens | repo-authored attack strategy | `.sstack/lenses/<name>.md` in the target repo |
 
 **Lens taxonomy (15 lenses, 7 shipped in v0):**
 
@@ -68,7 +69,7 @@ skills/sstack-<lens>/SKILL.md       peer lens skills (7: boundaries, malformed, 
 
 docs/
 ├── ETHOS.md                       the four rules
-├── ARCHITECTURE.md                lifecycle, six definitions, 15-lens taxonomy
+├── ARCHITECTURE.md                lifecycle, seven definitions, 15-lens taxonomy
 ├── TOOLS.md                       negative-testing tools by language
 ├── RESEARCH.md                    index into the 30-day scan library
 ├── LEARNED.md                     distilled research record
@@ -122,7 +123,7 @@ No database, no ORM. Data shapes:
 - **Evidence contract**: the shipped emitter (`skills/sstack/scripts/emit_findings.py`) is the only writer of `findings/<slug>.{json,md}` and `report.json`; it runs each repro itself and fingerprints `sha256(stdout+stderr)[:16]`. `regression.before`/`after` are the literal tokens `red`/`green`.
 - **Containment**: the caller builds the temp workspace and dispatches the agent into it. Prompt-only containment has failed; the host-repo marker directs the agent to the right root, but enforcement is the caller's responsibility.
 - **Coverage rule**: every selected lens must have zero-or-more cases on every mapped surface. A lens with zero cases on a record/string-input surface is an incomplete run.
-- **Extension point**: a target repo authors attack strategy in `.sstack/lenses/<name>.md` and selects it in `.sstack/config.md` (`lenses.add` / `lenses.remove`). A custom lens appends its rubric to an existing attacker's `### Lens rubric` dispatch; it does not add an agent. Identity is the `name` frontmatter field, not the filename. Lens files resolving outside the target are skipped (realpath guard, mirrored from omos `discoverProjectLocalSkillNames`). Config and lenses are committable because the emitter writes `.sstack/.gitignore` on first use: ignore all, negate `.gitignore`, `config.md`, `lenses`, `lenses/**`. The rule must live inside `.sstack/`, not at the repo root, since git cannot re-include a file under an ignored directory. The eight `future` lens-index rows are activatable this way. ADR-0008 records the cost, that the pack cannot test this because the agent is the loader.
+- **Extension point**: a target repo authors attack strategy in `.sstack/lenses/<name>.md` and selects it in `.sstack/config.md` (`lenses.add` / `lenses.remove`). A custom lens appends its rubric to an existing attacker's `### Lens rubric` dispatch; it does not add an agent. Identity is the `name` frontmatter field, not the filename. Lens files resolving outside the target are skipped (realpath guard, mirrored from omos `discoverProjectLocalSkillNames`). `.sstack/` is created in the target repo on first run, never copied from the pack, so nothing in this repo's `.sstack/` reaches a user. The eight `future` lens-index rows are activatable this way. ADR-0008 records the cost, that the pack cannot test this because the agent is the loader.
 
 ## Service Communication
 
@@ -142,7 +143,7 @@ None. Single-process, local files. `evals/acceptance.py` copies the orchestrator
 | `agents/sstack-<lens>-attacker.md` | per-lens attacker definitions (Thermos dispatch by name) |
 | `skills/sstack-<lens>/SKILL.md` | per-lens rubrics |
 | `docs/ETHOS.md` | four rules |
-| `docs/ARCHITECTURE.md` | lifecycle, six definitions, taxonomy |
+| `docs/ARCHITECTURE.md` | lifecycle, seven definitions, taxonomy |
 | `docs/adr/README.md` | decision index |
 | `evals/acceptance.py` | unified prepare/grade/replay entry point |
 | `evals/ACCEPTANCE.md` | evidence record |

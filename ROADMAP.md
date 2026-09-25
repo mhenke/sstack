@@ -10,11 +10,13 @@ of a run. Anything that does neither is out.
 ## Current state
 
 - Seven lenses shipped: boundaries, malformed, missing, ownership,
-  exceptional-conditions, resource-exhaustion, state.
+  exceptional-conditions, resource-exhaustion, state. A target repo
+  can add more without a pack change (ADR-0008).
 - Five seeded fixtures: Python, TypeScript, JavaScript, Java, C++.
+  Twenty-seven goldens; seeded-py carries seven.
 - Cold-run evidence (2026-09-25, content-match grader): **all five
-  fixtures PASS**. Seeds matched: py 5/5 (ColdPy-4 re-run on current
-  text; Learn-run-2 proved the loop), js 5/5, ts 5/5, java 3/5
+  fixtures PASS**. Seeds matched: py 5/5 (ColdPy-5, the state seed
+  included; Learn-run-2 proved the loop), js 5/5, ts 5/5, java 3/5
   (ColdJava-3 re-run — first java wave with replayed evidence), cpp
   3/5. Every PASS carries landed regressions verified on disk and
   evidence that replays with integrity ok.
@@ -26,9 +28,13 @@ of a run. Anything that does neither is out.
 ### 1. Remaining lenses
 
 - **What**: `ordering`, `concurrency`, `idempotency` next, then
-  `dependency-failure`, `contract`. Additive: one agent file, one
-  skill file, one index row each. (`state` shipped 2026-09-25: rubric
-  + attacker; seeds pending.)
+  `dependency-failure`, `contract`. Any of the eight unbuilt index
+  rows can be activated today by a target repo with a lens file, per
+  ADR-0008, without a pack change. Shipping one in the pack stays
+  additive: one agent file, one skill file, one index row. (`state`
+  shipped 2026-09-25 with seed `py-6`, exercised in ColdPy-5.
+  `ownership` gained collection surfaces and seed `py-7`, which has
+  had a targeted carrier run but no full cold pass.)
 - **Done when**: new seeds per shipped lens, majority confirmed per
   fixture.
 

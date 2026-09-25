@@ -9,10 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Target-repo custom lenses. A repo adds an attack strategy under
-  `.sstack/lenses/<name>.md` and selects it in `.sstack/config.md` with
-  `lenses.add` / `lenses.remove`, and the run picks it up with no pack
-  change. Modeled on oh-my-opencode-slim's project-local
+- Target-repo custom lenses. A repo adds attack strategies under
+  `.sstack/lenses/<name>.md`, any number of them, and selects them in
+  `.sstack/config.md` with `lenses.add` / `lenses.remove`, and the
+  run picks them up with no pack change. Modeled on
+  oh-my-opencode-slim's project-local
   customization: a custom lens **appends** its rubric to an existing
   attacker's `### Lens rubric` rather than adding an agent, mirroring
   how `<agent>_append.md` composes onto a resolved base prompt;
@@ -20,13 +21,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `discoverProjectLocalSkillNames`; and lens files resolving outside
   the target are skipped, the same realpath guard that keeps a
   symlinked `.opencode` from becoming arbitrary content injection.
-  Config and lenses are committable: the emitter writes
-  `.sstack/.gitignore` on first use, ignoring everything and negating
-  the authored paths. It goes inside `.sstack/` because git cannot
-  re-include a file under an ignored directory, so a root `.sstack/`
-  rule would make a user's lenses uncommittable. A team's lenses
-  version with the repo they protect. The eight `future` rows in the
-  lens index, `ordering` and `concurrency` among them, are now
+  A team commits `config.md` and `lenses/`; the rest of `.sstack/` is
+  run output. Ignoring the directory outright would trap those two
+  with it, because git cannot re-include a file under an ignored
+  directory. The eight `future` rows in the lens index, `ordering` and
+  `concurrency` among them, are now
   activatable by anyone. ADR-0008 records the decision and its cost:
   this is an extension point the pack cannot test, since the agent is
   the loader

@@ -7,13 +7,13 @@ fingerprint come from that execution and never from transcription.
 report.json is rebuilt from the evidence files on disk after every emit, so
 the run survives a crash with everything already verified still recorded.
 
-    python3 scripts/emit_findings.py --workspace <host-repo> [--fixture seeded-py] <<'JSON'
-    {"slug": "b1-paginate-page0", "lens": "boundaries", "surface": "paginate",
-     "case": "paginate(items, page=0, size=3)",
+    python3 scripts/emit_findings.py --workspace <host-repo> --fixture <fixture> <<'JSON'
+    {"slug": "checkout-page-zero", "lens": "boundaries", "surface": "checkout",
+     "case": "checkout(items=[], page=0)",
      "oracle": "ValueError naming page", "verdict": "confirmed",
-     "seed_id": "py-1", "repro": "python3 -c 'from shop import paginate; ...'",
+     "repro": "<command that reproduces it>",
      "fix": "raise when page < 1",
-     "regression": {"file": "tests/test_shop.py", "test": "test_page_zero",
+     "regression": {"file": "tests/test_checkout.py", "test": "test_page_zero",
                     "before": "red", "after": "green"}}
     JSON
 
@@ -120,26 +120,6 @@ def rebuild_report(findings_dir: Path, workspace: Path, fixture: str) -> int:
     return len(entries)
 
 
-# Written once, on first use, so a target repo keeps its own lenses and
-# config while discarding run output. Written into .sstack/ rather than
-# the repo root because a root `.sstack/` ignore cannot be overridden
-# from inside: git never re-includes a file under an ignored directory.
-IGNORE_FILE = """# sstack run output. Everything here is generated and disposable.
-*
-!.gitignore
-!config.md
-!lenses
-!lenses/**
-"""
-
-
-def ensure_ignore_file(stack: Path) -> None:
-    """Never overwrite: a user may have narrowed it."""
-    path = stack / ".gitignore"
-    if not path.exists():
-        path.write_text(IGNORE_FILE)
-
-
 def warn_unlanded(finding: dict, workspace: Path) -> None:
     """Advisory only: during Verify the regression test may legitimately not exist yet."""
     regression = finding["regression"]
@@ -159,7 +139,6 @@ def main() -> int:
     workspace = args.workspace.resolve()
     stack = workspace / ".sstack"
     stack.mkdir(parents=True, exist_ok=True)
-    ensure_ignore_file(stack)
     findings_dir = stack / "findings"
     findings_dir.mkdir(exist_ok=True)
 

@@ -32,6 +32,17 @@ agent reading `SKILL.md` *is* the loader. A config file nobody parses
 is decoration. The feature had to become a convention an agent
 performs, cheap enough that it actually happens.
 
+One constraint decided the shape of everything else. A user installs
+`skills/` and `agents/` into their own repo; they never clone this
+repository, and nothing here is copied into their tree. So a config
+mechanism cannot be "a file we ship": the run has to create what it
+needs in the user's repo, or the user creates it. Designing the feature
+around a file in this repository that the user is assumed to receive
+is how this decision was nearly got wrong twice, once by putting an
+ignore rule in the pack's own `.gitignore` and once by inventing a
+file for the emitter to drop in. Both were invisible from inside a
+checkout.
+
 ## Decision
 
 We will let a target repo add lenses without changing the pack. It
@@ -57,13 +68,12 @@ resolves outside the target is skipped with a note in the report. This
 is `discoverProjectLocalSkillNames` translated: the guard is the point,
 not a detail.
 
-Config lives under `.sstack/`, which the pack makes committable by
-writing its own `.sstack/.gitignore` on first use: ignore everything,
-negate `.gitignore`, `config.md`, and `lenses`. The rule has to live
-inside `.sstack/` rather than in the target's root `.gitignore`,
-because git cannot re-include a file under an ignored directory. A root
-`.sstack/` entry would make a user's lenses permanently
-uncommittable.
+Config lives under `.sstack/`, which the pack creates in the target
+repo on first run, never in a directory the user copies. A repo that
+wants to share lenses commits `config.md` and `lenses/`, and must
+ignore the rest as `/.sstack/*` rather than `/.sstack/`: git cannot
+re-include a file under an ignored directory, so a directory rule
+would trap the two authored paths with the run output.
 
 ## Consequences
 
