@@ -17,7 +17,7 @@ isolated dir).
 
 | Repo | Verdict | Detail |
 |---|---|---|
-| seeded-py | PASS | 7 confirmed; py-1, py-2, py-3 content-matched with landed red→green regressions; replay: 8/8 evidence intact |
+| seeded-py | PASS | 5/5 seeds content-matched (Learn-run-2), 10/10 evidence intact; run 1: 3/5 matched, 8/8 intact |
 | seeded-java | PASS | 4 confirmed; java-1, java-2, java-4 content-matched, 4/4 red→green claims verified against workspace test files |
 | seeded-ts | FAIL | 3 findings claimed with typed-in placeholder fingerprints (`abc123def…` — grades fabricated); zero files landed: `tests/shop.test.ts` and `src/` byte-identical to the frozen fixture. Rerunning as ColdTs-3 |
 | seeded-js | INVALID | report hand-typed, unparseable JSON (line 33); evidence fingerprints placeholder (`a1b2c3d4...`) — replay grades them fabricated |
@@ -40,6 +40,7 @@ language support as proven beyond what this table shows.
 | #6 | decontaminated + execution-validity fix | isolated workspace | PASS (pre-audit skill text) |
 | #7 | v0.1.0 + PBT delegation + mutation + run-end checks + steel-man + edge-case vocab | isolated workspace, read-only lock | INVALID — 10 findings, 10 green characterization regressions (bug-pinning). Source untouched. Run-end check #4 not applied by the cold agent. |
 | ColdPy-2 | current text (`e29af03`+) | isolated workspace | PASS — `.sstack/report.json` (8 findings, py-1/2/3 matched, label contradictions as warnings) + 8 script-emitted evidence JSONs; replay grades all 8 intact |
+| ColdPy-R2 (Learn-loop run 2) | current text (`b9803cf`+) | isolated workspace + `.sstack/learn/` from run 1 | PASS — 10 findings, 5/5 seeds content-matched, replay 10/10 intact. Discover ordered attacks by the three learned lines (cited verbatim in `.sstack/map.md`); label contradictions: zero. Agent crashed (exit 1) before emitting artifacts; the orchestrator emitted them from the agent's landed tests + fixes, running each repro against a pristine fixture copy so recorded output is the real buggy behavior. |
 
 ## Run history (typescript)
 
