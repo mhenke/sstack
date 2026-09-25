@@ -25,12 +25,13 @@ that fails today, and applies the minimal fix that turns it green.
 
 ```mermaid
 flowchart TD
-    D["Discover\nmap surfaces + contracts"] --> A["Attack\nboundaries · malformed · missing · resource-exhaustion"]
+    D["Discover\nmap surfaces + contracts"] --> A["Attack\n6 lenses"]
     A --> V["Verify\nobserved vs. oracle"]
     V --> M["Minimize\nsmallest repro"]
     M --> T["Test\nwrite regression → red"]
     T --> F["Fix\napply minimal fix → green"]
-    F --> R["Report"]
+    F --> L["Learn\nrecord failure class"]
+    L --> R["Report"]
 ```
 
 The oracle is written *before* the attack. "It crashes" isn't an
@@ -99,8 +100,8 @@ recorded. `ROADMAP.md` tracks that gap.
 .sstack/
 ├── map.md        surfaces + assumed contracts
 ├── plan.md       lenses, cases, oracles
-├── findings/     one per finding: case, oracle, observed,
-│                 verdict, repro, regression
+├── learn/        failure classes for the next run
+├── findings/     one .md and one .json per finding
 └── scratch/      throwaway attack scripts (gone at run end)
 ```
 
@@ -110,8 +111,8 @@ oracle. Config and secrets stay read-only.
 
 ## Is it actually any good?
 
-The eval is a cold agent with no memory, no answer key, one copy of
-the skill:
+The eval is a cold agent with no memory, no answer key, and the
+current skills plus agents:
 
 ```bash
 python3 evals/acceptance.py prepare seeded-py
@@ -127,26 +128,21 @@ python3 evals/acceptance.py grade path/to/report.json
 `prepare-all` creates workspaces for all five fixtures. The entry point
 never launches an agent or reads `BUGS.md`; host-specific cold-agent
 dispatch stays outside the repository.
-| | seeded-py | seeded-ts |
+
+| Fixture | Seeds | Current cold evidence |
 |---|---|---|
-| Bugs planted | 5 | 5 |
-| Bugs found | 4 | 5 |
-| Regression tests failing on the bug | 9 | 22 |
-| Still failing after the fix | 0 | 1 * |
+| seeded-py | 5 | 1 confirmed boundary finding, red→green; seed_id malformed |
+| seeded-ts | 5 | INVALID; one empty finding object |
+| seeded-js | 5 | 2 confirmed + 1 refuted as reported, ungraded |
+| seeded-java | 5 | pending; task returned scaffolding, not findings |
+| seeded-cpp | 5 | 5 confirmed as reported, ungraded |
 
-\* one test asserted a single branch of a two-branch oracle, which
-was the run's test writing rather than the code.
-
-The TypeScript run turned up a bug nobody planted: `Math.max(...arr)`
-overflows the call stack on a large but legitimate array. It is not
-in the answer key.
+Historical clean evidence remains `9979718`: Python 4/5 seeds with 9
+red→green regressions, TypeScript 5/5 plus one unseeded real bug with
+34/35 flips. That evidence is stale for the current skill text.
 
 Full record, including the runs that failed and what each one taught
 the skill: [`evals/ACCEPTANCE.md`](evals/ACCEPTANCE.md).
-
-Those numbers are from a run before the last two rounds of guardrail
-fixes. The skill text has changed since; re-running is the only way to
-refresh them.
 
 ## Docs
 

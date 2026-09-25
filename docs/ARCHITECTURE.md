@@ -11,17 +11,17 @@
 Canonical, in order. Each stage is discrete, artifact-producing, and
 resumable from its artifact (gstack's process lesson).
 
-| Stage | Produces | v0 |
+| Stage | Produces | Status |
 |---|---|---|
-| Discover | `.sstack/map.md` — surfaces + assumed contracts | yes |
-| Model | expected behavior per surface (folded into `map.md`) | yes |
-| Attack | executed cases + verbatim observed output | yes |
-| Observe | captured actual behavior (folded into Attack) | yes |
-| Verify | verdict per case: confirmed / refuted / inconclusive | yes |
-| Minimize | minimal repro per confirmed finding | yes |
-| Test | permanent negative test in the host repo's suite (red on confirmed, green on hardened) | yes |
-| Fix | minimal source change that satisfies the oracle, turning red to green | yes |
-| Learn | `.sstack/learn/` failure classes feeding future planning | deferred |
+| Discover | `.sstack/map.md` — surfaces + assumed contracts | shipped |
+| Model | expected behavior per surface (folded into `map.md`) | folded |
+| Attack | executed cases + verbatim observed output | shipped |
+| Observe | captured actual behavior (folded into Attack) | folded |
+| Verify | verdict per case: confirmed / refuted / inconclusive | shipped |
+| Minimize | minimal repro per confirmed finding | shipped |
+| Test | permanent negative test in the host repo's suite (red on confirmed, green on hardened) | shipped |
+| Fix | minimal source change that satisfies the oracle, turning red to green | shipped |
+| Learn | `.sstack/learn/` failure classes feeding future planning | shipped in text, proof open |
 
 ## Six definitions
 
@@ -31,20 +31,21 @@ belong in the pack.
 
 - **Skill** — the methodology for a stage. One entry skill owns
   routing and rules (`skills/sstack/SKILL.md`).
-- **Lens** — an attack strategy over a failure class. Content
-  (`agents/sstack-<lens>-attacker.md` loading the peer
-  `skills/sstack-<lens>/SKILL.md`), not machinery. Selected per
-  target by the Attack stage.
-- **Agent** — a Thermos dispatch handle. One file per shipped lens
-  (`agents/sstack-<lens>-attacker.md`); the orchestrator dispatches
-  it by name at the Attack stage.
+- **Lens** — an attack strategy over a failure class. Six peer skills
+  (`skills/sstack-<lens>/SKILL.md`) loaded inline under
+  `### Lens rubric`, never by name. Selected per target by the Attack
+  stage.
+- **Agent** — a `runSubagent` dispatch handle. One file per shipped
+  lens (`agents/sstack-<lens>-attacker.md`); the orchestrator passes
+  workspace, surface map, and rubric inline.
 - **Runner** — deterministic execution of generated cases. Deferred:
   v0 has the agent run real commands itself and quote real output.
 - **Oracle** — the expected-behavior declaration written *before*
   the attack. Errors, degradation, retry bounds, invariants,
   rejections — not only crashes.
-- **Evidence** — observed output vs. oracle. v0: loose markdown in
-  `.sstack/findings/`. v1: structured schema + fingerprints.
+- **Evidence** — observed output vs. oracle. Loose markdown plus a
+  machine JSON in `.sstack/findings/`; agent-out-of-loop
+  re-verification still open.
 
 ## Taxonomy
 
