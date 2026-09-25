@@ -17,7 +17,7 @@ isolated dir).
 
 | Repo | Verdict | Detail |
 |---|---|---|
-| seeded-py | PASS | 7 findings; py-1, py-3 content-matched with landed red→green regressions; label contradictions recorded as warnings |
+| seeded-py | PASS | 7 confirmed; py-1, py-2, py-3 content-matched with landed red→green regressions; replay: 8/8 evidence intact |
 | seeded-java | PASS | 4 confirmed; java-1, java-2, java-4 content-matched, 4/4 red→green claims verified against workspace test files |
 | seeded-ts | INVALID | one empty finding object; run still in progress |
 | seeded-js | INVALID | report hand-typed, unparseable JSON (line 33); evidence fingerprints placeholder (`a1b2c3d4...`) — replay grades them fabricated |
@@ -39,7 +39,7 @@ language support as proven beyond what this table shows.
 | #5 | decontaminated | isolated workspace | FAIL 0/5 — 105 attack scripts never reached the functions (wrong import path, missing args); every "oracle satisfied" was a harness TypeError |
 | #6 | decontaminated + execution-validity fix | isolated workspace | PASS (pre-audit skill text) |
 | #7 | v0.1.0 + PBT delegation + mutation + run-end checks + steel-man + edge-case vocab | isolated workspace, read-only lock | INVALID — 10 findings, 10 green characterization regressions (bug-pinning). Source untouched. Run-end check #4 not applied by the cold agent. |
-| ColdPy-2 | current text (`e29af03`+) | isolated workspace | PASS on root `report.json` (7 findings, py-1/py-3 matched); `.sstack/report.json` re-emit hit a control-char parse error; evidence files still being written |
+| ColdPy-2 | current text (`e29af03`+) | isolated workspace | PASS — `.sstack/report.json` (8 findings, py-1/2/3 matched, label contradictions as warnings) + 8 script-emitted evidence JSONs; replay grades all 8 intact |
 
 ## Run history (typescript)
 
@@ -56,6 +56,23 @@ language support as proven beyond what this table shows.
 | ColdJs | seeded-js | INVALID — finished 3 confirmed + fixes + 4 test files, but hand-typed `report.json` unparseable (unescaped quotes, line 33) and all evidence fingerprints placeholder (`a1b2c3d4...`); replay grades them fabricated |
 | ColdJava | seeded-java | PASS — 4 confirmed red→green; java-1/2/4 content-matched; self-labels shifted (advisory only) |
 | ColdCpp | seeded-cpp | in progress — 7 confirmed claimed, regression object non-compliant (`status:"red"` instead of `before`/`after`), evidence JSONs not yet emitted |
+
+## Evidence replay (roadmap item 2)
+
+`python3 evals/acceptance.py replay <workspace>` recomputes each
+evidence file's fingerprint from its recorded bytes and re-runs its
+command with the agent out of the loop.
+
+| Workspace | Integrity | Drift |
+|---|---|---|
+| seeded-js (ColdJs, first wave) | 2 fabricated (placeholder hex hashes), 1 unparseable | n/a — INVALID run |
+| seeded-py (ColdPy-2) | 8/8 intact | 4 drifted: fix landed, re-run shows corrected output |
+
+Drift after a landed fix is expected and informational; a fabricated
+fingerprint is the disqualifier. seeded-py is the first PASS whose
+evidence re-verifies with the finding agent out of the loop. (Java's
+PASS rests on landed-regression checks only — that run shipped no
+evidence JSONs.)
 
 Runs #1–#5 drove four product fixes, all committed:
 - `2880501` — forbid bug-pinning regressions; require per-surface lens
