@@ -109,8 +109,8 @@ the rest are the v1 proof-gate menu.
 
 `skills/sstack/SKILL.md` (orchestrator) + 4 peer lens skills
 (`skills/sstack-<lens>/SKILL.md`) + 4 attacker agents
-(`agents/sstack-<lens>-attacker.md`) + this docs pair + two seeded
-eval repos. Everything else (runners, evidence schema, learn loop,
+(`agents/sstack-<lens>-attacker.md`) + this docs pair + five seeded
+eval fixtures. Everything else (runners, evidence schema, learn loop,
 11 remaining lenses, host packaging) is additive later via new
 peer skill and agent files — no restructuring.
 

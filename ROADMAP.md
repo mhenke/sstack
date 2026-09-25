@@ -10,13 +10,12 @@ lower the cost of a run. Anything that does neither is out.
 ## What v0 left open
 
 v0 is a content-only skill pack with a process-only evidence layer
-(ADR-0002). Two consequences, both measured:
+(ADR-0002). Current consequences:
 
-- Cold-agent compliance is the weak axis. Six acceptance runs each
-  violated a rule in prose, and each violation forced a guardrail:
-  bug-pinning regressions, source-fixing mid-run, a contaminated skill,
-  broken harnesses scored as verdicts. Every guardrail held, but the
-  repetition across four unrelated failures is the real finding.
+- Cold-agent compliance is the weak axis. Acceptance runs have each
+  exposed a prose-compliance failure, and the guardrails now cover
+  the observed classes, but the current five-language fixture set has
+  no fresh cold-run evidence.
 - No deterministic evidence schema, so a finding is only as
   reproducible as the agent's transcript.
 
@@ -38,9 +37,9 @@ v0 is a content-only skill pack with a process-only evidence layer
 
 ### Mutation as a verification strategy
 
-- **Status**: SHIPPED in skill text (`5de75b3`). Pending acceptance
-  evidence.
-- **What**: the `mutation` lens and the mutation entry in the v1
+- **Status**: skill text shipped (`5de75b3`); the dedicated mutation
+  lens and acceptance evidence remain open.
+- **What**: add the `mutation` lens and the mutation entry in the v1
   proof-gate menu. Only after structured evidence exists, so a
   mutation result is itself recorded as evidence.
 - **Tooling per language**, researched rather than guessed: PIT for
@@ -75,7 +74,7 @@ v0 is a content-only skill pack with a process-only evidence layer
   Then `dependency-failure`, `contract`. (`resource-exhaustion`
   already shipped as a peer skill + agent.)
 - **Done when**: the seeded repos carry at least one seed per shipped
-  lens, and a clean run reaches a majority on both.
+  lens, and a clean run reaches a majority on each supported fixture.
 - **Note**: additive only. A lens is an
   `agents/sstack-<name>-attacker.md` wrapper plus a
   `skills/sstack-<name>/SKILL.md` rubric plus one row in
@@ -83,11 +82,12 @@ v0 is a content-only skill pack with a process-only evidence layer
 
 ### Run-end checklist
 
-- **Status**: SHIPPED in skill text (`5de75b3`). Pending acceptance
-  evidence.
-- **What**: before the report, the skill verifies source is unchanged
-  (`git status` when available), every confirmed finding has a
-  regression, and every regression's state is reported honestly.
+- **Status**: skill text shipped (`5de75b3`); current acceptance
+  evidence remains pending.
+- **What**: before the report, the skill verifies every confirmed
+  finding has a red test and a green post-fix test, every refuted
+  finding on external input has a green hardening test, every fix is
+  minimal, and the full suite passes.
 - **Done when**: the checklist appears in the shipped skill and a
   deliberately-defective cold run is caught by it.
 
@@ -95,18 +95,17 @@ v0 is a content-only skill pack with a process-only evidence layer
 
 ### Containment that survives a curious agent
 
-- **Status**: caller responsibility. The harness (`run-acceptance.sh`)
-  builds one temp workspace containing the skill and the
-  decontaminated fixture. The caller dispatches the cold agent into
-  that workspace. The skill resolves all paths via the
-  `.sstack-host-repo` marker inside the workspace.
-- **What was tried**: `evals/verify-isolation.sh` gained lock/unlock
-  subcommands that chmod the worktree read-only. Tested: new-file,
-  tracked-edit, and fixture-edit attacks all returned Permission
-  denied. Removed because the user rejected sh files in the repo.
+- **Status**: harness-backed containment. `run-acceptance.sh` builds
+  one temp workspace containing the skill, all four lens skills, the
+  four agents, and the decontaminated fixture. The caller dispatches
+  the cold agent into that workspace. The skill resolves all paths via
+  the `.sstack-host-repo` marker.
+- **What is enforced**: the harness strips `BUGS.md`, caches,
+  `node_modules`, `target`, and `build`; the cold agent receives no
+  answer key in its workspace.
 - **Residual risk**: prompt-only containment. A cold agent that
-  ignores the prompt can still reach the sstack repo. The isolation
-  check (`git status` before and after) detects it after the fact.
+  ignores the prompt can still reach the sstack repo. Compare
+  `git status` before and after the run to detect it.
 
 ### Learn loop
 
