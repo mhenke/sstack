@@ -52,11 +52,10 @@ the skill and the decontaminated fixture together in one temp dir.
   `name` + `description`, the description a single trigger-phrase
   sentence.
 - Every lens skill carries Case-generation heuristics, Oracle patterns
-  with an inline `Worked example` paragraph, and When not to apply,
-  with one `python` and one `ts` block whose comments read `# case:`
-  / `# oracle:` / `# observed (bug):`. Extra sections (Operating
-  limits, Language notes, Failure modes to watch for) are allowed
-  where the lens needs them.
+  with an inline `Worked example` paragraph (one python plus one ts/js
+  example; `observed (bug)` marks the defect), and When not to apply.
+  Extra sections (Operating limits, Language notes, Failure modes to
+  watch for) are allowed where the lens needs them.
 - A new lens is an `agents/sstack-<name>-attacker.md` file plus a
   `skills/sstack-<name>/SKILL.md` rubric plus one row in SKILL.md's
   lens index. The index is the only routing mechanism.
@@ -75,7 +74,7 @@ The unified eval entry point is `python3 evals/acceptance.py`:
 `prepare <fixture>`, `prepare-all`, `grade <workspace>`, and
 `replay <workspace>`. It never launches a host-specific cold agent.
 `grade` matches findings to goldens by content, not by seed labels.
-An agent saying it found bugs is not evidence. No coverage tooling exists and none is needed.
+No coverage tooling exists and none is needed.
 
 Failure modes this project has actually hit, all worth a regression
 check: tests that pin buggy behavior instead of the oracle; oracles

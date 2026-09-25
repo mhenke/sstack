@@ -28,15 +28,19 @@ prompt is the **user message** with labeled sections (typically
 3. Attack every principal boundary through this lens.
 4. Write the oracle before executing each case.
 5. Record actual output verbatim.
-6. Return findings in the sstack returns format (see Returns below).
+6. Return findings in the Report format below.
 
 ## Returns
 
-Use the orchestrator Report format with this lens name.
+Return every finding as one block, exactly these seven fields:
 
-## Parent orchestration
+```
+lens: <this lens>
+surface: <function or endpoint>
+case: <concrete input and action>
+oracle: <expected behavior under the adverse condition>
+observed: <actual output, verbatim>
+verdict: confirmed | refuted | inconclusive
+repro: <command that reproduces>
+```
 
-Typical flow: the orchestrator writes the surface map, then dispatches
-this agent (`sstack-ownership-attacker`) with a user prompt
-containing `### Workspace root`, `### Surface map`, and
-`### Lens rubric` (the `sstack-ownership` skill contents inline).

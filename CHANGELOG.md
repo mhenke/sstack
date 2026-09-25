@@ -14,8 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   audit-not-fix portion of ADR-0002)
 - Per-lens attacker agents (`agents/sstack-<lens>-attacker.md`):
   boundaries, malformed, missing, ownership, exceptional-conditions,
-  resource-exhaustion — each with returns format, constraints, and an
-  inline-rubric handoff
+  resource-exhaustion — each with the Report format block, constraints,
+  and an inline-rubric handoff
 - Thermos pattern: per-lens fan-out at Attack stage, one agent per
   lens, parallel when the host supports subagent dispatch
 - Property-based testing delegation: Attack stage checks for
@@ -84,13 +84,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   informational after a landed fix)
 - Report contract: JSON emitted by script with in-process
   fingerprint; hand-typed reports grade INVALID
+- Consistency pass across skills, agents, docs, and root files:
+  one name for the per-finding block ("Report format", replacing
+  "sstack returns format"); each attacker file carries that block
+  inline (a dispatched subagent never reads the orchestrator's file);
+  lens-skill frontmatter delivery clause unified; stale "proof open"
+  and "acceptance pending" claims corrected in ARCHITECTURE, ROADMAP,
+  RESEARCH, and the scanner doc; AGENTS.md conventions now match the
+  shipped lens shape (prose worked examples, not `# case:` blocks)
 
 ### Fixed
 
 - Attack coverage paragraph restored after silent deletion
 - Acceptance harness and skill corrected after guardrail iterations
-- SKILL.md lens index gains the missing `state` row; returns format
-  deduplicated to one canonical block in the orchestrator
+- SKILL.md lens index gains the missing `state` row; Report format
+  block named once and carried by every attacker
 - writing-for-agents sweep: restored eaten verbs, co-located skill
   names, single "attacker" term
 

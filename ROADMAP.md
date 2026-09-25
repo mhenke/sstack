@@ -56,18 +56,17 @@ of a run. Anything that does neither is out.
   `.sstack/learn/` classes verbatim, attacked in learned order, and
   matched 5/5 seeds where run 1 matched 3/5.
 
-## Shipped (one line each)
+### Earlier, one line each
 
-- Structured evidence JSON in skill text (`0765cb3`); re-verification open.
-- Run-end checklist in skill text (`5de75b3`); acceptance pending.
-- PBT delegation and mutation refs in skill text (`5de75b3`); acceptance pending.
+- Evidence JSON schema + replay verifier (`0765cb3`, `0ddecd6`,
+  `b05b94b`): content-match grading, integrity recomputation.
+- Run-end checklist, PBT delegation, mutation refs in skill text (`5de75b3`).
 - Thermos fan-out with `runSubagent` + inline context (`e78ee07`, `07f3e5c`).
 - Six peer lens skills + six attacker agents (`0765cb3`).
 - Five seeded fixtures (`aae7108`).
 - Unified eval entry point `evals/acceptance.py` (`2aa556f`).
-- Learn loop in skill text (`4da9a5f`); proof open.
+- Learn loop in skill text (`4da9a5f`).
 - Lifecycle principle mapping (`f7e053a`).
-- Content-match grader + integrity replay (`b05b94b`).
 - Goldens backfilled for js/java/cpp; junit jar auto-fetch (`fd3004e`).
 
 ## Explicitly not planned

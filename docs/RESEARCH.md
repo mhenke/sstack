@@ -27,9 +27,9 @@ Source: `ai-harness-evaluations-best-practices-oh-my-opencode-slim-omos-raw-v3.m
 Relevant because sstack's whole thesis is eval-gated acceptance
 (ADR-0003). The scan covers custom native evaluation harnesses for AI
 systems, including the point that production AI degrades silently
-without one. Worth reading before the structured-evidence-schema item:
-it is the same problem sstack solves for prose skills, approached from
-the harness side.
+without one. The evidence-schema problem it describes shipped as
+ADR-0006; the scan remains the reference for any future harness
+work.
 
 ### Evals for agents (2026-07-21 to 2026-08-20)
 

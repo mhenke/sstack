@@ -18,6 +18,18 @@ The run-level summary of all findings, at the canonical workspace
 path. Graded; the evidence files are replayed.
 _Avoid_: results file, output
 
+**Report format**:
+The seven-field per-finding block (lens, surface, case, oracle,
+observed, verdict, repro) an attacker returns and the orchestrator
+deduplicates. One name, one shape, carried in every attacker file.
+_Avoid_: returns format, findings format
+
+**Lens rubric**:
+A lens skill's body, delivered inline to its attacker under that
+heading. The attacker's only source of attack strategy; absent it,
+the attacker falls back to its own lens description.
+_Avoid_: prompt, instructions
+
 **Content match**:
 The grader's finding↔golden link, made from surface, case, and oracle
 text. The only link that can carry a pass.

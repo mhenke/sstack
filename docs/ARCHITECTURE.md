@@ -21,7 +21,7 @@ resumable from its artifact (gstack's process lesson).
 | Minimize | minimal repro per confirmed finding | shipped |
 | Test | permanent negative test in the host repo's suite (red on confirmed, green on hardened) | shipped |
 | Fix | minimal source change that satisfies the oracle, turning red to green | shipped |
-| Learn | `.sstack/learn/` failure classes feeding future planning | shipped in text, proof open |
+| Learn | `.sstack/learn/` failure classes feeding future planning | shipped, proven cold 2026-09-24 |
 
 ## Six definitions
 

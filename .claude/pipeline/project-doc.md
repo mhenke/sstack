@@ -64,7 +64,7 @@ Content architecture with a strict noun taxonomy (six definitions in ARCHITECTUR
 ## Folder Structure
 
 ```
-skills/sstack/SKILL.md              orchestrator: routing, rules, 6 stages, lens index
+skills/sstack/SKILL.md              orchestrator: routing, rules, 7 stages, lens index
 skills/sstack-<lens>/SKILL.md       peer lens skills (6: boundaries, malformed, missing, ownership, exceptional-conditions, resource-exhaustion)
 agents/sstack-<lens>-attacker.md    per-lens attacker definitions (Thermos dispatch by name)
 
@@ -97,9 +97,9 @@ CHANGELOG.md                       Keep a Changelog format
 
 ## Code Style Conventions
 
-- **Skill frontmatter**: exactly `name` + `description`; description is one long trigger-phrase sentence. `SKILL.md` must stay ≤ 500 lines (currently 253).
-- **Agent files**: YAML frontmatter with `name` + `description`; body is a thin dispatch wrapper that loads its lens skill and returns findings.
-- **Lens skill files**: Case-generation heuristics, Oracle patterns with an inline `Worked example` paragraph, and When not to apply, with one `python` and one `ts` block whose comments read `# case:` / `# oracle:` / `# observed (bug):`. Extra sections (Operating limits, Language notes, Failure modes to watch for) allowed where the lens needs them.
+- **Skill frontmatter**: exactly `name` + `description`; description is one long trigger-phrase sentence. `SKILL.md` must stay ≤ 500 lines (currently 377).
+- **Agent files**: YAML frontmatter with `name` + `description`; body carries the rubric fallback, the work steps, and the Report format block inline (co-located: a dispatched subagent never sees the orchestrator's file).
+- **Lens skill files**: Case-generation heuristics, Oracle patterns with an inline `Worked example` paragraph (one python plus one ts/js example; `observed (bug)` marks the defect), and When not to apply. Extra sections (Operating limits, Language notes, Failure modes to watch for) allowed where the lens needs them.
 - **Prose style**: hard-wrapped ~60–72 columns, imperative voice, backticks for identifiers and paths.
 - **Python eval**: PEP 8, snake_case, module docstrings, no type hints, no classes, deliberately no validation.
 - **TypeScript eval**: ESM, `export function`, `interface` per shape, `strict: true`, 2-space indent, semicolons, double quotes.
@@ -117,7 +117,7 @@ CHANGELOG.md                       Keep a Changelog format
 No database, no ORM. Data shapes:
 
 - **Fixture records**: Python dicts / TS interfaces (`LineItem`, `CartLine`)
-- **Run artifacts**: `.sstack/` in the host repo (`map.md`, `plan.md`, `findings/<slug>.md`, `scratch/`)
+- **Run artifacts**: `.sstack/` in the host repo (`map.md`, `plan.md`, `report.json`, `findings/<slug>.md` + `.json`, `learn/`, `scratch/`)
 - **Answer keys**: `evals/*/BUGS.md` (never shipped to cold agents)
 
 ## Cross-Cutting Concerns
@@ -136,7 +136,7 @@ None. Single-process, local files. `evals/acceptance.py` copies the orchestrator
 
 - **Overall coverage: not measured** — no coverage tooling, by design.
 - **Baselines**: `evals/seeded-py` → `pytest -q`; `evals/seeded-ts` → `bun run test`; `evals/seeded-js` → `npm test`; `evals/seeded-cpp` → CMake/CTest; `evals/seeded-java` → javac + junit-console (jar auto-fetched; `RUN_TESTS.md`).
-- **Acceptance**: cold-run eval per ADR-0003, recorded in `evals/ACCEPTANCE.md`. Fresh 2026-09-24 runs on current text (content-match grader): Python PASS, Java PASS, C++ regressions not landed, JS/TS INVALID (hand-typed artifacts). Last fully clean record remains `9979718`.
+- **Acceptance**: cold-run eval per ADR-0003, recorded in `evals/ACCEPTANCE.md`. 2026-09-24 current-text runs: **all five fixtures PASS** (py 5/5 seeds twice, js 5/5, ts 4/5, java 3/5, cpp 3/5), each with landed regressions verified on disk and evidence replaying intact (Java's wave predates the schema pin; landed-checks only).
 
 ## Entry Points
 
@@ -153,7 +153,7 @@ None. Single-process, local files. `evals/acceptance.py` copies the orchestrator
 | `CONTEXT.md` | judging glossary (integrity, drift, content match, INVALID) |
 
 ## Changed Files
-AGENTS.md, CHANGELOG.md, README.md, ROADMAP.md, docs/ARCHITECTURE.md, evals/README.md, evals/acceptance.py, evals/graders/seeded_acceptance.py, evals/replay.py, skills/sstack/SKILL.md (content-match grader, integrity replay, evidence schema pin, docs propagation)
+agents/sstack-*-attacker.md (inline Report format, Parent-orchestration section removed), skills/sstack-*/SKILL.md (frontmatter unified), skills/sstack/SKILL.md + docs/RESEARCH.md + docs/ARCHITECTURE.md + ROADMAP.md + AGENTS.md + CONTEXT.md (consistency pass)
 
 ## Last Scanned
-2026-09-24 (delta: first-principles eval redesign propagated through docs; CONTEXT.md glossary added)
+2026-09-25 (delta: skills/agents consistency review — returns-format naming, co-located Report block, stale-claim sweep, CONTEXT.md additions)
