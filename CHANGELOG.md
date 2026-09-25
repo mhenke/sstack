@@ -40,11 +40,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   surface, requires establishing a two-subject population before
   probing, and compares result *contents* and counts against
   entitlement. Seven probe-table rows, a collection oracle, and an
-  attacker work step. Blinded carrier test: a cold attacker given
-  only the rubric found the seeded leak with four distinct confirmed
-  findings (shared-sku match, wildcard query, count/volume leak,
-  absent principal) and correctly refuted itself on the two surfaces
-  that were implemented correctly
+  attacker work step. Blinded carrier test, re-run against the
+  decontaminated lens: a cold attacker given only the rubric found the
+  seeded leak with five confirmed findings (shared-sku match, wildcard
+  query, cross-subject read, error-based enumeration, field-level
+  sweep) and correctly refuted itself on the BOLA control, where the
+  detail route was implemented correctly
 - `state` lens (`skills/sstack-state` + `sstack-state-attacker`):
   stale cached/derived reads, mutable input written through, partial
   update after a failed call, internal collections escaped to callers
