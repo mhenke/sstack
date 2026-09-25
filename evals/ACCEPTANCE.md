@@ -19,7 +19,7 @@ isolated dir).
 |---|---|---|
 | seeded-py | PASS | 7 confirmed; py-1, py-2, py-3 content-matched with landed red→green regressions; replay: 8/8 evidence intact |
 | seeded-java | PASS | 4 confirmed; java-1, java-2, java-4 content-matched, 4/4 red→green claims verified against workspace test files |
-| seeded-ts | INVALID | one empty finding object; run still in progress |
+| seeded-ts | FAIL | 3 findings claimed with typed-in placeholder fingerprints (`abc123def…` — grades fabricated); zero files landed: `tests/shop.test.ts` and `src/` byte-identical to the frozen fixture. Rerunning as ColdTs-3 |
 | seeded-js | INVALID | report hand-typed, unparseable JSON (line 33); evidence fingerprints placeholder (`a1b2c3d4...`) — replay grades them fabricated |
 | seeded-cpp | FAIL | 7 confirmed, 7/7 evidence files replay intact, content matches cpp-1/3/4 — but every `regression.file` (`test_functions.cpp`) is absent from disk and `src/shop.cpp` gained no fix; claimed red→green, nothing landed |
 
@@ -47,7 +47,8 @@ language support as proven beyond what this table shows.
 |---|---|---|---|
 | CleanTs | decontaminated + execution-validity fix | isolated workspace | PASS (pre-audit skill text) |
 | RunTs | v0.1.0 + PBT delegation + mutation + run-end checks + steel-man + edge-case vocab | isolated workspace, read-only lock | DID NOT COMPLETE — 40+ min, stuck in Attack, no regressions landed, no findings reported. Fan-out subagents explored the sstack repo, not the temp workspace. Source and tests untouched. |
-| ColdTs-2 | current text (`e29af03`+) | isolated workspace | in progress; draft report had one empty finding object (INVALID as of 2026-09-24 21:45) |
+| ColdTs-2 | current text (`e29af03`+) | isolated workspace | FAIL (zombie) — claimed 3 findings, landed none; report findings carried evidence keys instead of report keys, fingerprints typed in. Cancelled; rerun as ColdTs-3 |
+| ColdTs-3 | current text (`b9803cf`+) | isolated workspace | in progress |
 
 ## Run history (js / java / cpp, current text)
 

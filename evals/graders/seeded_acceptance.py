@@ -5,9 +5,11 @@ unreliably (null, malformed, wrong). The grader therefore matches a
 finding to a golden by CONTENT: the trigger's function name or its
 distinctive words appearing in the finding's surface + case + oracle.
 A pass needs a confirmed red→green finding that content-matches a
-golden of the report's fixture, whose regression file exists in the
-workspace and contains the named test. The recorded seed_id, when
-present, must not contradict the content match.
+golden of the report's fixture, whose regression file was MODIFIED in
+the workspace (exists, contains the named test, and differs from the
+frozen fixture original — a claim naming an existing test in an
+untouched file is a false claim, ColdTs-2). The recorded seed_id,
+when present, must not contradict the content match.
 """
 from __future__ import annotations
 
@@ -54,7 +56,7 @@ def matches_golden(finding: dict, golden: dict) -> bool:
     return bool(words) and words <= set(text.split())
 
 
-def _regression_lands(finding: dict, workspace: Path | None) -> bool:
+def _regression_lands(finding: dict, workspace: Path | None, pristine: Path | None = None) -> bool:
     regression = finding.get("regression")
     if not isinstance(regression, dict) or regression.get("before") != "red" or regression.get("after") != "green":
         return False
@@ -63,12 +65,16 @@ def _regression_lands(finding: dict, workspace: Path | None) -> bool:
     file = regression.get("file") or ""
     test = regression.get("test") or ""
     candidate = (workspace / file) if file else None
-    return bool(
-        candidate and candidate.is_file() and (not test or test in candidate.read_text(errors="replace"))
-    )
+    if not (candidate and candidate.is_file() and (not test or test in candidate.read_text(errors="replace"))):
+        return False
+    if pristine and file:
+        original = pristine / file
+        if original.is_file() and original.read_bytes() == candidate.read_bytes():
+            return False
+    return True
 
 
-def grade(report: object, goldens: list[dict], workspace: Path | None = None) -> dict:
+def grade(report: object, goldens: list[dict], workspace: Path | None = None, fixture_dir: Path | None = None) -> dict:
     findings = report.get("findings", []) if isinstance(report, dict) else []
     if not isinstance(findings, list):
         return {"pass": False, "reason": "findings must be a list"}
@@ -99,7 +105,7 @@ def grade(report: object, goldens: list[dict], workspace: Path | None = None) ->
             label = finding.get("seed_id")
             if label and label != "other" and label != golden["id"]:
                 contradicted.append(f"{label}!={golden['id']}")
-            if _regression_lands(finding, workspace):
+            if _regression_lands(finding, workspace, fixture_dir):
                 matched.append(golden["id"])
             break
 
@@ -114,10 +120,15 @@ def grade(report: object, goldens: list[dict], workspace: Path | None = None) ->
     }
 
 
-def grade_file(report_path: str, goldens_path: str, workspace: str | None = None) -> dict:
+def grade_file(report_path: str, goldens_path: str, workspace: str | None = None, fixture_dir: str | None = None) -> dict:
     try:
         report = json.loads(Path(report_path).read_text())
     except json.JSONDecodeError as e:
         return {"pass": False, "reason": f"invalid report JSON: {e.msg} at line {e.lineno} col {e.colno}"}
     goldens = [json.loads(line) for line in Path(goldens_path).read_text().splitlines() if line]
-    return grade(report, goldens, Path(workspace) if workspace else None)
+    return grade(
+        report,
+        goldens,
+        Path(workspace) if workspace else None,
+        Path(fixture_dir) if fixture_dir else None,
+    )

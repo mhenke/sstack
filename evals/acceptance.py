@@ -79,7 +79,17 @@ def grade(report_path: Path) -> int:
     from seeded_acceptance import grade_file
 
     report, workspace = resolve_report(report_path)
-    result = grade_file(str(report), str(EVALS / "goldens.jsonl"), str(workspace) if workspace else None)
+    try:
+        fixture_name = json.loads(report.read_text()).get("fixture")
+    except (json.JSONDecodeError, OSError):
+        fixture_name = None
+    fixture_dir = EVALS / fixture_name if fixture_name in FIXTURES else None
+    result = grade_file(
+        str(report),
+        str(EVALS / "goldens.jsonl"),
+        str(workspace) if workspace else None,
+        str(fixture_dir) if fixture_dir else None,
+    )
     print(json.dumps(result, indent=2, sort_keys=True))
     return 0 if result["pass"] else 1
 
