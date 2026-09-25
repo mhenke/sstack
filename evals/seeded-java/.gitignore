@@ -1,1 +1,3 @@
 target/
+*.class
+junit-console.jar
