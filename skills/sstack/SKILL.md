@@ -341,7 +341,11 @@ Write the machine-readable run report to exactly
 `<host-repo>/.sstack/report.json` (the grader's canonical path), one
 object per finding: `{"fixture", "findings": [{"seed_id", "lens",
 "surface", "case", "oracle", "observed", "verdict", "repro",
-"regression": {"file","test","before","after"}}]}`.
+"regression": {"file","test","before","after"}}]}`. Emit both this
+file and each `findings/<slug>.json` from a script (`json.dump` of a
+dict holding the verbatim outputs), never by typing JSON by hand —
+quoted output breaks hand-written escaping, and an unparseable
+report grades INVALID.
 
 In the chat report, one line per finding: `id | lens | surface |
 verdict | regression (file::test, red→green)` or `id | lens |

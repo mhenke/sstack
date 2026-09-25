@@ -50,6 +50,9 @@ def grade(report: object, goldens: list[dict]) -> dict:
 
 
 def grade_file(report_path: str, goldens_path: str) -> dict:
-    report = json.loads(Path(report_path).read_text())
+    try:
+        report = json.loads(Path(report_path).read_text())
+    except json.JSONDecodeError as e:
+        return {"pass": False, "reason": f"invalid report JSON: {e.msg} at line {e.lineno} col {e.colno}"}
     goldens = [json.loads(line) for line in Path(goldens_path).read_text().splitlines() if line]
     return grade(report, goldens)
