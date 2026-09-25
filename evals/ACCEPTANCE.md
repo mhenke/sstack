@@ -19,7 +19,7 @@ isolated dir).
 |---|---|---|
 | seeded-py | PASS | 5/5 seeds content-matched (Learn-run-2), 10/10 evidence intact; run 1: 3/5 matched, 8/8 intact |
 | seeded-java | PASS | 4 confirmed; java-1, java-2, java-4 content-matched, 4/4 red→green claims verified against workspace test files |
-| seeded-ts | FAIL | 3 findings claimed with typed-in placeholder fingerprints (`abc123def…` — grades fabricated); zero files landed: `tests/shop.test.ts` and `src/` byte-identical to the frozen fixture. Rerunning as ColdTs-3 |
+| seeded-ts | PASS | 7 confirmed, 19/19 tests green; ts-1/2/3/5 content-matched (ts-4's claim lost on exact test-name match); 7/7 evidence replay intact (ColdTs-3, rerun) |
 | seeded-js | PASS | 7 confirmed; 5/5 seeds content-matched, landed regressions, 12/12 evidence files replay intact (ColdJs-2, rerun) |
 | seeded-cpp | FAIL | 7 confirmed, 7/7 evidence files replay intact, content matches cpp-1/3/4 — but every `regression.file` (`test_functions.cpp`) is absent from disk and `src/shop.cpp` gained no fix; claimed red→green, nothing landed |
 
@@ -48,8 +48,8 @@ language support as proven beyond what this table shows.
 |---|---|---|---|
 | CleanTs | decontaminated + execution-validity fix | isolated workspace | PASS (pre-audit skill text) |
 | RunTs | v0.1.0 + PBT delegation + mutation + run-end checks + steel-man + edge-case vocab | isolated workspace, read-only lock | DID NOT COMPLETE — 40+ min, stuck in Attack, no regressions landed, no findings reported. Fan-out subagents explored the sstack repo, not the temp workspace. Source and tests untouched. |
-| ColdTs-2 | current text (`e29af03`+) | isolated workspace | FAIL (zombie) — claimed 3 findings, landed none; report findings carried evidence keys instead of report keys, fingerprints typed in. Cancelled; rerun as ColdTs-3 |
-| ColdTs-3 | current text (`b9803cf`+) | isolated workspace | in progress |
+| ColdTs-2 | current text (`e29af03`+) | isolated workspace | FAIL (zombie) — claimed 3 findings, landed none; fingerprints typed in. Cancelled |
+| ColdTs-3 | current text (`b9803cf`+) | isolated workspace | PASS — 7 confirmed red→green, 4/5 seeds matched, report + 7 evidence files script-emitted, replay 7/7 intact, `bun run test` 19/19. ts-4 finding exists but its claimed test name doesn't match the written one |
 
 ## Run history (js / java / cpp, current text)
 
@@ -73,6 +73,7 @@ command with the agent out of the loop.
 | seeded-py (ColdPy-R2) | 10/10 intact | 4 drifted, 6 stable |
 | seeded-cpp (ColdCpp) | 7/7 intact | 7 drifted — no regression file, no fix landed; scratch-binary behavior, not proof |
 | seeded-js (ColdJs-2, rerun) | 12/12 intact | 0 drifted — repros re-run against a pristine source copy, so recorded output still reproduces after the fix |
+| seeded-ts (ColdTs-3, rerun) | 7/7 intact | 7 drifted: fixes landed, repros show corrected output |
 
 Drift after a landed fix is expected and informational; a fabricated
 fingerprint is the disqualifier. (Java's PASS rests on landed-
