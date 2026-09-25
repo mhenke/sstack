@@ -56,6 +56,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Evidence contract: `regression.before`/`after` are the literal state
+  tokens "red"/"green" — the grader always required that and the skill
+  never said it; ColdTs-4 wrote output snippets and graded zero matches
+- ColdTs-4 (seeded-ts, post-consistency text): PASS, 5/5 seeds,
+  15 confirmed red→green, 19/19 evidence replay intact, 0 drift — the
+  run crashed pre-emit and was resumed by the orchestrator, which is
+  exactly the zombie failure the emit-as-you-verify rule (`34bf6a6`)
+  exists to prevent
 - Cold acceptance baseline complete: all five fixtures PASS on the
   current skill text (2026-09-24). py 5/5 seeds twice (Learn-run-2
   proved the loop: run 2 cited run 1's `.sstack/learn/` classes and

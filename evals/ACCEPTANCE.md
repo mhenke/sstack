@@ -9,18 +9,19 @@ isolated dir).
 
 ## Verdict
 
-> **Graded 2026-09-24** with the content-match grader (`b05b94b`)
-> against the current skill text: **all five fixtures PASS**. Findings
-> link to goldens by trigger content (function name / trigger words
-> across surface, case, oracle); self-reported `seed_id` is advisory,
-> landed regressions are verified on disk, evidence replays out of the
-> agent loop.
+> **Graded 2026-09-25** with the content-match grader (`b05b94b`)
+> against the current skill text: **all five fixtures PASS**; seeded-ts
+> re-verified on the post-consistency text (ColdTs-4, 5/5 seeds).
+> Findings link to goldens by trigger content (function name / trigger
+> words across surface, case, oracle); self-reported `seed_id` is
+> advisory, landed regressions are verified on disk, evidence replays
+> out of the agent loop.
 
 | Repo | Verdict | Detail |
 |---|---|---|
 | seeded-py | PASS | 5/5 seeds content-matched (Learn-run-2), 10/10 evidence intact; run 1: 3/5 matched, 8/8 intact |
 | seeded-java | PASS | 4 confirmed; java-1, java-2, java-4 content-matched, 4/4 red→green claims verified against workspace test files |
-| seeded-ts | PASS | 7 confirmed, 19/19 tests green; ts-1/2/3/5 content-matched (ts-4's claim lost on exact test-name match); 7/7 evidence replay intact (ColdTs-3, rerun) |
+| seeded-ts | PASS | 15 confirmed red→green, 5/5 seeds content-matched, 37/37 tests, 19/19 evidence replay intact (ColdTs-4 on post-consistency text, orchestrator-resumed; prior: ColdTs-3 4/5) |
 | seeded-js | PASS | 7 confirmed; 5/5 seeds content-matched, landed regressions, 12/12 evidence files replay intact (ColdJs-2, rerun) |
 | seeded-cpp | PASS | 11 confirmed red→green in `tests/shop_test.cpp` (ctest 14/14), cpp-1/2/4 content-matched, 13/13 evidence replay intact (ColdCpp-2, rerun; wave 1 FAILed: named `test_functions.cpp`, landed nothing) |
 
@@ -51,6 +52,7 @@ only); every other PASS carries replayed evidence.
 | RunTs | v0.1.0 + PBT delegation + mutation + run-end checks + steel-man + edge-case vocab | isolated workspace, read-only lock | DID NOT COMPLETE — 40+ min, stuck in Attack, no regressions landed, no findings reported. Fan-out subagents explored the sstack repo, not the temp workspace. Source and tests untouched. |
 | ColdTs-2 | current text (`e29af03`+) | isolated workspace | FAIL (zombie) — claimed 3 findings, landed none; fingerprints typed in. Cancelled |
 | ColdTs-3 | current text (`b9803cf`+) | isolated workspace | PASS — 7 confirmed red→green, 4/5 seeds matched, report + 7 evidence files script-emitted, replay 7/7 intact, `bun run test` 19/19. ts-4 finding exists but its claimed test name doesn't match the written one |
+| ColdTs-4 | current text (`34bf6a6`+) | isolated workspace | PASS (resumed) — 15 confirmed red→green, 5/5 seeds, 37 tests, replay 19/19 intact, 0 drift. Crashed pre-emit (the zombie mode; motivated emit-as-you-verify `34bf6a6`); three orchestrator corrections after: field mapping (slug-in-surface, empty case), pristine-src repros, and the grader's literal "red"/"green" state tokens — the last since undocumented in the skill, now pinned in Workspace |
 
 ## Run history (js / java / cpp, current text)
 
@@ -76,6 +78,7 @@ command with the agent out of the loop.
 | seeded-cpp (ColdCpp) | 7/7 intact | 7 drifted — no regression file, no fix landed; scratch-binary behavior, not proof |
 | seeded-js (ColdJs-2, rerun) | 12/12 intact | 0 drifted — repros re-run against a pristine source copy, so recorded output still reproduces after the fix |
 | seeded-ts (ColdTs-3, rerun) | 7/7 intact | 7 drifted: fixes landed, repros show corrected output |
+| seeded-ts (ColdTs-4, resumed) | 19/19 intact | 0 drifted — repros ran against a pristine source copy, so recorded output still reproduces after the fix |
 | seeded-cpp (ColdCpp-2, rerun) | 13/13 intact | 11 drifted (fix landed), 2 stable hardening refutes |
 
 Drift after a landed fix is expected and informational; a fabricated

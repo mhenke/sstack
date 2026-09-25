@@ -63,7 +63,9 @@ All artifacts live under `<host-repo>/.sstack/`:
   `{"command": <shell string>, "exit_code": <int>, "stdout": <str>,
   "stderr": <str>, "fingerprint": "<sha256[:16] of stdout+stderr>",
   "oracle": <str>, "verdict": <confirmed|refuted|inconclusive>,
-  "regression": {"file","test","before","after"}}`. `evals/replay.py`
+  "regression": {"file","test","before","after"}}`. `before`/`after`
+  are the literal state tokens "red"/"green" (what the test did,
+  before-fix / after-fix), not output snippets. `evals/replay.py`
   re-runs `command` and compares exit code + fingerprint with the
   agent out of the loop; any other shape is unverifiable.
 - `scratch/` — throwaway scripts; delete at run end

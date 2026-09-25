@@ -12,12 +12,12 @@ of a run. Anything that does neither is out.
 - Six lenses shipped: boundaries, malformed, missing, ownership,
   exceptional-conditions, resource-exhaustion.
 - Five seeded fixtures: Python, TypeScript, JavaScript, Java, C++.
-- Cold-run evidence (2026-09-24, content-match grader): **all five
+- Cold-run evidence (2026-09-25, content-match grader): **all five
   fixtures PASS** on current text. Seeds matched: py 5/5 (twice;
-  Learn-run-2 also proved the loop), js 5/5, ts 4/5, java 3/5, cpp
-  3/5. Every PASS carries landed regressions verified on disk and
-  evidence that replays with integrity ok (Java's wave ran before the
-  schema pin; landed-checks only).
+  Learn-run-2 also proved the loop), js 5/5, ts 5/5 (ColdTs-4, on the
+  post-consistency text), java 3/5, cpp 3/5. Every PASS carries landed
+  regressions verified on disk and evidence that replays with integrity
+  ok (Java's wave ran before the schema pin; landed-checks only).
 - Findings JSON shipped with a pinned schema and out-of-loop replay
   (`b05b94b`); Learn loop proven cold (see Shipped below).
 
