@@ -137,11 +137,11 @@ reads `BUGS.md`; cold-agent dispatch stays outside the repository.
 | seeded-ts | 5 | PASS; 4/5 seeds content-matched, 7/7 evidence replay intact (rerun) |
 | seeded-js | 5 | PASS; 5/5 seeds content-matched, 12/12 evidence replay intact (rerun) |
 | seeded-java | 5 | PASS; 3/5 seeds content-matched with landed regressions |
-| seeded-cpp | 5 | FAIL; 7 confirmed with replayable evidence, but regression files never landed — caught by landed-check |
+| seeded-cpp | 5 | PASS; 3/5 seeds content-matched, 13/13 evidence replay intact (rerun) |
 
-Historical clean evidence remains `9979718`: Python 4/5 seeds with 9
-red→green regressions, TypeScript 5/5 plus one unseeded real bug with
-34/35 flips. That evidence is stale for the current skill text.
+All five grade PASS on the current text with replayed evidence
+(2026-09-24). Earlier waves' failures (fabricated fingerprints,
+regressions that never landed) are recorded in the run histories.
 
 Full record, including the runs that failed and what each one taught
 the skill: [`evals/ACCEPTANCE.md`](evals/ACCEPTANCE.md).

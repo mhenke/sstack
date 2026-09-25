@@ -56,9 +56,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Learn loop proven cold: run 2 cited run 1's `.sstack/learn/`
-  entries verbatim in Discover and matched 5/5 seeded-py bugs
-  (run 1: 3/5), 10/10 evidence replay intact
+- Cold acceptance baseline complete: all five fixtures PASS on the
+  current skill text (2026-09-24). py 5/5 seeds twice (Learn-run-2
+  proved the loop: run 2 cited run 1's `.sstack/learn/` classes and
+  attacked in learned order), js 5/5, ts 4/5, java 3/5, cpp 3/5;
+  every PASS replays evidence intact (py 10/10+8/8, ts 7/7,
+  js 12/12, cpp 13/13)
 - Grader rejects a regression whose file is byte-identical to the
   frozen fixture original (ColdTs-2 claimed tests it never wrote)
 - Run-end check #1 forbids scratch-binary regressions: the file must

@@ -12,43 +12,18 @@ of a run. Anything that does neither is out.
 - Six lenses shipped: boundaries, malformed, missing, ownership,
   exceptional-conditions, resource-exhaustion.
 - Five seeded fixtures: Python, TypeScript, JavaScript, Java, C++.
-- Cold-run evidence (2026-09-24, content-match grader): four of five
-  fixtures PASS on current text — Python 5/5 seeds (twice; Learn-run-2
-  also proved the loop), JS 5/5 (rerun), TS 4/5 (rerun), Java 3/5.
-  C++ rerun in flight; wave 1 caught regressions never landing.
-  Every PASS fixture's evidence replays with integrity ok.
+- Cold-run evidence (2026-09-24, content-match grader): **all five
+  fixtures PASS** on current text. Seeds matched: py 5/5 (twice;
+  Learn-run-2 also proved the loop), js 5/5, ts 4/5, java 3/5, cpp
+  3/5. Every PASS carries landed regressions verified on disk and
+  evidence that replays with integrity ok (Java's wave ran before the
+  schema pin; landed-checks only).
 - Findings JSON shipped with a pinned schema and out-of-loop replay
-  (`b05b94b`); Learn loop proven cold (see item 3).
+  (`b05b94b`); Learn loop proven cold (see Shipped below).
 
 ## Open, in order
 
-### 1. Acceptance re-runs — one left
-
-- Every fixture has a graded verdict on current text; py/ts/js/java
-  PASS with landed red→green regressions verified on disk. Done when
-  Cpp-2 lands its verdict.
-
-### 2. Evidence re-verification — nearly done
-
-- **What**: `evals/acceptance.py replay <workspace>` recomputes each
-  evidence file's fingerprint (integrity) and re-runs its command
-  (drift, informational post-fix).
-- **Status**: Python replays 10/10 intact (Learn-run-2) and 8/8 (run
-  1). JS wave 1 and TS wave 1 caught as fabricated/unparseable —
-  those ARE the filed failures. Java's PASS shipped no evidence
-  JSONs (it ran before the schema pin); its reruns will carry them.
-- **Done when**: the three in-flight reruns (js/ts/cpp) each replay
-  with integrity ok or their failures are recorded.
-
-### 3. Learn-loop proof — DONE (2026-09-24)
-
-- Run 1 (ColdPy-2) recorded three learned classes; run 2 (ColdPy-R2)
-  opened Discover citing all three verbatim in `.sstack/map.md` and
-  attacked `paginate`, `line_total`, `add_item` in learned order.
-  Result: 5/5 seeds content-matched (run 1: 3/5), zero label
-  contradictions, 10/10 evidence replay intact.
-
-### 4. Remaining lenses
+### 1. Remaining lenses
 
 - **What**: `state`, `ordering`, `concurrency`, `idempotency` next,
   then `dependency-failure`, `contract`. Additive: one agent file,
@@ -56,13 +31,30 @@ of a run. Anything that does neither is out.
 - **Done when**: new seeds per shipped lens, majority confirmed per
   fixture.
 
-### 5. Host packaging
+### 2. Host packaging
 
 - **Why**: install is one command (`npx skills add`) but update has
   no forced path; stale copies linger.
 - **What**: a thin per-host updater (Cursor, OpenCode, Claude Code).
   No plugin API, no marketplace entry, no runtime.
 - **Done when**: install and update are one command per host.
+
+## Shipped — acceptance baseline, 2026-09-24
+
+- All five fixtures PASS on current skill text with landed red→green
+  regressions verified on disk: py 5/5 seeds (twice), js 5/5, ts 4/5,
+  java 3/5, cpp 3/5. Each wave-1 failure converted to PASS on rerun
+  and motivated its guardrail: hand-typed JSON → script-emitted
+  contract; zombie run → pristine-file rejection; phantom
+  `test_functions.cpp` → run-end check #1 (repo suite, not scratch
+  binaries).
+- Evidence re-verification: `replay` recomputes fingerprints and
+  re-runs commands with the agent out of the loop — py 10/10 + 8/8,
+  ts 7/7, js 12/12, cpp 13/13 intact; wave-1 fabrications caught by
+  exactly this tool.
+- Learn loop proven cold: run 2 opened Discover citing run 1's three
+  `.sstack/learn/` classes verbatim, attacked in learned order, and
+  matched 5/5 seeds where run 1 matched 3/5.
 
 ## Shipped (one line each)
 

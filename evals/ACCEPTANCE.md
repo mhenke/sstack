@@ -10,10 +10,11 @@ isolated dir).
 ## Verdict
 
 > **Graded 2026-09-24** with the content-match grader (`b05b94b`)
-> against the current skill text. Findings link to goldens by
-> trigger content (function name / trigger words across surface,
-> case, oracle); self-reported `seed_id` is advisory, landed
-> regressions are verified on disk.
+> against the current skill text: **all five fixtures PASS**. Findings
+> link to goldens by trigger content (function name / trigger words
+> across surface, case, oracle); self-reported `seed_id` is advisory,
+> landed regressions are verified on disk, evidence replays out of the
+> agent loop.
 
 | Repo | Verdict | Detail |
 |---|---|---|
@@ -21,12 +22,12 @@ isolated dir).
 | seeded-java | PASS | 4 confirmed; java-1, java-2, java-4 content-matched, 4/4 red→green claims verified against workspace test files |
 | seeded-ts | PASS | 7 confirmed, 19/19 tests green; ts-1/2/3/5 content-matched (ts-4's claim lost on exact test-name match); 7/7 evidence replay intact (ColdTs-3, rerun) |
 | seeded-js | PASS | 7 confirmed; 5/5 seeds content-matched, landed regressions, 12/12 evidence files replay intact (ColdJs-2, rerun) |
-| seeded-cpp | FAIL | 7 confirmed, 7/7 evidence files replay intact, content matches cpp-1/3/4 — but every `regression.file` (`test_functions.cpp`) is absent from disk and `src/shop.cpp` gained no fix; claimed red→green, nothing landed |
+| seeded-cpp | PASS | 11 confirmed red→green in `tests/shop_test.cpp` (ctest 14/14), cpp-1/2/4 content-matched, 13/13 evidence replay intact (ColdCpp-2, rerun; wave 1 FAILed: named `test_functions.cpp`, landed nothing) |
 
-The historical PASS numbers below were produced by the skill text at
-commit `9979718` and are stale for the current text. JavaScript, Java,
-and C++ cold-run acceptance is now recorded above; do not report
-language support as proven beyond what this table shows.
+Wave 1 verdicts stand in the run histories below: they are what the
+grader caught, and every failure converted to a PASS on rerun. Java's
+PASS ran before the evidence-schema pin (landed-regression checks
+only); every other PASS carries replayed evidence.
 
 ## Run history (python)
 
@@ -58,7 +59,8 @@ language support as proven beyond what this table shows.
 | ColdJs | seeded-js | INVALID — finished 3 confirmed + fixes + 4 test files, but hand-typed `report.json` unparseable (unescaped quotes, line 33) and all evidence fingerprints placeholder (`a1b2c3d4...`); replay grades them fabricated |
 | ColdJs-2 | seeded-js | PASS — 7 confirmed red→green, 5/5 seeds matched, script-emitted report + 12 evidence files, replay 12/12 intact. First rerun to convert an INVALID wave-1 verdict |
 | ColdJava | seeded-java | PASS — 4 confirmed red→green; java-1/2/4 content-matched; self-labels shifted (advisory only); no evidence JSONs (ran before the schema pin) |
-| ColdCpp | seeded-cpp | FAIL — genuine attacks (7 confirmed, script-emitted evidence, all fingerprints intact, cases match cpp-1/3/4) but the regression objects name a `test_functions.cpp` that was never written and source was never fixed. First false-claim caught by landed-regression verification. Rerunning as ColdCpp-2 |
+| ColdCpp | seeded-cpp | FAIL — genuine attacks (7 confirmed, script-emitted evidence, all fingerprints intact, cases match cpp-1/3/4) but the regression objects name a `test_functions.cpp` that was never written and source was never fixed. First false-claim caught by landed-regression verification |
+| ColdCpp-2 | seeded-cpp | PASS — 11 confirmed red→green in `tests/shop_test.cpp` (built by CMake, 14/14 via ctest), 5 source guards in `src/shop.cpp`, cpp-1/2/4 content-matched, 13/13 evidence replay intact |
 
 ## Evidence replay (roadmap item 2)
 
@@ -74,6 +76,7 @@ command with the agent out of the loop.
 | seeded-cpp (ColdCpp) | 7/7 intact | 7 drifted — no regression file, no fix landed; scratch-binary behavior, not proof |
 | seeded-js (ColdJs-2, rerun) | 12/12 intact | 0 drifted — repros re-run against a pristine source copy, so recorded output still reproduces after the fix |
 | seeded-ts (ColdTs-3, rerun) | 7/7 intact | 7 drifted: fixes landed, repros show corrected output |
+| seeded-cpp (ColdCpp-2, rerun) | 13/13 intact | 11 drifted (fix landed), 2 stable hardening refutes |
 
 Drift after a landed fix is expected and informational; a fabricated
 fingerprint is the disqualifier. (Java's PASS rests on landed-
