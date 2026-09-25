@@ -55,25 +55,26 @@ runs wherever your agent already does.
 
 ### Optional verification skills
 
-Install only the three skills sstack uses or mirrors during Discover:
+Install only the three skills sstack uses during Discover and premise
+checks:
 
 ```bash
 npx skills@latest add cursor/plugins \
+  --skill principle-attack-the-premise \
   --skill create-verification-skill \
   --skill maintain-verification-skill \
-  --skill thermos \
   --global
-```
-
 This provides:
 
+- `principle-attack-the-premise` — challenge shared assumptions when
+  repeated fixes fail the same gate
 - `create-verification-skill` — create or refresh the target's
   verification map
 - `maintain-verification-skill` — keep that map current as the target
   changes
 
-Both are optional. If they are not installed, sstack falls back to the
-target's documentation, types, and call sites.
+All three are optional. If they are not installed, sstack falls back to
+the target's documentation, types, and call sites.
 
 ## Languages
 
