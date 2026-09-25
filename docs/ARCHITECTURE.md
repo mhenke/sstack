@@ -56,8 +56,8 @@ lens, never the identity.
 | Input | boundaries | ✅ |
 | Input | malformed | ✅ |
 | Input | missing | ✅ |
-| Access | ownership | next (highest priority) |
-| Behavior | exceptional-conditions | next |
+| Access | ownership | ✅ (peer skill + agent) |
+| Behavior | exceptional-conditions | ✅ (peer skill + agent) |
 | Behavior | state | future |
 | Behavior | ordering | future |
 | Behavior | concurrency | future |
@@ -107,8 +107,8 @@ the rest are the v1 proof-gate menu.
 
 ## v0 scope
 
-`skills/sstack/SKILL.md` (orchestrator) + 4 peer lens skills
-(`skills/sstack-<lens>/SKILL.md`) + 4 attacker agents
+`skills/sstack/SKILL.md` (orchestrator) + 6 peer lens skills
+(`skills/sstack-<lens>/SKILL.md`) + 6 attacker agents
 (`agents/sstack-<lens>-attacker.md`) + five seeded eval fixtures.
 Discover consumes `create-verification-skill` and
 `maintain-verification-skill`; Attack consumes

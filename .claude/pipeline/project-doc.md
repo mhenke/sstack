@@ -44,13 +44,13 @@ Content architecture with a strict noun taxonomy (six definitions in ARCHITECTUR
 | Oracle | expected behavior declared before the attack | inline in SKILL.md + lens skills |
 | Evidence | observed vs. oracle, loose markdown | `.sstack/findings/` in the host repo |
 
-**Lens taxonomy (15 lenses, 4 shipped in v0):**
+**Lens taxonomy (15 lenses, 6 shipped in v0):**
 
 | Category | Lens | v0 |
 |---|---|---|
 | Input | boundaries, malformed, missing | ✅ |
-| Access | ownership | next (highest priority) |
-| Behavior | exceptional-conditions | next |
+| Access | ownership | ✅ (peer skill + agent) |
+| Behavior | exceptional-conditions | ✅ (peer skill + agent) |
 | Behavior | state, ordering, concurrency, idempotency | future |
 | Environment | dependency-failure | future |
 | Environment | resource-exhaustion | ✅ (peer skill + agent) |
@@ -65,7 +65,7 @@ Content architecture with a strict noun taxonomy (six definitions in ARCHITECTUR
 
 ```
 skills/sstack/SKILL.md              orchestrator: routing, rules, 6 stages, lens index
-skills/sstack-<lens>/SKILL.md       peer lens skills (4: boundaries, malformed, missing, resource-exhaustion)
+skills/sstack-<lens>/SKILL.md       peer lens skills (6: boundaries, malformed, missing, ownership, exceptional-conditions, resource-exhaustion)
 agents/sstack-<lens>-attacker.md    per-lens attacker definitions (Thermos dispatch by name)
 
 docs/

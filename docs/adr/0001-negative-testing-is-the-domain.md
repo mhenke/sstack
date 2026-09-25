@@ -63,7 +63,7 @@ service) is explicitly not copied.
   finding rests on expected-error assertion plus reproducibility
   alone.
 - The taxonomy (15 lenses) is large enough to look like a sprawl
-  risk, mitigated by shipping four lenses and disclosing the rest.
+  risk, mitigated by shipping six lenses and disclosing the rest.
 
 **Risks**
 

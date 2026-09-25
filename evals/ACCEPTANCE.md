@@ -122,7 +122,7 @@ landed under `src/` instead of the repo root.
 At the time of run #4 and the first ColdTs, the shipped lens reference
 files carried 8 of the 10 seed trigger+oracle pairs verbatim (inherited
 from the implementation plan's worked examples), and the cold agents
-read all four lens files. Those results are NOT evidence of
+read all six lens files. Those results are NOT evidence of
 independent bug-finding and are retained above only as run history.
 Fixed in `14a1139`: worked examples rewritten onto non-seed domains,
 harness excludes `.pytest_cache` / `__pycache__` / `.vite`, stale

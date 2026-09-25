@@ -71,9 +71,9 @@ v0 is a content-only skill pack with a process-only evidence layer
 
 - **What**: `state`, `ordering`, `concurrency`, `idempotency` next.
   The behavior lenses catch more real defects than more input lenses.
-  Then `dependency-failure`, `contract`. (`resource-exhaustion`
-  already shipped as a peer skill + agent.)
-- **Done when**: the seeded repos carry at least one seed per shipped
+  Then `dependency-failure`, `contract`. (`ownership`,
+  `exceptional-conditions`, and `resource-exhaustion` already shipped
+  as peer skills + agents, pending cold-run acceptance.)
   lens, and a clean run reaches a majority on each supported fixture.
 - **Note**: additive only. A lens is an
   `agents/sstack-<name>-attacker.md` wrapper plus a
@@ -97,7 +97,7 @@ v0 is a content-only skill pack with a process-only evidence layer
 
 - **Status**: harness-backed containment. `python3 evals/acceptance.py
   prepare <fixture>` builds one temp workspace containing the skill,
-  all four lens skills, the four agents, and the decontaminated
+  all six lens skills, the six agents, and the decontaminated
   fixture. The caller dispatches the cold agent into that workspace.
   The skill resolves all paths via the `.sstack-host-repo` marker.
 - **What is enforced**: the harness strips `BUGS.md`, caches,
@@ -184,7 +184,11 @@ Discover's output.
   seeded repo, finds at least as many seeds as the inline loop, and
   completes in less wall clock.
 
-### The ownership lens (next lens, highest priority)
+### The ownership lens (shipped, pending cold-run acceptance)
+
+- **Status**: `sstack-ownership` peer skill plus
+  `sstack-ownership-attacker` agent shipped. Cold-run acceptance with
+  an authorization-scope seed remains open.
 
 Authorization-scope violations: user A's session returns user B's
 entity. Valid request, wrong session. OWASP A01:2025 Broken Access
@@ -376,17 +380,18 @@ language.
 - **A test-generation product.** Happy-path coverage is the host
   repo's business (ADR-0001).
 - **A security scanner.** Security is one lens among many
-  (ADR-0001).
-- **Mutation as the identity.** It is a strategy under proof quality,
-  never the frame (ADR-0001).
-
 ## Deferred
 
 - **Acceptance re-runs.** Cold-run evidence for the current skill text
-  is pending. The last clean evidence is at `9979718` (runs #6 and
-  CleanTs). Re-run when tagging a release.
-- **Evidence schema with fingerprints.** See v1 above.
-- **Learn loop.** See v2 above.
+  is pending. Fresh runs 2026-09-25: Python PASS (seed_id malformed);
+  TypeScript INVALID (empty finding); JavaScript and C++ reported but
+  ungraded; Java pending. Last clean evidence remains `9979718`
+  (runs #6 and CleanTs). Re-run when tagging a release.
+- **Evidence schema with fingerprints.** Findings JSON landed in the
+  skill text; agent-out-of-loop re-verification remains open. See v1.
+- **Learn loop.** Landed in skill text (`/sstack learn`,
+  `.sstack/learn/`, `agents-memory-updater` dispatch). Cold-run proof
+  of a prioritized second-run seed remains open. See v2.
 - **Host packaging.** See v2 above.
 
 Language breadth is no longer deferred: Python, JavaScript, TypeScript,

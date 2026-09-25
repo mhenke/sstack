@@ -13,8 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ADR-0005: sstack finds, tests, and fixes (supersedes the
   audit-not-fix portion of ADR-0002)
 - Per-lens attacker agents (`agents/sstack-<lens>-attacker.md`):
-  boundaries, malformed, missing, resource-exhaustion — each loading
-  its peer lens skill, with returns format and constraints
+  boundaries, malformed, missing, ownership, exceptional-conditions,
+  resource-exhaustion — each with returns format, constraints, and an
+  inline-rubric handoff
 - Thermos pattern: per-lens fan-out at Attack stage, one agent per
   lens, parallel when the host supports subagent dispatch
 - Property-based testing delegation: Attack stage checks for

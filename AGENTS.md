@@ -33,7 +33,7 @@ looks obvious.
 
 ### The skill carries no answer key
 
-A cold agent reads all four lens files. A worked example that shares a
+A cold agent reads all six lens files. A worked example that shares a
 trigger input *and* an oracle string with any `BUGS.md` row
 contaminates the acceptance evidence. This happened once and the
 re-review caught it.
