@@ -9,26 +9,26 @@ isolated dir).
 
 ## Verdict
 
-> **Graded 2026-09-25** with the content-match grader (`b05b94b`)
-> against the current skill text: **all five fixtures PASS**; seeded-ts
-> re-verified on the post-consistency text (ColdTs-4, 5/5 seeds).
-> Findings link to goldens by trigger content (function name / trigger
-> words across surface, case, oracle); self-reported `seed_id` is
-> advisory, landed regressions are verified on disk, evidence replays
-> out of the agent loop.
+> **Graded 2026-09-25** with the content-match grader (`b05b94b`):
+> **all five fixtures PASS**. py and java were re-run fresh on the
+> current post-lane-audit text (`13947ce`); ts, js, and cpp PASSes
+> stand on their recorded pre-audit text (the delta is fan-out
+> carrier mechanics plus the disjunctive-oracle guard — none of it
+> exercised by those serial runs). Findings link to goldens by
+> trigger content; self-reported `seed_id` is advisory; landed
+> regressions are verified on disk; every PASS now replays its
+> evidence out of the agent loop.
 
 | Repo | Verdict | Detail |
 |---|---|---|
-| seeded-py | PASS | 5/5 seeds content-matched (Learn-run-2), 10/10 evidence intact; run 1: 3/5 matched, 8/8 intact |
-| seeded-java | PASS | 4 confirmed; java-1, java-2, java-4 content-matched, 4/4 red→green claims verified against workspace test files |
+| seeded-py | PASS | ColdPy-4 on current text: 5/5 seeds, 13 confirmed red→green landed, 22/22 evidence replay intact, 0 drift (serial; earlier Learn-run-2 5/5 on `b9803cf`) |
+| seeded-java | PASS | ColdJava-3 on current text: java-1/2/4 content-matched, 5 confirmed red→green, 10 tests green, 7/7 evidence replay intact — the pre-schema-pin gap is closed |
 | seeded-ts | PASS | 15 confirmed red→green, 5/5 seeds content-matched, 37/37 tests, 19/19 evidence replay intact (ColdTs-4 on post-consistency text, orchestrator-resumed; prior: ColdTs-3 4/5) |
 | seeded-js | PASS | 7 confirmed; 5/5 seeds content-matched, landed regressions, 12/12 evidence files replay intact (ColdJs-2, rerun) |
 | seeded-cpp | PASS | 11 confirmed red→green in `tests/shop_test.cpp` (ctest 14/14), cpp-1/2/4 content-matched, 13/13 evidence replay intact (ColdCpp-2, rerun; wave 1 FAILed: named `test_functions.cpp`, landed nothing) |
 
 Wave 1 verdicts stand in the run histories below: they are what the
-grader caught, and every failure converted to a PASS on rerun. Java's
-PASS ran before the evidence-schema pin (landed-regression checks
-only); every other PASS carries replayed evidence.
+grader caught, and every failure converted to a PASS on rerun.
 
 ## Run history (python)
 
@@ -43,6 +43,8 @@ only); every other PASS carries replayed evidence.
 | #7 | v0.1.0 + PBT delegation + mutation + run-end checks + steel-man + edge-case vocab | isolated workspace, read-only lock | INVALID — 10 findings, 10 green characterization regressions (bug-pinning). Source untouched. Run-end check #4 not applied by the cold agent. |
 | ColdPy-2 | current text (`e29af03`+) | isolated workspace | PASS — `.sstack/report.json` (8 findings, py-1/2/3 matched, label contradictions as warnings) + 8 script-emitted evidence JSONs; replay grades all 8 intact |
 | ColdPy-R2 (Learn-loop run 2) | current text (`b9803cf`+) | isolated workspace + `.sstack/learn/` from run 1 | PASS — 10 findings, 5/5 seeds content-matched, replay 10/10 intact. Discover ordered attacks by the three learned lines (cited verbatim in `.sstack/map.md`); label contradictions: zero. Agent crashed (exit 1) before emitting artifacts; the orchestrator emitted them from the agent's landed tests + fixes, running each repro against a pristine fixture copy so recorded output is the real buggy behavior. |
+| ColdPy-3 (fan-out attempt) | current text (`13947ce`+) | isolated workspace | CANCELLED — dispatched six lens subagents; one attacker stalled past 50 min blocking its parent; host picked read-only `scout` subagents that cannot execute probes. Re-run in serial mode as ColdPy-4 |
+| ColdPy-4 | current text (`13947ce`+) | isolated workspace, serial lenses by dispatch override | PASS — 5/5 seeds, 13 confirmed red→green landed in `tests/test_shop.py`, 22 findings script-emitted, replay 22/22 intact, 0 drift. Mid-run report.json transiently named tests before the Test stage wrote them — incremental emission means grade after yield, not during |
 
 ## Run history (typescript)
 
@@ -59,8 +61,8 @@ only); every other PASS carries replayed evidence.
 | Run | Fixture | Outcome |
 |---|---|---|
 | ColdJs | seeded-js | INVALID — finished 3 confirmed + fixes + 4 test files, but hand-typed `report.json` unparseable (unescaped quotes, line 33) and all evidence fingerprints placeholder (`a1b2c3d4...`); replay grades them fabricated |
-| ColdJs-2 | seeded-js | PASS — 7 confirmed red→green, 5/5 seeds matched, script-emitted report + 12 evidence files, replay 12/12 intact. First rerun to convert an INVALID wave-1 verdict |
-| ColdJava | seeded-java | PASS — 4 confirmed red→green; java-1/2/4 content-matched; self-labels shifted (advisory only); no evidence JSONs (ran before the schema pin) |
+| ColdJava | seeded-java | PASS — 4 confirmed red→green; java-1/2/4 content-matched; self-labels shifted (advisory only); no evidence JSONs (ran before the schema pin); superseded by ColdJava-3 |
+| ColdJava-3 | seeded-java | PASS — java-1/2/4 content-matched (java-3/5 not attacked: four lenses deemed not-applicable with stated reasons), 5 confirmed red→green in `src/test/java/com/sstack/ShopTest.java`, 10 tests green, replay 7/7 intact, 0 drift. First java run to ship evidence JSONs — closes the pre-schema-pin gap; serial lenses by dispatch override after ColdPy-3's fan-out stalled |
 | ColdCpp | seeded-cpp | FAIL — genuine attacks (7 confirmed, script-emitted evidence, all fingerprints intact, cases match cpp-1/3/4) but the regression objects name a `test_functions.cpp` that was never written and source was never fixed. First false-claim caught by landed-regression verification |
 | ColdCpp-2 | seeded-cpp | PASS — 11 confirmed red→green in `tests/shop_test.cpp` (built by CMake, 14/14 via ctest), 5 source guards in `src/shop.cpp`, cpp-1/2/4 content-matched, 13/13 evidence replay intact |
 
@@ -80,10 +82,12 @@ command with the agent out of the loop.
 | seeded-ts (ColdTs-3, rerun) | 7/7 intact | 7 drifted: fixes landed, repros show corrected output |
 | seeded-ts (ColdTs-4, resumed) | 19/19 intact | 0 drifted — repros ran against a pristine source copy, so recorded output still reproduces after the fix |
 | seeded-cpp (ColdCpp-2, rerun) | 13/13 intact | 11 drifted (fix landed), 2 stable hardening refutes |
+| seeded-py (ColdPy-4, current text) | 22/22 intact | 0 drifted — repros ran against a pristine source copy |
+| seeded-java (ColdJava-3, current text) | 7/7 intact | 0 drifted — first java run with evidence JSONs |
 
 Drift after a landed fix is expected and informational; a fabricated
-fingerprint is the disqualifier. (Java's PASS rests on landed-
-regression checks only — that run shipped no evidence JSONs.)
+fingerprint is the disqualifier. Every PASS — all five — now carries
+replayed evidence.
 
 Runs #1–#5 drove four product fixes, all committed:
 - `2880501` — forbid bug-pinning regressions; require per-surface lens

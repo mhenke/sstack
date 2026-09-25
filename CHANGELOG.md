@@ -14,8 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   audit-not-fix portion of ADR-0002)
 - Per-lens attacker agents (`agents/sstack-<lens>-attacker.md`):
   boundaries, malformed, missing, ownership, exceptional-conditions,
-  resource-exhaustion — each with the Report format block, constraints,
-  and an inline-rubric handoff
+  resource-exhaustion — each with the Report format field names as
+  fallback, constraints, and an inline-rubric handoff
 - Thermos pattern: per-lens fan-out at Attack stage, one agent per
   lens, parallel when the host supports subagent dispatch
 - Property-based testing delegation: Attack stage checks for
@@ -56,6 +56,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Acceptance re-verified on the post-lane-audit text (`13947ce`):
+  ColdPy-4 PASS 5/5 seeds, 13 red→green, 22/22 replay intact;
+  ColdJava-3 PASS java-1/2/4, 5 red→green, 7/7 replay intact — java's
+  pre-schema-pin evidence gap is closed, every PASS now replays
+- Fan-out field failure modes logged (ColdPy-3, cancelled): an
+  attacker subagent stalled 50+ min blocking its parent, and one host
+  dispatched lens attackers as read-only scouts that cannot execute
+  probes. Serial override (skill's own fallback) carried both re-runs
 - Evidence contract: `regression.before`/`after` are the literal state
   tokens "red"/"green" — the grader always required that and the skill
   never said it; ColdTs-4 wrote output snippets and graded zero matches

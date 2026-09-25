@@ -13,11 +13,11 @@ of a run. Anything that does neither is out.
   exceptional-conditions, resource-exhaustion.
 - Five seeded fixtures: Python, TypeScript, JavaScript, Java, C++.
 - Cold-run evidence (2026-09-25, content-match grader): **all five
-  fixtures PASS** on current text. Seeds matched: py 5/5 (twice;
-  Learn-run-2 also proved the loop), js 5/5, ts 5/5 (ColdTs-4, on the
-  post-consistency text), java 3/5, cpp 3/5. Every PASS carries landed
-  regressions verified on disk and evidence that replays with integrity
-  ok (Java's wave ran before the schema pin; landed-checks only).
+  fixtures PASS**. Seeds matched: py 5/5 (ColdPy-4 re-run on current
+  text; Learn-run-2 proved the loop), js 5/5, ts 5/5, java 3/5
+  (ColdJava-3 re-run — first java wave with replayed evidence), cpp
+  3/5. Every PASS carries landed regressions verified on disk and
+  evidence that replays with integrity ok.
 - Findings JSON shipped with a pinned schema and out-of-loop replay
   (`b05b94b`); Learn loop proven cold (see Shipped below).
 

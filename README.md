@@ -138,16 +138,16 @@ reads `BUGS.md`; cold-agent dispatch stays outside the repository.
 
 | Fixture | Seeds | Current cold evidence |
 |---|---|---|
-| seeded-py | 5 | PASS; Learn-run-2 matched 5/5 seeds, 10/10 evidence replay intact |
-| seeded-ts | 5 | PASS; 5/5 seeds content-matched, 19/19 evidence replay intact (post-consistency rerun) |
+| seeded-py | 5 | PASS; 5/5 seeds content-matched, 22/22 evidence replay intact (rerun on current text) |
+| seeded-ts | 5 | PASS; 5/5 seeds content-matched, 19/19 evidence replay intact (rerun) |
 | seeded-js | 5 | PASS; 5/5 seeds content-matched, 12/12 evidence replay intact (rerun) |
-| seeded-java | 5 | PASS; 3/5 seeds content-matched with landed regressions |
+| seeded-java | 5 | PASS; 3/5 seeds content-matched, 7/7 evidence replay intact (rerun on current text) |
 | seeded-cpp | 5 | PASS; 3/5 seeds content-matched, 13/13 evidence replay intact (rerun) |
 
-All five grade PASS on the current text with replayed evidence
-(2026-09-24, ts re-verified 2026-09-25). Earlier waves' failures
-(fabricated fingerprints, regressions that never landed) are recorded
-in the run histories.
+All five grade PASS with replayed evidence; py and java re-run fresh
+on the current text (2026-09-25), ts/js/cpp PASSes stand on their
+recorded text. Earlier waves' failures (fabricated fingerprints,
+regressions that never landed) are recorded in the run histories.
 
 Full record, including the runs that failed and what each one taught
 the skill: [`evals/ACCEPTANCE.md`](evals/ACCEPTANCE.md).
