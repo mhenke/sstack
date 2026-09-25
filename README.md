@@ -87,13 +87,19 @@ The eval is a cold agent with no memory, no answer key, one copy of
 the skill:
 
 ```bash
-evals/run-acceptance.sh seeded-py    # or seeded-ts
+python3 evals/acceptance.py prepare seeded-py
 ```
 
 It hands back a temp workspace with a deliberately broken repo and
-nothing else. A fresh agent runs `/sstack` inside it and gets scored
-on what it finds.
+nothing else. Launch your host's cold agent in that directory, then:
 
+```bash
+python3 evals/acceptance.py grade path/to/report.json
+```
+
+`prepare-all` creates workspaces for all five fixtures. The entry point
+never launches an agent or reads `BUGS.md`; host-specific cold-agent
+dispatch stays outside the repository.
 | | seeded-py | seeded-ts |
 |---|---|---|
 | Bugs planted | 5 | 5 |

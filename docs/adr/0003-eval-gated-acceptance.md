@@ -28,12 +28,12 @@ The design had to answer four questions the demos kept getting wrong:
 
 Acceptance is a **cold-run eval**, recorded in `evals/ACCEPTANCE.md`:
 
-- Two seeded repos (Python/pytest, TypeScript/vitest), five bugs
-  each, every bug mapped to exactly one lens and listed in a
-  `BUGS.md` answer key.
-- `evals/run-acceptance.sh` copies the skill and a BUGS.md-free,
-  cache-free fixture into one temp workspace. The cold agent works
-  only inside it.
+- Five seeded repos (Python/pytest, TypeScript/vitest, JavaScript/node,
+  Java/JUnit, C++/CTest), five bugs each, every bug mapped to exactly
+  one lens and listed in a `BUGS.md` answer key.
+- `python3 evals/acceptance.py prepare <fixture>` copies the skill and
+  a BUGS.md-free, cache-free fixture into one temp workspace. The cold
+  agent works only inside it.
 - A repo passes when the agent confirms seeded bugs with oracle
   regressions that go **red** on the seed and **green** after the
   canonical fix.

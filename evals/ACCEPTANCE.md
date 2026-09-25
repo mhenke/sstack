@@ -3,8 +3,8 @@
 Runs: fresh subagent given only a copy of the skills (`skills/sstack/`
 plus the four `skills/sstack-<lens>/` peers) and the four
 `agents/sstack-<lens>-attacker.md` files, and a BUGS.md-free copy of
-the seeded repo, in a temp workspace (`evals/run-acceptance.sh`
-copies all of it into one isolated dir).
+the seeded repo, in a temp workspace (`python3 evals/acceptance.py
+prepare` copies all of it into one isolated dir).
 
 ## Verdict
 
@@ -72,9 +72,9 @@ Runs #1–#5 drove four product fixes, all committed:
   errors are broken cases, never verdicts (run #5 read its own broken
   harness as 105 satisfied oracles)
 
-Also: `run-acceptance.sh` copies the skill INTO the temp workspace so a
-cold agent never needs to touch the sstack repo (run #3 escaped by
-editing the main-repo seeds and reading BUGS.md).
+Also: `python3 evals/acceptance.py prepare` copies the skill INTO the
+temp workspace so a cold agent never needs to touch the sstack repo
+(run #3 escaped by editing the main-repo seeds and reading BUGS.md).
 
 ## seeded-py: seed mapping (run #6, clean)
 

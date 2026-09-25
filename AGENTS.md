@@ -64,19 +64,16 @@ the skill and the decontaminated fixture together in one temp dir.
 ## Testing
 
 Baselines, green before any commit:
-
 - `cd evals/seeded-py && pytest -q` → 5 passed
 - `cd evals/seeded-ts && bun run test` → 6 passed
+- `cd evals/seeded-js && npm test` → 1 passed
+- `cd evals/seeded-cpp && cmake -S . -B build && cmake --build build && ctest --test-dir build` → 1 passed
+- `cd evals/seeded-java && javac -d /tmp/seeded-java-classes src/main/java/com/sstack/Shop.java` → compiles
 
-An edit to `skills/` (orchestrator, lens skills) or `agents/`
-invalidates `evals/ACCEPTANCE.md`, because the recorded evidence came
-from the exact shipped text. Re-run `evals/run-acceptance.sh <repo>`
-and update the record, or state that the evidence is stale.
-
-A run passes when a cold agent finds at least one seeded bug, lands a
-regression that goes **red** on the seed, and that regression goes
-**green** after the canonical fix. An agent saying it found bugs is not
-evidence. No coverage tooling exists and none is needed.
+The unified eval entry point is `python3 evals/acceptance.py`:
+`prepare <fixture>`, `prepare-all`, and `grade <report.json>`. It never
+launches a host-specific cold agent.
+An agent saying it found bugs is not evidence. No coverage tooling exists and none is needed.
 
 Failure modes this project has actually hit, all worth a regression
 check: tests that pin buggy behavior instead of the oracle; oracles

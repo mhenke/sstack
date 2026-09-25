@@ -86,7 +86,8 @@ agents.
 - Three input lenses (`references/`): boundaries, malformed, missing
 - Concept freeze (`docs/`): ETHOS.md, ARCHITECTURE.md
 - Seeded-bug eval repos: `evals/seeded-py` and `evals/seeded-ts`
-- Cold-run acceptance harness (`evals/run-acceptance.sh`)
+- Unified Python eval entry point (`evals/acceptance.py`) prepares
+  isolated workspaces and grades JSON reports
 - Acceptance record (`evals/ACCEPTANCE.md`)
 - MIT license
 
