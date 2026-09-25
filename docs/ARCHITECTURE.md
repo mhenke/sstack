@@ -112,10 +112,11 @@ the rest are the v1 proof-gate menu.
 (`agents/sstack-<lens>-attacker.md`) + five seeded eval fixtures.
 Discover consumes `create-verification-skill` and
 `maintain-verification-skill`; Attack consumes
-`principle-attack-the-premise` when available, with a
-docs/types/call-sites fallback. Everything else (runners, evidence
-schema, learn loop, 11 remaining lenses, host packaging) is additive
-later via new peer skill and agent files — no restructuring.
+`principle-attack-the-premise`; Fix consumes
+`principle-fix-root-causes` when available, with docs/types/call-sites
+fallback. Everything else (runners, evidence schema, learn loop, 11
+remaining lenses, host packaging) is additive later via new peer skill
+and agent files — no restructuring.
 
 
 ## Prior art

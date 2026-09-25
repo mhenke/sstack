@@ -201,8 +201,14 @@ green for refuted/hardened.
 
 ### 6. Fix
 
-For each confirmed finding, apply the minimal change that satisfies
-the oracle. Smallest diff that turns the red test green.
+For each confirmed finding, trace the observed behavior to its root
+cause before editing. If available, use `principle-fix-root-causes`:
+reproduce the failure, ask why until the shared cause is found, and fix
+that cause rather than adding a symptom guard. Check every sibling
+caller of the same behavior before applying the fix.
+
+Then apply the minimal change that satisfies the oracle. Smallest diff
+that turns the red test green.
 
 - Validation: add the guard the oracle describes.
 - Error handling: wrap the leak in a clean domain error.
