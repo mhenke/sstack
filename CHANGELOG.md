@@ -18,8 +18,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   fallback, constraints, and an inline-rubric handoff
 - Thermos pattern: per-lens fan-out at Attack stage, one agent per
   lens, parallel when the host supports subagent dispatch
-- `state` lens (`skills/sstack/state` + `sstack-state-attacker`):
-  stale cached/derived reads, mutable input written through, partial
+- Ownership lens rebuilt against OWASP ASVS V8 and A01:2025, not just
+  C1. The rubric now starts from a subject × object × action × context
+  tuple per surface, sweeps every decision site (middleware, guards,
+  query filters, row policies, client-side) and attacks the weakest,
+  and carries a 24-row probe table: field-level read and write
+  (BOPLA), deny-by-default and policy fall-through, least privilege,
+  hard-coded roles, missing write-method controls, force browsing,
+  token replay/tampering, logout invalidation, stale grants (V8.3.2),
+  confused-deputy delegation (V8.3.3), cross-tenant writes (V8.4.1),
+  admin-interface context (V8.4.2), contextual step-up, CORS, CSRF,
+  SSRF, static resources, error-based enumeration, and decommissioned
+  accounts. Attacker gained the tuple-first work order and a rule that
+  a check on the read path proves nothing about the write path
   update after a failed call, internal collections escaped to callers.
   Seeds pending; rubric + attacker shipped
 - Evidence emitter ships with the entry skill

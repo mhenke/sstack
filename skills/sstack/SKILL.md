@@ -194,7 +194,9 @@ run, not a clean result.
   - agent `sstack-missing-attacker` with the `sstack-missing`
     skill inline: absent fields, nulls, empty inputs.
   - agent `sstack-ownership-attacker` with the `sstack-ownership`
-    skill inline: authorization scope, BOLA, IDOR, deny-by-default.
+    skill inline: subject × object × action × context, BOLA/IDOR,
+    field-level read and write, deny-by-default, least privilege,
+    token integrity, cross-tenant, CORS/CSRF.
   - agent `sstack-exceptional-conditions-attacker` with the
     `sstack-exceptional-conditions` skill inline: fail-open paths,
     diagnostic leakage, cascading failures.
@@ -356,7 +358,7 @@ reporting.
 | boundaries | edge cases: numbers, sizes, indexes, slices, collections, pagination, loops | sstack-boundaries-attacker |
 | malformed | strings parsed from outside, JSON, encodings, dynamic types | sstack-malformed-attacker |
 | missing | optional fields, records from external data, null/None/undefined | sstack-missing-attacker |
-| ownership | entities with an owner; valid request, wrong session. OWASP A01 broken access control, BOLA, IDOR | sstack-ownership-attacker |
+| ownership | a subject, an object, an action, and the context that joins them. OWASP A01 broken access control: BOLA/IDOR, BOPLA, missing deny-by-default, privilege escalation, token tampering, CORS, force browsing | sstack-ownership-attacker |
 | exceptional-conditions | fail-open paths, diagnostic leakage, cascading failures, empty catch blocks. OWASP A10 | sstack-exceptional-conditions-attacker |
 | resource-exhaustion | connection pools, rate limits, memory ceilings, payload limits, disk | sstack-resource-exhaustion-attacker |
 | state | object with lifetime: cached/derived reads, mutable input written through, partial update after failure, internal collection escaped to callers | sstack-state-attacker |

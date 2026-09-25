@@ -12,3 +12,4 @@ negative-control fixes.
 | py-4 | pricing | missing | `line_total({"unit_price": 10, "qty": 2, "discount": None})` | `TypeError: 1-None` | None treated as absent → 20.0 | `discount = item.get("discount") or 0` guard for None |
 | py-5 | pricing | malformed | `line_total({"unit_price": "abc", "qty": 2})` | raw `ValueError: could not convert string to float` | `ValueError: unit_price must be numeric` | wrap float() with clean error |
 | py-6 | cart | state | `Cart().track("widget", 3)` then `Cart.count()` | `0` — `_count` snapshotted in `__init__`, never invalidated by `track` | `count()` returns `3`; a derived read reflects current state | recompute in `count()`, or update `_count` in `track` |
+| py-7 | orders | ownership | `search_orders(session_alice, "gizmo")` | returns bob's and alice's orders; `session` is accepted but never used to filter | only alice's order with that sku | filter on `session["user_id"]` before the sku match |
