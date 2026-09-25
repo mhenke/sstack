@@ -32,6 +32,21 @@ heading. The attacker's only source of attack strategy; absent it,
 the attacker falls back to its own lens description.
 _Avoid_: prompt, instructions
 
+**Decision site**:
+A place in the code where an access decision is made: middleware, a
+guard, a decorator, a query filter, a row policy, a gateway rule, or a
+check the caller can edit. Access control is only as strong as its
+weakest decision site, and it is only deny-by-default if their union
+is.
+_Avoid_: auth check (singular, implies there is one)
+
+**Tuple**:
+The four inputs an access decision binds — subject, object, action,
+context. A check that binds only subject and action answers "is this
+user an admin", never "may this user have this record", so the omitted
+inputs name where the missing check belongs.
+_Avoid_: permission (a grant, not the question being asked)
+
 **Collection surface**:
 A surface that returns many records: list, search, index, feed,
 export, report, autocomplete. Its authorization obligation is the
@@ -40,6 +55,15 @@ needs its own probe: a subject absent from the query leaks even when
 every per-object check passes.
 _Avoid_: listing endpoint, read surface (names the transport, not the
 obligation)
+
+**Contamination**:
+A shipped artifact handing a cold run its answer — a worked example
+pairing a seed's trigger with its oracle, an unstripped `BUGS.md`, a
+leftover `.sstack/` copied into the workspace. It makes the run
+measure the prompt rather than the attacker, so the run is void
+whatever it reports. Distinct from a lucky find: the agent still has
+to notice, name, and record the defect unaided.
+_Avoid_: leakage, hinting (both name the symptom, not the invalidity)
 
 **Content match**:
 The grader's finding↔golden link, made from surface, case, and oracle

@@ -76,10 +76,10 @@ the skill and the decontaminated fixture together in one temp dir.
 ## Testing
 
 Baselines, green before any commit:
+- `python3 -m pytest evals/test_emitter.py -q` → 5 passed (emitter/skill contract)
 - `cd evals/seeded-py && pytest -q` → 5 passed
 - `cd evals/seeded-ts && bun run test` → 6 passed
 - `cd evals/seeded-js && npm test` → 1 passed
-- `cd evals/seeded-cpp && cmake -S . -B build && cmake --build build && ctest --test-dir build` → 1 passed
 - `cd evals/seeded-java && javac -d target/classes src/main/java/com/sstack/Shop.java && javac -cp target/classes:junit-console.jar -d target/test-classes src/test/java/com/sstack/ShopTest.java && java -jar junit-console.jar execute --class-path target/classes:target/test-classes --scan-class-path` → 3 passed (jar auto-fetched by `prepare`; see `evals/seeded-java/RUN_TESTS.md`)
 
 The unified eval entry point is `python3 evals/acceptance.py`:

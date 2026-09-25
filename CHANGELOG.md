@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Emitter/skill contract closed. The Report format block names
+  seven fields, but the emitter also requires `slug`, `fix`, and
+  `regression`; a cold agent following the skill verbatim had its
+  findings rejected with exit 2. SKILL.md now enumerates the
+  payload, and `evals/test_emitter.py` (5 tests) pins the
+  contract in the repo's own runner, including a negative
+  control proving it turns red when the paragraph is removed
 - ADR-0004: lenses delegate to the target's existing tools
 - ADR-0005: sstack finds, tests, and fixes (supersedes the
   audit-not-fix portion of ADR-0002)

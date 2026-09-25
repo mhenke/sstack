@@ -103,11 +103,22 @@ lens: <lens> | verdict: <confirmed | refuted | inconclusive>
 The emitter is `scripts/emit_findings.py`, beside this skill: run it,
 never rewrite or copy it. Once per finding, as that case verifies —
 `python3 <pack>/skills/sstack/scripts/emit_findings.py --workspace
-<host-repo> --fixture <name>` with the finding as JSON on stdin. It
-executes the repro, captures real output, computes the fingerprint
+<host-repo> --fixture <fixture-name>` with the finding as JSON on
+stdin. Pass `--fixture` on the first emit of a run; later emits inherit
+it from `report.json`.
+It executes the repro, captures real output, computes the fingerprint
 itself, and is the only writer of `<slug>.md`, `<slug>.json`, and
 `report.json`. The run's human report is the chat summary;
 `report.json` is the only report file.
+
+The JSON you pipe is the Report format fields — `lens`, `surface`,
+`case`, `oracle`, `verdict`, `repro` — plus `slug` (a short kebab-case
+name for the finding), `fix` (the minimal change you will make), and
+`regression`: `{"file": "tests/test_x.py", "test": "test_name",
+"before": "red", "after": "green"}`. `before` and `after` are the
+literal tokens `red` and `green`, never output snippets. The seven
+fields alone are rejected. A finding with no regression yet is
+legitimate during Verify: the emitter warns and records the rest.
 
 Everything sstack creates lives under `.sstack/` — never the workspace
 root, never a temp folder elsewhere. Delete `scratch/` at run end; keep
