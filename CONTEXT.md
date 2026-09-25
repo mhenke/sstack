@@ -1,11 +1,33 @@
 # sstack
 
-Vocabulary for structured negative testing. The six product nouns
-(Skill, Lens, Agent, Runner, Oracle, Evidence) live in
+Vocabulary for structured negative testing. The seven product nouns
+(Skill, Lens, Agent, Runner, Oracle, Evidence, Custom lens) live in
 `docs/ARCHITECTURE.md`; this file holds the judging vocabulary — the
 terms the eval harness and the evidence contract turn on.
 
 ## Language
+
+**Stage**:
+One of the seven lifecycle steps: Discover, Attack, Verify, Minimize,
+Test, Fix, Learn. The process, fixed for the life of the product. Only
+Attack fans out per lens; the other six are lens-agnostic. Adding a
+stage is not an extension point.
+_Avoid_: phase, step, stage of the attack
+
+**Lens**:
+An angle of attack over a failure class: boundaries, malformed,
+missing, ownership, exceptional-conditions, resource-exhaustion,
+state. A noun, not a step. Seven ship; a target repo adds any number.
+The count of attacks is surface × lens, and neither factor is capped.
+_Avoid_: attack type, test type, stage
+
+**Agent**:
+The subprocess that executes one lens. A `runSubagent` dispatch, one
+file per shipped lens, receiving the surface map, the lens rubric, and
+the report format pasted into its message. Ships paired 1:1 with a
+lens, which is why the two read as one thing; they are not. A lens is
+the strategy, an agent is the worker.
+_Avoid_: attacker lens, lens agent (both collapse the pair)
 
 **Evidence file**:
 The machine-readable record of one finding: command, recorded output,
@@ -34,10 +56,14 @@ _Avoid_: prompt, instructions
 
 **Custom lens**:
 A repo-authored attack strategy in `.sstack/lenses/<name>.md`,
-selected by `.sstack/config.md`. Any number of them; they run
-alongside the shipped lenses and append to an existing attacker's
-rubric rather than adding an agent. It adds a lens, never a lifecycle
-stage: the seven stages are fixed.
+selected by `.sstack/config.md` and narrowed by its `applies-when`
+field. Any number of them. It adds a **lens**, never an agent and
+never a stage: there is no `sstack-ordering-attacker`. A custom lens
+is dispatched to a shipped attacker whose discipline fits, with its
+rubric appended after the built-in one, so the seven agents are
+reusable executors. The lens index's eight `custom lens` rows
+(`ordering`, `concurrency`, …) are unbuilt *shipped* lenses, a third
+category from a repo's own.
 _Avoid_: plugin, extension (both imply code the pack loads; this is
 prose the agent reads)
 

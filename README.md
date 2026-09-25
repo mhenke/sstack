@@ -120,6 +120,34 @@ them, and `lenses.remove` is reported in the summary so a dropped lens
 cannot hide. Commit `config.md` and `lenses/` if your team shares
 them; ignore the rest of `.sstack/`.
 
+### The three words
+
+They are different things, and the pack is easier to reason about once
+they stay apart.
+
+**Stages** are the process, and there are always seven:
+
+```
+Discover → Attack → Verify → Minimize → Test → Fix → Learn
+```
+
+**Lenses** are what you attack with. Seven ship: `boundaries`,
+`malformed`, `missing`, `ownership`, `exceptional-conditions`,
+`resource-exhaustion`, `state`. Only Attack uses them, against every
+surface Discover found. How many cases run is surface × lens, and
+neither factor has a ceiling.
+
+**Agents** are who does the attacking: one subprocess per shipped
+lens, receiving the surface map, its rubric, and the report format
+in its message. A lens and its agent ship paired, which is why they
+read as one thing. They are not: the lens is the strategy, the agent
+is the worker.
+
+Your custom lens adds a **lens** only. It does not add an agent, so
+there is no `sstack-ordering-attacker`: your rubric rides along on a
+shipped attacker whose discipline fits, appended after the built-in
+rubric. And it does not add a stage, because the seven are fixed.
+
 ### For contributors
 
 `docs/`, `evals/`, and the acceptance record live only in a git
