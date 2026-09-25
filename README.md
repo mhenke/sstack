@@ -1,21 +1,21 @@
 # sstack
 
+> This one goes looking for the not-happy test cases, the ones
+> nobody writes tests for on purpose:
+>
+> - the empty string
+> - the `null`
+> - the duplicate webhook
+> - the dependency that dies at 2am
+> - the second request that lands while the first is still running
+
 **sad stack** · negative testing for AI coding agents
 
 gstack, pstack, sstack. Same suffix, same shape: a `SKILL.md` your
 agent reads, a directory you copy in, a slash command you type. The
-family ships features and reviews diffs. This one goes looking for
-the not-happy test cases, the ones nobody writes tests for on
-purpose:
-
-- the empty string
-- the `null`
-- the duplicate webhook
-- the dependency that dies at 2am
-- the second request that lands while the first is still running
-
-It finds the ways your software fails, writes a test for each one
-that fails today, and applies the minimal fix that turns it green.
+family ships features and reviews diffs. sstack finds the ways your
+software fails, writes a test for each one that fails today, and
+applies the minimal fix that turns it green.
 
 > Don't ask whether the software is robust.
 > Exercise the failure condition, write the test that proves it, and
@@ -45,7 +45,27 @@ bug, and a pinned bug is worse than no test at all.
 npx skills@latest add mhenke/sstack
 ```
 
-Then:
+That installs the skills. Two things it does not do:
+
+- **Copy the attacker agents.** The seven
+  `agents/sstack-*-attacker.md` files are not part of
+  `npx skills add`. Use the install prompt below.
+- **Register a slash command on every host.** Claude Code turns the
+  skill directory into `/sstack`. Other hosts load the skill through
+  their own mechanism instead.
+
+### Attacker agent install prompt
+
+Paste into your agent:
+
+```text
+Copy the seven agents/*.md files from https://github.com/mhenke/sstack into ~/.agents/agents/ (the .agents Protocol hub; create it if missing), plus a VS Code copy in ~/.copilot/agents/ renamed <name>.agent.md.
+```
+
+Claude Code: also copy them to `~/.claude/agents/`. Per-repo VS Code:
+`.github/agents/`.
+
+Where your host registers the command:
 
 ```
 /sstack src/checkout.ts
@@ -54,10 +74,11 @@ Then:
 Zero runtime. No CLI, no daemon, no binary. It is Markdown, and it
 runs wherever your agent already does.
 
-`npx skills add` ships exactly `skills/` and `agents/` — the Markdown
-your agent reads. `docs/`, `evals/`, and the acceptance record live
-only in a git checkout: they are the contributor lane, the place the
-evidence gets produced and audited.
+### For contributors
+
+`docs/`, `evals/`, and the acceptance record live only in a git
+checkout: they are the contributor lane, the place the evidence
+gets produced and audited.
 
 ### Optional lifecycle skills
 
@@ -70,8 +91,11 @@ npx skills@latest add cursor/plugins \
   --skill maintain-verification-skill \
   --skill principle-test-behavior-not-implementation \
   --skill principle-fix-root-causes \
-  --global
+  --global -y
 ```
+
+`-y` answers the interactive agent picker. Without it, a non-TTY
+run prints "Nothing was installed" and exits 0.
 
 Lifecycle mapping:
 
