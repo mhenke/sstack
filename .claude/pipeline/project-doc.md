@@ -136,7 +136,7 @@ None. Single-process, local files. `evals/acceptance.py` copies the orchestrator
 
 - **Overall coverage: not measured** — no coverage tooling, by design.
 - **Baselines**: `evals/seeded-py` → `pytest -q`; `evals/seeded-ts` → `bun run test`; `evals/seeded-js` → `npm test`; `evals/seeded-cpp` → CMake/CTest; `evals/seeded-java` → javac + junit-console (jar auto-fetched; `RUN_TESTS.md`).
-- **Acceptance**: cold-run eval per ADR-0003, recorded in `evals/ACCEPTANCE.md`. 2026-09-24 current-text runs: **all five fixtures PASS** (py 5/5 seeds twice, js 5/5, ts 4/5, java 3/5, cpp 3/5), each with landed regressions verified on disk and evidence replaying intact (Java's wave predates the schema pin; landed-checks only).
+- **Acceptance**: cold-run eval per ADR-0003, recorded in `evals/ACCEPTANCE.md`. 2026-09-25: **all five fixtures PASS**, every one with landed regressions verified on disk and replayed evidence (py re-run 5/5 seeds 22/22 intact, ts 5/5 19/19, js 5/5 12/12, java re-run 3/5 7/7, cpp 3/5 13/13).
 
 ## Entry Points
 
