@@ -53,6 +53,25 @@ Then:
 Zero runtime. No CLI, no daemon, no binary. It is Markdown, and it
 runs wherever your agent already does.
 
+### Optional verification skills
+
+Discover uses Cursor's verification skills when they are available.
+Install them globally alongside sstack:
+
+```bash
+npx skills@latest cursor/plugins --skills --global
+```
+
+This provides:
+
+- `create-verification-skill` — create or refresh the target's
+  verification map
+- `maintain-verification-skill` — keep that map current as the target
+  changes
+
+Both are optional. If they are not installed, sstack falls back to the
+target's documentation, types, and call sites.
+
 ## Languages
 
 The process is language-agnostic. The evidence is not.
