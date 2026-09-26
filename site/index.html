@@ -262,6 +262,12 @@
       }
       .code-block .cmt { color: var(--muted); }
       .code-block .cmd { color: var(--fg); }
+      /* Hero install chip is the primary action; one click selects the whole
+         command without any JS (user-select: all), the accent border marks it
+         as the thing to do first. */
+      .hero-install .code-block { border-color: var(--accent); }
+      .hero-install .cmd { user-select: all; cursor: pointer; }
+      .hero-install .cmd:hover { color: var(--link-hover); }
 
       /* ─── Nav ────────────────────────────────────────────────── */
       .nav {
@@ -438,8 +444,7 @@
 <span class="cmd">$ npx skills@latest add mhenke/sstack</span></pre>
             </div>
             <div class="hero-actions">
-              <a class="btn btn-primary" href="https://github.com/mhenke/sstack">View on GitHub</a>
-              <a class="btn btn-secondary" href="https://github.com/mhenke/sstack/tree/main/docs/ETHOS.md">Read the ethos</a>
+              <a class="btn btn-secondary" href="#evidence">See the evidence</a>
             </div>
           </div>
           <aside class="hero-meta" aria-label="The oracle rule">
