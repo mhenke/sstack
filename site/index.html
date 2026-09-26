@@ -1,0 +1,702 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>sstack — negative testing for AI coding agents</title>
+    <meta
+      name="description"
+      content="sstack finds the ways your software fails, writes a test for each one that fails today, and applies the minimal fix that turns it green. A skill pack for AI coding agents."
+    />
+    <meta property="og:title" content="sstack — negative testing for AI coding agents" />
+    <meta
+      property="og:description"
+      content="sstack goes looking for the not-happy test cases, the ones nobody writes tests for on purpose."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #1f1633;
+        --surface: #150f23;
+        --surface-warm: var(--surface);
+
+        --fg: #ffffff;
+        --fg-2: #e5e7eb;
+        --muted: #9d96b3;
+        --meta: var(--muted);
+
+        --border: #362d59;
+        --border-soft: var(--border);
+
+        --accent: #6a5fc1;
+        --accent-on: #ffffff;
+        --accent-hover: color-mix(in oklab, var(--accent), black 8%);
+        --accent-active: color-mix(in oklab, var(--accent), black 14%);
+
+        --success: #16a34a;
+        --warn: #eab308;
+        --danger: #dc2626;
+
+        --font-display: "Dammit Sans", "Rubik", -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
+        --font-body: "Rubik", -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
+        --font-mono: Monaco, Menlo, "Ubuntu Mono", ui-monospace, monospace;
+
+        --text-xs: 12px;
+        --text-sm: 14px;
+        --text-base: 16px;
+        --text-lg: 20px;
+        --text-xl: 24px;
+        --text-2xl: 30px;
+        --text-3xl: 60px;
+        --text-4xl: 88px;
+
+        --leading-body: 1.5;
+        --leading-tight: 1.2;
+        --tracking-display: normal;
+
+        --space-1: 4px;
+        --space-2: 8px;
+        --space-3: 12px;
+        --space-4: 16px;
+        --space-5: 20px;
+        --space-6: 24px;
+        --space-8: 32px;
+        --space-12: 48px;
+
+        --section-y-desktop: 80px;
+        --section-y-tablet: 64px;
+        --section-y-phone: 48px;
+
+        --radius-sm: 6px;
+        --radius-md: 8px;
+        --radius-lg: 12px;
+        --radius-pill: 9999px;
+
+        --elev-flat: none;
+        --elev-ring: 0 0 0 1px var(--border);
+        --elev-raised: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+
+        --focus-ring: 0 0 0 2px var(--accent);
+
+        --motion-fast: 150ms;
+        --motion-base: 200ms;
+        --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+
+        --container-max: 1152px;
+        --container-gutter-desktop: 64px;
+        --container-gutter-tablet: 32px;
+        --container-gutter-phone: 24px;
+      }
+
+      /* ─── Reset ─────────────────────────────────────────────── */
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--bg);
+        color: var(--fg);
+        font-family: var(--font-body);
+        font-size: var(--text-base);
+        line-height: var(--leading-body);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* ─── Layout ─────────────────────────────────────────────── */
+      .container { max-width: var(--container-max); margin-inline: auto; padding-inline: var(--container-gutter-desktop); }
+      section { padding-block: var(--section-y-desktop); }
+      section + section { border-top: 1px solid var(--border); }
+      @media (max-width: 1023px) {
+        .container { padding-inline: var(--container-gutter-tablet); }
+        section { padding-block: var(--section-y-tablet); }
+      }
+      @media (max-width: 639px) {
+        .container { padding-inline: var(--container-gutter-phone); }
+        section { padding-block: var(--section-y-phone); }
+      }
+
+      /* ─── Typography — Rubik workhorse; Dammit Sans hero only ── */
+      h1, h2, h3 {
+        font-family: var(--font-body);
+        line-height: var(--leading-tight);
+        margin: 0;
+        color: var(--fg);
+      }
+      h1 {
+        font-family: var(--font-display); /* falls back to Rubik 700 */
+        font-size: var(--text-4xl);
+        font-weight: 700;
+        letter-spacing: var(--tracking-display);
+        max-width: 20ch;
+      }
+      @media (max-width: 639px) {
+        h1 { font-size: var(--text-2xl); }  /* 30px — 88px is billboard-only */
+      }
+      h2 { font-size: var(--text-2xl); font-weight: 400; }
+      h3 { font-size: var(--text-xl); font-weight: 500; }
+      p { margin: 0; }
+      .lead { font-size: var(--text-lg); color: var(--fg-2); line-height: var(--leading-body); }
+      .body-muted { color: var(--muted); }
+      .body-sm { font-size: var(--text-sm); }
+      .eyebrow {
+        font-size: var(--text-xs);
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.2px;
+        font-weight: 600;
+      }
+      .eyebrow-pop {
+        font-size: var(--text-xs);
+        color: #c2ef4e;
+        text-transform: uppercase;
+        letter-spacing: 0.25px;
+        font-weight: 600;
+      }
+      .stack-3 > * + * { margin-block-start: var(--space-3); }
+      .stack-4 > * + * { margin-block-start: var(--space-4); }
+      .stack-6 > * + * { margin-block-start: var(--space-6); }
+
+      /* ─── Buttons ────────────────────────────────────────────── */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        padding: 12px 16px;
+        border-radius: var(--radius-md);
+        font-family: var(--font-body);
+        font-size: var(--text-sm);
+        font-weight: 700;
+        line-height: 1;
+        cursor: pointer;
+        border: none;
+        text-transform: uppercase;
+        letter-spacing: 0.2px;
+        transition: background-color var(--motion-fast) var(--ease-standard),
+                    box-shadow var(--motion-fast) var(--ease-standard),
+                    color var(--motion-fast) var(--ease-standard);
+        text-decoration: none;
+      }
+      .btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+      .btn-primary { background: var(--fg); color: var(--bg); }
+      .btn-primary:hover { background: var(--accent); color: var(--accent-on); }
+      .btn-primary:active { background: var(--accent-active); }
+      .btn-secondary {
+        background: #79628c;
+        color: var(--fg);
+        border: 1px solid #584674;
+        box-shadow: rgba(0, 0, 0, 0.1) 0 1px 3px 0 inset;
+      }
+      .btn-secondary:hover {
+        background: color-mix(in oklab, #79628c, white 6%);
+        box-shadow: rgba(0, 0, 0, 0.18) 0 8px 24px;
+      }
+
+      /* ─── Cards ──────────────────────────────────────────────── */
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: var(--space-6);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+        box-shadow: var(--elev-raised);
+      }
+      .card h3 { color: var(--fg); }
+      .card a { color: var(--accent); font-weight: 500; }
+      .card a:hover { color: var(--fg); }
+
+      /* ─── Badges ─────────────────────────────────────────────── */
+      .badge {
+        display: inline-flex; align-items: center; gap: var(--space-2);
+        padding: 3px var(--space-2);
+        border-radius: var(--radius-pill);
+        font-size: var(--text-xs); font-weight: 600; line-height: 1.6;
+        text-transform: uppercase; letter-spacing: 0.2px;
+      }
+      .badge-success {
+        color: var(--success);
+        background: color-mix(in oklab, var(--success), transparent 82%);
+      }
+      .badge-muted {
+        color: var(--muted);
+        background: color-mix(in oklab, var(--muted), transparent 80%);
+      }
+      .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+      /* ─── Links and code ────────────────────────────────────── */
+      a { color: var(--accent); text-decoration: none; }
+      a:hover { text-decoration: underline; text-underline-offset: 3px; }
+      kbd {
+        font-family: var(--font-mono); font-size: var(--text-xs);
+        padding: 2px 6px; border-radius: var(--radius-sm);
+        border: 1px solid var(--border); background: var(--surface); color: var(--fg-2);
+      }
+      code {
+        font-family: var(--font-mono);
+        color: #dcdcaa;
+        font-size: 0.95em;
+      }
+      .code-block {
+        font-family: var(--font-mono);
+        font-size: var(--text-sm);
+        color: var(--fg-2);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: var(--space-6);
+        overflow-x: auto;
+        white-space: pre;
+        line-height: var(--leading-body);
+      }
+      .code-block .cmt { color: var(--muted); }
+      .code-block .cmd { color: var(--fg); }
+
+      /* ─── Nav ────────────────────────────────────────────────── */
+      .nav {
+        border-bottom: 1px solid var(--border);
+        background: var(--bg);
+      }
+      .nav-inner {
+        display: flex; align-items: center; justify-content: space-between;
+        gap: var(--space-4);
+        padding-block: var(--space-4);
+      }
+      .nav-mark {
+        font-family: var(--font-mono);
+        font-weight: 700;
+        font-size: var(--text-base);
+        color: var(--fg);
+        text-decoration: none;
+      }
+      .nav-mark:hover { text-decoration: none; color: var(--accent); }
+      .nav-links { display: flex; align-items: center; gap: var(--space-5); flex-wrap: wrap; }
+      .nav-links a { font-size: var(--text-sm); font-weight: 500; }
+      .nav-links .nav-cta {
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.2px;
+        font-size: var(--text-xs);
+      }
+
+      /* ─── Hero ───────────────────────────────────────────────── */
+      .hero { box-shadow: rgba(22, 15, 36, 0.9) 0 4px 4px 9px; }
+      .hero-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: var(--space-12); align-items: end; }
+      @media (max-width: 1023px) { .hero-grid { grid-template-columns: 1fr; gap: var(--space-8); } }
+      /* grid/flex children shrink below content min-width (pre blocks scroll instead) */
+      .hero-grid > *, .case-list > *, .features-grid > *, .steps > *, .rules-grid > * { min-width: 0; }
+
+      .hero-actions { display: flex; gap: var(--space-3); margin-block-start: var(--space-6); flex-wrap: wrap; }
+      .hero-meta {
+        display: flex; flex-direction: column; gap: var(--space-3);
+        padding: var(--space-4);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        background: var(--surface);
+      }
+      .hero-install { margin-block-start: var(--space-6); }
+
+      /* ─── Case list ──────────────────────────────────────────── */
+      .case-list {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-3);
+        margin-block-start: var(--space-8);
+      }
+      @media (max-width: 639px) { .case-list { grid-template-columns: 1fr; } }
+      .case {
+        display: flex; align-items: baseline; gap: var(--space-3);
+        padding: var(--space-4) var(--space-5);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        color: var(--fg-2);
+      }
+      .case .n {
+        font-family: var(--font-mono);
+        font-size: var(--text-xs);
+        color: var(--muted);
+        flex-shrink: 0;
+      }
+
+      /* ─── Steps ──────────────────────────────────────────────── */
+      .steps {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-5);
+        margin-block-start: var(--space-8);
+        list-style: none;
+        margin-block-end: 0;
+        padding: 0;
+      }
+      @media (max-width: 639px) { .steps { grid-template-columns: 1fr; } }
+      .steps li { display: flex; gap: var(--space-4); align-items: baseline; }
+      .steps .n {
+        font-family: var(--font-mono);
+        font-size: var(--text-sm);
+        color: var(--accent);
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+      .steps h3 { font-size: var(--text-base); font-weight: 500; }
+      .steps p { font-size: var(--text-sm); color: var(--muted); margin-block-start: var(--space-1); }
+
+      /* ─── Lens grid ──────────────────────────────────────────── */
+      .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); }
+      @media (max-width: 1023px) { .features-grid { grid-template-columns: 1fr 1fr; } }
+      @media (max-width: 639px) { .features-grid { grid-template-columns: 1fr; } }
+
+      /* ─── Evidence table ─────────────────────────────────────── */
+      .table-wrap { overflow-x: auto; margin-block-start: var(--space-8); }
+      table { border-collapse: collapse; width: 100%; }
+      th {
+        font-family: var(--font-body);
+        font-size: var(--text-xs);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.2px;
+        color: var(--muted);
+        text-align: left;
+        padding: var(--space-3) var(--space-4);
+        border-bottom: 1px solid var(--border);
+      }
+      td {
+        font-size: var(--text-sm);
+        color: var(--fg-2);
+        padding: var(--space-3) var(--space-4);
+        border-bottom: 1px solid var(--border-soft);
+        vertical-align: top;
+      }
+      td:first-child { font-family: var(--font-mono); font-size: var(--text-sm); color: var(--fg); }
+      tr:last-child td { border-bottom: none; }
+
+      /* ─── Rules grid ─────────────────────────────────────────── */
+      .rules-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); margin-block-start: var(--space-8); }
+      @media (max-width: 639px) { .rules-grid { grid-template-columns: 1fr; } }
+      .rules-grid .n {
+        font-family: var(--font-mono);
+        font-size: var(--text-xs);
+        color: var(--accent);
+        font-weight: 700;
+      }
+
+      /* ─── Footer ─────────────────────────────────────────────── */
+      footer { border-top: 1px solid var(--border); padding-block: var(--space-12); }
+      .footer-grid { display: flex; justify-content: space-between; gap: var(--space-6); flex-wrap: wrap; }
+      .footer-links { display: flex; flex-direction: column; gap: var(--space-2); }
+      .footer-links a { font-size: var(--text-sm); }
+    </style>
+  </head>
+  <body>
+    <header class="nav">
+      <div class="container nav-inner">
+        <a class="nav-mark" href="/">sstack</a>
+        <nav class="nav-links">
+          <a href="https://github.com/mhenke/sstack">GitHub</a>
+          <a href="https://github.com/mhenke/sstack/tree/main/docs/ARCHITECTURE.md">Architecture</a>
+          <a href="https://github.com/mhenke/sstack/tree/main/evals/README.md">Evals</a>
+          <a class="nav-cta" href="#install">Install</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      <section id="top" class="hero">
+        <div class="hero-grid">
+          <div class="stack-4">
+            <p class="eyebrow">sad stack · negative testing for AI coding agents</p>
+            <h1>Don't ask whether the software is robust.</h1>
+            <p class="lead">
+              sstack goes looking for the not-happy test cases, the ones
+              nobody writes tests for on purpose. For each way your software
+              fails, it writes a test that fails today and applies the minimal
+              fix that turns it green.
+            </p>
+            <div class="hero-install" id="install">
+              <pre class="code-block"><span class="cmt"># attacker agents install separately — README</span>
+<span class="cmd">$ npx skills@latest add mhenke/sstack</span></pre>
+            </div>
+            <div class="hero-actions">
+              <a class="btn btn-primary" href="https://github.com/mhenke/sstack">View on GitHub</a>
+              <a class="btn btn-secondary" href="https://github.com/mhenke/sstack/tree/main/docs/ETHOS.md">Read the ethos</a>
+            </div>
+          </div>
+          <aside class="hero-meta" aria-label="The oracle rule">
+            <p class="eyebrow">Oracle first</p>
+            <p class="body-sm">
+              The oracle is written <em>before</em> the attack. "It crashes"
+              isn't an expectation. "It raises a validation error naming the
+              field" is.
+            </p>
+            <p class="body-sm body-muted">
+              A test that passes against code you just proved broken has
+              pinned the bug, and a pinned bug is worse than no test at all.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <section id="cases">
+        <div class="stack-3">
+          <p class="eyebrow">The not-happy cases</p>
+          <h2 style="max-width: 24ch">The ones nobody writes tests for on purpose.</h2>
+        </div>
+        <div class="case-list">
+          <div class="case"><span class="n">01</span><span>the empty string <code>""</code></span></div>
+          <div class="case"><span class="n">02</span><span>the <code>null</code></span></div>
+          <div class="case"><span class="n">03</span><span>the duplicate webhook</span></div>
+          <div class="case"><span class="n">04</span><span>the dependency that dies at 2am</span></div>
+          <div class="case"><span class="n">05</span><span>the second request that lands while the first is still running</span></div>
+        </div>
+      </section>
+
+      <section id="how-it-runs">
+        <div class="stack-3">
+          <p class="eyebrow">How it runs</p>
+          <h2 style="max-width: 24ch">Eight stages, every case executed for real.</h2>
+        </div>
+        <ol class="steps">
+          <li>
+            <span class="n">1</span>
+            <div>
+              <h3>Discover</h3>
+              <p>Map surfaces and assumed contracts. Read <code>learn/</code> first and prioritize adjacent surfaces of known failure classes.</p>
+            </div>
+          </li>
+          <li>
+            <span class="n">2</span>
+            <div>
+              <h3>Attack</h3>
+              <p>Seven lenses, one attacker agent each, cases run in parallel. The command takes a scope: a file, a directory, a module, a package, or a URL.</p>
+            </div>
+          </li>
+          <li>
+            <span class="n">3</span>
+            <div>
+              <h3>Verify</h3>
+              <p>Observed behavior against an oracle declared before the attack. One oracle, one observable outcome.</p>
+            </div>
+          </li>
+          <li>
+            <span class="n">4</span>
+            <div>
+              <h3>Minimize</h3>
+              <p>Reduce to the smallest reproduction.</p>
+            </div>
+          </li>
+          <li>
+            <span class="n">5</span>
+            <div>
+              <h3>Test</h3>
+              <p>Write the regression test and watch it go red on the bug.</p>
+            </div>
+          </li>
+          <li>
+            <span class="n">6</span>
+            <div>
+              <h3>Fix</h3>
+              <p>Apply the minimal change that turns it green.</p>
+            </div>
+          </li>
+          <li>
+            <span class="n">7</span>
+            <div>
+              <h3>Learn</h3>
+              <p>Record the failure class so the next run finds adjacent breakage.</p>
+            </div>
+          </li>
+          <li>
+            <span class="n">8</span>
+            <div>
+              <h3>Report</h3>
+              <p>One finding per confirmed violation, evidence through the shipped emitter, machine-replayable.</p>
+            </div>
+          </li>
+        </ol>
+      </section>
+
+      <section id="lenses">
+        <div class="stack-3">
+          <p class="eyebrow">Seven lenses, shipped</p>
+          <h2 style="max-width: 24ch">Each lens is one failure class.</h2>
+        </div>
+        <div class="features-grid" style="margin-block-start: var(--space-8)">
+          <article class="card">
+            <p class="eyebrow">boundaries</p>
+            <p class="body-sm">Edge cases: numbers, sizes, indexes, slices, collections, pagination, loops.</p>
+          </article>
+          <article class="card">
+            <p class="eyebrow">malformed</p>
+            <p class="body-sm">Strings parsed from outside, JSON, encodings, dynamic types.</p>
+          </article>
+          <article class="card">
+            <p class="eyebrow">missing</p>
+            <p class="body-sm">Optional fields, records from external data, null, None, undefined.</p>
+          </article>
+          <article class="card">
+            <p class="eyebrow">ownership</p>
+            <p class="body-sm">Subject, object, action, context. BOLA and IDOR, deny-by-default, privilege escalation, token tampering, CORS.</p>
+          </article>
+          <article class="card">
+            <p class="eyebrow">exceptional-conditions</p>
+            <p class="body-sm">Fail-open paths, diagnostic leakage, cascading failures, empty catch blocks.</p>
+          </article>
+          <article class="card">
+            <p class="eyebrow">resource-exhaustion</p>
+            <p class="body-sm">Connection pools, rate limits, memory ceilings, payload limits, disk.</p>
+          </article>
+          <article class="card">
+            <p class="eyebrow">state</p>
+            <p class="body-sm">Cached reads that never invalidate, mutable input written through, partial update after a failed call, internal collections escaped to callers.</p>
+          </article>
+          <article class="card">
+            <p class="eyebrow">your own</p>
+            <p class="body-sm">
+              Drop a file with an <code>sstack-</code> prefix in your tree and
+              the next run picks it up. No pack change needed.
+              <a href="https://github.com/mhenke/sstack/tree/main/docs/CUSTOMIZING.md">How it works</a>
+            </p>
+          </article>
+          <article class="card">
+            <p class="eyebrow">deferred</p>
+            <p class="body-sm">Ordering, concurrency, idempotency, dependency-failure, contract, mutation, and agent lenses are specified and unbuilt. Any of them can be activated by a user file.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="evidence">
+        <div class="stack-3">
+          <p class="eyebrow-pop">Is it actually any good?</p>
+          <h2 style="max-width: 24ch">The eval is a cold agent.</h2>
+          <p class="body-muted" style="max-width: 60ch">
+            No memory, no answer key, current skills and agents. The grader
+            matches findings to the answer key by content, and
+            <code>replay</code> re-audits each finding's evidence file with
+            the agent out of the loop.
+          </p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Fixture</th>
+                <th scope="col">Seeded bugs</th>
+                <th scope="col">Cold pass</th>
+                <th scope="col">Evidence replay</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>seeded-py</td>
+                <td>7</td>
+                <td><span class="badge badge-success"><span class="badge-dot"></span>5/5 matched</span></td>
+                <td>12/12 intact</td>
+              </tr>
+              <tr>
+                <td>seeded-ts</td>
+                <td>5</td>
+                <td><span class="badge badge-success"><span class="badge-dot"></span>5/5 matched</span></td>
+                <td>19/19 intact</td>
+              </tr>
+              <tr>
+                <td>seeded-js</td>
+                <td>5</td>
+                <td><span class="badge badge-success"><span class="badge-dot"></span>5/5 matched</span></td>
+                <td>12/12 intact</td>
+              </tr>
+              <tr>
+                <td>seeded-java</td>
+                <td>5</td>
+                <td><span class="badge badge-success"><span class="badge-dot"></span>3/5 matched</span></td>
+                <td>7/7 intact</td>
+              </tr>
+              <tr>
+                <td>seeded-cpp</td>
+                <td>5</td>
+                <td><span class="badge badge-success"><span class="badge-dot"></span>3/5 matched</span></td>
+                <td>13/13 intact</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="body-sm body-muted" style="margin-block-start: var(--space-4); max-width: 60ch">
+          Full record, including the runs that failed and what each taught
+          the skill:
+          <a href="https://github.com/mhenke/sstack/tree/main/evals/ACCEPTANCE.md">evals/ACCEPTANCE.md</a>
+        </p>
+      </section>
+
+      <section id="leaves-behind">
+        <div class="stack-3">
+          <p class="eyebrow">What it leaves behind</p>
+          <h2 style="max-width: 24ch">Run output in your repo, on your machine.</h2>
+        </div>
+        <pre class="code-block" style="margin-block-start: var(--space-8)"><span class="cmt">.sstack/
+├── config.md     lenses.remove only, if you skip one (optional)
+├── map.md        surfaces + assumed contracts
+├── plan.md       lenses, cases, oracles
+├── learn/        failure classes for the next run
+├── findings/     one .md and one .json per finding
+└── scratch/      throwaway attack scripts (gone at run end)</span></pre>
+        <p class="body-muted" style="margin-block-start: var(--space-4); max-width: 60ch">
+          Plus regression tests and fixes. Tests land in your suite, fixes
+          land in your source, and config and secrets stay read-only.
+        </p>
+      </section>
+
+      <section id="rules">
+        <div class="stack-3">
+          <p class="eyebrow">The four rules</p>
+          <h2 style="max-width: 24ch">The whole ethos, four lines.</h2>
+        </div>
+        <div class="rules-grid">
+          <article class="card">
+            <p class="n">1</p>
+            <h3 style="font-size: var(--text-base)">Attack assumptions</h3>
+            <p class="body-sm body-muted">Every input, state, and dependency an implementation assumes is a surface to probe.</p>
+          </article>
+          <article class="card">
+            <p class="n">2</p>
+            <h3 style="font-size: var(--text-base)">Define the oracle before the attack</h3>
+            <p class="body-sm body-muted">Write down the expected behavior under the adverse condition before running anything. One oracle, one observable outcome.</p>
+          </article>
+          <article class="card">
+            <p class="n">3</p>
+            <h3 style="font-size: var(--text-base)">Never accept an agent's claim as evidence</h3>
+            <p class="body-sm body-muted">Run the real command, quote the real output. The agent interprets evidence; it does not manufacture it.</p>
+          </article>
+          <article class="card">
+            <p class="n">4</p>
+            <h3 style="font-size: var(--text-base)">Turn confirmed failures into a test and a fix</h3>
+            <p class="body-sm body-muted">Write the regression test, apply the minimal fix, and add hardening tests for surfaces the system already handles.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="container footer-grid">
+        <div class="stack-3">
+          <p class="nav-mark" style="font-size: var(--text-sm)">sstack</p>
+          <p class="body-sm body-muted">
+            gstack, pstack, sstack. Same suffix, same shape: a skill your
+            agent reads, a directory you copy in, a slash command you type.
+          </p>
+        </div>
+        <div class="footer-links">
+          <a href="https://github.com/mhenke/sstack">GitHub</a>
+          <a href="https://github.com/mhenke/sstack/tree/main/CHANGELOG.md">Changelog</a>
+          <a href="https://github.com/mhenke/sstack/tree/main/docs/ARCHITECTURE.md">Architecture</a>
+        </div>
+        <div class="footer-links">
+          <a href="https://github.com/mhenke/sstack/tree/main/docs/ETHOS.md">Ethos</a>
+          <a href="https://github.com/mhenke/sstack/tree/main/docs/CUSTOMIZING.md">Customizing</a>
+          <a href="https://github.com/mhenke/sstack/tree/main/evals/README.md">Evals</a>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
