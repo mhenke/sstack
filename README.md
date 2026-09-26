@@ -161,7 +161,7 @@ file with the agent out of the loop.
 
 | Fixture | Seeds | Current cold evidence |
 |---|---|---|
-| seeded-py | 7 | PASS; 5/5 matched (ColdPy-5, state seed included), 12/12 replay intact, 0 drift. The ownership seed has not had a full cold pass |
+| seeded-py | 7 | PASS; 5/5 matched (ColdPy-5, state seed included), 12/12 replay intact, 0 drift. The ownership seed (py-7) has no cold pass: three attempts on post-pairing text (ColdPy6-8) all failed before reaching it — fabricated evidence, then two context-reset self-wipes — each recorded in `evals/ACCEPTANCE.md` |
 | seeded-ts | 5 | PASS; 5/5 seeds content-matched, 19/19 evidence replay intact (rerun) |
 | seeded-js | 5 | PASS; 5/5 seeds content-matched, 12/12 evidence replay intact (rerun) |
 | seeded-java | 5 | PASS; 3/5 seeds content-matched, 7/7 evidence replay intact (rerun on current text) |
