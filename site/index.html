@@ -34,8 +34,9 @@
         --border-soft: var(--border);
 
         --accent: #6a5fc1;
+        --accent-text: #887fcd;               /* AA text tier: 4.9:1 on --bg, 5.3:1 on cards (accent@20% white) */
         --accent-on: #ffffff;
-        --accent-hover: color-mix(in oklab, var(--accent), black 8%);
+        --accent-hover: color-mix(in oklab, var(--accent), white 28%);  /* 5.7:1 text-safe hover */
         --accent-active: color-mix(in oklab, var(--accent), black 14%);
 
         --success: #16a34a;
@@ -190,6 +191,7 @@
         box-shadow: rgba(0, 0, 0, 0.1) 0 1px 3px 0 inset;
       }
       .btn-secondary:hover {
+        color: var(--fg);
         background: color-mix(in oklab, #79628c, white 6%);
         box-shadow: rgba(0, 0, 0, 0.18) 0 8px 24px;
       }
@@ -206,7 +208,7 @@
         box-shadow: var(--elev-raised);
       }
       .card h3 { color: var(--fg); }
-      .card a { color: var(--accent); font-weight: 500; }
+      .card a { color: var(--accent-text); font-weight: 500; }
       .card a:hover { color: var(--fg); }
 
       /* ─── Badges ─────────────────────────────────────────────── */
@@ -228,8 +230,8 @@
       .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 
       /* ─── Links and code ────────────────────────────────────── */
-      a { color: var(--accent); text-decoration: none; }
-      a:hover { text-decoration: underline; text-underline-offset: 3px; }
+      a { color: var(--accent-text); text-decoration: none; }
+      a:hover { text-decoration: underline; text-underline-offset: 3px; color: var(--accent-hover); }
       kbd {
         font-family: var(--font-mono); font-size: var(--text-xs);
         padding: 2px 6px; border-radius: var(--radius-sm);
@@ -272,9 +274,9 @@
         color: var(--fg);
         text-decoration: none;
       }
-      .nav-mark:hover { text-decoration: none; color: var(--accent); }
+      .nav-mark:hover { text-decoration: none; color: var(--accent-text); }
       .nav-links { display: flex; align-items: center; gap: var(--space-5); flex-wrap: wrap; }
-      .nav-links a { font-size: var(--text-sm); font-weight: 500; }
+      .nav-links a { font-size: var(--text-sm); font-weight: 500; padding-block: var(--space-2); }  /* 24px touch targets */
       .nav-links .nav-cta {
         font-weight: 700;
         text-transform: uppercase;
@@ -315,12 +317,6 @@
         border-radius: var(--radius-md);
         color: var(--fg-2);
       }
-      .case .n {
-        font-family: var(--font-mono);
-        font-size: var(--text-xs);
-        color: var(--muted);
-        flex-shrink: 0;
-      }
 
       /* ─── Steps ──────────────────────────────────────────────── */
       .steps {
@@ -337,7 +333,7 @@
       .steps .n {
         font-family: var(--font-mono);
         font-size: var(--text-sm);
-        color: var(--accent);
+        color: var(--muted);
         font-weight: 700;
         flex-shrink: 0;
       }
@@ -379,7 +375,7 @@
       .rules-grid .n {
         font-family: var(--font-mono);
         font-size: var(--text-xs);
-        color: var(--accent);
+        color: var(--muted);
         font-weight: 700;
       }
 
@@ -387,7 +383,19 @@
       footer { border-top: 1px solid var(--border); padding-block: var(--space-12); }
       .footer-grid { display: flex; justify-content: space-between; gap: var(--space-6); flex-wrap: wrap; }
       .footer-links { display: flex; flex-direction: column; gap: var(--space-2); }
-      .footer-links a { font-size: var(--text-sm); }
+      .footer-links a { font-size: var(--text-sm); padding-block: var(--space-1); }
+
+      /* ─── Browser surfaces (craft floor) ───────────────────────── */
+      ::selection { background: var(--accent); color: var(--accent-on); }
+      ::-webkit-scrollbar { width: 10px; }
+      ::-webkit-scrollbar-track { background: var(--bg); }
+      ::-webkit-scrollbar-thumb { background: var(--border); border-radius: var(--radius-pill); border: 2px solid var(--bg); }
+      ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+      :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { transition-duration: 0.01ms !important; }
+      }
     </style>
   </head>
   <body>
@@ -440,16 +448,12 @@
       </section>
 
       <section id="cases">
-        <div class="stack-3">
-          <p class="eyebrow">The not-happy cases</p>
-          <h2 style="max-width: 24ch">The ones nobody writes tests for on purpose.</h2>
-        </div>
         <div class="case-list">
-          <div class="case"><span class="n">01</span><span>the empty string <code>""</code></span></div>
-          <div class="case"><span class="n">02</span><span>the <code>null</code></span></div>
-          <div class="case"><span class="n">03</span><span>the duplicate webhook</span></div>
-          <div class="case"><span class="n">04</span><span>the dependency that dies at 2am</span></div>
-          <div class="case"><span class="n">05</span><span>the second request that lands while the first is still running</span></div>
+          <div class="case"><span>the empty string <code>""</code></span></div>
+          <div class="case"><span>the <code>null</code></span></div>
+          <div class="case"><span>the duplicate webhook</span></div>
+          <div class="case"><span>the dependency that dies at 2am</span></div>
+          <div class="case"><span>the second request that lands while the first is still running</span></div>
         </div>
       </section>
 
