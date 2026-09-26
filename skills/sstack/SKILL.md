@@ -470,7 +470,7 @@ reporting.
 | idempotency | same operation applied twice diverges | custom lens |
 | dependency-failure | upstream timeout, partial response, unavailable service | custom lens |
 | contract | API contract violations between services | custom lens |
-| mutation | proof that tests detect seeded faults | custom lens |
+| mutation | proof that tests detect injected faults | custom lens |
 | agent | AI agent tool-call errors, truncated context, prompt injection | custom lens |
 | security | injection, privilege escalation, data exposure | custom lens |
 

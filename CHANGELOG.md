@@ -37,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   seven fields, but the emitter also requires `slug`, `fix`, and
   `regression`; a cold agent following the skill verbatim had its
   findings rejected with exit 2. SKILL.md now enumerates the
-  payload, and `evals/test_emitter.py` (9 tests) pins the contract in
+  payload, and `evals/test_emitter.py` (10 tests) pins the contract in
   the repo's own runner, including negative controls proving each test
   turns red when its guarantee is reverted
 - ADR-0004: lenses delegate to the target's existing tools

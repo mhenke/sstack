@@ -27,7 +27,9 @@ resumable from its artifact (gstack's process lesson).
 
 These prevent drift back into "a big bag of negative-testing
 skills". If a new file does not fit one of these nouns, it does not
-belong in the pack.
+belong in the pack. The judging vocabulary built on them — evidence,
+report, integrity, drift, and what not to call things — lives in
+[`CONTEXT.md`](../CONTEXT.md).
 
 - **Skill** — the methodology for a stage. One entry skill owns
   routing and rules (`skills/sstack/SKILL.md`).

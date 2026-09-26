@@ -1,5 +1,5 @@
 # Project Documentation
-> Generated: 2026-09-24 | Mode: DELTA
+> Generated: 2026-09-25 | Mode: DELTA
 
 ## Tech Stack
 
@@ -124,7 +124,7 @@ No database, no ORM. Data shapes:
 - **Evidence contract**: the shipped emitter (`skills/sstack/scripts/emit_findings.py`) is the only writer of `findings/<slug>.{json,md}` and `report.json`; it runs each repro itself and fingerprints `sha256(stdout+stderr)[:16]`. `regression.before`/`after` are the literal tokens `red`/`green`.
 - **Containment**: the caller builds the temp workspace and dispatches the agent into it. Prompt-only containment has failed; the host-repo marker directs the agent to the right root, but enforcement is the caller's responsibility.
 - **Coverage rule**: every selected lens must have zero-or-more cases on every mapped surface. A lens with zero cases on a record/string-input surface is an incomplete run.
-- **Customization**: a user extends sstack by dropping an `sstack-`-prefixed file into their own skills or agents tree, project scope winning over global. A lens is a skill (`sstack-<lens>/SKILL.md`, `disable-model-invocation: true`); a worker is `sstack-<lens>-attacker.md`. A custom lens appends its rubric to an existing attacker's dispatch rather than adding an agent, and adds no stage. Nothing is added to `skills/` or `agents/`, which are replaced wholesale on update. Files resolving outside the target are skipped (realpath guard, mirrored from omos `discoverProjectLocalSkillNames`). ADR-0008 records the design and its cost, that the pack cannot test this because the agent is the loader. Full reference: `docs/CUSTOMIZING.md`.
+- **Customization**: a user extends sstack by dropping an `sstack-`-prefixed file into their own skills or agents tree, project scope winning over global. A lens is a skill (`sstack-<lens>/SKILL.md`, `disable-model-invocation: true`); a worker is `sstack-<lens>-attacker.md`. A custom lens appends its rubric to an existing attacker's dispatch rather than adding an agent. Stages are the orchestrator's own text, not files: not addable, removable, or extensible. A lens whose agent is missing runs on a shipped attacker; an agent whose lens is missing is reported as unused by name, since a silent no-op reads as a clean run. Nothing is added to `skills/` or `agents/`, which are replaced wholesale on update. Files resolving outside the target are skipped (realpath guard, mirrored from omos `discoverProjectLocalSkillNames`). ADR-0008 records the design and its cost, that the pack cannot test this because the agent is the loader. Full reference: `docs/CUSTOMIZING.md`.
 
 ## Service Communication
 
@@ -154,4 +154,4 @@ None. Single-process, local files. `evals/acceptance.py` copies the orchestrator
 AGENTS.md, CHANGELOG.md, CONTEXT.md, ROADMAP.md, docs/ARCHITECTURE.md, evals/README.md, evals/acceptance.py, evals/goldens.jsonl, skills/sstack/SKILL.md, skills/sstack/scripts/emit_findings.py (new), skills/sstack-ownership/SKILL.md (rebuilt: tuple model + collection surfaces), skills/sstack-state/SKILL.md (new), agents/sstack-state-attacker.md (new), agents/sstack-ownership-attacker.md (rebuilt), evals/seeded-py/shop/{cart,orders}.py (2 new seeds)
 
 ## Last Scanned
-2026-09-25 (delta: state lens + shipped emitter, scope lock narrowed, ownership lens rebuilt against C1/V8/A01 with collection surfaces)
+2026-09-25 (delta: customization by naming a file, stage seam removed, lens/agent pairing specified)
