@@ -23,12 +23,25 @@ Optional keys: "fix" (confirmed only, and only when a fix was applied).
 import argparse
 import hashlib
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
 
 VERDICTS = ("confirmed", "refuted", "inconclusive")
 STATES = ("red", "green")
+SAFE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+
+
+def safe_slug(value: str, field: str) -> str:
+    """A slug becomes a filename under .sstack/findings/. A lens name can
+    come from user-authored frontmatter, so `lens: ../../etc` would
+    otherwise write outside the workspace."""
+    if not SAFE.match(value) or value in {".", ".."}:
+        raise ValueError(
+            f"{field} must be a plain filename fragment "
+            f"(letters, digits, dot, dash, underscore): {value!r}")
+    return value
 
 
 def read_finding() -> dict:
@@ -154,7 +167,13 @@ def main() -> int:
         print("first emit needs --fixture", file=sys.stderr)
         return 2
 
-    slug = finding.get("slug") or f"{finding['lens']}-{finding['surface']}"
+    try:
+        slug = safe_slug(finding.get("slug") or
+                         f"{safe_slug(finding['lens'], 'lens')}-{safe_slug(finding['surface'], 'surface')}",
+                         "slug")
+    except ValueError as error:
+        print(f"invalid finding: {error}", file=sys.stderr)
+        return 2
     run = run_repro(finding["repro"], workspace)
     record = {"seed_id": finding.get("seed_id", "other"), "lens": finding["lens"], "surface": finding["surface"],
               "case": finding["case"], "oracle": finding["oracle"], "verdict": finding["verdict"], **run,

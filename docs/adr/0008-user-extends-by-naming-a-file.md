@@ -1,4 +1,4 @@
-# ADR-0008: The target repo authors its own lenses
+# ADR-0008: The user extends sstack by naming a file, not by editing ours
 
 **Status**: Accepted
 **Date**: 2026-09-25
@@ -45,11 +45,16 @@ checkout.
 
 ## Decision
 
-We will let a target repo add lenses without changing the pack. It
-authors `.sstack/lenses/<name>.md` and selects them in
-`.sstack/config.md`, and a custom lens runs by appending its rubric to
-an existing attacker's `### Lens rubric` dispatch rather than by
-adding an agent.
+We will let a user extend sstack without editing a file the pack
+ships. Every extension is a file the user drops in their own tree,
+carrying an `sstack-` prefix, in a skills or agents directory that
+their tools already scan: `<project>/.agents/skills/` or
+`~/.agents/skills/` for a lens or a stage rule, the matching agents
+directories for a worker. Project scope wins over global, the rule
+OpenCode, Claude Code, and VS Code already apply to skills. No
+directory, registry, or installer of sstack's own is added, and
+`skills/` and `agents/` are declared off-limits to users so an update
+cannot destroy their work.
 
 Three properties follow from the omos reference:
 
@@ -57,23 +62,22 @@ The append mirrors `resolvePrompt`. The built-in rubric still applies,
 so a custom lens widens coverage instead of replacing it. Custom lenses
 are additive to the built-in set; `lenses.remove` is the only way to
 drop one, and every removal is reported in the chat summary, because a
-silently weakened run is indistinguishable from a clean one.
+silently weakened run is indistinguishable from a clean one. That one
+directive in `.sstack/config.md` is the entire remaining config
+surface, and the file is run input rather than pack content, so
+editing it costs no updates.
 
-Identity comes from frontmatter, not the filename, matching how skill
-identity already works in both sstack and omos. A lens file is found
-by `name:` in its frontmatter.
+Identity comes from the frontmatter `name`, matching how skill
+identity already works in both sstack and omos, and the `sstack-`
+prefix is what makes a file sstack's to read. A lens is a skill, so it
+carries `disable-model-invocation: true` and is pasted by the
+orchestrator rather than auto-loaded by a host, which has no target for
+it.
 
-Discovery is scoped to the repo. A `config.md` or `lenses/` that
-resolves outside the target is skipped with a note in the report. This
-is `discoverProjectLocalSkillNames` translated: the guard is the point,
+Discovery is scoped to the repo. A custom file that resolves outside
+the target is skipped with a note in the report. This is
+`discoverProjectLocalSkillNames` translated: the guard is the point,
 not a detail.
-
-Config lives under `.sstack/`, which the pack creates in the target
-repo on first run, never in a directory the user copies. A repo that
-wants to share lenses commits `config.md` and `lenses/`, and must
-ignore the rest as `/.sstack/*` rather than `/.sstack/`: git cannot
-re-include a file under an ignored directory, so a directory rule
-would trap the two authored paths with the run output.
 
 ## Consequences
 
@@ -84,10 +88,11 @@ including `ordering`, `concurrency`, and `idempotency`, are activatable
 today by anyone.
 
 **Bad**: the pack now has an extension point it cannot test. A cold
-agent reading `SKILL.md` might skip config discovery, or apply an
-appended rubric to the wrong scratch directory. The `lenses.remove`
-report requirement is likewise unenforced except by the agent's own
-honesty. This is the cost of having no loader, and it is not small.
+agent reading `SKILL.md` might skip discovery of a user's tree, or
+apply an appended rubric to the wrong scratch directory. The
+`lenses.remove` report requirement is likewise unenforced except by
+the agent's own honesty. This is the cost of having no loader, and it
+is not small.
 
 **Risks**: a custom lens is repo-authored content injected into an
 agent's instructions. A hostile or careless rubric could instruct the

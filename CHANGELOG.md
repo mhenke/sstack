@@ -9,27 +9,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Target-repo custom lenses. A repo adds attack strategies under
-  `.sstack/lenses/<name>.md`, any number of them, and selects them in
-  `.sstack/config.md` with `lenses.add` / `lenses.remove`, and the
-  run picks them up with no pack change. Modeled on
-  oh-my-opencode-slim's project-local
-  customization: a custom lens **appends** its rubric to an existing
-  attacker's `### Lens rubric` rather than adding an agent, mirroring
-  how `<agent>_append.md` composes onto a resolved base prompt;
-  identity comes from `name` frontmatter, not the filename, matching
-  `discoverProjectLocalSkillNames`; and lens files resolving outside
-  the target are skipped, the same realpath guard that keeps a
-  symlinked `.opencode` from becoming arbitrary content injection.
-  A team commits `config.md` and `lenses/`; the rest of `.sstack/` is
-  run output. Ignoring the directory outright would trap those two
-  with it, because git cannot re-include a file under an ignored
-  directory. The eight `future` rows in the lens index, `ordering` and
-  `concurrency` among them, are now
-  activatable by anyone. ADR-0008 records the decision and its cost:
-  this is an extension point the pack cannot test, since the agent is
-  the loader
-- ADR-0008: the target repo authors its own lenses
+- Customization, documented in [`docs/CUSTOMIZING.md`](docs/CUSTOMIZING.md).
+  A user extends sstack by dropping a file in their own tree named
+  with the `sstack-` prefix: a lens or stage rule in a skills dir, a
+  worker in an agents dir, project scope winning over global exactly
+  as OpenCode, Claude Code, and VS Code already resolve skills. No
+  directory, registry, or installer of sstack's own, and nothing to
+  add to `skills/` or `agents/`, which are replaced wholesale on
+  update. A lens is a skill, so it carries
+  `disable-model-invocation: true` and is pasted into a dispatch
+  rather than auto-loaded by a host with no target for it. A custom
+  lens appends its rubric to an existing attacker's `### Lens rubric`
+  rather than adding an agent, mirroring how `<agent>_append.md`
+  composes onto a resolved base prompt. Identity comes from `name`
+  frontmatter, not the filename, matching
+  `discoverProjectLocalSkillNames`; files resolving outside the target
+  are skipped, the same realpath guard that keeps a symlinked
+  `.opencode` from becoming arbitrary content injection. One directive
+  remains, `lenses.remove` in `.sstack/config.md`, for skipping a
+  shipped lens, and it is run input rather than pack content. The
+  eight `future` rows in the lens index, `ordering` and `concurrency`
+  among them, are now activatable by anyone. ADR-0008 records the
+  decision and its cost: this is an extension point the pack cannot
+  test, since the agent is the loader
+- ADR-0008: the user extends sstack by naming a file, not by editing ours
 - Emitter/skill contract closed. The Report format block names
   seven fields, but the emitter also requires `slug`, `fix`, and
   `regression`; a cold agent following the skill verbatim had its

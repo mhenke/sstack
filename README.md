@@ -84,24 +84,42 @@ Markdown plus one stdlib-only Python script the agent runs to write
 its own evidence; where Python is absent, the same evidence is two
 shell commands (see [Evidence](#evidence)).
 
-### Custom lenses
+### Customizing
 
-The seven shipped lenses are a floor, and a repo can add as many of its
-own as it needs under `.sstack/lenses/`. sstack picks them up on the
-next run with no change to the pack:
+Everything sstack does is customizable the same way: drop a file in
+your own tree with an `sstack-` prefix, and the next run picks it up.
+No config to edit, no plugin to install, and nothing of ours to
+modify.
 
 ```
-.sstack/
-├── config.md        lenses.add / lenses.remove
-└── lenses/
-    └── <name>.md     name, description, applies-when, then the rubric
+<your-repo>/.agents/skills/     your lenses and stage rules
+<your-repo>/.agents/agents/     your attackers
+~/.agents/skills/               same, for every repo you run
+~/.agents/agents/
 ```
+
+Project wins over global, the way OpenCode, Claude Code, and VS Code
+already resolve skills. Keep your files out of `skills/` and
+`agents/`, the directories this pack ships: those are replaced
+wholesale when you update, so anything you put there is lost.
+
+| to add | drop | named |
+|---|---|---|
+| an attack angle | `.agents/skills/sstack-<lens>/SKILL.md` | `sstack-ordering` |
+| a worker | `.agents/agents/sstack-<lens>-attacker.md` | `sstack-ordering-attacker` |
+| rules for a stage | `.agents/skills/sstack-<stage>-<what>/SKILL.md` | `sstack-test-conventions` |
+
+The `sstack-` prefix is the whole contract. A file without it is
+none of sstack's business.
+
+A lens is a skill, so it is an ordinary `SKILL.md`:
 
 ```markdown
 ---
-name: ordering
+name: sstack-ordering
 description: Operations applied out of sequence.
-applies-when: operations whose order changes the result
+applies-when: two operations on one resource
+disable-model-invocation: true
 ---
 
 # Ordering lens rubric
@@ -110,20 +128,25 @@ Case-generation heuristics, oracle patterns, worked examples, and
 when-not-to-apply guidance.
 ```
 
-```markdown
-lenses.add: ordering, idempotency
-lenses.remove: ownership
-```
+`disable-model-invocation: true` matters: a lens is pasted into an
+attack dispatch by sstack, never auto-loaded by your tool matching its
+description, because a rubric with no target yet means nothing.
 
-`lenses.add` runs your lenses alongside the built-ins, not instead of
-them, and `lenses.remove` is reported in the summary so a dropped lens
-cannot hide. Commit `config.md` and `lenses/` if your team shares
-them; ignore the rest of `.sstack/`.
+`<lens>` becomes a filename under `.sstack/findings/`, so keep it to
+letters, digits, dot, dash, and underscore. `applies-when` is
+optional: it narrows the lens to surfaces it is for, and without it
+the lens runs on every mapped surface.
+
+Your lens needs no agent. It runs on a shipped attacker whose
+discipline fits, with your rubric appended after the built-in one, so
+it widens coverage rather than replacing it. Add an agent only when
+the worker itself must behave differently.
+
+To skip a shipped lens for one run, name it in the chat or put
+`lenses.remove: ownership` in `.sstack/config.md`. Skips are reported
+in the summary, because a quietly weakened run reads as a clean one.
 
 ### The three words
-
-They are different things, and the pack is easier to reason about once
-they stay apart.
 
 **Stages** are the process, and there are always seven:
 
@@ -138,15 +161,10 @@ surface Discover found. How many cases run is surface × lens, and
 neither factor has a ceiling.
 
 **Agents** are who does the attacking: one subprocess per shipped
-lens, receiving the surface map, its rubric, and the report format
-in its message. A lens and its agent ship paired, which is why they
-read as one thing. They are not: the lens is the strategy, the agent
-is the worker.
-
-Your custom lens adds a **lens** only. It does not add an agent, so
-there is no `sstack-ordering-attacker`: your rubric rides along on a
-shipped attacker whose discipline fits, appended after the built-in
-rubric. And it does not add a stage, because the seven are fixed.
+lens, receiving the surface map, its rubric, and the report format in
+its message. A lens and its agent ship paired, which is why they read
+as one thing. They are not: the lens is the strategy, the agent is
+the worker.
 
 ### For contributors
 
@@ -223,8 +241,7 @@ far each one has been carried.
 
 ```
 .sstack/
-├── config.md     your lenses.add / lenses.remove (optional)
-├── lenses/       your custom lens rubrics (optional)
+├── config.md     lenses.remove only, if you skip one (optional)
 ├── map.md        surfaces + assumed contracts
 ├── plan.md       lenses, cases, oracles
 ├── learn/        failure classes for the next run
@@ -234,11 +251,9 @@ far each one has been carried.
 
 That directory is created in your repo, on your machine, the first
 time you run `/sstack`. The pack you installed is only `skills/` and
-`agents/`; nothing from the sstack repository comes with it. Commit
-`config.md` and `lenses/` if your team shares them, and ignore the
-rest as `/.sstack/*`: ignore the directory as `/.sstack/` and git will
-not re-include the two files inside it, because nothing under an
-ignored directory can be un-ignored.
+`agents/`; nothing from the sstack repository comes with it. Your own
+lenses live in `.agents/`, next to your code, where git already
+tracks them. Everything in `.sstack/` is run output, so ignore it.
 
 Plus regression tests and fixes. Tests land in your suite; fixes land
 in your source, scoped to the minimal change that satisfies the
@@ -286,9 +301,10 @@ the skill: [`evals/ACCEPTANCE.md`](evals/ACCEPTANCE.md).
 ## Docs
 
 - [`docs/ETHOS.md`](docs/ETHOS.md): the four rules
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): lifecycle, the seven
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): lifecycle, the eight
   definitions, the 15-lens taxonomy, what v1 adds
-- [`docs/adr/`](docs/adr/README.md): decision records
+- [`docs/CUSTOMIZING.md`](docs/CUSTOMIZING.md): adding a lens, an
+  agent, or stage rules
 - [`docs/TOOLS.md`](docs/TOOLS.md): negative-testing tools by language
 - [`docs/RESEARCH.md`](docs/RESEARCH.md): the research behind the
   decisions, and what is still open

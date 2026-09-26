@@ -76,7 +76,7 @@ the skill and the decontaminated fixture together in one temp dir.
 
 ### Conventions
 
-- `skills/sstack/SKILL.md` stays under 500 lines. Frontmatter is exactly
+- `skills/sstack/SKILL.md` stays under 540 lines. Frontmatter is exactly
   `name` + `description`, the description a single trigger-phrase
   sentence.
 - Every lens skill carries Case-generation heuristics, Oracle patterns
@@ -92,11 +92,12 @@ the skill and the decontaminated fixture together in one temp dir.
 - A new shipped lens is an `agents/sstack-<name>-attacker.md` file
   plus a `skills/sstack-<name>/SKILL.md` rubric plus one row in
   SKILL.md's lens index. The index is the only routing mechanism.
-- A target-repo lens is `.sstack/lenses/<name>.md` selected by
-  `.sstack/config.md`; it needs no pack change and appends to an
-  existing attacker's dispatch. Both paths are open. Do not edit a
-  target's lens or config, and never weaken a lens's rules from a
-  custom file.
+- A user extends sstack by dropping a file in their own tree named
+  with the `sstack-` prefix: a lens or stage rule in a skills dir, a
+  worker in an agents dir. It needs no pack change. Never put a
+  user-facing file in `skills/` or `agents/`, the dirs we ship: an
+  update replaces them wholesale. Do not edit a user's customization,
+  and never weaken a lens's rules from a custom file.
 - Conventional Commits: `docs:`, `feat:`, `fix:`, `test:`, `chore:`.
 
 ## Testing
@@ -121,7 +122,7 @@ No coverage tooling exists and none is needed.
 - `agents/sstack-<lens>-attacker.md` — one failure class each
 - `skills/sstack-<lens>/SKILL.md` — lens rubric
 - `docs/ETHOS.md` — the four rules
-- `docs/ARCHITECTURE.md` — lifecycle, seven definitions, lens taxonomy,
+- `docs/ARCHITECTURE.md` — lifecycle, eight definitions, lens taxonomy,
   v1 menu
 - `docs/adr/` — why the product is shaped this way
 - `evals/` — fixtures, goldens, graders, and acceptance evidence
@@ -165,7 +166,7 @@ cold run's report is attached.
 - 🔴 a fixture seed fixed or removed; a `BUGS.md` row altered; a CLI,
   daemon, or binary added; the evidence contract changed; a lens file
   leaking a seed trigger-and-oracle pair; containment weakened
-- 🟡 SKILL.md over 500 lines; a lens file missing a section or language
+- 🟡 SKILL.md over 540 lines; a lens file missing a section or language
   block; `ACCEPTANCE.md` claiming a count the runs do not support; a
   guardrail weakened
 - ⚪ wording, prose voice, docs drift

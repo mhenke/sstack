@@ -104,20 +104,50 @@ def test_readme_runtime_claim_matches_the_tree():
     assert "emit_findings.py" in readme or "Markdown plus" in readme
 
 
-def test_custom_lens_contract_is_documented():
-    """A cold agent must be able to run a target-repo lens without
-    guessing. The pack documents where lenses live, how any number of
-    them are selected, and that they append rather than replace."""
+def test_customization_contract_is_documented():
+    """A user must be able to extend sstack without editing a file the
+    pack ships, and without guessing the naming rule. The contract is
+    the `sstack-` prefix across skills and agents dirs."""
     text = SKILL.read_text()
-    section = re.search(r"## Custom lenses\n(.*?)\n## ", text, re.S)
-    assert section, "SKILL.md has no Custom lenses section"
+    section = re.search(r"## Customization\n(.*?)\n## ", text, re.S)
+    assert section, "SKILL.md has no Customization section"
     body = section.group(1)
-    for token in (".sstack/config.md", ".sstack/lenses/", "lenses.add",
-                  "lenses.remove", "frontmatter"):
-        assert token in body, f"Custom lenses never mentions {token}"
-    assert "append" in body, "custom lens must append to the built-in rubric"
-    assert "any number" in body, (
-        "custom lenses are unbounded; the text must not read as a fixed set")
+    for token in ("sstack-<lens>", "sstack-<lens>-attacker.md",
+                  "sstack-<stage>", ".agents/skills", "~/.agents/skills",
+                  "lenses.remove", "disable-model-invocation",
+                  "applies-when", "filename fragment"):
+        assert token in body, f"Customization never mentions {token}"
+    assert "append" in body, "a custom lens appends, never replaces"
+    assert "replaced wholesale on update" in body, (
+        "the pack's own skills/ and agents/ must be declared off-limits "
+        "for user files, or an update silently deletes their work")
+    assert ".sstack/lenses" not in text, (
+        "the old bespoke lens directory is gone; a lens is a skill")
+    assert "lenses.add" not in body, (
+        "presence in the tree opts a lens in; no add directive exists")
+    assert re.search(r"host-repo>/\.agents/skills", text), (
+        "the skills dir is never resolved against the host repo, so a "
+        "cold agent has no path to look in")
+    assert re.search(r"On entering any stage.*sstack-<", text, re.S), (
+        "no stage reads its own extension, so the seam is inert")
+
+
+def test_lens_name_cannot_escape_the_findings_dir():
+    """A lens name reaches a filename. It comes from user-authored
+    frontmatter now that custom lenses exist, so `lens: ../../etc`
+    would otherwise write outside the workspace."""
+    for hostile in ("../../etc", "a/b", "..", "/abs"):
+        with tempfile.TemporaryDirectory() as tmp:
+            result = emit(Path(tmp), base(lens=hostile, slug=None))
+            assert result.returncode == 2, f"{hostile!r} was accepted"
+            assert "filename fragment" in result.stderr, result.stderr
+            assert not list(Path(tmp).parent.glob("etc*"))
+    with tempfile.TemporaryDirectory() as tmp:
+        assert emit(Path(tmp), base(lens="", slug=None)).returncode == 2
+    with tempfile.TemporaryDirectory() as tmp:
+        result = emit(Path(tmp), base(slug="../../pwn"))
+        assert result.returncode == 2
+        assert "filename fragment" in result.stderr
 
 
 def test_every_attacker_scratch_path_follows_its_lens():

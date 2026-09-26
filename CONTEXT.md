@@ -1,7 +1,7 @@
 # sstack
 
-Vocabulary for structured negative testing. The seven product nouns
-(Skill, Lens, Agent, Runner, Oracle, Evidence, Custom lens) live in
+Vocabulary for structured negative testing. The eight product nouns
+(Skill, Lens, Agent, Runner, Oracle, Evidence, Customization, Custom lens) live in
 `docs/ARCHITECTURE.md`; this file holds the judging vocabulary — the
 terms the eval harness and the evidence contract turn on.
 
@@ -54,18 +54,26 @@ heading. The attacker's only source of attack strategy; absent it,
 the attacker falls back to its own lens description.
 _Avoid_: prompt, instructions
 
+**Customization**:
+Extending sstack by dropping a file in the user's own tree, named with
+the `sstack-` prefix: `sstack-<lens>/SKILL.md` for an attack angle,
+`sstack-<lens>-attacker.md` for a worker, `sstack-<stage>-*` for
+stage rules. Project scope wins over global, as skills resolve
+everywhere else. The pack ships no file a user is expected to edit, so
+an update never destroys a customization.
+_Avoid_: plugin, extension, config (all imply something the pack loads
+or parses; this is a file the user writes and the skill reads)
+
 **Custom lens**:
-A repo-authored attack strategy in `.sstack/lenses/<name>.md`,
-selected by `.sstack/config.md` and narrowed by its `applies-when`
-field. Any number of them. It adds a **lens**, never an agent and
-never a stage: there is no `sstack-ordering-attacker`. A custom lens
-is dispatched to a shipped attacker whose discipline fits, with its
-rubric appended after the built-in one, so the seven agents are
-reusable executors. The lens index's eight `custom lens` rows
+A repo-authored attack strategy, and structurally just a skill: an
+ordinary `SKILL.md` carrying `disable-model-invocation: true`, because
+a lens is pasted into a dispatch and never auto-loaded by a host. Any
+number of them. Adds a **lens**, never an agent and never a stage: it
+runs on a shipped attacker with its rubric appended, so the built-in
+rubric still applies. The index's eight `custom lens` rows
 (`ordering`, `concurrency`, …) are unbuilt *shipped* lenses, a third
-category from a repo's own.
-_Avoid_: plugin, extension (both imply code the pack loads; this is
-prose the agent reads)
+category from a user's own.
+_Avoid_: extension, plugin (both imply code the pack loads)
 
 **Decision site**:
 A place in the code where an access decision is made: middleware, a

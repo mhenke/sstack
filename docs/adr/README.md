@@ -15,7 +15,7 @@ the product. For *what* the code does, read [`../ARCHITECTURE.md`](../ARCHITECTU
 | [0005](0005-sstack-finds-tests-and-fixes.md) | sstack finds, tests, and fixes | Accepted | 2026-09-23 |
 | [0006](0006-evidence-re-verifiable-by-machine.md) | Finding evidence is machine-re-verifiable | Accepted | 2026-09-24 |
 | [0007](0007-optional-deps-degrade-inline.md) | Optional dependencies degrade inline | Accepted | 2026-09-24 |
-| [0008](0008-target-repo-authors-custom-lenses.md) | The target repo authors its own lenses | Accepted | 2026-09-25 |
+| [0008](0008-user-extends-by-naming-a-file.md) | The user extends sstack by naming a file, not by editing ours | Accepted | 2026-09-25 |
 
 ## Status
 

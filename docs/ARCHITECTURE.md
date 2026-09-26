@@ -23,7 +23,7 @@ resumable from its artifact (gstack's process lesson).
 | Fix | minimal source change that satisfies the oracle, turning red to green | shipped |
 | Learn | `.sstack/learn/` failure classes feeding future planning | shipped, proven cold 2026-09-24 |
 
-## Seven definitions
+## Eight definitions
 
 These prevent drift back into "a big bag of negative-testing
 skills". If a new file does not fit one of these nouns, it does not
@@ -52,14 +52,19 @@ belong in the pack.
   re-verifies the fingerprint with the agent out of the loop.
 
 
-- **Custom lens** — a repo-authored attack strategy in
-  `.sstack/lenses/<name>.md`, selected by `.sstack/config.md`. The
-  seven shipped lenses are a floor, not a ceiling: a custom lens
-  appends its rubric to an existing attacker agent's dispatch rather
-  than adding a new agent, and runs under the same Report format,
-  emitter, and run-end checks. Config and lenses are the only
-  `.sstack/` entries kept out of the ignore list, so a team can
-  commit them.
+- **Customization** — extending sstack from the user's own tree by
+  dropping a file named with the `sstack-` prefix into a skills or
+  agents directory, project scope winning over global, exactly as
+  skills already resolve in OpenCode, Claude Code, and VS Code. A lens
+  is a skill, an agent is an agent, and a stage is extended by a
+  `sstack-<stage>-*` skill. The pack ships no file a user is expected
+  to edit, so an update never destroys a customization.
+- **Custom lens** — a repo-authored attack strategy, structurally just
+  a skill with `disable-model-invocation: true`. The seven shipped
+  lenses are a floor, not a ceiling: a custom lens appends its rubric
+  to an existing attacker agent's dispatch rather than adding an
+  agent, and runs under the same Report format, emitter, and run-end
+  checks.
 ## Taxonomy
 
 Negative testing is the domain; lenses explore it. Security is a
@@ -131,10 +136,10 @@ Discover consumes `create-verification-skill` and
 `principle-fix-root-causes` when available, with docs/types/call-sites
 fallback. Every optional dependency carries an inline fallback
 (ADR-0007). Extension is additive and goes two ways: a pack
-extension is one lens skill, one agent file, one index row, and a
-target-repo extension is one file in `.sstack/lenses/`, selected by
-`.sstack/config.md` and appended to an existing attacker's dispatch,
-with no pack change at all. The evidence schema and replay verifier
+extension is one lens skill, one agent file, one index row; a user
+extension is one `sstack-`-prefixed file in their own skills or agents
+tree, appended to an existing attacker's dispatch, with no pack change
+at all. The evidence schema and replay verifier
 shipped as one example of the first shape.
 
 
