@@ -1,5 +1,5 @@
 # Project Documentation
-> Generated: 2026-09-25 | Mode: DELTA
+> Generated: 2026-09-26 | Mode: DELTA
 
 ## Tech Stack
 
@@ -17,7 +17,7 @@
 
 ## Architecture Pattern
 
-Content architecture with a strict noun taxonomy (eight definitions in ARCHITECTURE.md). The Thermos pattern is implemented: orchestrator skill dispatches per-lens attacker agents in parallel, each loading its own lens rubric from `skills/<lens>/SKILL.md`. Lanes: `npx skills add` ships only `skills/` + `agents/`; AGENTS.md, CONTEXT.md, docs/, evals/ are checkout-only — runtime rules live in shipped text, contributor rules in the checkout.
+Content architecture with a strict noun taxonomy (eight definitions in ARCHITECTURE.md). The Thermos pattern is implemented: orchestrator skill dispatches per-lens attacker agents in parallel, each loading its own lens rubric from `skills/<lens>/SKILL.md`. Lanes: `npx skills add` ships only `skills/`; the seven `agents/` attacker files are copied by hand. AGENTS.md, CONTEXT.md, docs/, evals/ are checkout-only — runtime rules live in shipped text, contributor rules in the checkout.
 
 **Lifecycle (9 canonical stages, 6 implemented in SKILL.md):**
 
@@ -31,7 +31,7 @@ Content architecture with a strict noun taxonomy (eight definitions in ARCHITECT
 | Minimize | Minimize (stage 4) | 4 |
 | Test | Test (stage 5) — writes regression, goes red | 5 |
 | Fix | Fix (stage 6) — applies minimal change, goes green | 6 |
-| Learn | deferred to v1 | — |
+| Learn | shipped, proven cold 2026-09-24 | 7 |
 
 **Eight definitions (taxonomy):**
 
@@ -74,7 +74,7 @@ docs/
 ├── TOOLS.md                       negative-testing tools by language
 ├── RESEARCH.md                    index into the 30-day scan library
 ├── LEARNED.md                     distilled research record
-└── adr/                           0001–0007 + README index + template
+└── adr/                           0001–0008 + README index + template
 
 evals/
 ├── acceptance.py                   unified prepare/grade/replay entry point
@@ -87,7 +87,7 @@ evals/
 ├── seeded-js/                     JavaScript fixture, 5 bugs + BUGS.md
 ├── seeded-java/                   Java fixture, 5 bugs + BUGS.md
 └── seeded-cpp/                    C++ fixture, 5 bugs + BUGS.md
-README.md                          install, lifecycle diagram, acceptance table, docs links
+README.md                          install + agent prompt, running, acceptance table, changelog, docs links
 ROADMAP.md                         v1 (proof quality), v2 (run cost), language breadth, deferred
 CHANGELOG.md                       Keep a Changelog format
 .claude/pipeline/                  scanner output (this file, state.json)
@@ -95,7 +95,7 @@ CHANGELOG.md                       Keep a Changelog format
 
 ## Code Style Conventions
 
-- **Skill frontmatter**: exactly `name` + `description`; description is one long trigger-phrase sentence. `SKILL.md` must stay ≤ 500 lines (currently 428).
+- **Skill frontmatter**: exactly `name` + `description`; description is one long trigger-phrase sentence. `SKILL.md` must stay under 540 lines per AGENTS.md (currently 534 — 6 to spare).
 - **Lens skill files**: Case-generation heuristics, Oracle patterns with an inline `Worked example` paragraph (one python plus one ts/js example; `observed (bug)` marks the defect), and When not to apply. Extra sections (Operating limits, Language notes, Failure modes to watch for) allowed where the lens needs them.
 - **Prose style**: hard-wrapped ~60–72 columns, imperative voice, backticks for identifiers and paths.
 - **Python eval**: PEP 8, snake_case, module docstrings, no type hints, no classes, deliberately no validation.
@@ -134,7 +134,7 @@ None. Single-process, local files. `evals/acceptance.py` copies the orchestrator
 
 - **Overall coverage: not measured** — no coverage tooling, by design.
 - **Baselines**: `evals/seeded-py` → `pytest -q`; `evals/seeded-ts` → `bun run test`; `evals/seeded-js` → `npm test`; `evals/seeded-cpp` → CMake/CTest; `evals/seeded-java` → javac + junit-console (jar auto-fetched; `RUN_TESTS.md`).
-- **Acceptance**: cold-run eval per ADR-0003, recorded in `evals/ACCEPTANCE.md`. 2026-09-25: **all five fixtures PASS** (py re-run 5/5 seeds 22/22 intact, ts 5/5 19/19, js 5/5 12/12, java re-run 3/5 7/7, cpp 3/5 13/13). **Stale since 2026-09-25**: these predate the `state` lens, the emitter, and the collection-surface lens work. ColdPy-5 is mid-flight; the ownership lens is separately carrier-verified.
+- **Acceptance**: cold-run eval per ADR-0003, recorded in `evals/ACCEPTANCE.md`. 2026-09-26: **all five fixtures PASS** per the README table (py ColdPy-5 5/5 seeds 12/12 intact 0 drift, ts 5/5 19/19, js 5/5 12/12, java 3/5 7/7, cpp 3/5 13/13). Re-run on current text: py only; ts/js/cpp PASSes stand on recorded text. The ownership seed has not had a full cold pass.
 
 ## Entry Points
 
@@ -151,7 +151,7 @@ None. Single-process, local files. `evals/acceptance.py` copies the orchestrator
 | `CONTEXT.md` | judging glossary (integrity, drift, content match, INVALID) |
 
 ## Changed Files
-AGENTS.md, CHANGELOG.md, CONTEXT.md, ROADMAP.md, docs/ARCHITECTURE.md, evals/README.md, evals/acceptance.py, evals/goldens.jsonl, skills/sstack/SKILL.md, skills/sstack/scripts/emit_findings.py (new), skills/sstack-ownership/SKILL.md (rebuilt: tuple model + collection surfaces), skills/sstack-state/SKILL.md (new), agents/sstack-state-attacker.md (new), agents/sstack-ownership-attacker.md (rebuilt), evals/seeded-py/shop/{cart,orders}.py (2 new seeds)
+README.md (detail-trim, install truth, v0-scope removal, changelog section, docs orientation), CHANGELOG.md (emitter test-count fix), docs/ARCHITECTURE.md (CONTEXT.md cross-link), skills/sstack/SKILL.md (1-word mutation-row change, seeded → injected faults, observed mid-session)
 
 ## Last Scanned
-2026-09-25 (delta: customization by naming a file, stage seam removed, lens/agent pairing specified)
+2026-09-26 (delta: README detail-trim + install truth + changelog section; ARCHITECTURE↔CONTEXT cross-links; project-doc staleness fixes: skills-only ship claim, Learn stage, adr 0008, SKILL.md 540 budget, acceptance table)
