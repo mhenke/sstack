@@ -38,8 +38,11 @@
         --accent: #6a5fc1;
         --accent-text: #887fcd;               /* AA text tier: 4.9:1 on --bg, 5.3:1 on cards (accent@20% white) */
         --accent-on: #ffffff;
-        --accent-hover: color-mix(in oklab, var(--accent), white 28%);  /* 5.7:1 text-safe hover */
+        --accent-hover: color-mix(in oklab, var(--accent), white 28%);
         --accent-active: color-mix(in oklab, var(--accent), black 14%);
+        /* Hover text must be measured, not asserted: color-mix(int) behaves differently
+           across browsers on dark canvases. #b9b1f2 measures 8.7:1 on --bg, 8.2:1 on cards. */
+        --link-hover: #b9b1f2;
 
         --success: #16a34a;
         --warn: #eab308;
@@ -231,7 +234,7 @@
 
       /* ─── Links and code ────────────────────────────────────── */
       a { color: var(--accent-text); text-decoration: none; }
-      a:hover { text-decoration: underline; text-underline-offset: 3px; color: var(--accent-hover); }
+      a:hover { text-decoration: underline; text-underline-offset: 3px; color: var(--link-hover); }
       /* WCAG 2.2 target size (2.5.8): inline links inside prose are 17px tall;
          block + padding gives them the 24px minimum without moving the text. */
       p a, td a, li a, figcaption a { display: inline-block; min-height: 24px; padding-block: 3px; box-decoration-break: clone; }
@@ -397,8 +400,11 @@
       ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
       :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+      /* Kill choreography, not state: an instant 0.01ms kill also deletes the
+         hover/focus color feedback. Scoped to actual animations and smooth scroll. */
       @media (prefers-reduced-motion: reduce) {
-        *, *::before, *::after { transition-duration: 0.01ms !important; }
+        html { scroll-behavior: auto; }
+        *, *::before, *::after { animation: none !important; }
       }
     </style>
   </head>
