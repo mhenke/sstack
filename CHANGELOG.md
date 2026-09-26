@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-26
+
 ### Added
 
 - Customization, documented in [`docs/CUSTOMIZING.md`](docs/CUSTOMIZING.md).
@@ -177,7 +179,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   in all seven files) was a drift cache — it contradicted itself
   within the hour. Re-probed on fresh-context subagents: pasted 5/5
   exact blocks, paste omitted 2/4 all-seven — paste is the carrier
-- Lane audit: `npx skills add` ships only `skills/` and `agents/`;
+- Lane audit: `npx skills add` ships only `skills/` (the `agents/` files are copied by hand);
   AGENTS.md, CONTEXT.md, docs/, and evals/ exist only in a git
   checkout. Three shipped-text references to checkout machinery
   (`evals/replay.py`, "the grader", "grading matches by content")
@@ -226,5 +228,6 @@ agents.
 - Acceptance record (`evals/ACCEPTANCE.md`)
 - MIT license
 
-[unreleased]: https://github.com/mhenke/sstack/compare/v0.1.0...HEAD
+[unreleased]: https://github.com/mhenke/sstack/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/mhenke/sstack/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/mhenke/sstack/releases/tag/v0.1.0
