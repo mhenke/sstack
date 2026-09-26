@@ -56,8 +56,8 @@ belong in the pack.
   dropping a file named with the `sstack-` prefix into a skills or
   agents directory, project scope winning over global, exactly as
   skills already resolve in OpenCode, Claude Code, and VS Code. A lens
-  is a skill, an agent is an agent, and a stage is extended by a
-  `sstack-<stage>-*` skill. The pack ships no file a user is expected
+  is a skill and an agent is an agent. Stages are the orchestrator's
+  own text and are not extensible. The pack ships no file a user is expected
   to edit, so an update never destroys a customization.
 - **Custom lens** — a repo-authored attack strategy, structurally just
   a skill with `disable-model-invocation: true`. The seven shipped

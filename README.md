@@ -92,7 +92,7 @@ No config to edit, no plugin to install, and nothing of ours to
 modify.
 
 ```
-<your-repo>/.agents/skills/     your lenses and stage rules
+<your-repo>/.agents/skills/     your lenses
 <your-repo>/.agents/agents/     your attackers
 ~/.agents/skills/               same, for every repo you run
 ~/.agents/agents/
@@ -107,7 +107,6 @@ wholesale when you update, so anything you put there is lost.
 |---|---|---|
 | an attack angle | `.agents/skills/sstack-<lens>/SKILL.md` | `sstack-ordering` |
 | a worker | `.agents/agents/sstack-<lens>-attacker.md` | `sstack-ordering-attacker` |
-| rules for a stage | `.agents/skills/sstack-<stage>-<what>/SKILL.md` | `sstack-test-conventions` |
 
 The `sstack-` prefix is the whole contract. A file without it is
 none of sstack's business.
@@ -303,8 +302,8 @@ the skill: [`evals/ACCEPTANCE.md`](evals/ACCEPTANCE.md).
 - [`docs/ETHOS.md`](docs/ETHOS.md): the four rules
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): lifecycle, the eight
   definitions, the 15-lens taxonomy, what v1 adds
-- [`docs/CUSTOMIZING.md`](docs/CUSTOMIZING.md): adding a lens, an
-  agent, or stage rules
+- [`docs/CUSTOMIZING.md`](docs/CUSTOMIZING.md): adding a lens or an
+  agent
 - [`docs/TOOLS.md`](docs/TOOLS.md): negative-testing tools by language
 - [`docs/RESEARCH.md`](docs/RESEARCH.md): the research behind the
   decisions, and what is still open

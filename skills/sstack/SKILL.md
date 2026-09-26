@@ -130,10 +130,9 @@ keep `pristine-src/` so evidence replays.
 
 ## Customization
 
-**A lens is a skill, an agent is an agent, and a stage is a name.**
-That is the whole extension model. Every piece of sstack is
-customized the same way: drop a file in your own tree, named so this
-skill recognizes it.
+**A lens is a skill, and an agent is an agent.** That is the whole
+extension model. Every piece of sstack is customized the same way: drop
+a file in your own tree, named so this skill recognizes it.
 
 ```
 <host-repo>/.agents/skills/     project scope, resolved against the
@@ -158,7 +157,6 @@ anything edited there is lost.
 |---|---|---|
 | an attack angle | `sstack-<lens>/SKILL.md` in a skills dir | Attack, at `### Lens rubric` |
 | a worker | `sstack-<lens>-attacker.md` in an agents dir | Attack, dispatched by name |
-| a stage | `sstack-<stage>-<anything>/SKILL.md` in a skills dir | that stage, read on entry |
 
 The `sstack-` prefix is the entire contract. A file carrying it is
 sstack's to read; a file without it is none of this skill's business.
@@ -171,8 +169,7 @@ rubric with no target is meaningless — and a rubric body of
 heuristics, oracle patterns, worked examples, and when-not-to-apply
 guidance. A custom agent is the same contract, stateless about the
 repo like the seven shipped ones, because everything repo-specific
-arrives pasted. A stage skill contributes rules only; it never
-replaces the stage, and stages cannot be added or removed.
+arrives pasted.
 
 The `lens` value is a filename fragment: letters, digits, dot, dash,
 underscore. The emitter rejects anything else, because it becomes a
@@ -192,6 +189,13 @@ each removal in the summary: a silent skip is a weakened run that
 reads as a clean one. That file is run input, not pack content, so
 editing it costs no updates.
 
+A lens and an agent pair by name. A lens with no matching agent runs
+on a shipped attacker, as above. An agent whose lens is missing is
+unused: say so in the report and name the file, because a worker
+nobody called is a customization that silently does nothing. Neither
+case is a failed run, and a repo with neither file is the ordinary
+case.
+
 Read only what resolves inside the target repo; a symlinked skills
 directory pointing elsewhere is skipped with a note, since a run must
 not take strategy from a path the user did not scope here. A
@@ -203,11 +207,11 @@ conflict and follow the built-in rules.
 
 ## Stages
 
-The seven stages are fixed: a stage can be extended, never replaced or
-added. **On entering any stage, first read every `sstack-<that
-stage>-*` skill from the skills directories named in Customization and
-apply its rules alongside this stage's own.** Absent one, the stage
-runs exactly as written here.
+The seven stages are fixed. A stage is not a file, it is this
+orchestrator's own text, so there is nothing to append to: they can be
+neither added, removed, nor extended. A user who needs different work
+in a stage ships a custom lens instead, since a lens runs over the same
+surfaces at Attack.
 
 ### 1. Discover
 

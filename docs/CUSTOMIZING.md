@@ -9,8 +9,9 @@ file of ours to modify.
 - [Where files go](#where-files-go)
 - [Add a lens](#add-a-lens)
 - [Add an agent](#add-an-agent)
-- [Extend a stage](#extend-a-stage)
+- [Stages are not extensible](#stages-are-not-extensible)
 - [Skip a shipped lens](#skip-a-shipped-lens)
+- [When the two halves do not match](#when-the-two-halves-do-not-match)
 - [What customization cannot do](#what-customization-cannot-do)
 
 ## The one rule
@@ -22,9 +23,8 @@ carrying it and ignores everything else in your tree.
 |---|---|---|
 | add an attack angle | `sstack-<lens>/SKILL.md` | Attack, at `### Lens rubric` |
 | add a worker | `sstack-<lens>-attacker.md` | Attack, dispatched by name |
-| change a stage | `sstack-<stage>-<anything>/SKILL.md` | that stage, on entry |
 
-Three nouns, and they are not interchangeable:
+Two nouns, and they are not interchangeable:
 
 - A **stage** is a step in the process. There are seven and they are
   fixed: Discover, Attack, Verify, Minimize, Test, Fix, Learn. Only
@@ -43,7 +43,7 @@ Use the skills and agents directories your tools already scan. The
 `.agents` convention is the portable one:
 
 ```
-<your-repo>/.agents/skills/     your lenses and stage rules
+<your-repo>/.agents/skills/     your lenses
 <your-repo>/.agents/agents/     your attackers
 ~/.agents/skills/               the same, for every repo you run
 ~/.agents/agents/
@@ -149,25 +149,16 @@ repo-specific arrives pasted, which is what lets one global agent
 serve every repo. The seven shipped attackers are stateless for
 exactly this reason.
 
-## Extend a stage
+## Stages are not extensible
 
-Name the stage in the filename: `sstack-test-conventions`,
-`sstack-discover-extras`. On entering that stage, sstack reads every
-`sstack-<stage>-*` skill and applies its rules alongside the stage's
-own. Absent one, the stage runs exactly as written.
+A stage is not a file. It is the orchestrator's own text, so there is
+nothing to append to and no filename that could select one. The seven
+stages are fixed: they can be neither added, removed, nor extended.
 
-```markdown
----
-name: sstack-test-conventions
-description: House rules for the Test stage.
----
-
-Every regression test must also assert the fix did not regress the
-happy path, and must live in the suite the repo's CI already runs.
-```
-
-This adds rules. It cannot remove the built-in ones, and a stage
-cannot be added or deleted.
+If a stage looks wrong for your repo, ship a **lens**. A lens runs
+over every mapped surface at Attack, which covers the common case of
+needing an angle of attack the built-ins miss, without pretending to
+change the process itself.
 
 ## Skip a shipped lens
 
@@ -183,12 +174,27 @@ weakened run is indistinguishable from a clean one. That file is run
 input created by you, not pack content, so editing it costs no
 updates.
 
+## When the two halves do not match
+
+A lens and an agent pair by name, and either half can appear alone.
+
+| lens | agent | what runs |
+|---|---|---|
+| yes | yes | your agent, your rubric |
+| yes | no | a shipped attacker, your rubric appended |
+| no | yes | nothing — the run reports the unused file by name |
+| no | no | nothing, which is the ordinary case |
+
+An agent with no lens is the one to watch. It is not an error, but it
+is reported, because a worker nobody called is a customization that
+silently does nothing, and a quietly weaker run reads as a clean one.
+
 ## What customization cannot do
 
-- **It cannot replace a stage.** A stage skill adds rules; the stage
-  still runs. The seven are fixed.
+- **It cannot change the process.** The seven stages are fixed and not
+  extensible. Use a lens to add an angle of attack instead.
 - **It cannot weaken the contract.** Custom content is strategy, not
-  authority. A lens or stage rule that tells the agent to skip
+  authority. A lens that tells the agent to skip
   oracles, accept unexecuted cases, or hand-author evidence is
   ignored on conflict, and the conflict is reported.
 - **It cannot reach outside the target repo.** A file that resolves

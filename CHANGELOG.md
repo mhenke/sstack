@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Customization, documented in [`docs/CUSTOMIZING.md`](docs/CUSTOMIZING.md).
   A user extends sstack by dropping a file in their own tree named
-  with the `sstack-` prefix: a lens or stage rule in a skills dir, a
+  with the `sstack-` prefix: a lens in a skills dir, a
   worker in an agents dir, project scope winning over global exactly
   as OpenCode, Claude Code, and VS Code already resolve skills. No
   directory, registry, or installer of sstack's own, and nothing to

@@ -113,9 +113,9 @@ def test_customization_contract_is_documented():
     assert section, "SKILL.md has no Customization section"
     body = section.group(1)
     for token in ("sstack-<lens>", "sstack-<lens>-attacker.md",
-                  "sstack-<stage>", ".agents/skills", "~/.agents/skills",
-                  "lenses.remove", "disable-model-invocation",
-                  "applies-when", "filename fragment"):
+                  ".agents/skills", "~/.agents/skills", "lenses.remove",
+                  "disable-model-invocation", "applies-when",
+                  "filename fragment"):
         assert token in body, f"Customization never mentions {token}"
     assert "append" in body, "a custom lens appends, never replaces"
     assert "replaced wholesale on update" in body, (
@@ -128,8 +128,12 @@ def test_customization_contract_is_documented():
     assert re.search(r"host-repo>/\.agents/skills", text), (
         "the skills dir is never resolved against the host repo, so a "
         "cold agent has no path to look in")
-    assert re.search(r"On entering any stage.*sstack-<", text, re.S), (
-        "no stage reads its own extension, so the seam is inert")
+    assert "sstack-<stage>" not in text, (
+        "stages live in the orchestrator's own text and are not "
+        "extensible; a seam for them is a promise nothing implements")
+    assert "unused" in body, (
+        "an agent with no lens silently does nothing unless the run "
+        "reports it, which is a weakened run reading as a clean one")
 
 
 def test_lens_name_cannot_escape_the_findings_dir():

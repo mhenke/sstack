@@ -9,10 +9,13 @@ terms the eval harness and the evidence contract turn on.
 
 **Stage**:
 One of the seven lifecycle steps: Discover, Attack, Verify, Minimize,
-Test, Fix, Learn. The process, fixed for the life of the product. Only
-Attack fans out per lens; the other six are lens-agnostic. Adding a
-stage is not an extension point.
-_Avoid_: phase, step, stage of the attack
+Test, Fix, Learn. The process. Only Attack fans out per lens; the other
+six are lens-agnostic. A stage is not a file, it is the orchestrator's
+own text, so it is neither added, removed, nor extended: there is
+nothing to append to and no filename that could select one. A user who
+needs different work in a stage ships a lens instead.
+_Avoid_: phase, step (both read as a generic workflow stage rather than
+this fixed seven)
 
 **Lens**:
 An angle of attack over a failure class: boundaries, malformed,
@@ -57,12 +60,21 @@ _Avoid_: prompt, instructions
 **Customization**:
 Extending sstack by dropping a file in the user's own tree, named with
 the `sstack-` prefix: `sstack-<lens>/SKILL.md` for an attack angle,
-`sstack-<lens>-attacker.md` for a worker, `sstack-<stage>-*` for
-stage rules. Project scope wins over global, as skills resolve
-everywhere else. The pack ships no file a user is expected to edit, so
+`sstack-<lens>-attacker.md` for a worker. Project scope wins over
+global, as skills resolve everywhere else. The pack ships no file a user is expected to edit, so
 an update never destroys a customization.
 _Avoid_: plugin, extension, config (all imply something the pack loads
 or parses; this is a file the user writes and the skill reads)
+
+**Unused customization**:
+A `sstack-<lens>-attacker.md` whose lens is missing, so nothing ever
+dispatches it. Not an error, but the run reports it by name, because a
+worker nobody called is a customization that silently does nothing and
+a quietly weakened run is indistinguishable from a clean one. The
+mirror case, a lens with no agent, is ordinary: it runs on a shipped
+attacker with the rubric appended.
+_Avoid_: broken config (implies a parse failure; this parsed fine and
+matched nothing)
 
 **Custom lens**:
 A repo-authored attack strategy, and structurally just a skill: an

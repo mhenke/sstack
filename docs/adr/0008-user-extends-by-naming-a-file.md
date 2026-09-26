@@ -49,7 +49,7 @@ We will let a user extend sstack without editing a file the pack
 ships. Every extension is a file the user drops in their own tree,
 carrying an `sstack-` prefix, in a skills or agents directory that
 their tools already scan: `<project>/.agents/skills/` or
-`~/.agents/skills/` for a lens or a stage rule, the matching agents
+`~/.agents/skills/` for a lens, the matching agents
 directories for a worker. Project scope wins over global, the rule
 OpenCode, Claude Code, and VS Code already apply to skills. No
 directory, registry, or installer of sstack's own is added, and

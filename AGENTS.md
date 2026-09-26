@@ -93,7 +93,7 @@ the skill and the decontaminated fixture together in one temp dir.
   plus a `skills/sstack-<name>/SKILL.md` rubric plus one row in
   SKILL.md's lens index. The index is the only routing mechanism.
 - A user extends sstack by dropping a file in their own tree named
-  with the `sstack-` prefix: a lens or stage rule in a skills dir, a
+  with the `sstack-` prefix: a lens in a skills dir, a
   worker in an agents dir. It needs no pack change. Never put a
   user-facing file in `skills/` or `agents/`, the dirs we ship: an
   update replaces them wholesale. Do not edit a user's customization,
