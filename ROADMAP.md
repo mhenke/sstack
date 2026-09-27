@@ -35,8 +35,8 @@ of a run. Anything that does neither is out.
   repo with an evidence runner or custom lens, per ADR-0008, without a
   pack change. All 14 shipped lenses have a seeded defect in
   `evals/seeded-py` — `py-1` through `py-16`, covering every lens in
-  `BUGS.md` — and every seed has a verified cold pass (ColdPy-5, -11,
-  -12, -13, -14, -15, -16) with 0 drift in `evals/ACCEPTANCE.md`.
+  `BUGS.md` — and every seed has a verified cold pass with 0 drift in
+  `evals/ACCEPTANCE.md`.
 - **Done when**: mutation runner gates Stage 5/6 with mutant generation
   and kill metrics.
 

@@ -42,7 +42,7 @@ hardened grader (`evals/test_grader.py` pins both gates):
   (seeded-cpp) each verified seeds 6-16 cold in isolated workspaces:
   11 confirmed red->green regressions landed per fixture, 11/11
   content-matched, evidence replay intact, 0 drift. seeded-py's
-  py-8..py-16 seeds verified in ColdPy-9 through ColdPy-16. All five
+  py-8..py-16 seeds verified in ColdPy-11 through ColdPy-16. All five
   fixtures now cover all 16 seeds across the 14 shipped lenses.
 - **Grader hardening.** The bug-pin control re-runs every confirmed
   finding's regression against the unfixed source (all-green means the
