@@ -29,9 +29,11 @@ Two nouns, and they are not interchangeable:
 - A **stage** is a step in the process. There are seven and they are
   fixed: Discover, Attack, Verify, Minimize, Test, Fix, Learn. Only
   Attack uses lenses.
-- A **lens** is what you attack with. Seven ship: `boundaries`,
+- A **lens** is what you attack with. Fourteen ship: `boundaries`,
   `malformed`, `missing`, `ownership`, `exceptional-conditions`,
-  `resource-exhaustion`, `state`. A lens and its agent ship paired,
+  `resource-exhaustion`, `state`, `ordering`, `concurrency`,
+  `idempotency`, `dependency-failure`, `contract`, `agent`,
+  `security`. A lens and its agent ship paired,
   which is why they read as one thing. They are not: the lens is the
   strategy, the agent is the worker.
 - An **agent** is the subprocess that runs one lens. It receives the

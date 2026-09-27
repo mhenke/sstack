@@ -78,11 +78,11 @@ While other lenses test a single invocation in isolation, the state lens attacks
 In the sstack taxonomy (`docs/ARCHITECTURE.md`), the `Behavior` category splits into four lenses:
 
 - **`state` (shipped):** Owns an object or entity's lifetime and shared mutable state—stale derived views, escaping internal collections, parameter write-through, mid-operation rollback failure, and invalid state machine transitions.
-- **`ordering` (custom/future):** Owns operations applied out of sequence across separate endpoints or pipeline stages (e.g. delivery before payment).
-- **`concurrency` (custom/future):** Owns parallel multi-threaded/multi-process race windows, thread synchronization primitives, and distributed lock contention.
-- **`idempotency` (custom/future):** Owns identical requests applied multiple times across network retries diverging or executing redundant side effects.
+- **`ordering` (shipped):** Owns operations applied out of sequence across separate endpoints or pipeline stages (e.g. delivery before payment).
+- **`concurrency` (shipped):** Owns parallel multi-threaded/multi-process race windows, thread synchronization primitives, and distributed lock contention.
+- **`idempotency` (shipped):** Owns identical requests applied multiple times across network retries diverging or executing redundant side effects.
 
-Where `concurrency` or `idempotency` are not configured as active custom lenses, `state` verifies that single-winner semantics, optimistic concurrency version checks, and basic duplicate rejections preserve state integrity.
+Where `concurrency` or `idempotency` are ruled out for a surface, `state` verifies that single-winner semantics, optimistic concurrency version checks, and basic duplicate rejections preserve state integrity.
 
 ## Primary Sources & References
 

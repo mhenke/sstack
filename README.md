@@ -198,10 +198,10 @@ the skill: [`evals/ACCEPTANCE.md`](evals/ACCEPTANCE.md).
 
 ## What's new
 
-[v0.2.0](https://github.com/mhenke/sstack/releases/tag/v0.2.0)
-(2026-09-26): seven lenses (ownership, exceptional-conditions,
-resource-exhaustion, and state join the original three), per-lens
-attacker agents, user customization via the `sstack-` prefix, a
+v0.2.0
+(2026-09-27): eleven lenses (ownership, exceptional-conditions,
+resource-exhaustion, and state among them) join the original three,
+per-lens attacker agents, user customization via the `sstack-` prefix, a
 shipped evidence emitter with machine-replayable findings, and cold
 acceptance PASS on all five fixtures.
 

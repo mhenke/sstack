@@ -1,8 +1,8 @@
 # Cold acceptance results — sstack v0
 
 Runs: fresh subagent given only a copy of the skills
-(`skills/sstack/` plus the six `skills/sstack-<lens>/` peers) and the
-six `agents/sstack-<lens>-attacker.md` files, and a BUGS.md-free copy
+(`skills/sstack/` plus the fourteen `skills/sstack-<lens>/` peers) and the
+fourteen `agents/sstack-<lens>-attacker.md` files, and a BUGS.md-free copy
 of the seeded repo, in a temp workspace
 (`python3 evals/acceptance.py prepare` copies all of it into one
 isolated dir).

@@ -23,7 +23,8 @@ running sstack agent must obey may live solely here.
 ### Two lanes, two copies of nothing
 
 `skills/` and `agents/` are the end-user product: `npx skills add`
-copies those, and nothing else. `AGENTS.md`, `CONTEXT.md`, `docs/`,
+copies `skills/` (`agents/` drops into the host's own agents
+directory by hand), and nothing else. `AGENTS.md`, `CONTEXT.md`, `docs/`,
 `evals/`, `CHANGELOG.md`, and this repo's `.gitignore` are the
 contributor lane and never reach a user.
 

@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## Unreleased
 
 ### Changed
 
@@ -59,8 +59,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `dependency-failure` moved from `future` to shipped.
 - `site/index.html` gains the four missing lens cards (ordering,
   concurrency, idempotency, dependency-failure). Grid verified in
-  Chromium at 1024px: 11 cards, ownership spans two columns, flow
-  3 / 2+1 / 3 / 3, no overflow, no orphan row.
+  Chromium at 1024px: 14 cards, every card span 1, flow 4 / 4 / 4 /
+  2, no overflow, no orphan row.
 - Install instructions now list each host's own agents directory
   (`.agents`, Claude Code, VS Code, OpenCode) instead of naming three
   paths in one prompt, which told a Cursor user to write into
@@ -87,7 +87,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `LEARNED.md` → `docs/research/FINDINGS-2026-09-27.md`. The old name
   collided with the Learn stage's `.sstack/learn/`, which is unrelated.
 
-## [0.2.0] - 2026-09-27
+- Stale-count audit: `docs/CUSTOMIZING.md` lens list (seven →
+  fourteen), `CONTEXT.md` custom-lens rows (four → `mutation` only),
+  `docs/lens/lens-state.md` taxonomy labels (custom/future → shipped
+  for ordering, concurrency, idempotency), `evals/ACCEPTANCE.md`
+  cold-run setup (six peers → fourteen), `ROADMAP.md` goldens
+  (thirty-six → eighty) and leftover partial-seed fractions, README
+  v0.2.0 lens delta (seven → eleven), site lifecycle sub (eight
+  stages → seven stages and a report), `AGENTS.md` install claim
+  (`npx skills add` carries `skills/` only), and the version-tag
+  links dropped until the tags exist.
+
+## 0.2.0 - 2026-09-27
 
 ### Added
 
@@ -119,7 +130,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   seven fields, but the emitter also requires `slug`, `fix`, and
   `regression`; a cold agent following the skill verbatim had its
   findings rejected with exit 2. SKILL.md now enumerates the
-  payload, and `evals/test_emitter.py` (10 tests) pins the contract in
+  payload, and `evals/test_emitter.py` (11 tests) pins the contract in
   the repo's own runner, including negative controls proving each test
   turns red when its guarantee is reverted
 - ADR-0004: lenses delegate to the target's existing tools
@@ -289,7 +300,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `docs/superpowers/` (process artifacts, gitignored)
 - `references/lens-*.md` (superseded by peer skills and agents)
 
-## [0.1.0] - 2026-09-27
+## 0.1.0 - 2026-09-27
 
 First release. A structured negative-testing skill pack for AI coding
 agents.
@@ -308,6 +319,3 @@ agents.
 - Acceptance record (`evals/ACCEPTANCE.md`)
 - MIT license
 
-[unreleased]: https://github.com/mhenke/sstack/compare/v0.2.0...HEAD
-[0.2.0]: https://github.com/mhenke/sstack/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/mhenke/sstack/releases/tag/v0.1.0
