@@ -114,9 +114,10 @@ exactly from `README.md`.
     `--accent`, masked to fade at the hero's lower edge. Pure CSS,
     `aria-hidden`, no motion (reduced-motion safe by construction), no
     new tokens, no raw hex outside `:root`.
-12. **Header — one focal CTA**: wordmark, nav (Lifecycle, Lenses,
-    Evidence, Docs↗, GitHub↗), and a single white **Get started**
-    button. No ghost GitHub button anywhere — the nav carries that
+12. **Header — one focal CTA**: wordmark, nav (Rules, Lifecycle,
+    Lenses, Evidence, Docs↗, GitHub↗ — the four-rules section joined
+    the TOC first, per the nav-mirrors-page-order rule), and a single
+    white **Get started** button. No ghost GitHub button anywhere — the nav carries that
     link at every width. Under 760px the nav drops to its own
     full-width row and the wordmark shares the first row with the
     Get started CTA. All three #install CTAs (header, hero, final)
