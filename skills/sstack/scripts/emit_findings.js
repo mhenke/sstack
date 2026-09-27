@@ -1,0 +1,256 @@
+#!/usr/bin/env node
+/**
+ * Evidence emitter: the only writer of .sstack/findings/* and .sstack/report.json.
+ * Node.js stdlib-only equivalent to emit_findings.py.
+ */
+
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
+const { spawnSync } = require('child_process');
+
+const VERDICTS = new Set(['confirmed', 'refuted', 'inconclusive']);
+const STATES = new Set(['red', 'green']);
+const SAFE = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
+
+function safeSlug(value, field) {
+  if (!value || !SAFE.test(value) || value === '.' || value === '..') {
+    throw new Error(
+      `${field} must be a plain filename fragment (letters, digits, dot, dash, underscore): ${JSON.stringify(value)}`
+    );
+  }
+  return value;
+}
+
+function readFinding() {
+  const input = fs.readFileSync(0, 'utf8');
+  let finding;
+  try {
+    finding = JSON.parse(input);
+  } catch (err) {
+    throw new Error(`invalid finding: ${err.message}`);
+  }
+
+  if (!finding || typeof finding !== 'object' || Array.isArray(finding)) {
+    throw new Error('finding must be a JSON object');
+  }
+
+  const missing = ['lens', 'surface', 'case', 'oracle', 'verdict', 'repro'].filter(
+    (k) => !finding[k]
+  );
+  if (missing.length > 0) {
+    throw new Error(`missing fields: ${missing.join(', ')}`);
+  }
+
+  if (!VERDICTS.has(finding.verdict)) {
+    throw new Error(`verdict must be one of ${Array.from(VERDICTS).join(', ')}`);
+  }
+
+  const regression = finding.regression;
+  if (!regression || typeof regression !== 'object' || Array.isArray(regression)) {
+    throw new Error('regression must name file, test, before, after');
+  }
+
+  const absent = ['file', 'test', 'before', 'after'].filter((k) => !regression[k]);
+  if (absent.length > 0) {
+    throw new Error(`regression missing: ${absent.join(', ')}`);
+  }
+
+  for (const state of ['before', 'after']) {
+    if (!STATES.has(regression[state])) {
+      throw new Error(`regression.${state} must be the literal token 'red' or 'green'`);
+    }
+  }
+
+  return finding;
+}
+
+function runRepro(command, workspace) {
+  const result = spawnSync(command, {
+    shell: true,
+    cwd: workspace,
+    encoding: 'utf8',
+  });
+  const stdout = result.stdout || '';
+  const stderr = result.stderr || '';
+  const exitCode = result.status !== null ? result.status : (result.signal ? 128 : 1);
+  const fingerprint = crypto
+    .createHash('sha256')
+    .update(stdout + stderr)
+    .digest('hex')
+    .slice(0, 16);
+
+  return {
+    command,
+    exit_code: exitCode,
+    stdout,
+    stderr,
+    fingerprint,
+  };
+}
+
+function renderMarkdown(finding, run) {
+  const observed = (run.stdout + run.stderr).replace(/^\n+|\n+$/g, '');
+  const parts = [
+    `# ${finding.surface} — ${finding.case}`,
+    '',
+    `lens: ${finding.lens} | verdict: ${finding.verdict}`,
+    '',
+    '## Case',
+    finding.case,
+    '',
+    '## Oracle',
+    finding.oracle,
+    '',
+    '## Observed',
+    '```',
+    observed,
+    '```',
+    '',
+    '## Repro',
+    '```',
+    finding.repro,
+    '```',
+    `exit ${run.exit_code}, fingerprint ${run.fingerprint}`,
+  ];
+
+  const regression = finding.regression;
+  if (finding.verdict === 'confirmed' && finding.fix) {
+    parts.push('', '## Fix', finding.fix);
+  }
+  parts.push(
+    '',
+    '## Regression',
+    `\`${regression.file}::${regression.test}\` — ${regression.before} → ${regression.after}`
+  );
+
+  return parts.join('\n') + '\n';
+}
+
+function rebuildReport(findingsDir, workspace, fixture) {
+  const files = fs
+    .readdirSync(findingsDir)
+    .filter((f) => f.endsWith('.json'))
+    .sort();
+
+  const entries = [];
+  for (const file of files) {
+    const record = JSON.parse(fs.readFileSync(path.join(findingsDir, file), 'utf8'));
+    entries.push({
+      seed_id: record.seed_id || 'other',
+      lens: record.lens,
+      surface: record.surface,
+      case: record.case,
+      oracle: record.oracle,
+      observed: record.stdout + record.stderr,
+      verdict: record.verdict,
+      repro: record.command,
+      regression: record.regression,
+    });
+  }
+
+  const reportPath = path.join(workspace, '.sstack', 'report.json');
+  fs.writeFileSync(
+    reportPath,
+    JSON.stringify({ fixture, findings: entries }, null, 2) + '\n'
+  );
+  return entries.length;
+}
+
+function warnUnlanded(finding, workspace) {
+  const regression = finding.regression;
+  const filePath = path.join(workspace, regression.file);
+  if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
+    process.stderr.write(`warning: ${regression.file} not on disk yet\n`);
+  } else {
+    const content = fs.readFileSync(filePath, 'utf8');
+    if (!content.includes(regression.test)) {
+      process.stderr.write(`warning: '${regression.test}' not found in ${regression.file} yet\n`);
+    }
+  }
+}
+
+function main() {
+  const args = process.argv.slice(2);
+  let workspaceArg = null;
+  let fixtureArg = null;
+
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--workspace') {
+      workspaceArg = args[++i];
+    } else if (args[i] === '--fixture') {
+      fixtureArg = args[++i];
+    }
+  }
+
+  if (!workspaceArg) {
+    process.stderr.write('error: --workspace is required\n');
+    process.exit(2);
+  }
+
+  const workspace = path.resolve(workspaceArg);
+  const stack = path.join(workspace, '.sstack');
+  const findingsDir = path.join(stack, 'findings');
+
+  fs.mkdirSync(findingsDir, { recursive: true });
+
+  let finding;
+  try {
+    finding = readFinding();
+  } catch (err) {
+    process.stderr.write(`invalid finding: ${err.message}\n`);
+    process.exit(2);
+  }
+
+  const reportPath = path.join(stack, 'report.json');
+  let fixture = fixtureArg;
+  if (!fixture && fs.existsSync(reportPath)) {
+    try {
+      const existing = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+      fixture = existing.fixture;
+    } catch (_) {}
+  }
+
+  if (!fixture) {
+    process.stderr.write('first emit needs --fixture\n');
+    process.exit(2);
+  }
+
+  let slug;
+  try {
+    slug = safeSlug(
+      finding.slug ||
+        `${safeSlug(finding.lens, 'lens')}-${safeSlug(finding.surface, 'surface')}`,
+      'slug'
+    );
+  } catch (err) {
+    process.stderr.write(`invalid finding: ${err.message}\n`);
+    process.exit(2);
+  }
+
+  const run = runRepro(finding.repro, workspace);
+  const record = {
+    seed_id: finding.seed_id || 'other',
+    lens: finding.lens,
+    surface: finding.surface,
+    case: finding.case,
+    oracle: finding.oracle,
+    verdict: finding.verdict,
+    ...run,
+    regression: finding.regression,
+  };
+  if (finding.fix) {
+    record.fix = finding.fix;
+  }
+
+  fs.writeFileSync(path.join(findingsDir, `${slug}.json`), JSON.stringify(record, null, 2) + '\n');
+  fs.writeFileSync(path.join(findingsDir, `${slug}.md`), renderMarkdown(finding, run));
+  const total = rebuildReport(findingsDir, workspace, fixture);
+  warnUnlanded(finding, workspace);
+  process.stdout.write(
+    `emitted ${slug}: ${finding.verdict}, exit ${run.exit_code}, fingerprint ${run.fingerprint}; report.json now ${total} finding(s)\n`
+  );
+  process.exit(0);
+}
+
+main();

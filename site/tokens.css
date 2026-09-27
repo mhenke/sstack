@@ -1,0 +1,128 @@
+/* ─────────────────────────────────────────────────────────────────────────
+ * site/tokens.css — sstack
+ *
+ * Adapted from the open-design "sentry" package
+ * (design-systems/sentry/tokens.css, Base: OpenDesign curated fixture).
+ * Dark purple-black canvas (#1f1633 / #150f23) retained. Deltas from the
+ * base (see DESIGN.md §Deltas):
+ *
+ *   1. `--accent` moves from Sentry Purple (#6a5fc1) to a magenta-pink
+ *      (#fa7faa) lifted from the base palette's own pink slot. On this
+ *      canvas the pink is the loudest in-palette accent that still clears
+ *      4.5:1 at body size (7.1:1) and it anchors the whole system: links,
+ *      focus ring, the hero's italic accent word, CTA fills. Sentry's lime
+ *      (#c2ef4e) is not in this palette at all.
+ *
+ *   2. `--accent-on` flips to the dark surface color (#150f23) because the
+ *      magenta is light enough to carry dark text (7.7:1); white text on
+ *      magenta would only reach ~3.7:1 and fail AA at button size.
+ *
+ *   3. `--font-display` drops "Dammit Sans" (unavailable) — Rubik leads,
+ *      matching the base package's own degraded landing template.
+ *
+ *   4. Added `--border-strong` (#6f63b8) for borders that are part of an
+ *      interactive control's state geometry. --border stays the quiet
+ *      decorative hairline (#362d59).
+ *
+ *   5. Added `--code` (#dcdcaa, from the base DESIGN.md §2 "Code Yellow")
+ *      for syntax-colored mono lines in the findings panel.
+ *
+ * Contract (unchanged from base): paste the `:root` block below verbatim
+ * into the first <style> of an artifact, then reference everything via
+ * var(--*). No raw hex outside this block.
+ * ─────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* ─── Surface ───────────────────────────────────────────────────── */
+  --bg: #1f1633;
+  --surface: #150f23;
+  --surface-warm: var(--surface);
+
+  /* ─── Foreground ────────────────────────────────────────────────── */
+  --fg: #f6f2fb;
+  --fg-2: #e5e7eb;
+  --muted: #9d96b3;
+  --meta: var(--muted);
+
+  /* ─── Border ────────────────────────────────────────────────────── */
+  --border: #362d59;
+  --border-strong: #6f63b8;            /* interactive chrome, legible at 2.9:1 vs --bg */
+  --border-soft: var(--border);
+
+  /* ─── Accent ──────────────────────────────────────────────────────
+   * sstack pink. Links, focus ring, accent word, CTA fill.
+   * #fa7faa on --bg = 7.1:1. --bg text on #fa7faa = 7.7:1. */
+  --accent: #fa7faa;
+  --accent-on: #150f23;                /* dark text ON accent fills */
+  --accent-hover: color-mix(in oklab, var(--accent), black 12%);
+  --accent-active: color-mix(in oklab, var(--accent), black 20%);
+
+  /* ─── Semantic ──────────────────────────────────────────────────── */
+  --success: #4ade80;                  /* brightened from base; #16a34a is too dark on --bg */
+  --warn: #eab308;
+  --danger: #f87171;                   /* brightened from base; #dc2626 fails on --surface */
+
+  /* ─── Code ──────────────────────────────────────────────────────── */
+  --code: #dcdcaa;                     /* syntax tint for mono lines (base DESIGN.md §2) */
+
+  /* ─── Typography ────────────────────────────────────────────────── */
+  --font-display: "Rubik", -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-body: "Rubik", -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-mono: Monaco, Menlo, "Ubuntu Mono", ui-monospace, monospace;
+
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 20px;
+  --text-xl: 24px;
+  --text-2xl: 30px;
+  --text-3xl: 60px;
+  --text-4xl: 88px;
+
+  --leading-body: 1.5;
+  --leading-tight: 1.2;
+  --tracking-display: normal;
+
+  /* ─── Spacing ───────────────────────────────────────────────────── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  --section-y-desktop: 80px;
+  --section-y-tablet: 64px;
+  --section-y-phone: 48px;
+
+  /* ─── Radius ────────────────────────────────────────────────────── */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 9999px;
+
+  /* ─── Elevation ───────────────────────────────────────────────────
+   * Flat-first (border + surface tint is the depth language). */
+  --elev-flat: none;
+  --elev-ring: 0 0 0 1px var(--border);
+  --elev-raised: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+
+  /* ─── Focus ring ────────────────────────────────────────────────── */
+  --focus-ring: 0 0 0 2px var(--accent);
+
+  /* ─── Motion ────────────────────────────────────────────────────── */
+  --motion-fast: 150ms;
+  --motion-base: 200ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+
+  /* ─── Layout ────────────────────────────────────────────────────── */
+  --container-max: 1152px;
+  --container-gutter-desktop: 64px;
+  --container-gutter-tablet: 32px;
+  --container-gutter-phone: 24px;
+
+  /* Rendering contract: the page is dark-only; native controls match. */
+  color-scheme: dark;
+}

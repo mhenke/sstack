@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>sstack spacing</title>
+    <link rel="stylesheet" href="../tokens.css" />
+    <style>
+      body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-body); }
+      main { max-width: var(--container-max); margin: 0 auto; padding: var(--space-12) var(--space-6); }
+      h1 { margin: 0 0 var(--space-6); font-family: var(--font-display); font-size: var(--text-2xl); line-height: var(--leading-tight); }
+      .stack { display: grid; gap: var(--space-3); }
+      .bar { display: flex; align-items: center; gap: var(--space-4); }
+      .block { height: var(--space-4); width: var(--value); background: var(--accent); border-radius: var(--radius-sm); }
+      .label { color: var(--muted); font-family: var(--font-mono); font-size: var(--text-xs); }
+      .radius-row { display: flex; gap: var(--space-4); margin-top: var(--space-8); flex-wrap: wrap; }
+      .radius-demo { width: 96px; height: 64px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--value); }
+      h2 { margin: var(--space-12) 0 var(--space-4); font-size: var(--text-lg); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Spacing and radius</h1>
+      <section class="stack">
+        <div class="bar"><div class="block" style="--value: var(--space-1)"></div><span class="label">--space-1 · 4px</span></div>
+        <div class="bar"><div class="block" style="--value: var(--space-2)"></div><span class="label">--space-2 · 8px</span></div>
+        <div class="bar"><div class="block" style="--value: var(--space-3)"></div><span class="label">--space-3 · 12px</span></div>
+        <div class="bar"><div class="block" style="--value: var(--space-4)"></div><span class="label">--space-4 · 16px</span></div>
+        <div class="bar"><div class="block" style="--value: var(--space-5)"></div><span class="label">--space-5 · 20px</span></div>
+        <div class="bar"><div class="block" style="--value: var(--space-6)"></div><span class="label">--space-6 · 24px</span></div>
+        <div class="bar"><div class="block" style="--value: var(--space-8)"></div><span class="label">--space-8 · 32px</span></div>
+        <div class="bar"><div class="block" style="--value: var(--space-12)"></div><span class="label">--space-12 · 48px</span></div>
+      </section>
+      <h2>Section rhythm: 80 / 64 / 48 · Radius</h2>
+      <div class="radius-row">
+        <div class="radius-demo" style="--value: var(--radius-sm)"></div>
+        <div class="radius-demo" style="--value: var(--radius-md)"></div>
+        <div class="radius-demo" style="--value: var(--radius-lg)"></div>
+        <div class="radius-demo" style="--value: var(--radius-pill)"></div>
+      </div>
+    </main>
+  </body>
+</html>

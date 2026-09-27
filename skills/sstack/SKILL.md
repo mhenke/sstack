@@ -1,0 +1,501 @@
+---
+name: sstack
+description: Use when the user wants negative testing, edge-case coverage, failure-mode analysis, robustness checks, hostile or unexpected input handling, "what happens if" questions about code, or to harden a module or API against bad input before shipping. Discovers failure surfaces, attacks them through lenses (boundaries, malformed, missing, ownership, exceptional-conditions, resource-exhaustion, state), verifies observed behavior against a pre-declared oracle, adds negative regression tests, fixes confirmed failures, and hardens existing suites against future regressions. Scope is existing behavior under adverse conditions; happy-path feature work belongs to the feature's own tests.
+disable-model-invocation: true
+---
+
+# sstack — structured negative testing
+
+> Don't ask whether the software is robust. Exercise the failure
+> condition, write the test that proves it, and fix it.
+
+sstack finds the ways software fails, writes a test that goes red on
+the bug, applies the minimal fix that turns it green, and hardens the
+existing suite with negative test cases even where nothing is broken.
+
+## The four rules
+
+1. Attack assumptions.
+2. Define the oracle before the attack. Expected behavior under the
+   adverse condition — error, degradation, retry bound, invariant,
+   rejection. "It crashes" is not an oracle; "it raises a
+   validation error naming the field" is. One oracle, one observable
+   outcome: "throws or returns NaN" is two verdicts wearing one
+   sentence — name the one the contract promises; when the contract
+   genuinely permits both, the case is inconclusive.
+3. Never accept an agent's claim as evidence. Run the real command,
+   quote the real output.
+4. Every confirmed failure gets a red test, a fix, and a green test.
+   Every refuted surface gets a green hardening test.
+
+## Routing
+
+- `/sstack <target>` — run the full lifecycle on a module, file,
+  directory, or function.
+- `/sstack` (bare) — infer the target from recent changes
+  (`git status`, `git diff --stat`); ask only if nothing is
+  inferable.
+- `/sstack <stage>` (discover | attack | verify | minimize |
+  test | fix) — enter that stage using existing `.sstack/` state.
+- `/sstack learn` — update `.sstack/learn/` from confirmed findings.
+- `/sstack lenses` — print the lens index below, then every custom
+  lens found in the skills directories named in Customization.
+
+## Workspace
+
+**Resolve the host repo first.** The host repo is the directory that
+contains `.sstack-host-repo`. If that file exists in the current
+working directory, the host repo is this directory. If it does not,
+search upward for it before writing anything. When no marker exists,
+the host repo is the directory the user pointed you at.
+
+Every path in this document — `.sstack/`, scratch scripts, repro
+commands — is relative to that host repo. Anchor each write to it
+explicitly (or `cd` there once) so nothing lands in whatever
+directory the agent happened to start in.
+
+All artifacts live under `<host-repo>/.sstack/`:
+- `map.md` — surfaces + assumed contracts (Discover output)
+- `learn/` — failure classes from prior runs (Discover input,
+  Learn output). One line per class:
+  `lens | signal | adjacent surfaces to re-test`
+- `findings/<slug>.md` — the human view, rendered by the emitter in
+  exactly this shape (no front-matter, no restated summary, the
+  finding's fields in place):
+
+```
+# <surface> — <one-line case>
+
+lens: <lens> | verdict: <confirmed | refuted | inconclusive>
+
+## Case
+<concrete input and action>
+
+## Oracle
+<expected behavior under the adverse condition>
+
+## Observed
+<verbatim output in a fenced block>
+
+## Repro
+<fenced command>, exit <exit_code>, fingerprint <fingerprint>
+
+## Fix
+<description, confirmed only>
+
+## Regression
+`<file>::<test>` — <before> → <after>
+```
+- `findings/<slug>.json` — the machine view, exact keys:
+  `{"command": <shell string>, "exit_code": <int>, "stdout": <str>,
+  "stderr": <str>, "fingerprint": "<sha256[:16] of stdout+stderr>",
+  "oracle": <str>, "verdict": <confirmed|refuted|inconclusive>,
+  "regression": {"file","test","before","after"}}`. `before`/`after`
+  are the literal state tokens "red"/"green" — the test's state
+  before-fix / after-fix — not output snippets. Verification re-runs
+  `command` and recomputes the fingerprint from the recorded bytes,
+  agent out of the loop; a hand-typed hash fails it. Any other shape
+  is unverifiable.
+- `scratch/<lens>/` — every probe, case script, and compiled artifact
+  an attack creates, one directory per lens
+- `pristine-src/` — the target's originals, snapshotted before Fix, so
+  a repro command still shows the buggy behavior after the fix lands
+
+The emitter is `scripts/emit_findings.py` (or `scripts/emit_findings.js`
+under Node), beside this skill: run it, never rewrite or copy it. Once
+per finding, as that case verifies —
+`python3 <pack>/skills/sstack/scripts/emit_findings.py --workspace
+<host-repo> --fixture <fixture-name>` (or `node ... emit_findings.js`)
+with the finding as JSON on stdin. Pass `--fixture` on the first emit
+of a run; later emits inherit it from `report.json`.
+It executes the repro, captures real output, computes the fingerprint
+itself, and is the only writer of `<slug>.md`, `<slug>.json`, and
+`report.json`. The run's human report is the chat summary;
+`report.json` is the only report file.
+
+The JSON you pipe is the Report format fields — `lens`, `surface`,
+`case`, `oracle`, `verdict`, `repro` — plus `slug` (a short kebab-case
+name for the finding), `fix` (the minimal change you will make), and
+`regression`: `{"file": "tests/test_x.py", "test": "test_name",
+"before": "red", "after": "green"}`. `before` and `after` are the
+literal tokens `red` and `green`, never output snippets. The seven
+fields alone are rejected. A finding with no regression yet is
+legitimate during Verify: the emitter warns and records the rest.
+
+Everything sstack creates lives under `.sstack/` — never the workspace
+root, never a temp folder elsewhere. That directory is created here,
+in the target repo, by this run: the pack is installed into a user's
+repo and brings only skills and agents, so nothing in it is inherited
+from wherever the pack was published. Delete `scratch/` at run end;
+keep `pristine-src/` so evidence replays.
+
+## Customization
+
+**A lens is a skill, and an agent is an agent.** That is the whole
+extension model. Every piece of sstack is customized the same way: drop
+a file in your own tree, named so this skill recognizes it.
+
+```
+<host-repo>/.agents/skills/     project scope, resolved against the
+                                host repo like every other path here
+~/.agents/skills/               global scope, an absolute path
+```
+
+Both are searched, project first, and the first `sstack-<lens>`
+found wins. Read `~/.agents/skills/` whether or not it exists; a
+missing directory is not an error and never blocks a run. The other
+hosts keep the same shape: `~/.config/opencode/skills/` and
+`.opencode/skills/` for OpenCode, `~/.claude/skills/` for Claude
+Code. Look in whichever the host uses, and in all of them if unsure —
+an unreadable directory is skipped, never a failed run.
+
+Project shadows global, as OpenCode, Claude Code, and VS Code already
+resolve skills. Never put a custom file in `skills/` or `agents/`:
+those belong to the pack and are replaced wholesale on update, so
+anything edited there is lost.
+
+| customize | by dropping | recognized by |
+|---|---|---|
+| an attack angle | `sstack-<lens>/SKILL.md` in a skills dir | Attack, at `### Lens rubric` |
+| a worker | `sstack-<lens>-attacker.md` in an agents dir | Attack, dispatched by name |
+
+The `sstack-` prefix is the entire contract. A file carrying it is
+sstack's to read; a file without it is none of this skill's business.
+
+A lens skill needs `name: sstack-<lens>`, a `description` naming its
+failure class, `disable-model-invocation: true` as all fourteen shipped
+skills carry — a lens is pasted here, never auto-loaded by a host, since
+a rubric with no target is meaningless — and a rubric body of
+heuristics, oracle patterns, worked examples, and when-not-to-apply
+guidance. That last section is how a lens narrows itself: none of the
+shipped lenses declare a machine-readable `applies-when`, because at
+this size the "When not to apply" prose is the cheaper and more accurate
+filter, and a field nothing reads is a field that rots. A custom lens
+may add `applies-when` if it wants a hard gate. A custom agent is the
+same contract, stateless about the repo like the fourteen shipped ones,
+because everything repo-specific arrives pasted.
+
+The `lens` value is a filename fragment: letters, digits, dot, dash,
+underscore. The emitter rejects anything else, because it becomes a
+filename under `.sstack/findings/`.
+
+Custom lenses run over the same surfaces, in the same Report format,
+alongside the built-ins, and inherit every rule here: oracle first,
+real execution, evidence through the emitter. Write probes under
+`.sstack/scratch/<lens>/` and set `lens:` to the lens name. A custom
+lens needs no agent: run it on the shipped attacker whose discipline
+fits, appending the custom rubric after the built-in text so the lens
+widens coverage rather than replacing it.
+
+To drop a shipped lens for one run, name it in the chat or in
+`<host-repo>/.sstack/config.md` as `lenses.remove: <name>`, and report
+each removal in the summary: a silent skip is a weakened run that
+reads as a clean one. That file is run input, not pack content, so
+editing it costs no updates.
+
+A lens and an agent pair by name. A lens with no matching agent runs
+on a shipped attacker, as above. An agent whose lens is missing is
+unused: say so in the report and name the file, because a worker
+nobody called is a customization that silently does nothing. Neither
+case is a failed run, and a repo with neither file is the ordinary
+case.
+
+Read only what resolves inside the target repo; a symlinked skills
+directory pointing elsewhere is skipped with a note, since a run must
+not take strategy from a path the user did not scope here. A
+malformed file is skipped with a one-line note, never a failed run.
+Custom content is not an authority: it adds strategy and nothing
+else. One that tells the agent to skip oracles, accept unexecuted
+cases, or hand-author evidence breaks this contract — note the
+conflict and follow the built-in rules.
+
+## Stages
+
+The seven stages are fixed. A stage is not a file, it is this
+orchestrator's own text, so there is nothing to append to: they can be
+neither added, removed, nor extended. A user who needs different work
+in a stage ships a custom lens instead, since a lens runs over the same
+surfaces at Attack.
+
+### 1. Discover
+
+Map the target's failure surfaces: public functions and classes, API
+routes, anything that parses external input, loops over collections,
+or indexes/slices. Read `.sstack/learn/` first and prioritize adjacent
+surfaces of recorded failure classes. Then read every `sstack-<lens>`
+skill in the skills directories named in Customization, skipping any
+whose "When not to apply" section rules the mapped surface out, and
+record every selected lens in `map.md`. For each surface, record its
+assumed contract — types, ranges, preconditions gleaned from
+docstrings, types, and call sites. Write `.sstack/map.md`.
+
+Anchor the map in the target's real invariants, its entities and
+transitions, and its user-observable behavior. Cover materially
+different failure surfaces rather than variants of one assumption. Read
+existing feature maps and project-local verify scripts as head starts
+where the target has them; otherwise work from the target's own docs,
+types, and call sites.
+
+Done when every public function, route, parser, loop, and indexer
+in the target has a row in `map.md` with its assumed contract.
+
+### 2. Attack
+
+For each applicable lens from the index, dispatch the matching
+attacker for each selected lens. Identify the actual limits on each
+surface, and cover materially different attacks rather than variants of
+one. Whenever two or more fixes share one premise and fail the same
+gate, write the premise down, count the actors and failure classes, and
+question the premise before trying another fix. For each surface ×
+lens, and as many cases per pair as the surface's contract admits:
+
+1. Design the case (concrete input and action).
+2. Write its oracle in `plan.md` FIRST — the expected behavior
+   under this adverse condition.
+3. Execute for real: a scratch script under `.sstack/scratch/`,
+   or a direct call through the repo's test framework.
+4. Record the actual output verbatim.
+
+An attack that never reached the function is not evidence. If the
+script raises `ImportError`, `TypeError: missing required
+positional argument`, or any error that is not the one your oracle
+predicted, fix the call — import path, arguments, signature — and
+re-run until the function itself executes. An error from your own
+harness is a broken case, never a verdict.
+
+If the target repo already has a property-based testing library
+installed, write a property capturing the oracle and let the
+library's generator and shrinker find the counterexample instead of
+hand-designing cases the library would generate:
+
+- Python: Hypothesis
+- TypeScript / JS: fast-check
+- Java / Kotlin: jqwik
+- C++: RapidCheck, Google FuzzTest
+
+Hand-designed cases remain the fallback when no library is present,
+and the oracle is still written FIRST either way.
+
+Cover every selected lens on every mapped surface before
+concluding. A lens with zero executed cases on a surface that
+consumes record/dict-shaped or string input is an incomplete
+run, not a clean result.
+
+**Per-lens fan-out.** Dispatch one subagent per selected lens with
+`runSubagent`, one call per lens, concurrently: for each selected lens
+`<lens>` from the index, dispatch agent `sstack-<lens>-attacker` with the
+matching `sstack-<lens>` skill inline under `### Lens rubric`. A custom
+lens without a dedicated agent runs on the shipped attacker whose discipline
+fits, with the custom rubric appended after the built-in text per
+Customization.
+
+Pass each subagent the full context inline, not paths. Read
+`.sstack/map.md` and paste its contents with labeled sections
+(`### Workspace root` with the absolute path and `### Surface map`
+with the map contents). Paste the matching lens skill's `SKILL.md`
+contents inline under `### Lens rubric`, and the Report format block
+below under `### Report format` — a subagent starts blank and cannot
+see this file, so anything not pasted does not exist for it.
+
+No subagent tool available, or dispatch fails twice? Run the lenses
+yourself, one at a time, in the same order: read the lens skill,
+execute its rubric against every mapped surface, record findings in
+the Report format. Coverage is the contract; parallelism is
+an optimization.
+
+### 3. Verify
+
+Prove a verdict before accepting it: per case, compare oracle vs.
+observed, and keep the result focused on observable behavior rather
+than on the shape of the code. Write both `findings/<slug>.md` and
+`findings/<slug>.json` for every finding, in the exact shapes given
+under Workspace — through the emitter script, as each case verifies.
+Evidence batched to run end is evidence a crash deletes. Check for
+materially distinct attack families before declaring a surface covered.
+Before comparing anything, check the observed output came from
+the function under attack and not from your harness. An observed
+`ImportError` or missing-argument error is a broken attack:
+mark the case inconclusive with the harness error quoted, fix
+it, and re-run.
+
+- **confirmed** — observed violates the oracle, and the case
+  reproduces on a second run.
+- **refuted** — system satisfies the oracle.
+- **inconclusive** — oracle unclear or execution unreliable.
+  Inconclusive findings are never promoted to regressions.
+
+Before recording a `confirmed` verdict, let the system argue its way
+out: state the strongest case that the observed behavior is correct
+given the surface's contract. If that case holds, the oracle is wrong,
+not the code. Re-read the contract and mark the finding refuted. Then
+name the conditions that would make your verdict wrong: a re-run that
+passes, an oracle that turns out to permit the observed behavior, a
+contract you inferred rather than read. A verdict you cannot break is
+a verdict you did not check.
+
+Synthesizing parallel lens findings: deduplicate defects reported
+through more than one lens into a single finding (operating-limit
+overlap between `boundaries` and `resource-exhaustion` keeps the
+`resource-exhaustion` verdict). Weight overlapping confirmations more
+heavily, resolve disagreements against the surface's contract, and
+keep the report brief.
+
+### 4. Minimize
+
+Keep the minimal case and repro easy to inspect, and reduce it in
+independently checkable steps. For each confirmed finding, strip the
+case to the smallest input that still violates the oracle. Update the
+repro command.
+
+Done when no smaller input still violates the oracle and the
+finding's repro command runs as written.
+
+### 5. Test
+
+Test behavior, not implementation, for every regression and hardening
+test. Call the subject as its users do, assert a literal expected value
+or observable effect, and delete or rewrite any test that would pass
+when every imported function returns `undefined`. Preserve the oracle
+and the failure mode in the test itself, so the test stays tied to the
+behavior that matters.
+
+Write a permanent negative test in the host repo's real suite — same
+directory and assert style as existing tests, asserting the oracle.
+
+For **confirmed** findings: the test goes **red** on current code.
+That is the proof the test catches the bug. A green test on a
+confirmed finding pinned the observed behavior instead of the oracle.
+Rewrite it to assert the oracle.
+
+For **refuted** findings and surfaces that already handle the adverse
+condition: add the test as a hardening characterization test. It goes
+**green** immediately and locks in the correct behavior against future
+regressions.
+
+Run every new test and confirm the verdict matches: red for confirmed,
+green for refuted/hardened.
+
+### 6. Fix
+
+For each confirmed finding, trace the observed behavior to its root
+cause before editing: reproduce the failure, ask why until the shared
+cause is found, and fix that cause rather than adding a symptom guard.
+Check every sibling caller of the same behavior before applying the
+fix. Remove obsolete complexity rather than adding to it, keep
+boundaries explicit, and keep each change independently checkable.
+
+Then apply the minimal change that satisfies the oracle. Smallest diff
+that turns the red test green.
+
+- Validation: add the guard the oracle describes.
+- Error handling: wrap the leak in a clean domain error.
+- Missing check: add the check the oracle names.
+
+Re-run the confirmed finding's test: it goes **green**. Then run the
+full suite: the fix must not break any existing test.
+
+Done when every confirmed finding's test is green and the full suite
+passes.
+
+If the target repo has a mutation testing tool installed, run it
+scoped to the surfaces you attacked and record the mutation score.
+PIT (Java), Stryker (JS/TS), mutmut (Python). Survived mutants in
+code you just fixed are evidence your fix or your test is
+incomplete, not evidence the tool is wrong.
+
+### Run-end checks
+
+Keep the report focused on observable results, and keep the final
+report concise — the discarded scratch evidence stays out of the
+user-facing output.
+
+Before delivering the report, verify all of the following:
+
+1. Every confirmed finding has a red test and a green post-fix test.
+   The regression must be a test FILE in the repo's own suite (added
+   to its build/test runner), not a scratch binary you compiled and
+   ran yourself. `regression.file` is the path a stranger can open
+   and re-run.
+2. Every refuted finding has a green hardening test (if the surface
+   consumes external input).
+3. Every fix is the minimal change that satisfies the oracle.
+4. The full suite passes.
+
+A run that fails any of these is invalid. Fix and re-run before
+reporting.
+
+## Lens index
+
+| Lens | Applies when | Reference |
+|---|---|---|
+| boundaries | edge cases: numbers, sizes, indexes, slices, collections, pagination, precision, time, loops | sstack-boundaries-attacker |
+| malformed | strings parsed from outside, JSON, encodings, dynamic types | sstack-malformed-attacker |
+| missing | optional fields, records from external data, null/None/undefined, falsy traps, PATCH omission | sstack-missing-attacker |
+| ownership | a subject, an object, an action, and the context that joins them. OWASP A01 broken access control: BOLA/IDOR, BOPLA, missing deny-by-default, privilege escalation, token tampering, header/IP bypasses, CORS, force browsing | sstack-ownership-attacker |
+| exceptional-conditions | fail-open paths, diagnostic leakage, cascading failures, empty catch blocks. OWASP A05, CWE-209/636 | sstack-exceptional-conditions-attacker |
+| resource-exhaustion | connection and thread pools, rate limits, memory ceilings, payload limits, unbounded queries, disk | sstack-resource-exhaustion-attacker |
+| state | object with lifetime: cached/derived reads, mutable input written through, partial update after failure, internal collection escaped to callers, invalid transitions | sstack-state-attacker |
+| ordering | operations applied out of sequence, multi-step pipeline bypass, step skipping | sstack-ordering-attacker |
+| concurrency | race conditions, parallel access, double-spend, lost updates | sstack-concurrency-attacker |
+| idempotency | retried mutations, duplicate submissions, Idempotency-Key divergence | sstack-idempotency-attacker |
+| dependency-failure | upstream timeout, partial response, unavailable service, circuit breaker trip | sstack-dependency-failure-attacker |
+| contract | API contract violations, schema drift, undeclared fields | sstack-contract-attacker |
+| agent | tool-call schema divergence, unhandled tool errors, prompt injection | sstack-agent-attacker |
+| security | injection (SQL, command, path traversal), crypto token tampering | sstack-security-attacker |
+| mutation | proof that tests detect injected faults | custom lens |
+
+This row is unbuilt. It can be activated today by a user dropping a
+`sstack-mutation` skill into a skills directory, per Customization,
+without changing this pack.
+
+## Safety
+
+- Only modify target source in the Fix stage, only for confirmed
+  findings, and only the minimal change that turns a red test green.
+  Every source change must trace to a finding.
+- Never modify config or secrets.
+- No test framework detected → ask before scaffolding one.
+- Respect the repo's test conventions exactly.
+
+## Report format
+
+One finding per confirmed violation, in this exact shape (agents use
+this block; the lens name fills the `lens:` field):
+
+```
+lens: <lens>
+surface: <function or endpoint>
+case: <concrete input and action>
+oracle: <expected behavior under the adverse condition>
+observed: <actual output, verbatim>
+verdict: confirmed | refuted | inconclusive
+repro: <command that reproduces>
+```
+
+Write the machine-readable run report to exactly
+`<host-repo>/.sstack/report.json` — the canonical path any verifier
+reads — one object per finding: `{"fixture", "findings":
+[{"seed_id", "lens", "surface", "case", "oracle", "observed",
+"verdict", "repro", "regression": {"file","test","before","after"}}]}`.
+`seed_id` is an optional free-form label for the finding, or "other";
+the content of a finding is what carries its outcome, so nothing
+depends on the label. The emitter in Workspace writes it, per finding,
+as each case verifies — so a crash keeps every finding written so
+far. A report or evidence file that does not parse is not evidence.
+
+In the chat report, one line per finding: `id | lens | surface |
+verdict | regression (file::test, red→green)` or `id | lens |
+surface | refuted | hardening (file::test, green)`. Then per confirmed
+finding the full field set, with observed output quoted verbatim and
+the fix applied. End with counts: confirmed / refuted / inconclusive,
+fixes applied, regressions landed, hardening tests added.
+
+## Learn loop
+
+### 7. Learn
+
+Record one line per confirmed failure class in
+`.sstack/learn/<lens>.md`: `lens | signal | adjacent surfaces to
+re-test`. Treat learned classes as prioritization for the next
+Discover, never as proof. Never write secrets, transcripts, or one-off
+instructions into `.sstack/learn/`.

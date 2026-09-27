@@ -1,0 +1,12 @@
+cmake_minimum_required(VERSION 3.20)
+project(seeded_cpp)
+set(CMAKE_CXX_STANDARD 17)
+add_executable(seeded_cpp src/shop.cpp)
+enable_testing()
+add_test(NAME happy COMMAND seeded_cpp)
+
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/shop_test.cpp")
+  add_executable(shop_test tests/shop_test.cpp)
+  target_include_directories(shop_test PRIVATE src)
+  add_test(NAME shop_test COMMAND shop_test)
+endif()

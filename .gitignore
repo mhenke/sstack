@@ -1,0 +1,25 @@
+# Superpowers process artifacts (specs, plans, workspace) — local only.
+# The durable decisions live in docs/adr/.
+docs/superpowers/
+.superpowers/
+
+# Python
+__pycache__/
+*.pyc
+
+# sstack run artifacts (runtime output of the skill, not source).
+# Authored content inside is kept by .sstack/.gitignore, which a user
+# repo gets from the pack. Do not use `.sstack/` or `.sstack` here: git
+# cannot re-include a file under an ignored parent directory.
+.sstack/
+.pytest_cache/
+
+# Node
+node_modules/
+
+# Tool artifacts
+.playwright-mcp/
+.agent/
+scratch/
+# Agent session artifacts
+.claude/

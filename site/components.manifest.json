@@ -1,0 +1,281 @@
+{
+  "schemaVersion": 1,
+  "brandId": "sstack",
+  "source": {
+    "componentsHtml": "components.html",
+    "tokensCss": "tokens.css"
+  },
+  "fixture": {
+    "title": "sstack \u2014 reference components",
+    "description": "Reference fixture for site/. Dark purple-black canvas, Rubik, Monaco/Menlo mono, single magenta-pink accent (#fa7faa). Adapted from design-systems/sentry.",
+    "styleBlockCount": 1
+  },
+  "classes": [
+    "accent",
+    "btn",
+    "btn-accent",
+    "btn-ghost",
+    "btn-white",
+    "card",
+    "callout",
+    "chip",
+    "codeblock",
+    "codetint",
+    "copy-btn",
+    "eyebrow",
+    "finding",
+    "install-grid",
+    "install-card",
+    "install-no",
+    "install-note",
+    "install-footnote",
+    "hero-h",
+    "kv",
+    "lead",
+    "lens-card",
+    "menu",
+    "menu-panel",
+    "burger",
+    "mono",
+    "panel",
+    "panel-body",
+    "panel-head",
+    "row",
+    "row-flex",
+    "row-no",
+    "rows",
+    "rule-no",
+    "skip-link",
+    "stack-4",
+    "stack-6",
+    "stars",
+    "table-note",
+    "table-wrap",
+    "topbar",
+    "topbar-inner",
+    "topnav",
+    "verdict-green",
+    "verdict-red",
+    "wordmark"
+  ],
+  "groups": [
+    {
+      "id": "buttons",
+      "label": "Buttons and calls to action",
+      "classes": [
+        "btn",
+        "btn-white",
+        "btn-ghost",
+        "btn-accent",
+        "copy-btn"
+      ],
+      "tokenReferences": [
+        "--accent",
+        "--accent-on",
+        "--accent-hover",
+        "--border-strong",
+        "--fg",
+        "--surface",
+        "--radius-md",
+        "--text-sm"
+      ]
+    },
+    {
+      "id": "topbar",
+      "label": "Sticky topbar, wordmark, nav, mobile hamburger menu",
+      "classes": [
+        "topbar",
+        "topbar-inner",
+        "wordmark",
+        "topnav",
+        "menu",
+        "menu-panel",
+        "burger"
+      ],
+      "tokenReferences": [
+        "--bg",
+        "--border",
+        "--fg",
+        "--fg-2",
+        "--accent",
+        "--space-5",
+        "--space-6",
+        "--text-sm",
+        "--text-lg",
+        "--surface",
+        "--radius-sm",
+        "--radius-md"
+      ]
+    },
+    {
+      "id": "findings",
+      "label": "Illustrative findings panel and key-value rows",
+      "classes": [
+        "panel",
+        "panel-head",
+        "panel-body",
+        "finding",
+        "kv",
+        "accent",
+        "codetint",
+        "verdict-red",
+        "verdict-green"
+      ],
+      "tokenReferences": [
+        "--surface",
+        "--border",
+        "--radius-lg",
+        "--radius-md",
+        "--font-mono",
+        "--accent",
+        "--code",
+        "--danger",
+        "--success",
+        "--muted"
+      ]
+    },
+    {
+      "id": "cards",
+      "label": "Rule cards and lens cards",
+      "classes": [
+        "card",
+        "rule-no",
+        "lens-card"
+      ],
+      "tokenReferences": [
+        "--surface",
+        "--border",
+        "--border-strong",
+        "--radius-md",
+        "--accent",
+        "--muted",
+        "--font-mono"
+      ]
+    },
+    {
+      "id": "callout",
+      "label": "Oracle definition callout panel",
+      "classes": [
+        "callout"
+      ],
+      "tokenReferences": [
+        "--accent",
+        "--surface",
+        "--fg-2",
+        "--radius-md",
+        "--space-5"
+      ]
+    },
+    {
+      "id": "chips",
+      "label": "Not-happy case chips",
+      "classes": [
+        "chip"
+      ],
+      "tokenReferences": [
+        "--surface",
+        "--border",
+        "--radius-pill",
+        "--font-mono",
+        "--fg-2"
+      ]
+    },
+    {
+      "id": "lifecycle",
+      "label": "Numbered lifecycle bordered rows",
+      "classes": [
+        "rows",
+        "row",
+        "row-no"
+      ],
+      "tokenReferences": [
+        "--border",
+        "--accent",
+        "--muted",
+        "--font-mono"
+      ]
+    },
+    {
+      "id": "install",
+      "label": "Install tracks: two equal numbered cards with code blocks and copy buttons",
+      "classes": [
+        "install-grid",
+        "install-card",
+        "install-no",
+        "install-note",
+        "install-footnote",
+        "codeblock",
+        "copy-btn",
+        "mono"
+      ],
+      "tokenReferences": [
+        "--surface",
+        "--border",
+        "--radius-md",
+        "--font-mono",
+        "--accent",
+        "--muted",
+        "--fg-2",
+        "--text-xs"
+      ]
+    },
+    {
+      "id": "table",
+      "label": "Acceptance evidence table (stacked cards below 640px)",
+      "classes": [
+        "table-wrap",
+        "table-note"
+      ],
+      "tokenReferences": [
+        "--surface",
+        "--border",
+        "--radius-md",
+        "--fg",
+        "--fg-2",
+        "--muted",
+        "--font-mono"
+      ]
+    },
+    {
+      "id": "illustration",
+      "label": "Hero starfield (static decorative CSS)",
+      "classes": [
+        "stars"
+      ],
+      "tokenReferences": [
+        "--border-strong",
+        "--accent"
+      ]
+    },
+    {
+      "id": "typography",
+      "label": "Hero type, eyebrow, lead",
+      "classes": [
+        "eyebrow",
+        "hero-h",
+        "lead"
+      ],
+      "tokenReferences": [
+        "--accent",
+        "--muted",
+        "--font-display",
+        "--leading-tight",
+        "--text-lg"
+      ]
+    },
+    {
+      "id": "a11y",
+      "label": "Skip link and focus ring",
+      "classes": [
+        "skip-link"
+      ],
+      "tokenReferences": [
+        "--accent",
+        "--accent-on",
+        "--focus-ring",
+        "--radius-sm",
+        "--radius-md"
+      ]
+    }
+  ]
+}

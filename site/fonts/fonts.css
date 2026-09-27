@@ -1,0 +1,20 @@
+/* Rubik variable font, self-hosted (OFL). Sourced from Google Fonts
+ * v31; the same files the CDN served. Pages link this stylesheet
+ * instead of fonts.googleapis.com — no build step, no third-party
+ * runtime dependency, works offline. */
+
+@font-face {
+  font-family: "Rubik";
+  src: url("rubik-var.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Rubik";
+  src: url("rubik-var-italic.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}

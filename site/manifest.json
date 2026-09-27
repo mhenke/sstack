@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "od-design-system-project/v1",
+  "id": "sstack",
+  "name": "sstack",
+  "category": "Backend & Data",
+  "description": "Marketing-site design package for sstack (sad stack) — negative testing for AI coding agents. Adapted from the OpenDesign 'sentry' package: same dark purple-black canvas, accent moved to magenta-pink (#fa7faa).",
+  "source": {
+    "type": "bundled",
+    "origin": "Adapted from OpenDesign curated package 'sentry' (design-systems/sentry)"
+  },
+  "files": {
+    "design": "DESIGN.md",
+    "tokens": "tokens.css",
+    "designTokens": "design-tokens.json",
+    "tailwind": "tailwind-v4.css",
+    "components": "components.html"
+  },
+  "usage": "USAGE.md",
+  "componentsManifest": "components.manifest.json",
+  "importMode": "normalized",
+  "craft": {
+    "applies": [],
+    "suggested": [
+      "color",
+      "accessibility-baseline"
+    ],
+    "exemptions": []
+  },
+  "preview": {
+    "dir": "preview",
+    "pages": [
+      {
+        "path": "preview/colors.html",
+        "role": "colors",
+        "title": "Colors"
+      },
+      {
+        "path": "preview/typography.html",
+        "role": "typography",
+        "title": "Typography"
+      },
+      {
+        "path": "preview/spacing.html",
+        "role": "spacing",
+        "title": "Spacing"
+      }
+    ]
+  },
+  "sourceFiles": {
+    "evidence": "../README.md",
+    "tokens": "tokens.css",
+    "report": "../evals/ACCEPTANCE.md"
+  }
+}

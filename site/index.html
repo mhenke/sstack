@@ -1,0 +1,787 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>sstack: negative testing for AI coding agents</title>
+  <meta name="description" content="sstack (sad stack) finds the ways your software fails, writes a test for each one that fails today, and applies the minimal fix that turns it green." />
+  <meta name="theme-color" content="#1f1633" />
+  <meta property="og:title" content="sstack: sad stack" />
+  <meta property="og:description" content="Negative testing for AI coding agents. Exercise the failure condition, write the test that proves it, and fix it." />
+  <meta property="og:type" content="website" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231f1633'/%3E%3Cpath d='M9 21.5c1.2 1.6 3.4 2.5 6 2.5 3.6 0 6-1.8 6-4.5 0-2.6-1.9-3.9-5.5-4.7-2.6-.6-3.4-1.2-3.4-2.4 0-1.3 1.2-2.2 3-2.2 2 0 3.4.7 4.3 1.8l2-1.7c-1.3-1.7-3.5-2.7-6.3-2.7-3.3 0-5.7 1.9-5.7 4.6 0 2.7 2 4 5.3 4.7 2.7.6 3.6 1.3 3.6 2.6 0 1.5-1.4 2.4-3.3 2.4-2.2 0-3.8-.8-4.7-2.2z' fill='%23fa7faa'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="fonts/fonts.css" />
+  <style>
+/* :root pasted verbatim from tokens.css — single source of truth. */
+:root {
+  /* ─── Surface ───────────────────────────────────────────────────── */
+  --bg: #1f1633;
+  --surface: #150f23;
+  --surface-warm: var(--surface);
+
+  /* ─── Foreground ────────────────────────────────────────────────── */
+  --fg: #f6f2fb;
+  --fg-2: #e5e7eb;
+  --muted: #9d96b3;
+  --meta: var(--muted);
+
+  /* ─── Border ────────────────────────────────────────────────────── */
+  --border: #362d59;
+  --border-strong: #6f63b8;            /* interactive chrome, legible at 2.9:1 vs --bg */
+  --border-soft: var(--border);
+
+  /* ─── Accent ──────────────────────────────────────────────────────
+   * sstack pink. Links, focus ring, accent word, CTA fill.
+   * #fa7faa on --bg = 7.1:1. --bg text on #fa7faa = 7.7:1. */
+  --accent: #fa7faa;
+  --accent-on: #150f23;                /* dark text ON accent fills */
+  --accent-hover: color-mix(in oklab, var(--accent), black 12%);
+  --accent-active: color-mix(in oklab, var(--accent), black 20%);
+
+  /* ─── Semantic ──────────────────────────────────────────────────── */
+  --success: #4ade80;                  /* brightened from base; #16a34a is too dark on --bg */
+  --warn: #eab308;
+  --danger: #f87171;                   /* brightened from base; #dc2626 fails on --surface */
+
+  /* ─── Code ──────────────────────────────────────────────────────── */
+  --code: #dcdcaa;                     /* syntax tint for mono lines (base DESIGN.md §2) */
+
+  /* ─── Typography ────────────────────────────────────────────────── */
+  --font-display: "Rubik", -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-body: "Rubik", -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-mono: Monaco, Menlo, "Ubuntu Mono", ui-monospace, monospace;
+
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 20px;
+  --text-xl: 24px;
+  --text-2xl: 30px;
+  --text-3xl: 60px;
+  --text-4xl: 88px;
+
+  --leading-body: 1.5;
+  --leading-tight: 1.2;
+  --tracking-display: normal;
+
+  /* ─── Spacing ───────────────────────────────────────────────────── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  --section-y-desktop: 80px;
+  --section-y-tablet: 64px;
+  --section-y-phone: 48px;
+
+  /* ─── Radius ────────────────────────────────────────────────────── */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 9999px;
+
+  /* ─── Elevation ───────────────────────────────────────────────────
+   * Flat-first (border + surface tint is the depth language). */
+  --elev-flat: none;
+  --elev-ring: 0 0 0 1px var(--border);
+  --elev-raised: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+
+  /* ─── Focus ring ────────────────────────────────────────────────── */
+  --focus-ring: 0 0 0 2px var(--accent);
+
+  /* ─── Motion ────────────────────────────────────────────────────── */
+  --motion-fast: 150ms;
+  --motion-base: 200ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+
+  /* ─── Layout ────────────────────────────────────────────────────── */
+  --container-max: 1152px;
+  --container-gutter-desktop: 64px;
+  --container-gutter-tablet: 32px;
+  --container-gutter-phone: 24px;
+  color-scheme: dark;
+}
+  </style>
+  <style>
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      line-height: var(--leading-body);
+      -webkit-font-smoothing: antialiased;
+    }
+    h1, h2, h3, p { margin: 0; }
+    h1, h2, h3 { font-family: var(--font-display); line-height: var(--leading-tight); letter-spacing: var(--tracking-display); }
+    a { color: var(--accent); text-underline-offset: 3px; }
+    a:hover { color: var(--accent-hover); }
+    :focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: var(--radius-sm); }
+    code, pre, .mono { font-family: var(--font-mono); }
+    /* External-link indicator: ↗ on every absolute http(s) link, in every
+     * context (nav, buttons, cards, table, footer, mono). Plain inline glyph,
+     * not an atomic inline-block, so it cannot wrap onto its own line away
+     * from the label. Empty alt text keeps it silent for assistive tech.
+     * Same-page anchors and relative links never get it. */
+    a[href^="http"]::after {
+      content: "↗" / "";
+      margin-inline-start: 0.15em;
+      font-size: 0.75em;
+      text-decoration: none;
+    }
+
+    .skip-link {
+      position: absolute; left: var(--space-4); top: calc(-1 * var(--space-12));
+      padding: var(--space-3) var(--space-4);
+      background: var(--accent); color: var(--accent-on);
+      font-weight: 700; text-decoration: none; border-radius: var(--radius-md);
+      z-index: 100; transition: top var(--motion-fast) var(--ease-standard);
+    }
+    .skip-link:focus { top: var(--space-4); }
+    /* a:hover (0,1,1) would outrank .skip-link (0,1,0) and drop contrast to
+     * accent-hover-on-accent (1.3:1); pin the AA pair. */
+    .skip-link:hover { color: var(--accent-on); }
+
+    .container { width: 100%; max-width: var(--container-max); margin: 0 auto; padding-inline: var(--container-gutter-phone); }
+
+    /* ─── Topbar ─── */
+    .topbar {
+      position: sticky; top: 0; z-index: 50;
+      background: color-mix(in oklab, var(--bg), transparent 8%);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+    }
+    .topbar-inner { display: flex; align-items: center; gap: var(--space-6); min-height: 64px; flex-wrap: wrap; }
+    .wordmark { font-weight: 800; font-size: var(--text-lg); color: var(--fg); text-decoration: none; }
+    .wordmark span { color: var(--accent); }
+    .topnav { display: flex; gap: var(--space-5); margin-inline-start: auto; }
+    .topnav a { display: inline-flex; align-items: center; white-space: nowrap; color: var(--fg-2); text-decoration: none; font-size: var(--text-sm); font-weight: 500; padding: var(--space-2) 0; }
+    .topnav a:hover { color: var(--accent); }
+    .topbar-actions { display: flex; gap: var(--space-3); align-items: center; }
+
+    /* ─── Mobile menu (≤759px) ───
+     * details/summary disclosure — keyboard-operable, no JS for open/close.
+     * JS below only closes on link activation / Escape. Burger is pure CSS
+     * (one bar + two box-shadows), aria-hidden; the summary carries the name. */
+    .menu { display: none; position: relative; }
+    .menu summary {
+      list-style: none; display: inline-flex; align-items: center; justify-content: center;
+      width: 44px; height: 44px; border-radius: var(--radius-md); cursor: pointer;
+    }
+    .menu summary::-webkit-details-marker { display: none; }
+    .menu summary:hover { background: var(--surface); }
+    .burger { display: block; width: 18px; height: 2px; background: var(--fg); box-shadow: 0 -6px 0 var(--fg), 0 6px 0 var(--fg); }
+    .menu-panel {
+      position: absolute; top: calc(100% + var(--space-2)); right: 0; z-index: 60;
+      min-width: 12rem; padding: var(--space-2);
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md);
+      display: grid;
+    }
+    .menu-panel a {
+      display: block; padding: var(--space-3) var(--space-4);
+      color: var(--fg-2); text-decoration: none; font-size: var(--text-sm); font-weight: 500;
+      border-radius: var(--radius-sm); white-space: nowrap;
+    }
+    .menu-panel a:hover { color: var(--accent); }
+    /* Small screens: ONE row — wordmark left, Get started + hamburger right.
+     * All nav links move into the menu; the bar blends into the hero
+     * (no divider). */
+    @media (max-width: 759px) {
+      .topbar { border-bottom: 0; }
+      .topbar-inner { min-height: 56px; gap: var(--space-3); }
+      .topnav { display: none; }
+      .topbar-actions { margin-inline-start: auto; }
+      .menu { display: block; }
+    }
+    /* Tablet: single row still fits if the nav gap tightens a notch. */
+    @media (min-width: 760px) and (max-width: 1023px) {
+      .topnav { gap: var(--space-4); }
+    }
+
+    /* ─── Buttons ─── */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-height: 44px; padding: 0 var(--space-5);
+      border-radius: var(--radius-md); border: 1px solid transparent;
+      font-weight: 700; font-size: var(--text-xs); text-decoration: none;
+      text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap;
+      transition: background-color var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard), border-color var(--motion-fast) var(--ease-standard);
+      cursor: pointer;
+    }
+    .btn-white { background: var(--fg); color: var(--surface); border-color: var(--fg); }
+    .btn-white:hover { background: var(--accent); border-color: var(--accent); color: var(--accent-on); }
+    .btn-ghost { background: transparent; color: var(--fg); border-color: var(--border-strong); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-accent { background: var(--accent); color: var(--accent-on); border-color: var(--accent); }
+    .btn-accent:hover { background: var(--accent-hover); border-color: var(--accent-hover); color: var(--accent-on); }
+    .btn:active { transform: translateY(1px); }
+
+    /* ─── Sections ─── */
+    .section { padding-block: var(--section-y-phone); }
+    @media (min-width: 640px) { .section { padding-block: var(--section-y-tablet); } }
+    @media (min-width: 1024px) { .section { padding-block: var(--section-y-desktop); } }
+    .section h2 { font-size: clamp(1.875rem, 4vw, 3.75rem); font-weight: 800; }
+    .section-sub { margin-top: var(--space-4); max-width: 62ch; color: var(--muted); font-size: var(--text-lg); }
+
+    /* ─── Hero ─── */
+    .hero { position: relative; padding-block: var(--section-y-tablet) var(--section-y-phone); }
+    /* Starfield: one decorative illustration moment. Pure CSS — tiled
+     * radial-gradient pinpricks in --border-strong with a rare --accent,
+     * faded at the lower edge. Static (reduced-motion safe by construction),
+     * aria-hidden, pointer-events off. Colors are var() only. */
+    .stars {
+      position: absolute; inset: 0; overflow: hidden; pointer-events: none; opacity: 0.5;
+      background-image:
+        radial-gradient(1px 1px at 24px 36px, var(--border-strong) 50%, transparent 51%),
+        radial-gradient(1px 1px at 96px 148px, var(--accent) 50%, transparent 51%),
+        radial-gradient(1px 1px at 152px 60px, var(--border-strong) 50%, transparent 51%),
+        radial-gradient(1px 1px at 60px 196px, var(--border-strong) 50%, transparent 51%);
+      background-size: 190px 230px;
+      mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
+    }
+    .hero > :not(.stars) { position: relative; }
+    @media (min-width: 1024px) { .hero { padding-block: calc(var(--section-y-desktop) + var(--space-4)) var(--section-y-desktop); } }
+    .eyebrow { color: var(--accent); font-size: var(--text-sm); font-weight: 600; }
+    .hero h1 { margin-top: var(--space-4); font-size: clamp(2.75rem, 6vw + 1rem, 5.5rem); font-weight: 800; max-width: 14ch; }
+    .hero h1 em { color: var(--accent); }
+    .hero-sub { margin-top: var(--space-6); max-width: 56ch; color: var(--muted); font-size: var(--text-lg); }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-8); }
+
+    /* ─── Findings panel (illustrative) ─── */
+    .panel {
+      margin-top: var(--section-y-phone);
+      border: 1px solid var(--border); border-radius: var(--radius-lg);
+      background: var(--surface); overflow: hidden;
+    }
+    .panel-head {
+      display: flex; align-items: center; justify-content: space-between; gap: var(--space-4);
+      padding: var(--space-3) var(--space-5); border-bottom: 1px solid var(--border);
+      font-family: var(--font-mono); font-size: var(--text-xs); color: var(--muted);
+    }
+    .panel-body { padding: var(--space-5); display: grid; gap: var(--space-4); }
+    .finding { overflow: hidden; }
+    .finding dl { margin: 0; display: grid; }
+    .finding .kv { display: grid; grid-template-columns: 7rem 1fr; gap: var(--space-3); padding: var(--space-2) var(--space-4); font-family: var(--font-mono); font-size: var(--text-sm); }
+    .finding .kv + .kv { border-top: 1px solid var(--border); }
+    .finding dt { color: var(--muted); }
+    .finding dd { margin: 0; }
+    .finding dd .accent { color: var(--accent); }
+    .finding dd .codetint { color: var(--code); }
+    .verdict-red { color: var(--danger); }
+    .verdict-green { color: var(--success); }
+    .panel-note { padding: 0 var(--space-5) var(--space-4); color: var(--muted); font-size: var(--text-xs); font-family: var(--font-mono); }
+
+    /* ─── Chips strip ─── */
+    .strip { padding-block: var(--space-6); }
+    .strip-note { margin: 0 0 var(--space-3); color: var(--muted); font-family: var(--font-mono); font-size: var(--text-sm); }
+    .strip-list { display: flex; flex-wrap: wrap; gap: var(--space-3); list-style: none; margin: 0; padding: 0; }
+    .chip {
+      font-family: var(--font-mono); font-size: var(--text-sm); color: var(--fg-2);
+      border: 1px solid var(--border); border-radius: var(--radius-pill);
+      padding: var(--space-2) var(--space-4); background: var(--surface);
+    }
+
+    /* ─── Oracle callout ───
+     * The canonical definition, verbatim from README/CONTEXT.md. Flat like
+     * everything else: 1px --accent border + --surface fill; the strong lead
+     * word carries the accent. No left-border bar (craft floor), no shadow. */
+    .callout {
+      margin-top: var(--space-8); max-width: 62ch;
+      border: 1px solid var(--accent); border-radius: var(--radius-md);
+      background: var(--surface); padding: var(--space-5);
+    }
+    .callout p { margin: 0; color: var(--fg-2); font-size: var(--text-base); }
+    .callout strong { color: var(--accent); }
+
+    /* ─── Rule cards ─── */
+    .grid-4 { display: grid; gap: var(--space-4); margin-top: var(--space-8); grid-template-columns: 1fr; }
+    @media (min-width: 640px) { .grid-4 { grid-template-columns: 1fr 1fr; } }
+    @media (min-width: 1024px) { .grid-4 { grid-template-columns: repeat(4, 1fr); } }
+    .card { border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); padding: var(--space-5); }
+    .card h3 { margin-top: var(--space-3); font-size: var(--text-lg); font-weight: 700; }
+    .card p { margin-top: var(--space-3); color: var(--muted); font-size: var(--text-sm); }
+
+    /* ─── Lifecycle rows ─── */
+    .rows { margin-top: var(--space-8); border-top: 1px solid var(--border); }
+    .row {
+      display: grid; grid-template-columns: 3rem 1fr; gap: var(--space-4); align-items: baseline;
+      padding: var(--space-5) 0; border-bottom: 1px solid var(--border);
+    }
+    @media (min-width: 820px) { .row { grid-template-columns: 3rem 14rem 1fr; } }
+    .row .row-no { font-family: var(--font-mono); font-size: var(--text-sm); color: var(--accent); }
+    .row h3 { font-size: var(--text-lg); font-weight: 700; }
+    .row p { color: var(--muted); font-size: var(--text-base); grid-column: 2; }
+    @media (min-width: 820px) { .row p { grid-column: auto; } }
+
+    /* ─── Lens grid ─── */
+    .grid-lens { display: grid; gap: var(--space-4); margin-top: var(--space-8); grid-template-columns: 1fr; }
+    @media (min-width: 640px) { .grid-lens { grid-template-columns: 1fr 1fr; } }
+    @media (min-width: 1024px) { .grid-lens { grid-template-columns: repeat(4, 1fr); } }
+    .lens-card { display: block; text-decoration: none; color: inherit; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); padding: var(--space-5); transition: border-color var(--motion-fast) var(--ease-standard); }
+    .lens-card:hover { border-color: var(--border-strong); }
+    .lens-card h3 { font-size: var(--text-base); font-weight: 700; font-family: var(--font-mono); color: var(--accent); }
+    .lens-card p { margin-top: var(--space-3); color: var(--muted); font-size: var(--text-sm); }
+
+    /* ─── Install ───
+     * The conversion moment gets the page's only full-bleed band: --surface
+     * fenced by hairlines top and bottom (the footer/strip pattern). Flat —
+     * no shadow, no radius at page width. */
+    .install { background: var(--surface); border-block: 1px solid var(--border); }
+    .install-grid { display: grid; gap: var(--space-4); margin-top: var(--space-8); grid-template-columns: 1fr; text-align: start; }
+    @media (min-width: 820px) { .install-grid { grid-template-columns: 1fr 1fr; } }
+    .install-card { display: flex; flex-direction: column; gap: var(--space-4); align-items: start; min-width: 0; }
+    .install-no { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--accent); }
+    .install-card h3 { font-size: var(--text-lg); font-weight: 700; }
+    .install-note { color: var(--muted); font-size: var(--text-sm); }
+    .install-note code { color: var(--fg-2); font-size: var(--text-sm); }
+    .host-list { list-style: none; margin: var(--space-3) 0 0; padding: 0; display: grid; gap: var(--space-2); font-size: var(--text-sm); }
+    .install-label { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--border); color: var(--muted); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.08em; }
+    .host-list li { display: flex; gap: var(--space-2); align-items: baseline; justify-content: space-between; }
+    .host-list code { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--muted); }
+    .install-card .codeblock { margin: 0; max-width: none; width: 100%; }
+    .codeblock {
+      margin: var(--space-8) auto 0; max-width: 42rem; min-width: 0;
+      display: flex; align-items: stretch; gap: 0;
+      overflow: hidden; text-align: start;
+    }
+    .codeblock code {
+      flex: 1; padding: var(--space-4) var(--space-5);
+      font-family: var(--font-mono); font-size: var(--text-sm); color: var(--fg);
+      overflow-x: auto; white-space: nowrap; align-self: center;
+    }
+    .copy-btn {
+      border: 0; border-inline-start: 1px solid var(--border);
+      background: transparent; color: var(--muted);
+      font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+      padding: 0 var(--space-4); min-height: 44px; cursor: pointer;
+      transition: color var(--motion-fast) var(--ease-standard);
+    }
+    .copy-btn:hover { color: var(--accent); }
+    .install-more { margin-top: var(--space-6); color: var(--muted); font-size: var(--text-sm); max-width: 62ch; }
+    .install-footnote { margin-top: var(--space-4); color: var(--muted); font-size: var(--text-xs); max-width: 62ch; }
+    .install-more code { color: var(--fg-2); font-size: var(--text-sm); }
+
+    /* ─── Evidence table ───
+     * ≥640px: real table. <640px: stacked cards — the fixture cell becomes
+     * the card title, the other cells become labeled rows via data-label.
+     * Same table markup, same caption semantics; thead is visually clipped
+     * but stays in the a11y tree. */
+    .table-wrap { margin-top: var(--space-8); overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-2) var(--space-3); }
+    table { width: 100%; border-collapse: collapse; min-width: 44rem; background: var(--surface); }
+    caption { text-align: start; padding: var(--space-4) var(--space-5); color: var(--muted); font-size: var(--text-sm); border-bottom: 1px solid var(--border); }
+    th, td { text-align: start; vertical-align: top; padding: var(--space-4) var(--space-5); font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+    thead th { color: var(--fg); font-weight: 700; border-bottom: 1px solid var(--border); }
+    tbody tr + tr td { border-top: 1px solid var(--border); }
+    td .mono, th .mono { font-size: var(--text-sm); }
+    tbody td { color: var(--fg-2); }
+    tbody th[scope="row"] { color: var(--fg); font-family: var(--font-mono); font-weight: 400; }
+    .table-note { margin-top: var(--space-8); color: var(--muted); font-size: var(--text-sm); max-width: 62ch; }
+    .table-note a { padding-block: var(--space-1); }
+    @media (max-width: 639px) {
+      .table-wrap { overflow: visible; border: 0; border-radius: 0; }
+      table { min-width: 0; background: transparent; }
+      caption { padding: 0 0 var(--space-4); border-bottom: 0; }
+      thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+      tbody tr {
+        display: block; margin-bottom: var(--space-4);
+        border: 1px solid var(--border); border-radius: var(--radius-md);
+        background: var(--surface);
+      }
+      tbody tr + tr td, tbody tr + tr th[scope="row"] { border-top: 1px solid var(--border); }
+      tbody td, tbody th[scope="row"] { display: block; padding: var(--space-3) var(--space-4); text-align: start; }
+      tbody tr th[scope="row"] { border-top: 0; font-size: var(--text-base); font-weight: 700; }
+      tbody td[data-label]::before {
+        content: attr(data-label); display: block; margin-bottom: var(--space-1);
+        font-family: var(--font-mono); font-size: var(--text-xs); color: var(--muted);
+      }
+    }
+
+    /* ─── Final CTA ─── */
+    .final { text-align: center; border-top: 1px solid var(--border); }
+    .final h2 { font-size: clamp(2.25rem, 5vw, 3.75rem); font-weight: 800; }
+    .final h2 em { color: var(--accent); }
+    .final .hero-actions { justify-content: center; }
+
+    /* ─── Footer ─── */
+    .footer { border-top: 1px solid var(--border); background: var(--surface); padding-block: var(--section-y-phone) var(--space-6); }
+    .footer-grid { display: grid; gap: var(--space-8); grid-template-columns: 1fr; }
+    @media (min-width: 640px) { .footer-grid { grid-template-columns: 1fr 1fr; } }
+    @media (min-width: 1024px) { .footer-grid { grid-template-columns: repeat(4, 1fr); } }
+    .footer h3 { font-size: var(--text-sm); font-weight: 700; color: var(--fg); }
+    .footer ul { list-style: none; margin: var(--space-3) 0 0; padding: 0; display: grid; gap: var(--space-2); }
+    .footer a { color: var(--muted); text-decoration: none; font-size: var(--text-sm); display: inline-block; padding-block: var(--space-1); }
+    .footer a:hover { color: var(--accent); }
+    .footer-bar { margin-top: var(--section-y-phone); padding-top: var(--space-5); border-top: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: space-between; color: var(--muted); font-size: var(--text-xs); font-family: var(--font-mono); }
+
+    /* ─── Page-load reveal (single orchestrated moment) ─── */
+    @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+    .reveal { animation: rise var(--motion-base) var(--ease-standard) both; }
+    .reveal-2 { animation-delay: 90ms; }
+    .reveal-3 { animation-delay: 180ms; }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .reveal { animation: none; }
+      * { transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a class="wordmark" href="./index.html">sstack<span>.</span></a>
+      <nav class="topnav" aria-label="Primary">
+        <a href="#lifecycle">Lifecycle</a>
+        <a href="#lenses">Lenses</a>
+        <a href="#evidence">Evidence</a>
+        <a href="https://github.com/mhenke/sstack#readme">Docs</a>
+        <a href="https://github.com/mhenke/sstack">GitHub</a>
+      </nav>
+      <div class="topbar-actions">
+        <a class="btn btn-white" href="#install">Get started</a>
+        <details class="menu">
+          <summary aria-label="Menu"><span class="burger" aria-hidden="true"></span></summary>
+          <nav class="menu-panel" aria-label="Menu">
+            <a href="#lifecycle">Lifecycle</a>
+            <a href="#lenses">Lenses</a>
+            <a href="#evidence">Evidence</a>
+            <a href="https://github.com/mhenke/sstack#readme">Docs</a>
+            <a href="https://github.com/mhenke/sstack">GitHub</a>
+          </nav>
+        </details>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- Hero -->
+    <section class="hero container" aria-labelledby="hero-h">
+      <div class="stars" aria-hidden="true"></div>
+      <p class="eyebrow reveal">sad stack · negative testing for AI coding agents</p>
+      <h1 id="hero-h" class="reveal reveal-2">Don’t ask whether it’s <em>robust</em>.</h1>
+      <p class="hero-sub reveal reveal-3">Exercise the failure condition, write the test that proves it, and fix it.</p>
+      <div class="hero-actions reveal reveal-3">
+        <a class="btn btn-white" href="#install">Get started</a>
+        <a class="btn btn-ghost" href="https://github.com/mhenke/sstack#readme">Read the docs</a>
+      </div>
+
+      <!-- Illustrative findings panel -->
+      <div class="panel reveal reveal-3" aria-label="Illustrative sstack findings">
+        <div class="panel-head">
+          <span>.sstack/findings/boundaries-03.md</span>
+          <span>illustrative</span>
+        </div>
+        <div class="panel-body">
+          <div class="finding">
+            <dl>
+              <div class="kv"><dt>lens</dt><dd class="accent">boundaries</dd></div>
+              <div class="kv"><dt>case</dt><dd>apply_discount(<span class="codetint">cart</span>, <span class="codetint">percent: 101</span>)</dd></div>
+              <div class="kv"><dt>oracle</dt><dd>raises validation error naming <span class="codetint">percent</span></dd></div>
+              <div class="kv"><dt>observed</dt><dd class="verdict-red">returns negative total; no bound checked</dd></div>
+              <div class="kv"><dt>verdict</dt><dd class="verdict-red">FAIL observed ≠ oracle → regression test written → <span class="verdict-green">green after fix</span></dd></div>
+            </dl>
+          </div>
+        </div>
+        <p class="panel-note">red → green. one .md + one .json per finding. evidence replayable.</p>
+      </div>
+    </section>
+
+    <!-- Not-happy strip -->
+    <div class="strip">
+      <div class="container">
+        <p class="strip-note">the not-happy cases it hunts:</p>
+        <ul class="strip-list" aria-label="The not-happy cases">
+          <li class="chip">the empty string</li>
+          <li class="chip">the null</li>
+          <li class="chip">the duplicate webhook</li>
+          <li class="chip">the dependency that dies at 2am</li>
+          <li class="chip">the second concurrent request</li>
+          <li class="chip">the step that runs before its gate</li>
+          <li class="chip">the retried request that books twice</li>
+          <li class="chip">the endpoint that answers for another tenant</li>
+          <li class="chip">the text field that executes SQL</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Four rules -->
+    <section class="section container" aria-labelledby="rules-h">
+      <h2 id="rules-h">The four rules.</h2>
+      <p class="section-sub">sstack is structured negative testing: it explores how software behaves outside the happy path, verifies observed behavior against a declared oracle, and turns confirmed failures into permanent regression tests.</p>
+      <aside class="callout" aria-label="Oracle definition">
+        <p><strong>Oracle</strong> — the expected behavior written down <em>before</em> the attack: error, degradation, retry bound, invariant, rejection — not only crashes. “It crashes” isn’t an expectation; “it raises a validation error naming the field” is. A test that passes against code you just proved broken has pinned the bug, and a pinned bug is worse than no test at all.</p>
+      </aside>
+      <div class="grid-4">
+        <article class="card">
+          <h3>Attack assumptions</h3>
+          <p>Every input, state, and dependency an implementation assumes is a surface to probe.</p>
+        </article>
+        <article class="card">
+          <h3>Define the oracle first</h3>
+          <p>Expected behavior goes down before the attack runs. One oracle, one observable outcome; a verdict only counts when real command output backs it.</p>
+        </article>
+        <article class="card">
+          <h3>No claims as evidence</h3>
+          <p>Never accept an agent’s claim. Run the real command, quote the real output. The agent interprets evidence; it does not manufacture it.</p>
+        </article>
+        <article class="card">
+          <h3>Failure → test → fix</h3>
+          <p>Write the regression test (goes red on the bug), apply the minimal fix (turns it green), harden the surfaces already handled correctly.</p>
+        </article>
+      </div>
+      <p class="table-note">The four rules in full: <a href="https://github.com/mhenke/sstack/blob/main/docs/ETHOS.md">docs/ETHOS.md</a>.</p>
+    </section>
+
+    <!-- Lifecycle -->
+    <section class="section container" id="lifecycle" aria-labelledby="lifecycle-h">
+      <h2 id="lifecycle-h">The not-happy cases, staged.</h2>
+      <p class="section-sub">One pass, eight stages. Expected behavior goes down before anything runs; a case that could pass two ways is two verdicts wearing one sentence.</p>
+      <div class="rows">
+        <div class="row"><span class="row-no">1</span><h3>Discover</h3><p>Map surfaces and assumed contracts inside the scope you named.</p></div>
+        <div class="row"><span class="row-no">2</span><h3>Attack</h3><p>Fourteen lenses fan out, one attacker agent each, running concurrently.</p></div>
+        <div class="row"><span class="row-no">3</span><h3>Verify</h3><p>Observed behavior checked against the oracle written before the attack.</p></div>
+        <div class="row"><span class="row-no">4</span><h3>Minimize</h3><p>Reduce the failure to the smallest repro that still trips it.</p></div>
+        <div class="row"><span class="row-no">5</span><h3>Test</h3><p>Write the regression test. It goes red on the bug.</p></div>
+        <div class="row"><span class="row-no">6</span><h3>Fix</h3><p>Apply the minimal change that satisfies the oracle. Green.</p></div>
+        <div class="row"><span class="row-no">7</span><h3>Learn</h3><p>Record the failure class in <code>.sstack/learn/</code> for the next run.</p></div>
+        <div class="row"><span class="row-no">8</span><h3>Report</h3><p>Emit findings: one .md and one .json each, evidence replayable.</p></div>
+      </div>
+      <p class="table-note">How it works in detail: <a href="https://github.com/mhenke/sstack/blob/main/docs/ARCHITECTURE.md">docs/ARCHITECTURE.md</a>.</p>
+    </section>
+
+    <!-- Lenses -->
+    <section class="section container" id="lenses" aria-labelledby="lenses-h">
+      <h2 id="lenses-h">Fourteen lenses, one failure class each.</h2>
+      <p class="section-sub">Each lens is a rubric plus a dedicated attacker agent. Drop a file with the <code>sstack-</code> prefix in your own tree and the next run picks up your custom lens alongside the shipped fourteen.</p>
+      <div class="grid-lens">
+        <a class="lens-card" href="https://github.com/mhenke/sstack/blob/main/docs/LENS.md#boundaries">
+          <h3>boundaries</h3>
+          <p>Numeric, size, index, collection, and pagination edges.</p>
+        </a>
+        <a class="lens-card" href="https://github.com/mhenke/sstack/blob/main/docs/LENS.md#malformed">
+          <h3>malformed</h3>
+          <p>Wrong types, corrupt structures, encodings.</p>
+        </a>
+        <a class="lens-card" href="https://github.com/mhenke/sstack/blob/main/docs/LENS.md#missing">
+          <h3>missing</h3>
+          <p>Absent fields, nulls, empty inputs.</p>
+        </a>
+        <a class="lens-card" href="https://github.com/mhenke/sstack/blob/main/docs/LENS.md#ownership">
+          <h3>ownership</h3>
+          <p>Subject × object × action × context. BOLA/IDOR, field-level read and write, deny-by-default, least privilege, token integrity, cross-tenant, CORS/CSRF.</p>
+        </a>
+        <a class="lens-card" href="https://github.com/mhenke/sstack/blob/main/docs/LENS.md#exceptional-conditions">
+          <h3>exceptional-conditions</h3>
+          <p>Fail-open paths, diagnostic leakage, unreleased resources on abort, empty catch blocks, cascading failures.</p>
+        </a>
+        <a class="lens-card" href="https://github.com/mhenke/sstack/blob/main/docs/LENS.md#resource-exhaustion">
+          <h3>resource-exhaustion</h3>
+          <p>Pools, rate limits, memory ceilings, payload limits, disk.</p>
+        </a>
+        <a class="lens-card" href="https://github.com/mhenke/sstack/blob/main/docs/LENS.md#state">
+          <h3>state</h3>
+          <p>Stale cached reads, write-through to caller data, partial updates after failure, escaped internal references.</p>
+        </a>
+        <a class="lens-card" href="https://github.com/mhenke/sstack/blob/main/docs/LENS.md#ordering">
+          <h3>ordering</h3>
+          <p>Out-of-sequence steps, multi-step pipeline bypass, step skipping.</p>
+        </a>
+        <a class="lens-card" href="https://github.com/mhenke/sstack/blob/main/docs/LENS.md#concurrency">
+          <h3>concurrency</h3>
+          <p>Race conditions, parallel access, double-spend, lost updates.</p>
+        </a>
+        <a class="lens-card" href="https://github.com/mhenke/sstack/blob/main/docs/LENS.md#idempotency">
+          <h3>idempotency</h3>
+          <p>Retried mutations, duplicate submissions, Idempotency-Key divergence.</p>
+        </a>
+        <a class="lens-card" href="https://github.com/mhenke/sstack/blob/main/docs/LENS.md#dependency-failure">
+          <h3>dependency-failure</h3>
+          <p>Upstream timeouts, 5xx, dropped packets, circuit breaker trip, graceful degradation.</p>
+        </a>
+        <a class="lens-card" href="https://github.com/mhenke/sstack/blob/main/docs/LENS.md#contract">
+          <h3>contract</h3>
+          <p>Schema drift, undeclared fields, breaking type changes, spec-to-implementation gaps.</p>
+        </a>
+        <a class="lens-card" href="https://github.com/mhenke/sstack/blob/main/docs/LENS.md#agent">
+          <h3>agent</h3>
+          <p>Tool schema divergence, unhandled tool errors, prompt injection, context truncation.</p>
+        </a>
+        <a class="lens-card" href="https://github.com/mhenke/sstack/blob/main/docs/LENS.md#security">
+          <h3>security</h3>
+          <p>SQL/command injection, path traversal, JWT token tampering, insecure deserialization.</p>
+        </a>
+      </div>
+      <p class="table-note">All fourteen lenses, detail per lens: <a href="https://github.com/mhenke/sstack/blob/main/docs/LENS.md">docs/LENS.md</a>.</p>
+    </section>
+
+    <!-- Install -->
+    <section class="section install" id="install" aria-labelledby="install-h">
+      <div class="container">
+        <h2 id="install-h">Install.</h2>
+        <p class="section-sub">Two halves, equally required: the skills your agent reads, and the attacker agents.</p>
+        <div class="install-grid">
+          <div class="card install-card">
+            <p class="install-no">1</p>
+            <h3>Install the skills</h3>
+            <div class="codeblock">
+              <code id="install-cmd">npx skills@latest add mhenke/sstack</code>
+              <button class="copy-btn" type="button" data-copy="#install-cmd">copy</button>
+            </div>
+            <p class="install-note">Registers <code>/sstack</code> in Claude Code. Hosts without slash commands: open the skill directory in your editor and ask for it in your own words.</p>
+          </div>
+          <div class="card install-card">
+            <p class="install-no">2</p>
+            <h3>Install the attackers</h3>
+            <p class="install-note">Paste into your AI CLI or IDE; the agent does the copying:</p>
+            <div class="codeblock">
+              <code id="agents-cmd">Copy the agents/*.md files from https://github.com/mhenke/sstack into ~/.agents/ (create it if missing).</code>
+              <button class="copy-btn" type="button" data-copy="#agents-cmd">copy</button>
+            </div>
+            <p class="install-note">For VS Code:</p>
+            <div class="codeblock">
+              <code id="vscode-cmd">Copy the agents/*.md files from https://github.com/mhenke/sstack into ~/.copilot/agents/ renamed &lt;name&gt;.agent.md.</code>
+              <button class="copy-btn" type="button" data-copy="#vscode-cmd">copy</button>
+            </div>
+            <p class="install-label">Manual process</p>
+            <ul class="host-list">
+              <li>Agnostic → <code>~/.agents/</code></li>
+              <li>Claude Code → <code>~/.claude/agents/</code></li>
+              <li>VS Code → <code>~/.copilot/agents/</code> as <code>&lt;name&gt;.agent.md</code></li>
+            </ul>
+            <p class="install-note">Only VS Code needs the rename. Full rows: <a href="https://github.com/mhenke/sstack/blob/main/README.md#install-the-attacker-agents">README</a>.</p>
+          </div>
+        </div>
+        <p class="install-more">Then run it on a scope (<code>/sstack src/checkout.ts</code>): a file, directory, module, or package.</p>
+        <p class="install-footnote">Nothing else to install. The evidence emitter is stdlib-only (Python, with Node fallback).</p>
+      </div>
+    </section>
+
+    <!-- Evidence -->
+    <section class="section container" id="evidence" aria-labelledby="evidence-h">
+      <h2 id="evidence-h">Is it actually any good?</h2>
+      <p class="section-sub">The eval is a cold agent with no memory, no answer key, and the current skills plus agents. <code>grade</code> matches findings to the answer key by content; <code>replay</code> re-audits each finding’s evidence file with the agent out of the loop.</p>
+      <div class="table-wrap">
+        <table>
+          <caption>Each row is the most recent cold pass for that fixture.</caption>
+          <thead>
+            <tr><th scope="col">Fixture</th><th scope="col">Seeds</th><th scope="col">Current cold evidence</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">seeded-py</th><td data-label="Seeds">16</td>
+              <td data-label="Cold evidence">PASS; all 16 seeds have a verified cold pass. ColdPy-5 covered py-1/3/4/5/6; ColdPy-11 verified py-7 (ownership) through py-11 (concurrency), 5 confirmed red&rarr;green; ColdPy-12, -13, -14, -15, -16 verified py-12 (idempotency), py-13 (dependency-failure), py-14 (contract), py-15 (security), and py-16 (agent) individually. Every evidence file replays with integrity ok, 0 drift. Full history in <span class="mono">evals/ACCEPTANCE.md</span></td>
+            </tr>
+            <tr><th scope="row">seeded-ts</th><td data-label="Seeds">16</td><td data-label="Cold evidence">PASS; all 16 seeds have a verified cold pass. ColdTs-4 covered ts-1..5; ColdTs-5 verified ts-6..16 with 11 confirmed red&rarr;green, 11/11 evidence replay intact, 0 drift</td></tr>
+            <tr><th scope="row">seeded-js</th><td data-label="Seeds">16</td><td data-label="Cold evidence">PASS; all 16 seeds have a verified cold pass. ColdJs-2 covered js-1..5; ColdJs-3 verified js-6..16 with 11 confirmed red&rarr;green, 11/11 evidence replay intact, 0 drift</td></tr>
+            <tr><th scope="row">seeded-java</th><td data-label="Seeds">16</td><td data-label="Cold evidence">PASS; all 16 seeds have a verified cold pass. ColdJava-3 covered java-1..5; ColdJava-4 verified java-6..16 with 11 confirmed red&rarr;green, 11/11 evidence replay intact, 0 drift</td></tr>
+            <tr><th scope="row">seeded-cpp</th><td data-label="Seeds">16</td><td data-label="Cold evidence">PASS; all 16 seeds have a verified cold pass. ColdCpp-2 covered cpp-1..5; ColdCpp-3 verified cpp-6..16 with 11 confirmed red&rarr;green, 11/11 evidence replay intact, 0 drift</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="table-note">Full record, including the runs that failed: <a href="https://github.com/mhenke/sstack/blob/main/evals/ACCEPTANCE.md">evals/ACCEPTANCE.md</a>.</p>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="section final" aria-labelledby="final-h">
+      <div class="container">
+        <h2 id="final-h">Break it on <em>purpose</em>.</h2>
+        <p class="section-sub" style="margin-inline:auto;">gstack, pstack, sstack. Same suffix, same shape: a SKILL.md your agent reads, a directory you copy in, a slash command you type.</p>
+        <div class="hero-actions">
+          <a class="btn btn-white" href="#install">Get started</a>
+          <a class="btn btn-accent" href="https://github.com/mhenke/sstack#readme">Read the docs</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <nav aria-label="Pack">
+          <h3>Pack</h3>
+          <ul>
+            <li><a href="#install">Install</a></li>
+            <li><a href="https://github.com/mhenke/sstack#attacker-agent-install-prompt">Attacker agents</a></li>
+            <li><a href="https://github.com/mhenke/sstack/blob/main/docs/CUSTOMIZING.md">Customizing</a></li>
+            <li><a href="https://github.com/mhenke/sstack/blob/main/CHANGELOG.md">Changelog</a></li>
+          </ul>
+        </nav>
+        <nav aria-label="Docs">
+          <h3>Docs</h3>
+          <ul>
+            <li><a href="https://github.com/mhenke/sstack/blob/main/docs/ETHOS.md">Ethos</a></li>
+            <li><a href="https://github.com/mhenke/sstack/blob/main/docs/ARCHITECTURE.md">Architecture</a></li>
+            <li><a href="https://github.com/mhenke/sstack/blob/main/docs/research/RESEARCH.md">Research</a></li>
+            <li><a href="https://github.com/mhenke/sstack/blob/main/docs/TOOLS.md">Tools</a></li>
+          </ul>
+        </nav>
+        <nav aria-label="Lenses">
+          <h3>Lenses</h3>
+          <ul>
+            <li><a href="https://github.com/mhenke/sstack/blob/main/docs/LENS.md">All fourteen lenses</a></li>
+            <li><a href="https://github.com/mhenke/sstack/blob/main/docs/CUSTOMIZING.md">Add your own</a></li>
+          </ul>
+        </nav>
+        <nav aria-label="Repo">
+          <h3>Repo</h3>
+          <ul>
+            <li><a href="https://github.com/mhenke/sstack">GitHub</a></li>
+            <li><a href="https://github.com/mhenke/sstack/issues">Issues</a></li>
+            <li><a href="https://github.com/mhenke/sstack/releases">Releases</a></li>
+            <li><a href="https://github.com/mhenke/sstack/blob/main/LICENSE">License</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div class="footer-bar">
+        <span>MIT</span>
+        <span>sstack: sad stack. Same family as gstack and pstack: a skill your agent reads, a command you type.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile menu: details/summary needs no JS to open, but close it after
+    // link activation and on Escape (returning focus to the summary).
+    document.querySelectorAll('.menu').forEach(function (menu) {
+      menu.addEventListener('click', function (e) {
+        if (e.target.closest('a')) menu.removeAttribute('open');
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && menu.hasAttribute('open')) {
+          menu.removeAttribute('open');
+          menu.querySelector('summary').focus();
+        }
+      });
+    });
+
+    // Copy-to-clipboard for the install command. Without JS the command
+    // stays selectable text; the button simply does nothing.
+    document.querySelectorAll('[data-copy]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var target = document.querySelector(btn.getAttribute('data-copy'));
+        if (!target) return;
+        var text = target.textContent;
+        function done() { btn.textContent = 'copied'; setTimeout(function () { btn.textContent = 'copy'; }, 1600); }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done, function () { fallback(); });
+        } else { fallback(); }
+        function fallback() {
+          var range = document.createRange();
+          range.selectNodeContents(target);
+          var sel = window.getSelection();
+          sel.removeAllRanges(); sel.addRange(range);
+          done();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+{
+  "$schema": "https://design-tokens.org/schema/2024.10",
+  "description": "sstack design tokens. Source of truth is tokens.css (:root); this file mirrors it for tooling. Adapted from design-systems/sentry.",
+  "color": {
+    "bg":            { "$type": "color", "$value": "#1f1633", "$description": "Deep purple-black canvas" },
+    "surface":       { "$type": "color", "$value": "#150f23", "$description": "Recessed sections, panels, footer" },
+    "fg":            { "$type": "color", "$value": "#ffffff" },
+    "fg-2":          { "$type": "color", "$value": "#e5e7eb" },
+    "muted":         { "$type": "color", "$value": "#9d96b3", "$description": "Purple-mauve meta text, 6.1:1 on bg" },
+    "border":        { "$type": "color", "$value": "#362d59", "$description": "Quiet decorative hairline" },
+    "border-strong": { "$type": "color", "$value": "#6f63b8", "$description": "Interactive chrome, 2.9:1 on bg" },
+    "accent":        { "$type": "color", "$value": "#fa7faa", "$description": "Magenta-pink accent, 7.1:1 on bg" },
+    "accent-on":     { "$type": "color", "$value": "#150f23", "$description": "Dark text on accent fills, 7.7:1" },
+    "success":       { "$type": "color", "$value": "#4ade80" },
+    "warn":          { "$type": "color", "$value": "#eab308" },
+    "danger":        { "$type": "color", "$value": "#f87171" },
+    "code":          { "$type": "color", "$value": "#dcdcaa", "$description": "Syntax tint (base package 'Code Yellow')" }
+  },
+  "font": {
+    "display": { "$type": "fontFamily", "$value": ["Rubik", "-apple-system", "system-ui", "Segoe UI", "Helvetica", "Arial", "sans-serif"] },
+    "body":    { "$type": "fontFamily", "$value": ["Rubik", "-apple-system", "system-ui", "Segoe UI", "Helvetica", "Arial", "sans-serif"] },
+    "mono":    { "$type": "fontFamily", "$value": ["Monaco", "Menlo", "Ubuntu Mono", "ui-monospace", "monospace"] }
+  },
+  "text": {
+    "xs":   { "$type": "dimension", "$value": "12px" },
+    "sm":   { "$type": "dimension", "$value": "14px" },
+    "base": { "$type": "dimension", "$value": "16px" },
+    "lg":   { "$type": "dimension", "$value": "20px" },
+    "xl":   { "$type": "dimension", "$value": "24px" },
+    "2xl":  { "$type": "dimension", "$value": "30px" },
+    "3xl":  { "$type": "dimension", "$value": "60px" },
+    "4xl":  { "$type": "dimension", "$value": "88px" }
+  },
+  "leading": {
+    "body":  { "$type": "number", "$value": 1.5 },
+    "tight": { "$type": "number", "$value": 1.2 }
+  },
+  "space": {
+    "1":  { "$type": "dimension", "$value": "4px" },
+    "2":  { "$type": "dimension", "$value": "8px" },
+    "3":  { "$type": "dimension", "$value": "12px" },
+    "4":  { "$type": "dimension", "$value": "16px" },
+    "5":  { "$type": "dimension", "$value": "20px" },
+    "6":  { "$type": "dimension", "$value": "24px" },
+    "8":  { "$type": "dimension", "$value": "32px" },
+    "12": { "$type": "dimension", "$value": "48px" }
+  },
+  "section": {
+    "desktop": { "$type": "dimension", "$value": "80px" },
+    "tablet":  { "$type": "dimension", "$value": "64px" },
+    "phone":   { "$type": "dimension", "$value": "48px" }
+  },
+  "radius": {
+    "sm":   { "$type": "dimension", "$value": "6px" },
+    "md":   { "$type": "dimension", "$value": "8px" },
+    "lg":   { "$type": "dimension", "$value": "12px" },
+    "pill": { "$type": "dimension", "$value": "9999px" }
+  },
+  "layout": {
+    "container-max": { "$type": "dimension", "$value": "1152px" },
+    "gutter-desktop": { "$type": "dimension", "$value": "64px" },
+    "gutter-tablet":  { "$type": "dimension", "$value": "32px" },
+    "gutter-phone":   { "$type": "dimension", "$value": "24px" }
+  },
+  "motion": {
+    "fast": { "$type": "dimension", "$value": "150ms" },
+    "base": { "$type": "dimension", "$value": "200ms" },
+    "ease": { "$type": "cubicBezier", "$value": [0.2, 0, 0, 1] }
+  }
+}
