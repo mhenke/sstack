@@ -84,9 +84,9 @@ def test_state_tokens_must_be_literal():
 def test_seven_field_report_format_alone_is_rejected():
     """The Report format block is seven fields; the emitter payload is
     not. This pins why SKILL.md must document the extras separately."""
-    seven = ("lens", "surface", "case", "oracle", "verdict", "repro")
+    report_fields = ("lens", "surface", "case", "oracle", "verdict", "repro")
     with tempfile.TemporaryDirectory(dir=SCRATCH) as tmp:
-        result = emit(Path(tmp), {k: v for k, v in base().items() if k in seven})
+        result = emit(Path(tmp), {k: v for k, v in base().items() if k in report_fields})
         assert result.returncode == 2
         assert "regression" in result.stderr
 
