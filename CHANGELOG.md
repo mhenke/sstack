@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Stage 5 (Test) and Stage 6 (Fix) upgraded with in-agent mutant checks
+  (testing against ROR, boundary shift, and statement deletion in scratch),
+  assertion exactness density rules, and general invariant relational guards.
+  Stage 6 mutation delegation diff-scoped with a 60s timebox. Run-end check
+  #5 added to SKILL.md.
+- Lens index pruned in `SKILL.md`: removed unbuilt `mutation` row; index now
+  strictly matches the 14 shipped attacker lenses.
+- Lens rubrics extended with mutation vectors: `boundaries` and
+  `resource-exhaustion` (paired boundary/capacity probes), `contract`
+  (paired schema mutation probes), and `idempotency` (payload divergence
+  mutation under IETF draft §2.7).
+- PBT scratch execution capped to 25 iterations with seed capture in repro
+  and emitter schemas for deterministic machine replay.
 - Boundaries lens extended from the `docs/lens/lens-boundaries.md` research
   review: precision/scale cases (money needing more decimal places
   than the type holds, floats where the contract implies exactness,
@@ -35,6 +48,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- ADR-0013 (`docs/adr/0013-no-dedicated-pbt-runner.md`): Reject dedicated PBT
+  runner; capture seed and minimal counterexample in findings schema and emitters.
+- ADR-0014 (`docs/adr/0014-do-not-build-mutation-runner.md`): Reject built-in
+  mutation runner engine to preserve ADR-0002 zero-runtime and target repo
+  portability; gate Stage 5/6 via in-agent sensitivity check and diff-scoped
+  delegation.
 - `ordering`, `concurrency`, `idempotency`, and `dependency-failure`
   lenses ship: one `agents/sstack-<lens>-attacker.md`, one
   `skills/sstack-<lens>/SKILL.md`, and one lens-index row each. All
