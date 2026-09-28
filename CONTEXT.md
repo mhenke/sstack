@@ -143,14 +143,19 @@ a wrong label is a warning, never a disqualification.
 _Avoid_: seed_id as truth, claimed id
 
 **Integrity**:
-The recorded output and recorded fingerprint agree. What replay
-verifies first; the recorded bytes are independent of whether the
-command still behaves the same.
+The recorded output and recorded fingerprint agree. Verified twice:
+by `replay` against every evidence file, and by the grader before a
+run can pass. A pass therefore cannot rest on evidence whose
+fingerprint the machine cannot re-derive. The recorded bytes are
+independent of whether the command still behaves the same.
 _Avoid_: validity
 
 **Fabricated**:
 Integrity failed — the fingerprint could not have come from the
-recorded output. Typed-in fingerprints are fabricated by definition.
+recorded output. The emitter hashes its own execution and is the only
+writer of evidence files, so a mismatch means the file changed after
+emit: a typed-in fingerprint, tampered bytes. Not a capture-time
+error; the emitter cannot mis-hash what it just ran.
 
 **Drift**:
 The re-run output no longer matches the record. Expected for a
