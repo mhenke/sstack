@@ -105,10 +105,11 @@ package. sstack reads that scope, maps the surfaces inside it, and
 works only within what you named. A narrow scope keeps the run small;
 a directory keeps it broad.
 
-`/sstack harden <scope>` runs the same lifecycle in gap-filling mode:
-it measures what the suite's negative tests already cover and writes
-the missing ones. A harden test that comes back red is a live bug and
-flips into the lifecycle; the rest land as hardening tests.
+> **Harden** — `/sstack harden <scope>` runs the same lifecycle in
+> gap-filling mode: it measures what the suite's negative tests already
+> cover and writes the missing ones. A harden test that comes back red
+> is a live bug and flips into the lifecycle; the rest land as
+> hardening tests.
 
 In an agent without slash commands, say the same thing in a prompt:
 "use the sstack skill on src/checkout.ts".

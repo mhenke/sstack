@@ -233,3 +233,10 @@ exactly from `README.md`.
     four grounded in the shipped lenses' documented cases
     (ordering, idempotency, ownership, security). Rhythm unchanged
     (`--space-6`).
+27. **Harden callout**: harden mode gets one aside, not a section —
+    the oracle callout's anatomy (1px `--accent` border, `--surface`
+    fill, accent lead word, 62ch) placed in the install band between
+    the run-scope line and the footnote; inside the band its rhythm
+    tightens to `--space-6`. Copy is new, so no em-dash per 24: the
+    lead word takes a period. README carries the mirror as a
+    blockquote in Running it, per its own oracle blockquote shape.
