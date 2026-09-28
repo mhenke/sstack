@@ -17,6 +17,9 @@ __pycache__/
 # Node
 node_modules/
 
+# Java (target/) and C++ (build/) artifacts are ignored by per-fixture
+# .gitignore files in evals/seeded-java/ and evals/seeded-cpp/.
+
 # Tool artifacts
 .playwright-mcp/
 .agent/

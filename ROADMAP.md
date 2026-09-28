@@ -29,12 +29,13 @@ of a run. Anything that does neither is out.
 
 ## Open, in order
 
-### 1. Host packaging
+### 1. Host packaging *(blocked by v0 scope lock — requires v1 lift)*
 
 - **Why**: install is one command (`npx skills add`) but update has
   no forced path; stale copies linger.
 - **What**: a thin per-host updater (Cursor, OpenCode, Claude Code).
-  No plugin API, no marketplace entry, no runtime.
+  No plugin API, no marketplace entry, no runtime. Requires lifting
+  the scope lock's "no CLI, daemon, or binary" constraint (ADR pending).
 - **Done when**: install and update are one command per host.
 
 ## Shipped — acceptance baseline, 2026-09-27

@@ -105,7 +105,7 @@ the skill and the decontaminated fixture together in one temp dir.
 ## Testing
 
 Baselines, green before any commit:
-- `python3 -m pytest evals/test_emitter.py -q` → 11 passed (emitter/skill contract)
+- `python3 -m pytest evals/test_emitter.py -q` → 12 passed (emitter/skill contract)
 - `python3 evals/acceptance.py test-all` → ALL FIXTURES GREEN (py, ts, js, java, cpp)
   (or per-fixture: `python3 evals/acceptance.py test <fixture>`)
 
@@ -127,9 +127,11 @@ needed.
   v1 menu
 - `docs/adr/` — why the product is shaped this way
 - `evals/` — fixtures, goldens, graders, and acceptance evidence
+- `site/` — static project site (single `index.html`, design tokens,
+  fonts); deployed to GitHub Pages by `.github/workflows/pages.yml`
 
-New artifacts fit one of six nouns: Skill, Lens, Agent, Runner, Oracle,
-Evidence. Anything that does not is not part of this pack.
+New artifacts fit one of seven nouns: Skill, Lens, Agent, Runner, Oracle,
+Evidence, Site. Anything that does not is not part of this pack.
 
 ## Roles
 

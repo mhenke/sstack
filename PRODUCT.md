@@ -68,8 +68,8 @@ suffix family, same install shape.
 ## Capabilities and Constraints
 
 - Fourteen shipped lenses, each with a rubric and a dedicated attacker
-  agent. One more (mutation) is specified and unbuilt, activatable by
-  user-dropped `sstack-`-prefixed files.
+  agent. Users can add more by dropping `sstack-`-prefixed files in
+  their own tree.
 - Customization contract: the `sstack-` prefix in the user's own tree;
   shipped `skills/` and `agents/` are replaced wholesale on update.
 - **Site constraint (confirmed): single static `index.html`, forever.**
