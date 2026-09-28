@@ -313,11 +313,12 @@ contents inline under `### Lens rubric`, and the Report format block
 below under `### Report format` — a subagent starts blank and cannot
 see this file, so anything not pasted does not exist for it.
 
-No subagent tool available, or dispatch fails twice? Run the lenses
-yourself, one at a time, in the same order: read the lens skill,
-execute its rubric against every mapped surface, record findings in
-the Report format. Coverage is the contract; parallelism is
-an optimization.
+No subagent tool available, or a dispatch fails or goes silent twice?
+Run the lenses yourself, one at a time, in the same order: read the
+lens skill, execute its rubric against every mapped surface, record
+findings in the Report format. A silent subagent counts as a failed
+dispatch; never re-dispatch past two — coverage is the contract,
+parallelism is an optimization.
 
 ### 3. Verify
 

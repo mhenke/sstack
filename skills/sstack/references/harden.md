@@ -26,9 +26,9 @@ and both start blank, so paste each everything it needs.
   the existing tests actually assert: literal test names and
   assertion text, no judgment about adequacy. B never sees A's list.
 
-No subagent tool, or dispatch fails twice: run A, then B, inline, and
-open the report with `⚠️ DEGRADED: single-context` — Attack's serial
-fallback convention.
+No subagent tool, or a dispatch fails or goes silent twice: run A,
+then B, inline, and open the report with `⚠️ DEGRADED: single-context`
+— Attack's serial fallback convention.
 
 ## 3. Synthesize
 
