@@ -221,7 +221,8 @@ The seven stages are fixed. A stage is not a file, it is this
 orchestrator's own text, so there is nothing to append to: they can be
 neither added, removed, nor extended. A user who needs different work
 in a stage ships a custom lens instead, since a lens runs over the same
-surfaces at Attack.
+surfaces at Attack. End every stage by printing `stage ✓ <count>`
+(`discover ✓ 14 surfaces`) — a quiet console names the hung stage.
 
 ### 1. Discover
 
