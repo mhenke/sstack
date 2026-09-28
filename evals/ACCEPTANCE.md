@@ -17,15 +17,17 @@ isolated dir).
 > exercised by those serial runs). Findings link to goldens by
 > trigger content; self-reported `seed_id` is advisory; landed
 > regressions are verified on disk; every PASS now replays its
-> evidence out of the agent loop.
+> evidence out of the agent loop. seeded-py's PASS covers 15/16
+> named seeds; py-2 has no named verifying run (see table).
 >
 > **Scope note (2026-09-27)**: All five fixtures (`seeded-py`, `seeded-ts`,
-> `seeded-js`, `seeded-java`, and `seeded-cpp`) now cover all 16 seeds across
-> all 14 shipped lenses with verified cold passes under ADR-0010.
+> `seeded-js`, `seeded-java`, and `seeded-cpp`) cover 16 seeds across
+> all 14 shipped lenses with graded cold runs under ADR-0010;
+> seeded-py's named-run coverage is 15/16 (py-2 unmatched — table).
 
 | Repo | Verdict | Detail |
 |---|---|---|
-| seeded-py | PASS | ColdPy-5 covers py-1/3/4/5/6 (5/5 seeds, 17 tests green, 12/12 replay intact). ColdPy-11 verified py-7 (ownership), py-8 (ordering), py-9 (exceptional-conditions), py-10 (resource-exhaustion), and py-11 (concurrency): 5 confirmed red→green in `tests/test_shop.py`, 5/5 evidence replay intact, 0 drift, 10 tests green. ColdPy-12 verified py-12 (idempotency): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-13 verified py-13 (dependency-failure): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-14 verified py-14 (contract): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-15 verified py-15 (security): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-16 verified py-16 (agent): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. All 16 seeds across the 14 shipped lenses in `seeded-py` now have verified cold passes |
+| seeded-py | PASS | ColdPy-5 covers py-1/3/4/5/6 (5/5 seeds, 17 tests green, 12/12 replay intact). ColdPy-11 verified py-7 (ownership), py-8 (ordering), py-9 (exceptional-conditions), py-10 (resource-exhaustion), and py-11 (concurrency): 5 confirmed red→green in `tests/test_shop.py`, 5/5 evidence replay intact, 0 drift, 10 tests green. ColdPy-12 verified py-12 (idempotency): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-13 verified py-13 (dependency-failure): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-14 verified py-14 (contract): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-15 verified py-15 (security): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-16 verified py-16 (agent): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-17 (2026-09-27, fresh full-lifecycle rerun on current skill text): 12 confirmed red→green, 12/12 evidence replay intact, 20 tests green, content-matched py-1/3/8/9/11/13. **py-2 (cart `add_item` qty) has no named cold run** — 15/16 seeds carry a named verifying run; py-2's original run name was lost when this file was condensed, and ColdPy-17 did not re-find it. |
 | seeded-java | PASS | All 16 seeds across all 14 lenses verified. java-1..5 verified in ColdJava-3 (3/5 seeds, 7/7 replay intact); java-6..16 verified in ColdJava-4 (11/11 seeds content-matched, 14/14 tests green, 11 confirmed red→green regressions landed in ShopTest.java, 11/11 evidence replay intact, 0 drift). |
 | seeded-ts | PASS | All 16 seeds across all 14 lenses verified. ts-1..5 verified in CleanTs/ColdTs-4 (5/5 seeds, 19/19 replay intact); ts-6..16 verified in ColdTs-5 (11/11 seeds content-matched, 17/17 tests green, 11 confirmed red→green regressions landed, 11/11 evidence replay intact, 0 drift). |
 | seeded-js | PASS | All 16 seeds across all 14 lenses verified. js-1..5 verified in ColdJs-2 (5/5 seeds, 12/12 replay intact); js-6..16 verified in ColdJs-3 (11/11 seeds content-matched, 12/12 tests green, 11 confirmed red→green regressions landed, 11/11 evidence replay intact, 0 drift). |
@@ -43,7 +45,13 @@ hardened grader (`evals/test_grader.py` pins both gates):
   11 confirmed red->green regressions landed per fixture, 11/11
   content-matched, evidence replay intact, 0 drift. seeded-py's
   py-8..py-16 seeds verified in ColdPy-11 through ColdPy-16. All five
-  fixtures now cover all 16 seeds across the 14 shipped lenses.
+  fixtures cover 16 seeds in goldens and graded cold runs; seeded-py's
+  named-run coverage is 15/16 (py-2 unmatched — table).
+- **ColdPy-17 (seeded-py, 2026-09-27).** Fresh full-lifecycle rerun on
+  current skill text after the docs audit: 12 confirmed red→green
+  regressions landed, 12/12 evidence replay intact, 20 tests green,
+  content-matched py-1/3/8/9/11/13. py-2 (cart `add_item` qty) went
+  unfound — named-run coverage stays 15/16.
 - **Grader hardening.** The bug-pin control re-runs every confirmed
   finding's regression against the unfixed source (all-green means the
   test asserts the defect), and `matches_golden` gates on executed

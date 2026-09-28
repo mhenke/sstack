@@ -100,25 +100,21 @@ every evidence file is intact.
 
 | Fixture | Language | Baseline | Cold acceptance |
 |---|---|---|---|
-| `seeded-py` | Python | `pytest -q` | stale historical evidence |
-| `seeded-ts` | TypeScript | `bun run test` | stale historical evidence |
-| `seeded-js` | JavaScript | `npm test` | pending |
-| `seeded-java` | Java | `javac` compile | pending |
-| `seeded-cpp` | C++ | CMake + CTest | pending |
+| `seeded-py` | Python | `pytest -q` | PASS — graded 2026-09-27, 15/16 named runs |
+| `seeded-ts` | TypeScript | `bun run test` | PASS — graded 2026-09-27 |
+| `seeded-js` | JavaScript | `npm test` | PASS — graded 2026-09-27 |
+| `seeded-java` | Java | `javac` compile | PASS — graded 2026-09-27 |
+| `seeded-cpp` | C++ | CMake + CTest | PASS — graded 2026-09-27 |
 
-Each fixture ships at least five seeded defects and a `BUGS.md` answer
-key. `seeded-ts` has grown to 16 under ADR-0010 parity work; ts-6..ts-16
-have goldens but no cold acceptance run yet. The answer key is never
+Each fixture ships sixteen seeded defects and a `BUGS.md` answer
+key — every fixture covers all 14 lenses under ADR-0010 parity.
+On seeded-py, fifteen of sixteen seeds carry a named verifying run;
+py-2 has no named run (see `ACCEPTANCE.md`). The answer key is never
 copied into a cold workspace.
 
 ## Grading and evidence
-
 - `goldens.jsonl` contains seeded expectations.
 - `graders/seeded_acceptance.py` contains the deterministic grader.
-- `drift-suite.yaml` and `baseline-base.json` were placeholders for a
-  model-promotion gate that does not exist in this pack. sstack grades
-  cold-agent runs against seeded defects, not model checkpoints, so
-  nothing read them and they are removed rather than left to rot.
 - `ACCEPTANCE.md` records historical cold runs and known failures.
 
 A report is not evidence by itself. Evidence requires the report's

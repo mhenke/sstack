@@ -66,6 +66,8 @@ def prepare(fixture: str) -> Path:
         "This file marks the host repo for a cold sstack run. The directory\n"
         "containing this file is the root every relative path resolves\n"
         "against. Do not write anywhere else.\n"
+        f"Fixture name: {fixture}. Pass it verbatim to emit_findings.py\n"
+        "--fixture; the grader rejects any other name.\n"
     )
     return workspace
 

@@ -17,8 +17,10 @@ of a run. Anything that does neither is out.
   Eighty goldens: sixteen seeds per fixture (`py-1` through `py-16`
   and peers), covering all fourteen lenses.
 - Cold-run evidence (2026-09-27, content-match grader): **all five
-  fixtures PASS**. Every one of the sixteen seeds has a verified cold
-  pass in every fixture (run detail in
+  fixtures PASS**. Sixteen seeds per fixture; fifteen of sixteen
+  carry a named verifying cold run in every fixture — py-2
+  (cart `add_item` qty) has no named run after a fresh ColdPy-17
+  rerun missed it (run detail in
   [`evals/ACCEPTANCE.md`](evals/ACCEPTANCE.md)). Every PASS carries
   landed regressions verified on disk and evidence that replays with
   integrity ok.
@@ -35,8 +37,8 @@ of a run. Anything that does neither is out.
   repo with an evidence runner or custom lens, per ADR-0008, without a
   pack change. All 14 shipped lenses have a seeded defect in
   `evals/seeded-py` — `py-1` through `py-16`, covering every lens in
-  `BUGS.md` — and every seed has a verified cold pass with 0 drift in
-  `evals/ACCEPTANCE.md`.
+  `BUGS.md` — and fifteen of the sixteen have a verified cold pass
+  with 0 drift in `evals/ACCEPTANCE.md` (py-2 unmatched).
 - **Done when**: mutation runner gates Stage 5/6 with mutant generation
   and kill metrics.
 
@@ -51,7 +53,9 @@ of a run. Anything that does neither is out.
 ## Shipped — acceptance baseline, 2026-09-27
 
 - All five fixtures PASS on current skill text with landed red→green
-  regressions verified on disk: 16/16 seeds on every fixture. Each
+  regressions verified on disk: 15/16 named-seed coverage on
+  seeded-py (py-2 unmatched, ColdPy-17 rerun missed it), 16/16 on
+  ts/js/java/cpp. Each
   wave-1 failure converted to PASS on rerun
   and motivated its guardrail: hand-typed JSON → script-emitted
   contract; zombie run → pristine-file rejection; phantom

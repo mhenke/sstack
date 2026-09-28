@@ -20,17 +20,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Myers). Rubric, attacker fallback text, fan-out gloss, and lens
   index row updated together. Cold probes (py, ts): new heuristics
   applied unprompted where surfaces admit them, seven-field Report
-  format exact, scratch contained. Recorded boundaries acceptance
-  evidence predates this text and is stale until the next cold run.
+  format exact, scratch contained. Boundaries evidence refreshed by
+  ColdPy-17 (2026-09-27): 2 confirmed boundaries findings on current
+  text, replay intact.
 - State lens extended from the `docs/lens/lens-state.md` research review:
   lifecycle & post-disposal invocation (CWE-672), escaped internal
   collection references (CWE-375), callee argument write-through
   mutation (CWE-374), and mid-operation rollback atomicity (CWE-366).
   Added failure modes, language notes (Python, TS/JS, Java, C++),
   structured attacker heuristics, explicit rejection oracles (409 Conflict,
-  IllegalStateError), and updated lens index in `SKILL.md`. Recorded
-  state acceptance evidence predates this text and is stale until the next
-  cold run.
+  IllegalStateError), and updated lens index in `SKILL.md`. State
+  evidence refreshed by ColdPy-17 (2026-09-27): 1 confirmed state
+  finding on current text, replay intact.
 
 ### Added
 
@@ -97,6 +98,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   stages → seven stages and a report), `AGENTS.md` install claim
   (`npx skills add` carries `skills/` only), and the version-tag
   links dropped until the tags exist.
+- ColdPy-17 (seeded-py, 2026-09-27): fresh full-lifecycle cold run on
+  current skill text after the docs audit. 12 confirmed red→green
+  regressions, 12/12 evidence replay intact, 20 tests green,
+  content-matched py-1/3/8/9/11/13. py-2 (cart `add_item` qty) went
+  unfound: named-run coverage corrected to 15/16 across README,
+  ROADMAP, evals/README, site, and ACCEPTANCE; `prepare` now stamps
+  the fixture name into `.sstack-host-repo` so a cold run cannot
+  misname it; `drift-suite.yaml` and `baseline-base.json` deleted for
+  real (README said removed, they weren't).
 
 ## 0.2.0 - 2026-09-27
 
