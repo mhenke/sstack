@@ -54,6 +54,12 @@ isolated dir).
 > ADR-0015. Recorded PASSes predate both texts; neither is exercised
 > by any seeded fixture (none exposes an HTTP server), so fixture
 > outcomes are unaffected.
+> **Staleness note (2026-09-28, harden mode)**: SKILL.md gained the
+> `harden` routing bullet, the findings-report wording amendment, and
+> the workspace-list `.sstack/harden/` line;
+> `skills/sstack/references/harden.md` shipped. No stage text
+> changed, so recorded PASSes stand. Cold harden-mode evidence:
+> pending.
 
 | fixture | verdict | evidence |
 |---|---|---|
