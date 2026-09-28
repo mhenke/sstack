@@ -59,7 +59,29 @@ isolated dir).
 > the workspace-list `.sstack/harden/` line;
 > `skills/sstack/references/harden.md` shipped. No stage text
 > changed, so recorded PASSes stand. Cold harden-mode evidence:
-> pending.
+>
+> **ColdHarden-1 (seeded-py, buggy target, 2026-09-28): PASS as
+> graded.** Cold harden run in an isolated workspace: 69 findings —
+> 20 confirmed red→green (8 seeds content-matched: py-1, py-2, py-3,
+> py-6, py-7, py-11, py-14, py-15) and 49 refuted gap-fills —
+> `grade` pass=true, `replay` exit 0 (0 drift). Doubles as attack
+> evidence for 8 seeds via the flip path.
+>
+> **ColdHarden-2 negative control (seeded-py, canonically fixed by
+> hand): FAILED direct judgment.** The cold agent emitted no
+> report.json and no findings (hardened §8 after this run), named its
+> snapshot `report.md` instead of the `<date>-<target>-<seq>` format
+> (§4 tightened after this run), and made three source edits — one of
+> which (`fetch_tracking_status` rewritten to call the tracker as a
+> callback) **broke the py-18 canonical fix**: the worker-thread
+> TypeError is swallowed, no TimeoutError raises, and the agent's own
+> 21 green tests hid the regression while it claimed all oracles
+> satisfied. Failure kept per ADR-0003; product fixes it forced:
+> harden.md §8 now requires emitter output per finding (no
+> report.json = invalid run), §4 locks the snapshot filename, Safety
+> requires every source edit to trace to a confirmed finding.
+> ColdHarden-1 predates those text fixes; **control re-run on the
+> fixed text: pending.**
 
 | fixture | verdict | evidence |
 |---|---|---|

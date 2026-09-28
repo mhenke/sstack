@@ -48,10 +48,11 @@ percentage with bands: ≥90 Excellent, 70–89 Good, 50–69 Acceptable,
 well covered) and systemic patterns (zero boundaries coverage
 anywhere → recommend a custom lens).
 
-Persist the report to `.sstack/harden/<date>-<target>-<seq>.md`
-(seq = two-digit same-day counter, `01` first; the trend line dies
-without it). Print the trend across prior snapshots for the same
-target: `24% → 61%`.
+Persist the report to exactly
+`.sstack/harden/<date>-<target>-<seq>.md` — never `report.md`, never
+another name (seq = two-digit same-day counter, `01` first; the trend
+line dies without it). Print the trend across prior snapshots for the
+same target: `24% → 61%`.
 
 ## 5. Scope
 
@@ -106,9 +107,11 @@ in the suite.
 
 ## 8. Emit
 
-Every outcome goes through `emit_findings.py` as usual. The chat
-report ends with counts: gaps filled, hardening tests added, live
-bugs found and fixed.
+Every landed test and every flip becomes a finding through
+`emit_findings.py` — harden runs emit like any other run, and a
+harden workspace with no `report.json` is an invalid run, whatever
+its tests say. The chat report ends with counts: gaps filled,
+hardening tests added, live bugs found and fixed.
 
 ## Learn
 
@@ -117,6 +120,7 @@ records its confirmed failure class per the existing rule.
 
 ## Safety
 
-Outside a flip, harden writes only test files. No test framework
-detected → ask before scaffolding one. Target build configs stay
-read-only.
+Outside a flip, harden writes only test files. Every source edit must
+trace to a confirmed finding; an edit with no finding behind it is an
+invalid run. No test framework detected → ask before scaffolding one.
+Target build configs stay read-only.
