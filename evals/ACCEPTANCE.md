@@ -47,12 +47,13 @@ isolated dir).
 > cpp-12) remains valid: Discover loads lens skills directly from the
 > skills directories, so those runs reached the rubric despite the
 > missing index row.
-> **Staleness note (2026-09-28, latest)**: security and ownership lens
-> rubrics gained live-surface guidance (boot the target's server, probe
-> with `curl`, emit with the curl command as repro) per ADR-0015.
-> Recorded PASSes predate this text; the guidance is additive and no
-> seeded fixture exposes an HTTP server, so fixture outcomes are
-> unaffected.
+> **Staleness note (2026-09-28, latest)**: the security and ownership
+> rubric passages directing the agent to boot the target's server and
+> probe with `curl` (added earlier on 2026-09-28 per ADR-0015) have
+> been removed; runtime behavior is out of scope per the amended
+> ADR-0015. Recorded PASSes predate both texts; neither is exercised
+> by any seeded fixture (none exposes an HTTP server), so fixture
+> outcomes are unaffected.
 
 | fixture | verdict | evidence |
 |---|---|---|

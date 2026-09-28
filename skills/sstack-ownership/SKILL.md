@@ -55,7 +55,8 @@ A single consolidated routine is the fix; N scattered checks are the bug.
   rather than nonexistent records. Obfuscation is not a control.
 - Force-browse: request authenticated pages with no session, privileged
   pages as a standard user, and unlinked admin or API routes directly
-  outside the UI (curl or raw HTTP).
+  outside the UI (source-level route and handler review; runtime
+  probing is out of scope).
 - Call the write methods and alternate verbs. `POST`, `PUT`, `PATCH`, and
   `DELETE` frequently ship without checks while `GET` is guarded.
 - Header routing and IP spoofing: send `X-Original-URL: <target>` and
@@ -216,11 +217,11 @@ regression lands there, not in a scratch file.
 
 The integration tier needs real sessions, multiple subjects, and live
 routers: the whole point is that middleware, filters, and gateway config
-are part of the decision. Boot the target's own server when it has a
-discoverable boot command, probe routes with `curl` as each subject,
-and emit with the `curl` command as `repro`. Record session and entity
-evidence. Test both tiers when the enforcement point is not in the
-function under test.
+are part of the decision. Runtime-only behavior — framework output
+escaping, middleware ordering, header handling — is outside sstack's
+source-first scope: record it as a checked N/A in `map.md`. Record
+session and entity evidence. Test both tiers when the enforcement point
+is not in the function under test.
 
 ## Interaction with verification skill
 

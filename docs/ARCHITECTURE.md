@@ -45,8 +45,11 @@ report, integrity, drift, and what not to call things — lives in
   carrier; the attacker file keeps field names as fallback.
 - **Runner** — deterministic execution of generated cases. Rejected as
   infrastructure (ADR-0013, ADR-0014, ADR-0015): the agent runs real
-  commands itself — target test frameworks, target servers, `curl` —
-  and quotes real output through the emitter. `runners/` stays absent.
+  commands itself — the target's own test frameworks — and quotes
+  real output through the emitter. `runners/` stays absent, and
+  runtime/live-surface probing (booting servers, firing HTTP probes)
+  is out of scope: sstack is source-first, in-process negative
+  testing (ADR-0015).
 - **Oracle** — the expected-behavior declaration written *before*
   the attack. Errors, degradation, retry bounds, invariants,
   rejections — not only crashes.

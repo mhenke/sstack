@@ -32,20 +32,24 @@ position. The reasons:
 
 ## Decision
 
-sstack finds, tests, and fixes. The lifecycle is Discover, Attack, Verify, Minimize, Test, Fix, Learn. Source changes are allowed only in the Fix stage, only for confirmed findings, and only the minimal change that turns a red test green. Every source change must trace to a finding.
-that turns a red test green. Every source change must trace to a
-finding.
+sstack finds, tests, and fixes. The lifecycle is Discover, Attack,
+Verify, Minimize, Test, Fix, Learn. Source changes are allowed only in
+the Fix stage, only for confirmed findings, and only the minimal
+change that turns a red test green. Every source change must trace to
+a finding.
 
 ## Consequences
 
 **Good**
+
 - One run closes the loop: find, test, fix, verify, learn.
 - The red-then-green sequence preserves the evidence that the test
   catches the bug.
 - Hardening tests lock in correct behavior even where no bug exists.
 - The fix is oracle-driven, so it is mechanical and minimal.
 
-- Hardening tests lock in correct behavior even where no bug exists.
+**Bad**
+
 - The read-only containment barrier can no longer lock the full
   repo for the entire run. The lock applies during Attack and Test
   stages; the Fix stage requires write access to source.

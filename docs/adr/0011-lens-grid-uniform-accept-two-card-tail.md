@@ -12,7 +12,7 @@ four even rows. The lens waves of 2026-09-26/27 (security, agent, and
 four behavior lenses) grew the count to fourteen, and the grid moved to
 4 columns at ≥1024px, flowing 4/4/4/2. Two audits disagreed on the
 two-card tail: one read it as a regression of DESIGN.md §20's
-"even rows" goal and proposed span-2 cards to force four clean rows;
+uniform-matrix rule and proposed span-2 cards to force four clean rows;
 the other accepted it as a count artifact. The impeccable layout
 doctrine settles the tie: "variation is not a goal by itself;
 repetition should support recognition; break it only when content or

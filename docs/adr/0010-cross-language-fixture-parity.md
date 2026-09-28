@@ -48,7 +48,7 @@ fixture (`seeded-ts`, `seeded-js`, `seeded-java`, `seeded-cpp`) to cover all
 1. Existing seeds (`ts-1..5`, `js-1..5`, `java-1..5`, `cpp-1..5`) remain
    frozen and immutable.
 2. Each fixture will implement an `orders` domain module (e.g. `src/orders.ts`,
-   `orders.js`, `Orders.java`, `orders.cpp`) hosting seeds 6 through 16
+   `orders.js`, `Orders.java`, `orders.hpp`) hosting seeds 6 through 16
    corresponding to the 11 extended lenses (`state`, `ownership`, `ordering`,
    `exceptional-conditions`, `resource-exhaustion`, `concurrency`,
    `idempotency`, `dependency-failure`, `contract`, `security`, `agent`).

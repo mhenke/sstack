@@ -33,3 +33,6 @@ However, PBT introduces a real integrity risk to machine replay (ADR-0006): beca
 
 **Bad**
 - Agents must extract the seed and counterexample from CLI stdout and include them in the finding emission payload.
+
+**Risks**
+- Agents may omit `seed`/`counterexample` when a target's PBT output is noisy or truncated, quietly degrading replay determinism. Revisit if replay mismatches cluster on PBT findings — the fix is a stronger emitter requirement, not a runner.

@@ -81,11 +81,12 @@ the skill and the decontaminated fixture together in one temp dir.
 - `skills/sstack/SKILL.md` stays under 540 lines. Frontmatter is exactly
   `name` + `description`, the description a single trigger-phrase
   sentence.
-- Every lens skill carries Case-generation heuristics, Oracle patterns
-  with an inline `Worked example` paragraph (one python plus one ts/js
-  example; `observed (bug)` marks the defect), and When not to apply.
-  Extra sections (Operating limits, Language notes, Failure modes to
-  watch for) are allowed where the lens needs them.
+- Every lens skill implements the uniform six-part anatomy (ADR-0009):
+  Case-generation heuristics, Oracle patterns with an inline
+  `Worked example` paragraph (one python plus one ts/js example;
+  `observed (bug)` marks the defect), Failure modes to watch for,
+  Language notes, and When not to apply. Operating limits is an
+  allowed extra where the lens needs it.
 - The Report format block lives once in `skills/sstack/SKILL.md` and
   reaches a subagent only pasted under `### Report format`; attacker
   files keep the seven field names as fallback. Verified by
@@ -130,8 +131,10 @@ needed.
 - `site/` — static project site (single `index.html`, design tokens,
   fonts); deployed to GitHub Pages by `.github/workflows/pages.yml`
 
-New artifacts fit one of seven nouns: Skill, Lens, Agent, Runner, Oracle,
-Evidence, Site. Anything that does not is not part of this pack.
+New artifacts fit one of the eight definitions in `docs/ARCHITECTURE.md`
+(Skill, Lens, Agent, Runner, Oracle, Evidence, Customization, Custom
+lens); the `site/` tree is contributor-lane, not pack. Anything that
+does not fit is not part of this pack.
 
 ## Roles
 

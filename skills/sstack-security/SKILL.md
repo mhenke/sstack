@@ -69,14 +69,6 @@ API keys in search results.
 - Cryptographic signature bypass (CWE-347): unverified JWT header algorithms.
 - Unsafe object deserialization (CWE-502): `pickle.loads` on external data.
 
-## Live surfaces
-
-Framework behavior — output escaping, middleware ordering, header
-handling — is decided at runtime, not by source reading. When the
-target has a discoverable boot command (its own scripts, never a
-shipped one), boot the server, fire probes with `curl`, and emit with
-the `curl` command as `repro`. No discoverable server: record the
-N/A in `map.md` and move on.
 
 ## Language notes
 

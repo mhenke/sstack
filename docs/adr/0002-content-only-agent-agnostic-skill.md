@@ -1,6 +1,6 @@
 # ADR-0002: Content-only, agent-agnostic skill pack
 
-**Status**: Accepted
+**Status**: Accepted (audit-not-fix portion superseded by ADR-0005)
 **Date**: 2026-09-27
 **Deciders**: Mike Henke
 
@@ -33,10 +33,12 @@ content files.
 
 sstack v0 is a portable skill pack: one entry `SKILL.md` plus
 on-demand `references/` lens files, in the agent-skills format. No
-CLI, no daemon, no binary, no runtime dependencies. The agent runs
-real commands and quotes real output; evidence is loose markdown
-under `.sstack/`. The pack is host-agnostic and copied into any
-agent's skills directory.
+CLI, no daemon, no binary, and no runtime dependency beyond standard
+libraries (Python or Node.js). The agent runs real commands and
+quotes real output; evidence is loose markdown under `.sstack/`
+plus a machine JSON view written by the emitter scripts (ADR-0006).
+The pack is host-agnostic and copied into any agent's skills
+directory.
 
 sstack is an **audit, not a refactor**: it writes tests and `.sstack/`
 artifacts and never the target's source, config, or secrets.
@@ -53,12 +55,11 @@ artifacts and never the target's source, config, or secrets.
 - The audit-not-fix contract is enforceable in prose because there
   is no code path the skill owns.
 
-No deterministic evidence schema in v0, so findings are only as reproducible as the agent's transcript. This is a real gap, and it is the main thing v1 buys.
-Cold-agent compliance is the weak axis. Every early run violated a rule in prose (bug-pinning regressions, fixing source, scoring harnesses as verdicts), and each violation had to be answered with another guardrail in the text.
-Host-agnostic means no forced update path; a stale copy of the skill can sit in a user's directory indefinitely.
+**Bad**
 
-The audit-not-fix stance was superseded by ADR-0005, which allows source changes in the Fix stage. Evidence preservation is maintained by requiring a red-then-green regression test.
-
+- No deterministic evidence schema in v0, so findings are only as
+  reproducible as the agent's transcript. This is a real gap, and it
+  is the main thing v1 buys.
 - Cold-agent compliance is the weak axis. Every early run violated a
   rule in prose (bug-pinning regressions, fixing source, scoring
   broken harnesses as verdicts), and each violation had to be
@@ -72,3 +73,8 @@ The audit-not-fix stance was superseded by ADR-0005, which allows source changes
   ceiling is real and v1 should revisit a thin `scripts/` runner.
   Trigger: a clean cold run still misreads a core contract after the
   text is unambiguous.
+
+**Note (2026-09-28)**: the audit-not-fix stance was superseded by
+ADR-0005, which allows source changes in the Fix stage. Evidence
+preservation is maintained by requiring a red-then-green regression
+test per finding.
