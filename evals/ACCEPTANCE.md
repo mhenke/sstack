@@ -24,6 +24,10 @@ isolated dir).
 > `seeded-js`, `seeded-java`, and `seeded-cpp`) cover 16 seeds across
 > all 14 shipped lenses with graded cold runs under ADR-0010;
 > seeded-py's named-run coverage is 15/16 (py-2 unmatched — table).
+>
+> **Staleness note (2026-09-27)**: Recorded cold-run passes predate the
+> addition of the inline sensitivity check (Stage 5) and Run-end check #5;
+> existing PASS numbers reflect exact pre-check skill text.
 
 | Repo | Verdict | Detail |
 |---|---|---|

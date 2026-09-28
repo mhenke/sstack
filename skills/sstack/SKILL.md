@@ -86,11 +86,12 @@ lens: <lens> | verdict: <confirmed | refuted | inconclusive>
 ## Regression
 `<file>::<test>` — <before> → <after>
 ```
-- `findings/<slug>.json` — the machine view, exact keys:
+- `findings/<slug>.json` — the machine view (emitted by script, never hand-typed):
   `{"command": <shell string>, "exit_code": <int>, "stdout": <str>,
   "stderr": <str>, "fingerprint": "<sha256[:16] of stdout+stderr>",
   "oracle": <str>, "verdict": <confirmed|refuted|inconclusive>,
-  "regression": {"file","test","before","after"}}`. `before`/`after`
+  "regression": {"file","test","before","after"}}` (plus optional
+  `fix`, `seed`, `counterexample`). `before`/`after`
   are the literal state tokens "red"/"green" — the test's state
   before-fix / after-fix — not output snippets. Verification re-runs
   `command` and recomputes the fingerprint from the recorded bytes,
@@ -471,11 +472,6 @@ reporting.
 | contract | API contract violations, schema drift, undeclared fields | sstack-contract-attacker |
 | agent | tool-call schema divergence, unhandled tool errors, prompt injection | sstack-agent-attacker |
 | security | injection (SQL, command, path traversal), crypto token tampering | sstack-security-attacker |
-| mutation | proof that tests detect injected faults | custom lens |
-
-This row is unbuilt. It can be activated today by a user dropping a
-`sstack-mutation` skill into a skills directory, per Customization,
-without changing this pack.
 
 ## Safety
 

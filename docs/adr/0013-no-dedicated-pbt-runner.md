@@ -14,7 +14,7 @@ A dedicated PBT runner script fails that test:
 - It does not lower run cost: the agent already executes target test frameworks directly via native CLI commands (`pytest`, `vitest`, `mvn`). A custom wrapper script does nothing the native command cannot do.
 - It does not raise proof quality: PBT frameworks already print their own random seeds and shrunk counterexamples to stdout. A wrapper script adds zero signal.
 - It inflates pack maintenance: adds boilerplate scripts, extra cognitive load for cold agents, and complicates the zero-runtime promise of ADR-0002.
-- Unlike mutation testing (which requires complex AST manipulation and kill metric tracking, justifying a future runner), PBT requires only standard CLI execution with framework flags.
+- Like mutation testing (evaluated and rejected in ADR-0014 due to runtime, toolchain, and latency constraints), in-tree runners add runtime bloat without sufficient return. PBT requires only standard target CLI execution with framework flags.
 
 However, PBT introduces a real integrity risk to machine replay (ADR-0006): because PBT is pseudorandom, a counterexample found by an agent cannot be reliably replayed out-of-loop by `evals/replay.py` unless the random seed and minimized counterexample are captured.
 

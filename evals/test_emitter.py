@@ -100,6 +100,8 @@ def test_skill_documents_every_required_payload_key():
     assert doc, "SKILL.md does not document the emitter payload"
     missing = [k for k in PAYLOAD_KEYS if k not in doc.group(1)]
     assert not missing, f"emitter payload paragraph never mentions: {missing}"
+    for opt in ("seed", "counterexample"):
+        assert opt in doc.group(1), f"emitter payload paragraph never mentions optional: {opt}"
 
 
 def test_readme_runtime_claim_matches_the_tree():

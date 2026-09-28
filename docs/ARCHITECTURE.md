@@ -33,12 +33,11 @@ report, integrity, drift, and what not to call things — lives in
 
 - **Skill** — the methodology for a stage. One entry skill owns
   routing and rules (`skills/sstack/SKILL.md`).
-- **Lens** — an attack strategy over a failure class. Twelve peer
+- **Lens** — an attack strategy over a failure class. Fourteen peer
   skills ship (`skills/sstack-<lens>/SKILL.md`), loaded inline under
   `### Lens rubric`, never by name, and selected per target by the
-  Attack stage. Twelve is the shipped count, not the total: the index
-  carries three more rows the pack has not built, and a target repo
-  can add any number. See **Custom lens**.
+  Attack stage. Fourteen is the shipped count; a target repo can add
+  any number. See **Custom lens**.
 - **Agent** — a `runSubagent` dispatch handle. One file per shipped
   lens (`agents/sstack-<lens>-attacker.md`); the orchestrator pastes
   workspace, surface map, rubric, and the Report format block into
@@ -62,7 +61,7 @@ report, integrity, drift, and what not to call things — lives in
   own text and are not extensible. The pack ships no file a user is expected
   to edit, so an update never destroys a customization.
 - **Custom lens** — a repo-authored attack strategy, structurally just
-  a skill with `disable-model-invocation: true`. The eleven shipped
+  a skill with `disable-model-invocation: true`. The fourteen shipped
   lenses are a floor, not a ceiling: a custom lens appends its rubric
   to an existing attacker agent's dispatch rather than adding an
   agent, and runs under the same Report format, emitter, and run-end
@@ -88,8 +87,6 @@ lens, never the identity.
 | Contracts | contract | ✅ (peer skill + agent) |
 | Security | security | ✅ (peer skill + agent) |
 | AI / Agent | agent | ✅ (peer skill + agent) |
-| Evidence | mutation | future |
-
 
 ### Vocabulary
 
@@ -121,7 +118,7 @@ the rest are the v1 proof-gate menu.
 1. expected-error assertion (v0)
 2. reproducibility — a confirmed finding must reproduce (v0)
 3. controlled fault injection (v1)
-4. mutation — test fails against a mutant (v1)
+4. mutation — opportunistic target delegation (ADR-0004) / inline sensitivity check (ADR-0014)
 5. known-bad fixture (v1)
 6. differential comparison (v1)
 7. invariant violation (v1)
