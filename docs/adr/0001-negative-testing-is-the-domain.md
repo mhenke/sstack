@@ -62,8 +62,13 @@ service) is explicitly not copied.
 - Mutation, the strongest proof technique, is not in v0, so a v0
   finding rests on expected-error assertion plus reproducibility
   alone.
-- The taxonomy (15 lenses) is large enough to look like a sprawl
-The taxonomy (15 lenses) is large enough to look like a sprawl risk, mitigated by shipping six lenses and disclosing the rest. [As of 2026-09-28 the pack ships fourteen lenses.]
+- The taxonomy (fifteen lenses) is large enough to look like a sprawl
+  risk. The v0 mitigation — ship six, disclose the rest — has been
+  overtaken by the acceptance gate: a lens ships only with seeded
+  defects across all five fixtures, goldens, and a graded cold run.
+  At fourteen shipped lenses the gate, not the subset, is the sprawl
+  control; the fifteenth (mutation) stays disclosed and unshipped.
+
 **Risks**
 
 - If cold agents keep missing the malformed/missing lenses in
