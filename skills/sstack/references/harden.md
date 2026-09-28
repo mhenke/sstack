@@ -111,7 +111,7 @@ Every landed test and every flip becomes a finding through
 `emit_findings.py` — harden runs emit like any other run, and a
 harden workspace with no `report.json` is an invalid run, whatever
 its tests say. The chat report ends with counts: gaps filled,
-hardening tests added, live bugs found and fixed.
+hardening tests added, live failures found and fixed.
 
 ## Learn
 

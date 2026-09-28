@@ -101,7 +101,9 @@ isolated dir).
 > run-end check 7 ("every confirmed regression is red against pristine
 > source") added to SKILL.md; it mechanically converts all five false
 > confirmations. A control run over check-7 text is the next evidence
-> run.
+> run. Staleness: §8's count line reads "live failures found and
+> fixed" (was "bugs") per the glossary's finding entry — prose only;
+> all recorded harden evidence predates the wording.
 
 | fixture | verdict | evidence |
 |---|---|---|
