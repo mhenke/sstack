@@ -105,6 +105,11 @@ package. sstack reads that scope, maps the surfaces inside it, and
 works only within what you named. A narrow scope keeps the run small;
 a directory keeps it broad.
 
+`/sstack harden <scope>` runs the same lifecycle in gap-filling mode:
+it measures what the suite's negative tests already cover and writes
+the missing ones. A harden test that comes back red is a live bug and
+flips into the lifecycle; the rest land as hardening tests.
+
 In an agent without slash commands, say the same thing in a prompt:
 "use the sstack skill on src/checkout.ts".
 
@@ -178,16 +183,17 @@ current skills plus agents. How to run it:
 [`evals/README.md`](evals/README.md).
 
 `grade` matches findings to the answer key by content, not by the
-labels an agent guesses; `replay` re-audits each finding's evidence
-file with the agent out of the loop.
+labels an agent guesses, and gates a pass on evidence integrity;
+`replay` re-audits each finding's evidence file with the agent out of
+the loop.
 
 | Fixture | Seeds | Current cold evidence |
 |---|---|---|
-| seeded-py | 16 | PASS; all 16 seeds have a verified cold pass. ColdPy-5 covered py-1/3/4/5/6; ColdPy-11 verified py-7 (ownership) through py-11 (concurrency), 5 confirmed red→green; ColdPy-12..16 verified py-12..16 individually; ColdPy-18 verified all 16 seeds (16 confirmed red→green, 16/16 replay intact). Every evidence file replays with integrity ok, 0 drift. History is in `evals/ACCEPTANCE.md` |
-| seeded-ts | 16 | PASS; all 16 seeds have a verified cold pass. ColdTs-4 covered ts-1..5; ColdTs-5 verified ts-6..16 with 11 confirmed red→green, 11/11 evidence replay intact, 0 drift |
-| seeded-js | 16 | PASS; all 16 seeds have a verified cold pass. ColdJs-2 covered js-1..5; ColdJs-3 verified js-6..16 with 11 confirmed red→green, 11/11 evidence replay intact, 0 drift |
-| seeded-java | 16 | PASS; all 16 seeds have a verified cold pass. ColdJava-3 covered java-1..5; ColdJava-4 verified java-6..16 with 11 confirmed red→green, 11/11 evidence replay intact, 0 drift |
-| seeded-cpp | 16 | PASS; all 16 seeds have a verified cold pass. ColdCpp-2 covered cpp-1..5; ColdCpp-3 verified cpp-6..16 with 11 confirmed red→green, 11/11 evidence replay intact, 0 drift |
+| seeded-py | 19 | PASS; 16 of 19 seeds have a verified cold pass (17–19 pending). ColdPy-5 covered py-1/3/4/5/6; ColdPy-11 verified py-7 (ownership) through py-11 (concurrency), 5 confirmed red→green; ColdPy-12..16 verified py-12..16 individually; ColdPy-18 verified all 16 seeds (16 confirmed red→green, 16/16 replay intact). Every evidence file replays with integrity ok, 0 drift. History is in `evals/ACCEPTANCE.md` |
+| seeded-ts | 19 | PASS; 16 of 19 seeds have a verified cold pass (17–19 pending). ColdTs-4 covered ts-1..5; ColdTs-5 verified ts-6..16 with 11 confirmed red→green, 11/11 evidence replay intact, 0 drift |
+| seeded-js | 19 | PASS; 16 of 19 seeds have a verified cold pass (17–19 pending). ColdJs-2 covered js-1..5; ColdJs-3 verified js-6..16 with 11 confirmed red→green, 11/11 evidence replay intact, 0 drift |
+| seeded-java | 19 | PASS; 16 of 19 seeds have a verified cold pass (17–19 pending). ColdJava-3 covered java-1..5; ColdJava-4 verified java-6..16 with 11 confirmed red→green, 11/11 evidence replay intact, 0 drift |
+| seeded-cpp | 19 | PASS; 16 of 19 seeds have a verified cold pass (17–19 pending). ColdCpp-2 covered cpp-1..5; ColdCpp-3 verified cpp-6..16 with 11 confirmed red→green, 11/11 evidence replay intact, 0 drift |
 
 All five fixtures (`seeded-py`, `seeded-ts`, `seeded-js`, `seeded-java`, and `seeded-cpp`) are re-run on the current 14-lens set. Earlier waves' failures, including
 fabricated fingerprints and regressions that never landed, are in the
