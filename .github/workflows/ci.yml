@@ -1,0 +1,43 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  baselines:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temuned
+          java-version: "21"
+
+      - uses: oven-sh/setup-bun@v2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install fixture deps
+        run: |
+          pip install pytest
+          cd evals/seeded-ts && bun install --frozen-lockfile && cd ../..
+          cd evals/seeded-js && npm ci --ignore-scripts 2>/dev/null || npm install && cd ../..
+
+      - name: Emitter contract (pytest)
+        run: python3 -m pytest evals/test_emitter.py -q
+
+      - name: Grader contract (pytest)
+        run: python3 -m pytest evals/test_grader.py -q
+
+      - name: All fixtures green
+        run: python3 evals/acceptance.py test-all
