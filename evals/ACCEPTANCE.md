@@ -80,8 +80,26 @@ isolated dir).
 > harden.md §8 now requires emitter output per finding (no
 > report.json = invalid run), §4 locks the snapshot filename, Safety
 > requires every source edit to trace to a confirmed finding.
-> ColdHarden-1 predates those text fixes; **control re-run on the
-> fixed text: pending.**
+> ColdHarden-1 predates those text fixes; **control re-run
+> (ColdHarden-4, 2026-09-28, contained temp workspace): PARTIAL.**
+> Closed: emitter used, `report.json` present, snapshot named
+> `2026-09-28-coldharden3-01.md` per §4, artifacts contained in the
+> workspace, UNATTENDED scope banner printed, report structure per §4,
+> all 19 canonical fixes intact (py-18 oracle verified live), 49 tests
+> green. The run caught one genuine gap the canonical fixes had missed
+> (`create_checkout` accepted `qty <= 0`) and flipped it properly.
+> Remaining defects, recorded per ADR-0003: (a) 5 of 6 findings are
+> marked `confirmed` on surfaces the unmodified canonical fixture
+> already handles (paginate page-zero, add_item qty, line_total
+> missing key, get_order missing, receipt traversal) — green
+> gap-fills recorded as flips, violating §7's verdict split; (b) the
+> `add_item` finding's surface label names the wrong function (its fix
+> landed in `create_checkout`); (c) `report.json` carries 3 findings
+> while `findings/` holds 6 — a later emit overwrote earlier ones; and
+> (d) the run's chat summary claims "6 confirmed" against its own
+> 3-finding artifact. Product fix forced: run-end check 7 ("every
+> confirmed regression is red against pristine source") added to
+> SKILL.md; a control run over check-7 text is the next evidence run.
 
 | fixture | verdict | evidence |
 |---|---|---|

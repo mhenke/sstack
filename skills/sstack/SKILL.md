@@ -221,8 +221,7 @@ The seven stages are fixed. A stage is not a file, it is this
 orchestrator's own text, so there is nothing to append to: they can be
 neither added, removed, nor extended. A user who needs different work
 in a stage ships a custom lens instead, since a lens runs over the same
-surfaces at Attack. End every stage by printing `stage ✓ <count>`
-(`discover ✓ 14 surfaces`) — a quiet console names the hung stage.
+surfaces at Attack. Each stage ends with a printed `stage ✓ <count>` line.
 
 ### 1. Discover
 
@@ -462,6 +461,8 @@ Before delivering the report, verify all of the following:
 6. Every skipped lens in `map.md` names the "When not to apply"
    line that ruled it out. An unrecorded skip is a lens that never
    ran, and the report must not read as though it had.
+7. Every confirmed regression is red against pristine source; one that
+   passes with the fix reverted is a false confirmation (record refuted).
 
 A run that fails any of these is invalid. Fix and re-run before
 reporting.
