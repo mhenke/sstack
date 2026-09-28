@@ -138,3 +138,42 @@ def test_no_workspace_leaves_the_negative_control_unrun(workspace):
     land(workspace, BUG_PINNING_TEST)
     result = grade({"fixture": "seeded-py", "findings": [finding()]}, PY, None, None)
     assert "bug-pin" not in (result.get("reason") or "")
+
+
+# --- gate 4: evidence integrity ------------------------------------------
+#
+# The emitter computes the fingerprint itself, so a mismatch means the
+# evidence file was edited after emit (ColdPy-19: 11 of 29 findings
+# had recorded fingerprints that did not match recomputation from their
+# own stdout+stderr). A graded PASS must not rest on such evidence.
+
+
+def _seed_evidence(ws, fingerprint: str):
+    findings = ws / ".sstack" / "findings"
+    findings.mkdir(parents=True, exist_ok=True)
+    evidence = {
+        "command": "python3 -c \"print(1)\"",
+        "stdout": "1\n",
+        "stderr": "",
+        "exit_code": 0,
+        "fingerprint": fingerprint,
+        "verdict": "confirmed",
+    }
+    (findings / "probe.json").write_text(json.dumps(evidence))
+
+
+def test_fabricated_fingerprint_fails_grade(workspace):
+    """A hand-edited fingerprint must fail the grade, not just replay."""
+    land(workspace, ORACLE_TEST)
+    _seed_evidence(workspace, "deadbeef00000000")
+    result = grade({"fixture": "seeded-py", "findings": [finding()]}, PY, workspace, FIXTURE)
+    assert result["pass"] is False
+    assert "integrity" in (result.get("reason") or "")
+
+
+def test_intact_fingerprint_still_passes(workspace):
+    """A genuine emit re-derives to the same hash and must not be blocked."""
+    land(workspace, ORACLE_TEST)
+    _seed_evidence(workspace, "4355a46b19d348dc")  # sha256("1\n")[:16]
+    result = grade({"fixture": "seeded-py", "findings": [finding()]}, PY, workspace, FIXTURE)
+    assert result["pass"] is True

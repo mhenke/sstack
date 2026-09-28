@@ -20,6 +20,8 @@ present, must not contradict the content match.
 """
 from __future__ import annotations
 
+import hashlib
+
 import json
 import re
 import shutil
@@ -213,6 +215,32 @@ def _bug_pin_verdict(workspace: Path | None, fixture_dir: Path | None) -> dict |
         shutil.rmtree(staging.parent, ignore_errors=True)
 
 
+def _fingerprint(text: str) -> str:
+    return hashlib.sha256(text.encode(errors="replace")).hexdigest()[:16]
+
+
+def _evidence_integrity(findings_dir: Path) -> str | None:
+    """Re-derive each finding's fingerprint from its recorded stdout+stderr.
+
+    The emitter computes the fingerprint itself, so a mismatch means the
+    evidence file was edited after emit (hand-typed fingerprint, tampered
+    bytes). A graded PASS must not rest on evidence the machine cannot
+    verify. Returns a reason string on failure, else None.
+    """
+    for path in sorted(findings_dir.glob("*.json")):
+        try:
+            ev = json.loads(path.read_text())
+        except json.JSONDecodeError:
+            continue
+        if "fingerprint" not in ev:
+            continue
+        recorded = ev.get("fingerprint")
+        computed = _fingerprint(ev.get("stdout", "") + ev.get("stderr", ""))
+        if recorded != computed:
+            return f"evidence integrity failure in {path.name}: recorded fingerprint {recorded} != computed {computed} (file edited after emit)"
+    return None
+
+
 def grade(report: object, goldens: list[dict], workspace: Path | None = None, fixture_dir: Path | None = None) -> dict:
     findings = report.get("findings", []) if isinstance(report, dict) else []
     if not isinstance(findings, list):
@@ -235,7 +263,15 @@ def grade(report: object, goldens: list[dict], workspace: Path | None = None, fi
         and f["regression"].get("before") == "red"
         and f["regression"].get("after") == "green"
     ]
-
+    # Evidence integrity: a PASS must not rest on a finding whose
+    # fingerprint the machine cannot re-derive (post-emit edit, tampered
+    # bytes). Run before the bug-pin control so a corrupted run fails
+    # loudly instead of passing on claims we cannot replay.
+    if workspace is not None:
+        integrity_fail = _evidence_integrity(workspace / ".sstack" / "findings")
+        if integrity_fail:
+            return {"pass": False, "reason": integrity_fail, "fixture": fixture,
+                    "confirmed": len(confirmed), "red_green_claimed": len(claimed)}
     # The negative control: every confirmed finding's regression must be
     # RED against the unfixed source. Run before matching so a bug-pinned
     # run fails loudly instead of passing on a function name.
