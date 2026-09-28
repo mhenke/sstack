@@ -31,8 +31,10 @@ belong in the pack. The judging vocabulary built on them — evidence,
 report, integrity, drift, and what not to call things — lives in
 [`CONTEXT.md`](../CONTEXT.md).
 
-- **Skill** — the methodology for a stage. One entry skill owns
-  routing and rules (`skills/sstack/SKILL.md`).
+- **Skill** — the methodology for a stage or subcommand. One entry
+  skill owns routing and rules (`skills/sstack/SKILL.md`); long mode
+  bodies live in `skills/sstack/references/` and load on demand
+  (ADR-0016).
 - **Lens** — an attack strategy over a failure class. Fourteen peer
   skills ship (`skills/sstack-<lens>/SKILL.md`), loaded inline under
   `### Lens rubric`, never by name, and selected per target by the

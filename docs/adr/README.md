@@ -23,6 +23,7 @@ the product. For *what* the code does, read [`../ARCHITECTURE.md`](../ARCHITECTU
 | [0013](0013-no-dedicated-pbt-runner.md) | Do not build a dedicated PBT runner; record seeds in evidence | Accepted | 2026-09-27 |
 | [0014](0014-do-not-build-mutation-runner.md) | Do not build a mutation runner | Accepted | 2026-09-27 |
 | [0015](0015-no-live-surface-runner.md) | No live-surface testing — runner or rubric; runtime behavior is out of scope | Accepted | 2026-09-28 |
+| [0016](0016-on-demand-references-tier.md) | Subcommand bodies live in an on-demand references tier | Accepted | 2026-09-28 |
 
 ## Status
 
