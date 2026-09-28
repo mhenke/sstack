@@ -39,6 +39,9 @@ existing suite with negative test cases even where nothing is broken.
 - `/sstack learn` — update `.sstack/learn/` from confirmed findings.
 - `/sstack lenses` — print the lens index below, then every custom
   lens found in the skills directories named in Customization.
+- `/sstack harden <target>` — fill the suite's negative-test gaps
+  without a full attack; load `skills/sstack/references/harden.md`
+  and follow it.
 
 ## Workspace
 
@@ -101,6 +104,8 @@ lens: <lens> | verdict: <confirmed | refuted | inconclusive>
   an attack creates, one directory per lens
 - `pristine-src/` — the target's originals, snapshotted before Fix, so
   a repro command still shows the buggy behavior after the fix lands
+- `harden/<date>-<target>-<seq>.md` — harden-mode coverage inventory
+  snapshots (not findings; the trend line reads these)
 
 The emitter is `scripts/emit_findings.py` (or `scripts/emit_findings.js`
 under Node), beside this skill: run it, never rewrite or copy it. Once
@@ -112,7 +117,7 @@ of a run; later emits inherit it from `report.json`.
 It executes the repro, captures real output, computes the fingerprint
 itself, and is the only writer of `<slug>.md`, `<slug>.json`, and
 `report.json`. The run's human report is the chat summary;
-`report.json` is the only report file.
+`report.json` is the only findings report file.
 
 The JSON you pipe is the Report format fields — `lens`, `surface`,
 `case`, `oracle`, `verdict`, `repro` — plus `slug` (a short kebab-case
