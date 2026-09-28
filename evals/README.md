@@ -100,7 +100,7 @@ every evidence file is intact.
 
 | Fixture | Language | Baseline | Cold acceptance |
 |---|---|---|---|
-| `seeded-py` | Python | `pytest -q` | PASS — graded 2026-09-27, 15/16 named runs |
+| `seeded-py` | Python | `pytest -q` | PASS — graded 2026-09-27, 16/16 named runs |
 | `seeded-ts` | TypeScript | `bun run test` | PASS — graded 2026-09-27 |
 | `seeded-js` | JavaScript | `npm test` | PASS — graded 2026-09-27 |
 | `seeded-java` | Java | `javac` compile | PASS — graded 2026-09-27 |
@@ -108,9 +108,8 @@ every evidence file is intact.
 
 Each fixture ships sixteen seeded defects and a `BUGS.md` answer
 key — every fixture covers all 14 lenses under ADR-0010 parity.
-On seeded-py, fifteen of sixteen seeds carry a named verifying run;
-py-2 has no named run (see `ACCEPTANCE.md`). The answer key is never
-copied into a cold workspace.
+All five fixtures carry full 16/16 named verifying run coverage
+(see `ACCEPTANCE.md`). The answer key is never copied into a cold workspace.
 
 ## Grading and evidence
 - `goldens.jsonl` contains seeded expectations.
