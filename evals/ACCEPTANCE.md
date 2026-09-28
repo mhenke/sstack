@@ -94,12 +94,14 @@ isolated dir).
 > missing key, get_order missing, receipt traversal) — green
 > gap-fills recorded as flips, violating §7's verdict split; (b) the
 > `add_item` finding's surface label names the wrong function (its fix
-> landed in `create_checkout`); (c) `report.json` carries 3 findings
-> while `findings/` holds 6 — a later emit overwrote earlier ones; and
-> (d) the run's chat summary claims "6 confirmed" against its own
-> 3-finding artifact. Product fix forced: run-end check 7 ("every
-> confirmed regression is red against pristine source") added to
-> SKILL.md; a control run over check-7 text is the next evidence run.
+> landed in `create_checkout`). An earlier draft of this note also
+> claimed `report.json` held 3 findings against 6 evidence files; that
+> was a mid-run read taken before the final emit — the rebuilt report
+> carries all 6, and the emitter is correct. Product fix forced: 
+> run-end check 7 ("every confirmed regression is red against pristine
+> source") added to SKILL.md; it mechanically converts all five false
+> confirmations. A control run over check-7 text is the next evidence
+> run.
 
 | fixture | verdict | evidence |
 |---|---|---|
