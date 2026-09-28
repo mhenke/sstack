@@ -158,6 +158,40 @@ confirmed finding whose fix landed; evidence against a `refuted`
 verdict. Not a failure of the evidence.
 _Avoid_: mismatch (it names the symptom, not the meaning)
 
+**Finding**:
+One attacked case with a recorded outcome — the unit the report format
+carries and the evidence file records. A finding is a claim until its
+verdict says otherwise; it is never called a bug in the evidence
+contract. "Bug" is prose shorthand for a confirmed finding, never a
+judging term, and it names no artifact.
+_Avoid_: bug (prose only); issue, defect (same looseness)
+
+**Verdict**:
+The judging outcome of one finding: `confirmed`, `refuted`, or
+`inconclusive`. The truthfulness mechanism — every artifact-level word
+(landed regression, hardening test, count) derives from it, so a wrong
+verdict corrupts the whole report. `confirmed` requires a red test
+against pristine source; a test that passes with the fix reverted is
+not a confirmation of anything.
+_Avoid_: status, result (both read as raw outcome, not a judgment
+against an oracle)
+
+**False confirmation**:
+A finding recorded `confirmed` whose regression passes against
+pristine source — a green gap-fill wearing a red claim. Run-end check
+7 converts it mechanically. It over-claims the report ("N bugs found"
+when none were) while the landed tests themselves stay correct.
+_Avoid_: false positive (names a classifier, not an evidence verdict)
+
+**Hardening test**:
+A green test landed for a surface that already handles the adverse
+condition — the permanent product of a `refuted` finding or a filled
+gap. In harden mode, the default output: an unmasked matrix test per
+surface × lens gap, named `sstack_<lens>_`. Distinct from a
+regression, which is red→green and atomic.
+_Avoid_: negative test (covers both kinds), gap-fill test (process
+language, not the artifact)
+
 **Landed regression**:
 A red→green test whose file exists in the graded workspace and
 contains the named test. A claimed regression that cannot be found on
