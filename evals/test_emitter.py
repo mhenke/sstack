@@ -229,13 +229,21 @@ def test_node_emitter_contract_parity():
         assert res_py.returncode == 0
         py_json = (Path(tmp_py) / ".sstack/findings/t1.json").read_text()
         js_json = (Path(tmp_js) / ".sstack/findings/t1.json").read_text()
-        assert json.loads(py_json) == json.loads(js_json)
+        py_obj, js_obj = json.loads(py_json), json.loads(js_json)
+        for obj in (py_obj, js_obj):
+            obj.pop("emitted_at", None)
+            obj.pop("duration_ms", None)
+        assert py_obj == js_obj
         py_md = (Path(tmp_py) / ".sstack/findings/t1.md").read_text()
         js_md = (Path(tmp_js) / ".sstack/findings/t1.md").read_text()
         assert py_md == js_md
         py_rep = (Path(tmp_py) / ".sstack/report.json").read_text()
         js_rep = (Path(tmp_js) / ".sstack/report.json").read_text()
-        assert json.loads(py_rep) == json.loads(js_rep)
+        py_rep_obj, js_rep_obj = json.loads(py_rep), json.loads(js_rep)
+        for f in py_rep_obj.get("findings", []) + js_rep_obj.get("findings", []):
+            f.pop("emitted_at", None)
+            f.pop("duration_ms", None)
+        assert py_rep_obj == js_rep_obj
 
         bad_finding = base()
         del bad_finding["regression"]
@@ -263,6 +271,9 @@ def test_pbt_seed_and_counterexample_parity():
         js_rec = json.loads((Path(tmp_js) / ".sstack/findings/t1.json").read_text())
         assert py_rec["seed"] == 42891234
         assert py_rec["counterexample"] == '""'
+        for obj in (py_rec, js_rec):
+            obj.pop("emitted_at", None)
+            obj.pop("duration_ms", None)
         assert py_rec == js_rec
 
         py_md = (Path(tmp_py) / ".sstack/findings/t1.md").read_text()
@@ -276,6 +287,9 @@ def test_pbt_seed_and_counterexample_parity():
         js_rep = json.loads((Path(tmp_js) / ".sstack/report.json").read_text())
         assert py_rep["findings"][0]["seed"] == 42891234
         assert py_rep["findings"][0]["counterexample"] == '""'
+        for f in py_rep.get("findings", []) + js_rep.get("findings", []):
+            f.pop("emitted_at", None)
+            f.pop("duration_ms", None)
         assert py_rep == js_rep
 
         from evals.replay import replay_one

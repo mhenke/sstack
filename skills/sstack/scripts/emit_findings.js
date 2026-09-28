@@ -66,11 +66,13 @@ function readFinding() {
 }
 
 function runRepro(command, workspace) {
+  const t0 = Date.now();
   const result = spawnSync(command, {
     shell: true,
     cwd: workspace,
     encoding: 'utf8',
   });
+  const durationMs = Date.now() - t0;
   const stdout = result.stdout || '';
   const stderr = result.stderr || '';
   const exitCode = result.status !== null ? result.status : (result.signal ? 128 : 1);
@@ -86,6 +88,7 @@ function runRepro(command, workspace) {
     stdout,
     stderr,
     fingerprint,
+    duration_ms: durationMs,
   };
 }
 
@@ -163,6 +166,12 @@ function rebuildReport(findingsDir, workspace, fixture) {
     }
     if (record.counterexample !== undefined) {
       entry.counterexample = record.counterexample;
+    }
+    if (record.duration_ms !== undefined) {
+      entry.duration_ms = record.duration_ms;
+    }
+    if (record.emitted_at) {
+      entry.emitted_at = record.emitted_at;
     }
     entries.push(entry);
   }
@@ -256,6 +265,7 @@ function main() {
     verdict: finding.verdict,
     ...run,
     regression: finding.regression,
+    emitted_at: new Date().toISOString(),
   };
   if (finding.fix) {
     record.fix = finding.fix;

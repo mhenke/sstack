@@ -28,6 +28,8 @@ import json
 import re
 import subprocess
 import sys
+import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 VERDICTS = ("confirmed", "refuted", "inconclusive")
@@ -68,7 +70,9 @@ def read_finding() -> dict:
 
 
 def run_repro(command: str, workspace: Path) -> dict:
+    t0 = time.monotonic()
     done = subprocess.run(command, shell=True, cwd=workspace, capture_output=True, text=True, errors="replace")
+    duration_ms = round((time.monotonic() - t0) * 1000)
     stdout, stderr = done.stdout, done.stderr
     return {
         "command": command,
@@ -76,6 +80,7 @@ def run_repro(command: str, workspace: Path) -> dict:
         "stdout": stdout,
         "stderr": stderr,
         "fingerprint": hashlib.sha256((stdout + stderr).encode()).hexdigest()[:16],
+        "duration_ms": duration_ms,
     }
 
 
@@ -140,6 +145,10 @@ def rebuild_report(findings_dir: Path, workspace: Path, fixture: str) -> int:
             entry["seed"] = record["seed"]
         if record.get("counterexample") is not None:
             entry["counterexample"] = record["counterexample"]
+        if record.get("duration_ms") is not None:
+            entry["duration_ms"] = record["duration_ms"]
+        if record.get("emitted_at"):
+            entry["emitted_at"] = record["emitted_at"]
         entries.append(entry)
     (workspace / ".sstack" / "report.json").write_text(json.dumps({"fixture": fixture, "findings": entries}, indent=2) + "\n")
     return len(entries)
@@ -189,7 +198,8 @@ def main() -> int:
     run = run_repro(finding["repro"], workspace)
     record = {"seed_id": finding.get("seed_id", "other"), "lens": finding["lens"], "surface": finding["surface"],
               "case": finding["case"], "oracle": finding["oracle"], "verdict": finding["verdict"], **run,
-              "regression": finding["regression"]}
+              "regression": finding["regression"],
+              "emitted_at": datetime.now(timezone.utc).isoformat()}
     if finding.get("fix"):
         record["fix"] = finding["fix"]
     if finding.get("seed") is not None:
