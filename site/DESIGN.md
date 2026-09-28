@@ -188,7 +188,15 @@ exactly from `README.md`.
     process" over a hairline divider, keeps the manual rows
     (Agnostic → `~/.agents/`, Claude Code, VS Code); the
     OpenCode-specific row is dropped because the hub covers it. Only VS Code needs the
-    rename; every other host reads the files as-is.
+    rename; every other host reads the files as-is. The skills card
+    mirrors the same manual pattern: its own "Manual process"
+    host-list with each host's skills directory — Agnostic →
+    `~/.agents/skills/`, Claude Code → `~/.claude/skills/`,
+    VS Code → `~/.copilot/skills/` — no rename on any host,
+    project scope shadowing global, full per-host table in
+    `docs/CUSTOMIZING.md`. Each list opens with the instruction
+    "Or copy the `skills/` folders / the `agents/*.md` files
+    into one of these:" so it says what to copy before the rows.
 22. **Docs cross-links**: prose links (muted text + accent link,
     the `.table-note` pattern) close the four-rules, lifecycle, and
     lens sections — ETHOS.md, ARCHITECTURE.md, LENS.md on GitHub.

@@ -285,6 +285,14 @@
               <button class="copy-btn" type="button" data-copy="#install-cmd">copy</button>
             </div>
             <p class="install-note">Registers <code>/sstack</code> in Claude Code. Hosts without slash commands: open the skill directory in your editor and ask for it in your own words.</p>
+            <p class="install-label">Manual process</p>
+            <p class="install-note">Or copy the <code>skills/</code> folders into one of these:</p>
+            <ul class="host-list">
+              <li>Agnostic → <code>~/.agents/skills/</code></li>
+              <li>Claude Code → <code>~/.claude/skills/</code></li>
+              <li>VS Code → <code>~/.copilot/skills/</code></li>
+            </ul>
+            <p class="install-note">Project wins over global. Full table: <a href="https://github.com/mhenke/sstack/blob/main/docs/CUSTOMIZING.md">docs/CUSTOMIZING.md</a>.</p>
           </div>
           <div class="card install-card">
             <p class="install-no">2</p>
@@ -300,6 +308,7 @@
               <button class="copy-btn" type="button" data-copy="#vscode-cmd">copy</button>
             </div>
             <p class="install-label">Manual process</p>
+            <p class="install-note">Or copy the <code>agents/*.md</code> files into one of these:</p>
             <ul class="host-list">
               <li>Agnostic → <code>~/.agents/</code></li>
               <li>Claude Code → <code>~/.claude/agents/</code></li>
