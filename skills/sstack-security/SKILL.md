@@ -69,7 +69,6 @@ API keys in search results.
 - Cryptographic signature bypass (CWE-347): unverified JWT header algorithms.
 - Unsafe object deserialization (CWE-502): `pickle.loads` on external data.
 
-
 ## Language notes
 
 ### Python

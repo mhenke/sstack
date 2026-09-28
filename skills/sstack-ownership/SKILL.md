@@ -54,9 +54,8 @@ A single consolidated routine is the fix; N scattered checks are the bug.
   objects before probing BOLA/IDOR so 404s reflect authorization denials
   rather than nonexistent records. Obfuscation is not a control.
 - Force-browse: request authenticated pages with no session, privileged
-  pages as a standard user, and unlinked admin or API routes directly
-  outside the UI (source-level route and handler review; runtime
-  probing is out of scope).
+  pages as a standard user, and unlinked admin or API routes the UI
+  never links — probe each in the route table and handler guards.
 - Call the write methods and alternate verbs. `POST`, `PUT`, `PATCH`, and
   `DELETE` frequently ship without checks while `GET` is guarded.
 - Header routing and IP spoofing: send `X-Original-URL: <target>` and
@@ -147,10 +146,6 @@ volume rather than of contents.
   Even a single foreign record or identifier in the payload is a finding.
 - Collection surfaces obey the oracle stated above; see that section
   before probing a list, search, export, or report.
-- After logout or revocation the old credential no longer works.
-- Tokens lacking required OAuth/API scopes receive `401` or `403`.
-- A new account, a newly added route, and an unregistered endpoint are
-  denied until explicitly granted.
 - Denials are logged with subject, object, action, and reason, and a
   repeated-denial burst is visible.
 - Public resources are reachable unauthenticated on purpose, and that
@@ -207,21 +202,21 @@ persists it. A token case: log out, replay the same bearer token; oracle
 | error-based enumeration | compare denial for present vs absent object | indistinguishable responses |
 | decommissioned account | removed role, retained credential | credential dies with the grant |
 
-## Unit tier
+## Tiers
 
-Use sstack's scratch-script model: mock the subject object, set the
-role/session/claims, call the function, assert the rejection. No live
-authenticated sessions are required for the unit tier. Functional access
-control belongs in the target's own unit and integration suites, so the
-regression lands there, not in a scratch file.
+Unit tier: mock the subject object, set the role/session/claims, call
+the function, assert the rejection — sstack's scratch-script model.
+Functional access control belongs in the target's own unit and
+integration suites, so the regression lands there, not in a scratch
+file.
 
-The integration tier needs real sessions, multiple subjects, and live
-routers: the whole point is that middleware, filters, and gateway config
-are part of the decision. Runtime-only behavior — framework output
-escaping, middleware ordering, header handling — is outside sstack's
-source-first scope: record it as a checked N/A in `map.md`. Record
-session and entity evidence. Test both tiers when the enforcement point
-is not in the function under test.
+Integration tier: the enforcement point lives in middleware, filters,
+or gateway config rather than the function under test. Read those
+artifacts from source and test the decision functions in-process,
+seeding real subjects and distinguishable objects as fixtures.
+Behaviors decidable only at runtime — framework output escaping,
+middleware ordering, live header handling — are checked N/As in
+`map.md`: cite the artifact, note that source cannot decide it.
 
 ## Interaction with verification skill
 
