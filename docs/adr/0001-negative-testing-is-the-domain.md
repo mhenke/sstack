@@ -63,8 +63,7 @@ service) is explicitly not copied.
   finding rests on expected-error assertion plus reproducibility
   alone.
 - The taxonomy (15 lenses) is large enough to look like a sprawl
-  risk, mitigated by shipping six lenses and disclosing the rest.
-
+The taxonomy (15 lenses) is large enough to look like a sprawl risk, mitigated by shipping six lenses and disclosing the rest. [As of 2026-09-28 the pack ships fourteen lenses.]
 **Risks**
 
 - If cold agents keep missing the malformed/missing lenses in

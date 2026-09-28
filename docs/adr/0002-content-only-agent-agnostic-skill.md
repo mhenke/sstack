@@ -53,11 +53,12 @@ artifacts and never the target's source, config, or secrets.
 - The audit-not-fix contract is enforceable in prose because there
   is no code path the skill owns.
 
-**Bad**
+No deterministic evidence schema in v0, so findings are only as reproducible as the agent's transcript. This is a real gap, and it is the main thing v1 buys.
+Cold-agent compliance is the weak axis. Every early run violated a rule in prose (bug-pinning regressions, fixing source, scoring harnesses as verdicts), and each violation had to be answered with another guardrail in the text.
+Host-agnostic means no forced update path; a stale copy of the skill can sit in a user's directory indefinitely.
 
-- No deterministic evidence schema in v0, so findings are only as
-  reproducible as the agent's transcript. This is a real gap, and it
-  is the main thing v1 buys.
+The audit-not-fix stance was superseded by ADR-0005, which allows source changes in the Fix stage. Evidence preservation is maintained by requiring a red-then-green regression test.
+
 - Cold-agent compliance is the weak axis. Every early run violated a
   rule in prose (bug-pinning regressions, fixing source, scoring
   broken harnesses as verdicts), and each violation had to be

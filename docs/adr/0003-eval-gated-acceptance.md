@@ -29,8 +29,7 @@ The design had to answer four questions the demos kept getting wrong:
 Acceptance is a **cold-run eval**, recorded in `evals/ACCEPTANCE.md`:
 
 - Five seeded repos (Python/pytest, TypeScript/vitest, JavaScript/node,
-  Java/JUnit, C++/CTest), five bugs each, every bug mapped to exactly
-  one lens and listed in a `BUGS.md` answer key.
+Five seeded repos (Python/pytest, TypeScript/vitest, JavaScript/node, Java/JUnit, C++/CTest), 16 seeded defects each, every bug mapped to exactly one lens and listed in a `BUGS.md` answer key.
 - `python3 evals/acceptance.py prepare <fixture>` copies the skill and
   a BUGS.md-free, cache-free fixture into one temp workspace. The cold
   agent works only inside it.
@@ -55,8 +54,7 @@ Acceptance is a **cold-run eval**, recorded in `evals/ACCEPTANCE.md`:
 
 **Bad**
 
-- Expensive: a full re-run is roughly 20–35 minutes of subagent time
-  across both repos.
+- Expensive: a full re-run is roughly 20–35 minutes of subagent time across the five fixtures.
 - Any edit to the skill invalidates the record by the repo's own rule
   (the evidence came from exact text), so shipping a wording change
   carries a re-run debt.
