@@ -22,6 +22,7 @@ the product. For *what* the code does, read [`../ARCHITECTURE.md`](../ARCHITECTU
 | [0012](0012-self-host-rubik-variable-fonts.md) | Self-host the Rubik variable fonts | Accepted | 2026-09-27 |
 | [0013](0013-no-dedicated-pbt-runner.md) | Do not build a dedicated PBT runner; record seeds in evidence | Accepted | 2026-09-27 |
 | [0014](0014-do-not-build-mutation-runner.md) | Do not build a mutation runner | Accepted | 2026-09-27 |
+| [0015](0015-no-live-surface-runner.md) | Do not build a live-surface runner; probe with curl through the emitter | Accepted | 2026-09-28 |
 
 ## Status
 

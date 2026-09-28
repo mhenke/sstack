@@ -14,16 +14,15 @@ of a run. Anything that does neither is out.
   concurrency, idempotency, dependency-failure, contract, security,
   agent. A target repo can add more without a pack change (ADR-0008).
 - Five seeded fixtures: Python, TypeScript, JavaScript, Java, C++.
-  Eighty goldens: sixteen seeds per fixture (`py-1` through `py-16`
-  and peers), covering all fourteen lenses.
+  Ninety-five goldens: nineteen seeds per fixture (`py-1` through
+  `py-19` and peers), covering all fourteen lenses.
 - Cold-run evidence (2026-09-27, content-match grader): **all five
-  fixtures PASS**. Sixteen seeds per fixture; fifteen of sixteen
-  carry a named verifying cold run in every fixture — py-2
-  (cart `add_item` qty) has no named run after a fresh ColdPy-17
-  rerun missed it (run detail in
-  [`evals/ACCEPTANCE.md`](evals/ACCEPTANCE.md)). Every PASS carries
-  landed regressions verified on disk and evidence that replays with
-  integrity ok.
+  fixtures PASS**. Sixteen of nineteen seeds per fixture carry
+  verified cold passes, py-2 included (closed by ColdPy-18);
+  `*-17`/`*-18`/`*-19` carry goldens with cold-run evidence pending
+  (run detail in [`evals/ACCEPTANCE.md`](evals/ACCEPTANCE.md)). Every
+  PASS carries landed regressions verified on disk and evidence that
+  replays with integrity ok.
 - Findings JSON shipped with a pinned schema and out-of-loop replay;
   Learn loop proven cold (see Shipped below).
 
@@ -87,6 +86,10 @@ of a run. Anything that does neither is out.
   violates zero-runtime (ADR-0002), fails in repos lacking tooling,
   explodes run latency, and duplicates the existing red-to-green proof
   gate (ADR-0014). Target repos delegate opportunistically via ADR-0004.
+- **A live-surface runner.** The agent boots the target's own server
+  and probes with `curl` through the emitter; a wrapper script adds no
+  signal over the native command and would cost replay lifecycle
+  management (ADR-0015).
 
 ## How a roadmap item ships
 

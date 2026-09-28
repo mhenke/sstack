@@ -216,8 +216,11 @@ regression lands there, not in a scratch file.
 
 The integration tier needs real sessions, multiple subjects, and live
 routers: the whole point is that middleware, filters, and gateway config
-are part of the decision. Record session and entity evidence. Test both
-tiers when the enforcement point is not in the function under test.
+are part of the decision. Boot the target's own server when it has a
+discoverable boot command, probe routes with `curl` as each subject,
+and emit with the `curl` command as `repro`. Record session and entity
+evidence. Test both tiers when the enforcement point is not in the
+function under test.
 
 ## Interaction with verification skill
 

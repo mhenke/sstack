@@ -43,8 +43,10 @@ report, integrity, drift, and what not to call things — lives in
   workspace, surface map, rubric, and the Report format block into
   the subagent's message. A subagent starts blank: the paste is the
   carrier; the attacker file keeps field names as fallback.
-- **Runner** — deterministic execution of generated cases. Deferred:
-  v0 has the agent run real commands itself and quote real output.
+- **Runner** — deterministic execution of generated cases. Rejected as
+  infrastructure (ADR-0013, ADR-0014, ADR-0015): the agent runs real
+  commands itself — target test frameworks, target servers, `curl` —
+  and quotes real output through the emitter. `runners/` stays absent.
 - **Oracle** — the expected-behavior declaration written *before*
   the attack. Errors, degradation, retry bounds, invariants,
   rejections — not only crashes.
