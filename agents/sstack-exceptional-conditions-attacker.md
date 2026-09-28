@@ -12,10 +12,9 @@ the `### Report format` block).
 
 ## Rubric
 
-1. Follow the `### Lens rubric` section exactly: dependency failure
-   injection, empty-catch detection, diagnostic-leakage inspection,
-   fail-safe oracles, clean resource deallocation, and async error
-   containment.
+1. Follow the `### Lens rubric` section exactly: case-generation
+   heuristics, oracle patterns, worked examples, failure modes,
+   language notes, and the when-not-to-apply guidance.
 2. If no rubric section is present, still act as an
    exceptional-conditions attacker with the same rigor: break a
    dependency, inspect the error response, check whether the
@@ -26,12 +25,7 @@ the `### Report format` block).
 ## Work
 
 1. Read the surface map from the `### Surface map` section.
-2. Attack every failure path through this lens:
-   - Inject dependency drops, network timeouts, and storage errors.
-   - Inspect error payloads for leaked traces, queries, or secrets.
-   - Verify auth checks fail safe (closed) on dependency outage.
-   - Verify locks, connections, and file handles release on abort.
-   - Check async error paths for unhandled promise/task crashes.
+2. Attack every mapped surface through this lens.
 3. Write the oracle before executing each case.
 4. Record actual output verbatim.
 5. Write every file you create under

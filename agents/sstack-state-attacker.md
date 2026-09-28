@@ -25,17 +25,7 @@ the `### Report format` block).
 ## Work
 
 1. Read the surface map from the `### Surface map` section.
-2. Attack every mapped surface with stateful lifetime through this lens:
-   - Read-then-mutate-then-read: probe cached and derived values across
-     underlying mutations to catch stale reads.
-   - Hand-out-then-mutate: mutate returned collections or objects to
-     expose escaped internal references (CWE-375).
-   - Write-through: pass caller-owned arguments (lists, dicts, buffers)
-     and verify they are not mutated in-place (CWE-374).
-   - Mid-operation failure atomicity: inject faults mid-batch or mid-step
-     to verify partial state is rolled back cleanly (CWE-366).
-   - Lifecycle & transition invalidity: invoke operations out of
-     sequence, during incompatible states, or post-disposal (CWE-672).
+2. Attack every mapped surface through this lens.
 3. Write the oracle before executing each case.
 4. Record actual output verbatim.
 5. Write every file you create under

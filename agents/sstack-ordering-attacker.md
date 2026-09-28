@@ -24,15 +24,7 @@ the `### Report format` block).
 ## Work
 
 1. Read the surface map from the `### Surface map` section.
-2. Attack every mapped surface with workflow or pipeline dependencies:
-   - Step-skipping: invoke final or intermediate stages without executing
-     prerequisite operations (CWE-841).
-   - Inverted sequences: call operations backwards (e.g. process before
-     initialize, commit before validate) (CWE-696).
-   - Token & gate jumping: attempt activating records or capturing payments
-     without completing preceding verification stages.
-   - Out-of-order event replay: feed update or deletion events before
-     creation events to verify resequencing or explicit rejections.
+2. Attack every mapped surface through this lens.
 3. Write the oracle before executing each case.
 4. Record actual output verbatim.
 5. Write every file you create under

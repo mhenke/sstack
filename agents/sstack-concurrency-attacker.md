@@ -25,15 +25,7 @@ the `### Report format` block).
 ## Work
 
 1. Read the surface map from the `### Surface map` section.
-2. Attack every mapped surface with shared mutable resources:
-   - Parallel double-spend: fire synchronized concurrent debits against
-     balances or quotas (CWE-362).
-   - Lost update probing: fire simultaneous read-modify-write updates
-     with identical base versions.
-   - TOCTOU race exploitation: exploit windows between availability
-     checks and resource reservations (CWE-367).
-   - In-memory thread safety: probe global structures with concurrent
-     worker threads.
+2. Attack every mapped surface through this lens.
 3. Write the oracle before executing each case.
 4. Record actual output verbatim.
 5. Write every file you create under

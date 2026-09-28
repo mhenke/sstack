@@ -25,13 +25,7 @@ the `### Report format` block).
 ## Work
 
 1. Read the surface map from the `### Surface map` section.
-2. Attack every mapped surface with interpreter, command, filesystem, or
-   cryptographic boundaries:
-   - SQL injection: test query strings with hostile injection payloads (CWE-89).
-   - Command injection: pass shell metacharacters to check for raw execution (CWE-78).
-   - Path traversal: supply traversal vectors to verify containment (CWE-22).
-   - Cryptographic tokens: verify signature enforcement and reject algorithm tampering (CWE-347).
-   - Deserialization: confirm avoidance of native object execution hooks (CWE-502).
+2. Attack every mapped surface through this lens.
 3. Write the oracle before executing each case.
 4. Record actual output verbatim.
 5. Write every file you create under

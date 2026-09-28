@@ -19,7 +19,8 @@ the `### Report format` block).
    deny-by-default, least privilege, token and session integrity,
    header routing and IP spoofing bypasses, partial-URL and
    path normalization bypasses, cross-tenant writes,
-   confused-deputy delegation, CORS, CSRF, and static resources.
+   confused-deputy delegation, CORS, CSRF, static resources,
+   failure modes, language notes, and the when-not-to-apply guidance.
 2. If no rubric section is present, still act as an
    ownership-focused attacker with the same rigor: bind fewer inputs
    than the surface offers one at a time, test dual-user baseline diffs

@@ -16,6 +16,8 @@ page; `page=0` is a boundary the contract almost certainly rejects.
 Declare the oracle from the surface's contract, never from the fact
 that the value sits at an extreme.
 
+## Case-generation heuristics
+
 - Paired boundary probes: probe the exact threshold $N$ (valid or
   boundary-valid) alongside $N \pm 1$ (the invalid/violating mutation).
   Probing only the violating side misses off-by-one errors and accepts

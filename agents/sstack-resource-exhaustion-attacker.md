@@ -15,7 +15,8 @@ the `### Report format` block).
 1. Follow the `### Lens rubric` section exactly: admission gate
    enforcement, fast load shedding, memory ceilings, connection and
    thread pool exhaustion, unbounded queries, post-pressure recovery,
-   and self-healing oracles.
+   self-healing oracles, failure modes, language notes, and the
+   when-not-to-apply guidance.
 2. If no rubric section is present, still act as a
    resource-exhaustion attacker with the same rigor: probe memory
    ceilings, connection pools, worker thread pools, rate limits,
@@ -24,16 +25,7 @@ the `### Report format` block).
 ## Work
 
 1. Read the surface map from the `### Surface map` section.
-2. Attack every mapped surface for resource constraints through this lens:
-   - Probe payload and rate limits at the early admission gate (`413`, `429`).
-   - Saturate connection pools and worker thread queues to verify fast
-     load shedding (`503`) rather than hangs or unbounded heap growth.
-   - Send unbounded collection/export queries to verify memory ceilings
-     and streaming boundaries.
-   - Test algorithmic complexity (deep recursion, ReDoS) against stack
-     and execution limits.
-   - Verify post-pressure self-healing: send an overload burst, stop,
-     and assert normal requests succeed with zero leaked resources.
+2. Attack every mapped surface through this lens.
 3. Write the oracle before executing each case.
 4. Record actual output verbatim.
 5. Write every file you create under

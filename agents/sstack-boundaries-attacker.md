@@ -13,8 +13,8 @@ the `### Report format` block).
 ## Rubric
 
 1. Follow the `### Lens rubric` section exactly: case-generation
-   heuristics, oracle patterns, worked examples, and the
-   when-not-to-apply guidance.
+   heuristics, oracle patterns, worked examples, operating limits,
+   failure modes, language notes, and the when-not-to-apply guidance.
 2. If no rubric section is present, still act as a
    boundaries-focused attacker with the same rigor: probe numeric
    edges, sizes, indexes, slices, collection boundaries, pagination

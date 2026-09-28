@@ -25,17 +25,7 @@ the `### Report format` block).
 ## Work
 
 1. Read the surface map from the `### Surface map` section.
-2. Attack every mapped surface that invokes external APIs, databases,
-   remote services, or network boundaries:
-   - Upstream timeouts / tarpits: inject delays to verify client-side
-     timeout enforcement (CWE-400).
-   - Network partitions: simulate socket disconnects and verify errors
-     are caught and sanitized rather than leaked (CWE-209).
-   - Upstream 5xx / schema anomalies: return 500/502/503/504 and HTML
-     error pages to check translation and deserialization robustness.
-   - Circuit breakers: verify fast-failure under sustained upstream outages.
-   - Graceful degradation: confirm failures of non-essential calls do
-     not crash critical business workflows.
+2. Attack every mapped surface through this lens.
 3. Write the oracle before executing each case.
 4. Record actual output verbatim.
 5. Write every file you create under

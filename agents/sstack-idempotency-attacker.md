@@ -24,14 +24,7 @@ the `### Report format` block).
 ## Work
 
 1. Read the surface map from the `### Surface map` section.
-2. Attack every mapped mutation surface through this lens:
-   - Replay attacks: submit identical requests multiple times with and
-     without idempotency keys to detect duplicate actions.
-   - Payload tampering: submit an existing idempotency key with altered
-     parameters to verify rejection.
-   - Safe method checking: invoke `GET`/`HEAD` endpoints to verify they
-     execute zero state modifications.
-   - Repeat deletion stability: repeat `DELETE` calls to verify idempotence.
+2. Attack every mapped surface through this lens.
 3. Write the oracle before executing each case.
 4. Record actual output verbatim.
 5. Write every file you create under

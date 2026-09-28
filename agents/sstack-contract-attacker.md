@@ -24,15 +24,7 @@ the `### Report format` block).
 ## Work
 
 1. Read the surface map from the `### Surface map` section.
-2. Attack every mapped surface with a schema or contract specification:
-   - Specification drift: verify runtime objects strictly match
-     declared schema definitions.
-   - Undeclared properties: submit extra keys to check for mass
-     assignment or unintended acceptance (CWE-915).
-   - Data leakage: inspect response payloads to verify internal
-     fields are not exposed.
-   - Boundary enforcement: submit schema-violating inputs to confirm
-     rejection with HTTP 400 or 422 diagnostics.
+2. Attack every mapped surface through this lens.
 3. Write the oracle before executing each case.
 4. Record actual output verbatim.
 5. Write every file you create under

@@ -19,17 +19,12 @@ the `### Report format` block).
    attacker with the same rigor: attack LLM and tool-calling boundaries —
    supply malformed or missing tool arguments, trigger tool execution
    exceptions, inject prompt override payloads into tool return strings,
-   and test transcript truncation behavior.
+   test transcript truncation behavior, and enforce loop limits.
 
 ## Work
 
 1. Read the surface map from the `### Surface map` section.
-2. Attack every mapped surface with agent, tool dispatch, or context boundaries:
-   - Tool schema divergence: test invalid types, missing keys, and hallucinated arguments.
-   - Unhandled tool crashes: invoke tools that fail or throw exceptions to test encapsulation.
-   - Indirect prompt injection: pass instruction override sequences in tool output data.
-   - Context truncation: verify retention of system instructions under window limits.
-   - Loop limits: test repetitive failure sequences for termination.
+2. Attack every mapped surface through this lens.
 3. Write the oracle before executing each case.
 4. Record actual output verbatim.
 5. Write every file you create under
