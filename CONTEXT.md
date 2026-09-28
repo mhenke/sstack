@@ -18,10 +18,10 @@ _Avoid_: phase, step (both read as a generic workflow stage rather than
 this fixed seven)
 
 **Lens**:
-An angle of attack over a failure class: boundaries, malformed,
-missing, ownership, exceptional-conditions, resource-exhaustion,
-state, ordering, concurrency, idempotency, dependency-failure. A noun,
-not a step. Eleven ship; a target repo adds any number.
+An angle of attack over a failure class. A noun, not a step. Fourteen
+ship; a target repo adds any number. Which failure class each name
+covers — and the category it sits in — is the taxonomy, not this file's
+enumeration; see `docs/ARCHITECTURE.md`.
 The count of attacks is surface × lens, and neither factor is capped.
 _Avoid_: attack type, test type, stage
 
@@ -139,8 +139,10 @@ _Avoid_: fuzzy match
 
 **Seed label**:
 A finding's self-reported guess at which planted bug it is. Advisory:
-a wrong label is a warning, never a disqualification.
-_Avoid_: seed_id as truth, claimed id
+a wrong label surfaces as a label contradiction, which is a warning
+and never a disqualification.
+_Avoid_: seed_id as truth, claimed id, mislabel (the guess itself, not
+the grader's recorded fact)
 
 **Integrity**:
 The recorded output and recorded fingerprint agree. Verified twice:
@@ -156,6 +158,16 @@ recorded output. The emitter hashes its own execution and is the only
 writer of evidence files, so a mismatch means the file changed after
 emit: a typed-in fingerprint, tampered bytes. Not a capture-time
 error; the emitter cannot mis-hash what it just ran.
+
+**Label contradiction**:
+A content-matched finding whose self-reported seed label names a
+different seed than the golden it matched — `cart-count-is-stale!=
+py-6`. The match is judged on content, so the contradiction never
+disqualifies a run; it is recorded because a pattern of them is what
+a run that pattern-matches rather than attacks looks like. Distinct
+from a fabricated finding, which is a fingerprint failure, not a
+naming one.
+_Avoid_: fabricated (a different mechanism entirely), seed mismatch
 
 **Drift**:
 The re-run output no longer matches the record. Expected for a
@@ -188,6 +200,21 @@ pristine source — a green gap-fill wearing a red claim. Run-end check
 when none were) while the landed tests themselves stay correct.
 _Avoid_: false positive (names a classifier, not an evidence verdict)
 
+**Negative control**:
+The grader's re-execution of every confirmed finding's regression
+against pristine source, before a run may pass. All green means each
+claimed red→green test actually asserts the buggy behavior, and the
+run fails. Distinct from a control run, the same idea at fixture scale.
+_Avoid_: bug-pin (the defect the control detects, not the control)
+
+**Control run**:
+A negative control at fixture scale: the operation run against a
+fixture already known to be fixed, which must yield zero confirmed
+findings. `grade` cannot judge it — a zero-confirmed run fails the
+content-match gate by design — so a control run is judged directly.
+_Avoid_: negative control (the grader's per-finding re-execution),
+dry run
+
 **Hardening test**:
 A green test landed for a surface that already handles the adverse
 condition — the permanent product of a `refuted` finding or a filled
@@ -196,6 +223,24 @@ surface × lens gap, named `sstack_<lens>_`. Distinct from a
 regression, which is red→green and atomic.
 _Avoid_: negative test (covers both kinds), gap-fill test (process
 language, not the artifact)
+
+**Harden mode**:
+Gap-filling mode, `/sstack harden <target>`: it measures what a suite's
+negative tests already cover and writes the missing ones, rather than
+attacking for new defects. Not a stage and never inside the lifecycle;
+the seven stages are unchanged and all its rules apply. A harden
+test that comes back red is a live bug and flips into the lifecycle,
+everything else is a hardening test.
+_Avoid_: negative-test mode, gap-fill stage (it is neither a stage nor
+only a fill)
+
+**Run type**:
+Which shape a cold run took, named in the acceptance record: a
+default lifecycle run (`ColdPy-…`, `ColdTs-…`, peers) or a harden run
+(`ColdHarden-…`). It fixes what a pass means, since a harden run's
+output is tests and a lifecycle run's is findings. Never a separate
+evidence contract — both emit through the same emitter.
+_Avoid_: run mode, harness profile
 
 **Landed regression**:
 A red→green test whose file exists in the graded workspace and
@@ -211,3 +256,11 @@ _Avoid_: failed, errored
 `evals/ACCEPTANCE.md` — graded verdicts per fixture with run history.
 _Evidence_ alone should not mean this file; evidence is per-finding,
 the record is per-run.
+
+**Harden snapshot**:
+The dated coverage report a harden run writes to
+`.sstack/harden/<date>-<target>-<seq>.md`, one per run, named so a
+later run can print the trend against it. Its per-lens table and
+banded percentage are the run's headline claim; the findings JSON
+beside it is the run's evidence, and the two are graded separately.
+_Avoid_: harden report, coverage report
