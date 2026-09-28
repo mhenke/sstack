@@ -18,3 +18,6 @@
 | cpp-14 | orders | contract | `export_order_summary(order_id)` | leaks internal database fields internal_cost and gateway_ref | return public schema fields only; internal fields stripped |
 | cpp-15 | orders | security | `resolve_receipt_path(order_id, filename)` | returns unconstrained path escaping receipts dir | throw `path traversal outside receipts directory` |
 | cpp-16 | orders | agent | `dispatch_agent_tool("lookup_order", {{"order_id", "invalid"}})` | raw exception leaks, crashing agent loop | return `{"is_error": "true", "error": ...}`; errors encapsulated |
+| cpp-17 | shop | boundaries | `apply_coupon(10.10, 30)` | returns `7.069999999999999`; floating-point truncation error | `7.07`; price rounded to cents | `std::round(result * 100) / 100` |
+| cpp-18 | orders | dependency-failure | `fetch_tracking_status(1, hanging_tracker)` | blocks indefinitely; no timeout on external call | throws timeout error after deadline | wrap with `std::future::wait_for` |
+| cpp-19 | orders | security | `search_order_notes("'; DROP TABLE orders; --")` | filter string contains unsanitized SQL injection payload | reject or escape SQL metacharacters | sanitize or parameterize the query string |

@@ -173,3 +173,29 @@ def dispatch_agent_tool(tool_name, arguments, registry=None):
     # DEFECT: tool execution failure or schema mismatch crashes caller; errors must be encapsulated in structured result
     return {"is_error": False, "result": tools[tool_name](**arguments)}
 
+
+def fetch_tracking_status(order_id, tracker):
+    """Fetch shipping tracking status from external tracker service."""
+    for o in _ORDERS:
+        if o["id"] == order_id:
+            # DEFECT: no timeout on external call; hangs indefinitely if tracker blocks
+            return tracker.get_status(order_id)
+    raise LookupError("no such order")
+
+
+_ORDER_NOTES = {
+    1: "Shipped via FedEx, tracking 12345",
+    2: "Customer requested gift wrap",
+    3: "Expedited shipping applied",
+}
+
+
+def search_order_notes(user_query):
+    """Search order notes matching a user query."""
+    # DEFECT: user input interpolated into filter string without sanitization
+    filter_expr = f"note LIKE '%{user_query}%'"
+    results = []
+    for oid, note in _ORDER_NOTES.items():
+        if user_query in note:
+            results.append({"order_id": oid, "note": note, "filter": filter_expr})
+    return results

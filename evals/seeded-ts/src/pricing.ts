@@ -12,3 +12,9 @@ export function lineTotal(item: LineItem): number {
 export function parseOrder(raw: string): LineItem[] {
   return JSON.parse(raw) as LineItem[];
 }
+
+export function applyCoupon(price: number, discountPct: number): number {
+  // DEFECT: floating-point arithmetic without rounding to cents
+  // 10.10 * 0.70 = 7.069999999999999, not 7.07
+  return price * (1 - discountPct / 100);
+}

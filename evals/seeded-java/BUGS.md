@@ -18,3 +18,6 @@
 | java-14 | orders | contract | `exportOrderSummary(orderId)` | leaks internal fields `internalCost` and `gatewayRef` | return public schema fields only; internal fields stripped |
 | java-15 | orders | security | `resolveReceiptPath(orderId, filename)` | returns unconstrained path escaping receipts dir | throw `path traversal outside receipts directory` |
 | java-16 | orders | agent | `dispatchAgentTool("lookupOrder", {"orderId": "invalid"})` | raw ClassCastException leaks, crashing agent loop | return `{"isError": true, "error": ...}`; errors encapsulated |
+| java-17 | Shop | boundaries | `Shop.applyCoupon(10.10, 30)` | returns `7.069999999999999`; floating-point truncation error | `7.07`; price rounded to cents | `Math.round(result * 100) / 100.0` |
+| java-18 | Orders | dependency-failure | `Orders.fetchTrackingStatus(1, hangingTracker)` | blocks indefinitely; no timeout on external call | throws timeout exception after deadline | wrap with `CompletableFuture.orTimeout()` |
+| java-19 | Orders | security | `Orders.searchOrderNotes("'; DROP TABLE orders; --")` | filter string contains unsanitized SQL injection payload | reject or escape SQL metacharacters in user input | use PreparedStatement-style parameterization |

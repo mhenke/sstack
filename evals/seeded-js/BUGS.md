@@ -19,3 +19,6 @@
 | js-15 | orders | security | `resolveReceiptPath(orderId, filename)` | returns unconstrained path escaping receipts dir | throw `path traversal outside receipts directory` |
 | js-16 | orders | agent | `dispatchAgentTool('lookupOrder', {orderId: 'invalid'})` | raw TypeError leaks, crashing agent loop | return `{ isError: true, error: ... }`; errors encapsulated |
 
+| js-17 | pricing | boundaries | `applyCoupon(10.10, 30)` | returns `7.069999999999999`; floating-point truncation error | `7.07`; price rounded to cents |
+| js-18 | orders | dependency-failure | `fetchTrackingStatus(1, hangingTracker)` | blocks indefinitely; no timeout on external call | `Error: timeout` after reasonable deadline |
+| js-19 | orders | security | `searchOrderNotes("'; DROP TABLE orders; --")` | filter string contains unsanitized SQL injection payload | reject or escape SQL metacharacters |

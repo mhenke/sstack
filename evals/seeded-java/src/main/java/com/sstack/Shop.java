@@ -17,4 +17,9 @@ public final class Shop {
     for (int qty : quantities) max = Math.max(max, qty);
     return max;
   }
+  public static double applyCoupon(double price, double discountPct) {
+    // DEFECT: floating-point arithmetic without rounding to cents
+    // 10.10 * 0.70 = 7.069999999999999, not 7.07
+    return price * (1 - discountPct / 100);
+  }
 }

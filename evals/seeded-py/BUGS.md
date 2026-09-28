@@ -22,4 +22,7 @@ negative-control fixes.
 | py-14 | orders | contract | `export_order_summary(1)` | leaks internal database fields `internal_cost` and `gateway_ref` | return public schema fields only; undeclared internal fields stripped | filter against public contract fields before returning |
 | py-15 | orders | security | `resolve_receipt_path(1, "../../etc/passwd")` | returns unconstrained traversal path escaping receipts directory | `PermissionError: path traversal outside receipts directory` | verify canonical path is contained in receipts_dir via commonpath |
 | py-16 | orders | agent | `dispatch_agent_tool("lookup_order", {"order_id": "invalid"})` | raw TypeError leaks, crashing agent loop | return `{"is_error": True, "error": "order_id must be an integer"}`; tool errors encapsulated as structured error result | wrap tool handler invocation in try/except and return is_error payload |
+| py-17 | pricing | boundaries | `apply_coupon(10.10, 30)` | returns `7.069999999999999`; floating-point truncation error | `7.07`; price rounded to cents | `round(result, 2)` |
+| py-18 | orders | dependency-failure | `fetch_tracking_status(1, hanging_tracker)` | blocks indefinitely; no timeout on external call | `TimeoutError` after reasonable deadline | add timeout kwarg or wrap with `signal.alarm` |
+| py-19 | orders | security | `search_order_notes("'; DROP TABLE orders; --")` | filter string contains unsanitized SQL injection payload | reject or escape SQL metacharacters in user input | sanitize or parameterize the query string |
 

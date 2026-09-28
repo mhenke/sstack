@@ -209,4 +209,23 @@ inline std::map<std::string, std::string> dispatch_agent_tool(const std::string&
   return {{"is_error", "false"}, {"id", std::to_string(id)}};
 }
 
+struct Tracker {
+  virtual std::string get_status(int order_id) = 0;
+  virtual ~Tracker() = default;
+};
+
+inline std::string fetch_tracking_status(int order_id, Tracker& tracker) {
+  auto it = std::find_if(ORDERS.begin(), ORDERS.end(), [order_id](const Order& o) { return o.id == order_id; });
+  if (it == ORDERS.end()) throw std::invalid_argument("no such order");
+  // DEFECT (cpp-18): no timeout on external call; hangs indefinitely if tracker blocks
+  return tracker.get_status(order_id);
+}
+
+inline std::string search_order_notes(const std::string& user_query) {
+  // DEFECT (cpp-19): user input interpolated into filter string without sanitization
+  std::string filter = "note LIKE '%" + user_query + "%'";
+  // return results including the unsanitized filter
+  return "Results for " + filter;
+}
+
 } // namespace shop

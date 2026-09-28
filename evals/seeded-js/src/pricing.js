@@ -6,3 +6,7 @@ export function lineTotal(item) {
 export function parseOrder(raw) {
   return JSON.parse(raw);
 }
+export function applyCoupon(price, discountPct) {
+  // DEFECT: floating-point arithmetic without rounding to cents
+  return price * (1 - discountPct / 100);
+}

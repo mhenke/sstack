@@ -245,6 +245,39 @@ public final class Orders {
     return dispatchAgentTool(toolName, args, null);
   }
 
+  public interface Tracker {
+    String getStatus(int orderId);
+  }
+
+  public static String fetchTrackingStatus(int orderId, Tracker tracker) {
+    // verify order exists
+    for (Order o : ORDER_DATABASE) {
+      if (o.id() == orderId) {
+        // DEFECT: no timeout on external call; hangs indefinitely if tracker blocks
+        return tracker.getStatus(orderId);
+      }
+    }
+    throw new IllegalArgumentException("no such order");
+  }
+
+  private static final Map<Integer, String> ORDER_NOTES = Map.of(
+    1, "Shipped via FedEx, tracking 12345",
+    2, "Customer requested gift wrap",
+    3, "Expedited shipping applied"
+  );
+
+  public static List<Map<String, Object>> searchOrderNotes(String userQuery) {
+    // DEFECT: user input interpolated into filter string without sanitization
+    String filter = "note LIKE '%" + userQuery + "%'";
+    List<Map<String, Object>> results = new java.util.ArrayList<>();
+    for (var entry : ORDER_NOTES.entrySet()) {
+      if (entry.getValue().contains(userQuery)) {
+        results.add(Map.of("order_id", entry.getKey(), "note", entry.getValue(), "filter", filter));
+      }
+    }
+    return results;
+  }
+
   // Standalone CLI dispatcher for evidence repro commands
   public static void main(String[] args) {
     if (args.length == 0) return;

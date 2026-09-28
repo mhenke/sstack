@@ -211,3 +211,28 @@ export function dispatchAgentTool(
   // DEFECT (ts-16): tool execution error crashes caller instead of returning structured error result
   return { isError: false, result: tools[toolName](args) };
 }
+
+export interface Tracker {
+  getStatus(orderId: number): string;
+}
+
+export function fetchTrackingStatus(orderId: number, tracker: Tracker): string {
+  const order = orders.find(o => o.id === orderId);
+  if (!order) throw new Error("no such order");
+  // DEFECT: no timeout on external call; hangs indefinitely if tracker blocks
+  return tracker.getStatus(orderId);
+}
+
+const orderNotes: Record<number, string> = {
+  1: "Shipped via FedEx, tracking 12345",
+  2: "Customer requested gift wrap",
+  3: "Expedited shipping applied",
+};
+
+export function searchOrderNotes(userQuery: string): { orderId: number; note: string; filter: string }[] {
+  // DEFECT: user input interpolated into query string without sanitization
+  const filterExpr = `note LIKE '%${userQuery}%'`;
+  return Object.entries(orderNotes)
+    .filter(([, note]) => note.includes(userQuery))
+    .map(([id, note]) => ({ orderId: Number(id), note, filter: filterExpr }));
+}

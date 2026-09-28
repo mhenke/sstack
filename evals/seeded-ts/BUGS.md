@@ -22,4 +22,7 @@ negative-control fixes.
 | ts-14 | orders | contract | `exportOrderSummary(1)` | leaks internal database fields `internalCost` and `gatewayRef` | return public schema fields only; undeclared internal fields stripped | filter against public contract fields before returning |
 | ts-15 | orders | security | `resolveReceiptPath(1, "../../etc/passwd")` | returns unconstrained traversal path escaping receipts directory | `Error: path traversal outside receipts directory` | verify canonical path starts with receiptsDir |
 | ts-16 | orders | agent | `dispatchAgentTool("lookupOrder", {orderId: "invalid"})` | raw TypeError leaks, crashing agent loop | return `{"isError": true, "error": "orderId must be a number"}`; tool errors encapsulated as structured error result | wrap tool handler invocation in try/catch and return isError payload |
+| ts-17 | pricing | boundaries | `applyCoupon(10.10, 30)` | returns `7.069999999999999`; floating-point truncation error | `7.07`; price rounded to cents | `Math.round(result * 100) / 100` |
+| ts-18 | orders | dependency-failure | `fetchTrackingStatus(1, hangingTracker)` | blocks indefinitely; no timeout on external call | `Error: timeout` after reasonable deadline | wrap call with `AbortSignal.timeout()` or `Promise.race` |
+| ts-19 | orders | security | `searchOrderNotes("'; DROP TABLE orders; --")` | filter string contains unsanitized SQL injection payload | reject or escape SQL metacharacters in user input | sanitize or parameterize the query string |
 

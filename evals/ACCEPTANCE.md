@@ -27,8 +27,19 @@ isolated dir).
 > **Staleness note (2026-09-27)**: Recorded cold-run passes predate the
 > addition of the inline sensitivity check (Stage 5) and Run-end check #5;
 > existing PASS numbers reflect exact pre-check skill text.
+> **Staleness note (2026-09-27, later)**: Recorded cold-run passes also
+> predate the agent-lens rubric revision (three oracles restated as
+> code-observable assertions on the orchestrator's own outputs) and the
+> `agent` index row now naming all five owned failure classes. The
+> agent-lens cold evidence (py-16/ts-16/js-16/java-16/cpp-16) remains
+> valid: those seeds are dispatch-crash defects, unchanged by the
+> revision. Other lenses are untouched.
+> **Staleness note (2026-09-28)**: Seeds `*-17` (boundaries/precision),
+> `*-18` (dependency-failure/timeout), and `*-19` (security/injection)
+> added across all five fixtures. Goldens present; cold-run evidence
+> pending. Existing 16-seed PASS verdicts remain valid — new seeds are
+> additive.
 
-| Repo | Verdict | Detail |
 |---|---|---|
 | seeded-py | PASS | ColdPy-5 covers py-1/3/4/5/6 (5/5 seeds, 17 tests green, 12/12 replay intact). ColdPy-11 verified py-7 (ownership), py-8 (ordering), py-9 (exceptional-conditions), py-10 (resource-exhaustion), and py-11 (concurrency): 5 confirmed red→green in `tests/test_shop.py`, 5/5 evidence replay intact, 0 drift, 10 tests green. ColdPy-12 verified py-12 (idempotency): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-13 verified py-13 (dependency-failure): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-14 verified py-14 (contract): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-15 verified py-15 (security): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-16 verified py-16 (agent): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-18 (2026-09-27, fresh full-lifecycle rerun after SSOT deduplication): 16 confirmed red→green, 16/16 evidence replay intact, 21 tests green, content-matched all 16 seeds including py-2. Full 16/16 named coverage achieved. |
 | seeded-java | PASS | All 16 seeds across all 14 lenses verified. java-1..5 verified in ColdJava-3 (3/5 seeds, 7/7 replay intact); java-6..16 verified in ColdJava-4 (11/11 seeds content-matched, 14/14 tests green, 11 confirmed red→green regressions landed in ShopTest.java, 11/11 evidence replay intact, 0 drift). |
