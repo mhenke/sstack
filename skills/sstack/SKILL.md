@@ -118,8 +118,7 @@ The JSON you pipe is the Report format fields — `lens`, `surface`,
 `case`, `oracle`, `verdict`, `repro` — plus `slug` (a short kebab-case
 name for the finding), `fix` (the minimal change you will make), and
 `regression`: `{"file": "tests/test_x.py", "test": "test_name",
-"before": "red", "after": "green"}`. `before` and `after` are the
-literal tokens `red` and `green`, never output snippets. Optional for
+"before": "red", "after": "green"}`. Optional for
 PBT: `seed` (integer/token) and `counterexample` (minimal failing input).
 The seven fields alone are rejected. A finding with no regression yet is
 legitimate during Verify: the emitter warns and records the rest.
@@ -282,8 +281,7 @@ Cap scratch runs to 25 iterations (`max_examples=25`, `numRuns: 25`,
 the seed into the `repro` command (`--hypothesis-seed=<seed>`,
 `{ seed: <seed> }`) so machine replay runs deterministically.
 
-Hand-designed cases remain the fallback when no library is present,
-and the oracle is still written FIRST either way.
+Hand-designed cases remain the fallback when no library is present.
 
 Cover every selected lens on every mapped surface before
 concluding. A lens with zero executed cases on a surface that
@@ -437,10 +435,6 @@ your fix or your test is incomplete, not evidence the tool is wrong.
 
 ### Run-end checks
 
-Keep the report focused on observable results, and keep the final
-report concise — the discarded scratch evidence stays out of the
-user-facing output.
-
 Before delivering the report, verify all of the following:
 
 1. Every confirmed finding has a red test and a green post-fix test.
@@ -477,7 +471,7 @@ reporting.
 | agent | tool-call schema divergence, tool errors crashing the loop, prompt injection delimiters, system prompt eviction, runaway tool loops | sstack-agent-attacker |
 | dependency-failure | upstream timeout, partial response, unavailable service, circuit breaker trip | sstack-dependency-failure-attacker |
 | contract | API contract violations, schema drift, undeclared fields | sstack-contract-attacker |
-| agent | tool-call schema divergence, unhandled tool errors, prompt injection | sstack-agent-attacker |
+| idempotency | retried operations, duplicate requests, Idempotency-Key collisions and tampering, safe method purity | sstack-idempotency-attacker |
 | security | injection (SQL, command, path traversal), crypto token tampering | sstack-security-attacker |
 
 ## Safety

@@ -17,12 +17,13 @@ isolated dir).
 > exercised by those serial runs). Findings link to goldens by
 > trigger content; self-reported `seed_id` is advisory; landed
 > regressions are verified on disk; every PASS now replays its
-> evidence out of the agent loop. All five fixtures cover 16/16
-> named seeds with verified cold passes.
+> evidence out of the agent loop. All five fixtures show verified cold
+> passes on 16 of 19 named seeds; `*-17`/`*-18`/`*-19` carry goldens
+> with cold-run evidence pending.
 >
 > **Scope note (2026-09-27)**: All five fixtures (`seeded-py`, `seeded-ts`,
-> `seeded-js`, `seeded-java`, and `seeded-cpp`) cover 16 seeds across
-> all 14 shipped lenses with graded cold runs under ADR-0010.
+> `seeded-js`, `seeded-java`, and `seeded-cpp`) cover 16 evidenced seeds
+> (of 19 seeded) across all 14 shipped lenses with graded cold runs under ADR-0010.
 >
 > **Staleness note (2026-09-27)**: Recorded cold-run passes predate the
 > addition of the inline sensitivity check (Stage 5) and Run-end check #5;
@@ -39,6 +40,13 @@ isolated dir).
 > added across all five fixtures. Goldens present; cold-run evidence
 > pending. Existing 16-seed PASS verdicts remain valid — new seeds are
 > additive.
+> **Staleness note (2026-09-28, later)**: SKILL.md lens index gained the
+> missing `idempotency` row (a duplicate `agent` row was removed) and was
+> pruned for headroom (527 lines). Recorded cold-run PASSes predate this
+> text. The idempotency cold evidence (py-12, ts-12, js-12, java-12,
+> cpp-12) remains valid: Discover loads lens skills directly from the
+> skills directories, so those runs reached the rubric despite the
+> missing index row.
 
 |---|---|---|
 | seeded-py | PASS | ColdPy-5 covers py-1/3/4/5/6 (5/5 seeds, 17 tests green, 12/12 replay intact). ColdPy-11 verified py-7 (ownership), py-8 (ordering), py-9 (exceptional-conditions), py-10 (resource-exhaustion), and py-11 (concurrency): 5 confirmed red→green in `tests/test_shop.py`, 5/5 evidence replay intact, 0 drift, 10 tests green. ColdPy-12 verified py-12 (idempotency): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-13 verified py-13 (dependency-failure): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-14 verified py-14 (contract): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-15 verified py-15 (security): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-16 verified py-16 (agent): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-18 (2026-09-27, fresh full-lifecycle rerun after SSOT deduplication): 16 confirmed red→green, 16/16 evidence replay intact, 21 tests green, content-matched all 16 seeds including py-2. Full 16/16 named coverage achieved. |
