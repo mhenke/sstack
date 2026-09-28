@@ -75,7 +75,11 @@ report, integrity, drift, and what not to call things — lives in
 ## Taxonomy
 
 Negative testing is the domain; lenses explore it. Security is a
-lens, never the identity.
+lens, never the identity. The taxonomy is bounded by an entry gate,
+not a count: a lens ships only with seeded defects across all five
+fixtures, goldens, and a graded cold run (ADR-0003), and a candidate
+overlapping an existing lens's trigger space is absorbed into it
+rather than added. Mutation stays disclosed and unshipped (ADR-0014).
 
 | Category | Lens | v0 |
 |---|---|---|
