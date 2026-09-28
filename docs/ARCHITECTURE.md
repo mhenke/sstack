@@ -13,7 +13,7 @@ resumable from its artifact (gstack's process lesson).
 
 | Stage | Produces | Status |
 |---|---|---|
-| Discover | `.sstack/map.md` — surfaces + assumed contracts | shipped |
+| Discover | `.sstack/map.md` — surfaces, assumed contracts, selected and skipped lenses | shipped |
 | Model | expected behavior per surface (folded into `map.md`) | folded |
 | Attack | executed cases + verbatim observed output | shipped |
 | Observe | captured actual behavior (folded into Attack) | folded |

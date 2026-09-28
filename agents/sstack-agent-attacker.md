@@ -19,7 +19,12 @@ the `### Report format` block).
    attacker with the same rigor: attack LLM and tool-calling boundaries —
    supply malformed or missing tool arguments, trigger tool execution
    exceptions, inject prompt override payloads into tool return strings,
-   test transcript truncation behavior, and enforce loop limits.
+   test transcript truncation behavior, and enforce loop limits. Where
+   the rubric's oracles assert on code the orchestrator returns or
+   builds (delimited prompt text, the truncated message list, the
+   structured tool result), confirm by running the real command and
+   quoting its output; never accept a judgment of the model's reply
+   as the observed field.
 
 ## Work
 

@@ -1,7 +1,6 @@
 ---
 name: sstack
-description: Use when the user wants negative testing, edge-case coverage, failure-mode analysis, robustness checks, hostile or unexpected input handling, "what happens if" questions about code, or to harden a module or API against bad input before shipping. Discovers failure surfaces, attacks them through lenses (boundaries, malformed, missing, ownership, exceptional-conditions, resource-exhaustion, state), verifies observed behavior against a pre-declared oracle, adds negative regression tests, fixes confirmed failures, and hardens existing suites against future regressions. Scope is existing behavior under adverse conditions; happy-path feature work belongs to the feature's own tests.
-disable-model-invocation: true
+description: Use when the user wants negative testing, edge-case coverage, failure-mode analysis, robustness checks, hostile input handling, or to harden a module against bad input before shipping.
 ---
 
 # sstack — structured negative testing
@@ -55,7 +54,8 @@ explicitly (or `cd` there once) so nothing lands in whatever
 directory the agent happened to start in.
 
 All artifacts live under `<host-repo>/.sstack/`:
-- `map.md` — surfaces + assumed contracts (Discover output)
+- `map.md` — surfaces + assumed contracts + selected and skipped
+  lenses (Discover output)
 - `learn/` — failure classes from prior runs (Discover input,
   Learn output). One line per class:
   `lens | signal | adjacent surfaces to re-test`
@@ -226,8 +226,10 @@ routes, anything that parses external input, loops over collections,
 or indexes/slices. Read `.sstack/learn/` first and prioritize adjacent
 surfaces of recorded failure classes. Then read every `sstack-<lens>`
 skill in the skills directories named in Customization, skipping any
-whose "When not to apply" section rules the mapped surface out, and
-record every selected lens in `map.md`. For each surface, record its
+whose "When not to apply" section rules the mapped surface out.
+Record every selected lens in `map.md`, and each skipped lens with
+the line that ruled it out, so a deselected lens reads as a recorded
+decision rather than an omission. For each surface, record its
 assumed contract — types, ranges, preconditions gleaned from
 docstrings, types, and call sites. Write `.sstack/map.md`.
 
@@ -452,6 +454,9 @@ Before delivering the report, verify all of the following:
 4. The full suite passes.
 5. Every confirmed regression test passed the sensitivity check (turns
    red when the fix guard is bypassed in scratch).
+6. Every skipped lens in `map.md` names the "When not to apply"
+   line that ruled it out. An unrecorded skip is a lens that never
+   ran, and the report must not read as though it had.
 
 A run that fails any of these is invalid. Fix and re-run before
 reporting.
@@ -469,7 +474,7 @@ reporting.
 | state | object with lifetime: cached/derived reads, mutable input written through, partial update after failure, internal collection escaped to callers, invalid transitions | sstack-state-attacker |
 | ordering | operations applied out of sequence, multi-step pipeline bypass, step skipping | sstack-ordering-attacker |
 | concurrency | race conditions, parallel access, double-spend, lost updates | sstack-concurrency-attacker |
-| idempotency | retried mutations, duplicate submissions, Idempotency-Key divergence | sstack-idempotency-attacker |
+| agent | tool-call schema divergence, tool errors crashing the loop, prompt injection delimiters, system prompt eviction, runaway tool loops | sstack-agent-attacker |
 | dependency-failure | upstream timeout, partial response, unavailable service, circuit breaker trip | sstack-dependency-failure-attacker |
 | contract | API contract violations, schema drift, undeclared fields | sstack-contract-attacker |
 | agent | tool-call schema divergence, unhandled tool errors, prompt injection | sstack-agent-attacker |

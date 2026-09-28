@@ -94,8 +94,9 @@ ordinary `SKILL.md` carrying `disable-model-invocation: true`, because
 a lens is pasted into a dispatch and never auto-loaded by a host. Any
 number of them. Adds a **lens**, never an agent and never a stage: it
 runs on a shipped attacker with its rubric appended, so the built-in
-rubric still applies. The index's lone `custom lens` row (`mutation`)
-is an unbuilt *shipped* lens, a third category from a user's own.
+rubric still applies. `mutation` is a research conclusion, not an
+index row: it was pruned from the lens index because it verifies
+tests rather than attacking code (see `docs/research/MUTATION-RESEARCH.md`).
 _Avoid_: extension, plugin (both imply code the pack loads)
 
 **Decision site**:

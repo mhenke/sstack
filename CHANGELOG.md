@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- Lens deselection is now recorded and checked. Discover already
+  skipped a lens whose "When not to apply" section ruled the mapped
+  surface out, but nothing recorded the decision, so a run that dropped
+  a lens read exactly like a clean one. `map.md` now carries every
+  skipped lens with the line that ruled it out, and run-end check #6
+  fails a run that deselects without naming that line.
+
+- Agent-lens rubric revision, from the all-lenses value/cost audit:
+  three oracles restated as code-observable assertions (delimiter check
+  on the constructed prompt, system-prompt presence in the truncated
+  message list, structured tool result), an "Interaction with other
+  lenses" section adjudicating the 4-way overlap with `malformed`,
+  `contract`, and `dependency-failure`, and the `agent` index row plus
+  skill description plus site card now naming all five owned failure
+  classes. Attacker fallback guards against accepting model-reply
+  judgments as `observed`.
+
 ### Changed
 
 - Stage 5 (Test) and Stage 6 (Fix) upgraded with in-agent mutant checks

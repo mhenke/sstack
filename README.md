@@ -154,7 +154,7 @@ built-in prose and the target's documentation, types, and call sites.
 ```
 .sstack/
 ├── config.md     lenses.remove only, if you skip one (optional)
-├── map.md        surfaces + assumed contracts
+├── map.md        surfaces, assumed contracts, selected + skipped lenses
 ├── plan.md       lenses, cases, oracles
 ├── learn/        failure classes for the next run
 ├── findings/     one .md and one .json per finding

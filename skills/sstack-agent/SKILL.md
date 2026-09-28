@@ -1,6 +1,6 @@
 ---
 name: sstack-agent
-description: "Agent lens rubric. Case-generation heuristics, oracle patterns, and worked examples for tool-call schema divergence, unhandled tool errors, prompt injection, and context eviction. Loaded inline under ### Lens rubric."
+description: "Agent lens rubric. Case-generation heuristics, oracle patterns, and worked examples for tool-call schema divergence, tool errors crashing the loop, prompt injection delimiters, system prompt eviction, and runaway tool loops. Loaded inline under ### Lens rubric."
 disable-model-invocation: true
 ---
 
@@ -37,10 +37,15 @@ system prompt instructions during context truncation.
 - Universal exception encapsulation: tool execution exceptions format as
   `{"is_error": true, "error": "..."}` results for model self-correction; the
   orchestrator process and agent loop never crash.
-- Instruction-data boundary isolation: external tool outputs are enclosed in strict
-  data delimiters (`<tool_output>`), never evaluated as privileged instructions.
-- System prompt preservation: context pruning retains system prompts and tool
-  definitions across window compaction.
+- Instruction-data boundary isolation: the prompt the orchestrator
+  builds carries tool output inside explicit data delimiters
+  (`<tool_output>`), with the injection payload verbatim inside them.
+  Confirm on the constructed prompt string — never by judging the
+  model's reply, which no command can quote.
+- System prompt preservation: after truncation the orchestrator's
+  outgoing message list still contains the pinned system prompt
+  verbatim. Assert on the list the truncator returns, never on model
+  behavior at turn $N$.
 - Bounded tool iteration: repeated identical failures abort cleanly after a fixed
   cycle threshold.
 
@@ -98,3 +103,14 @@ throws unhandled exception terminating the Node process.
 
 The surface does not interact with language models, agent tool-call protocols,
 context window managers, or untrusted external data retrieval.
+
+## Interaction with other lenses
+
+`agent` owns the agent loop: the tool-result envelope, the loop's step
+ceiling, and the prompt the orchestrator builds from tool output.
+The trigger for a wrapped-vs-leaking dispatch failure belongs to
+`malformed` (bad types) or `dependency-failure` (upstream dies);
+`agent` grades the loop's response — structured result, bounded retry,
+delimited output. A tool schema is a contract: schema drift between
+two pinned versions is `contract`; a hallucinated argument the schema
+rejects is `agent`.

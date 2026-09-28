@@ -175,8 +175,10 @@ lenses.remove: ownership
 ```
 
 Skipped lenses are reported in the run summary, because a quietly
-weakened run is indistinguishable from a clean one. That file is run
-input created by you, not pack content, so editing it costs no
+weakened run is indistinguishable from a clean one. `map.md` records
+each one with the line that ruled it out, and a run that deselects a
+lens without naming that line fails its run-end checks. That file is
+run input created by you, not pack content, so editing it costs no
 updates.
 
 ## When the two halves do not match
@@ -206,7 +208,7 @@ silently does nothing, and a quietly weaker run reads as a clean one.
   elsewhere, including through a symlinked skills directory, is
   skipped with a note in the report. A run takes attack strategy only
   from paths scoped to the repo under test.
-- **It cannot add an 8th shipped lens to the index.** The index in
+- **It cannot add a fifteenth shipped lens to the index.** The index in
   `skills/sstack/SKILL.md` lists what the pack provides. Your lens
   runs alongside it without an index row.
 
