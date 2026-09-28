@@ -228,9 +228,13 @@ skill in the skills directories named in Customization, skipping any
 whose "When not to apply" section rules the mapped surface out.
 Record every selected lens in `map.md`, and each skipped lens with
 the line that ruled it out, so a deselected lens reads as a recorded
-decision rather than an omission. For each surface, record its
-assumed contract — types, ranges, preconditions gleaned from
-docstrings, types, and call sites. Write `.sstack/map.md`.
+decision rather than an omission. A behavior is testable only if the
+agent can confirm it by importing code and calling a function — the
+no-socket test: confirming by launching a process and observing real
+HTTP is out of scope, recorded as a checked N/A that names the
+artifact. For each surface, record its assumed contract — types,
+ranges, preconditions gleaned from docstrings, types, and call sites.
+Write `.sstack/map.md`.
 
 Anchor the map in the target's real invariants, its entities and
 transitions, and its user-observable behavior. Cover materially

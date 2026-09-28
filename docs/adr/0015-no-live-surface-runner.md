@@ -43,13 +43,31 @@ We will not build or ship a live-surface runner, and `runners/`
 remains absent from the tree.
 
 Live-surface testing is out of scope entirely, as guidance as well as
-infrastructure. The security and ownership lens rubrics do **not**
-direct the agent to boot servers or fire HTTP probes. Runtime-only
-behaviors are recorded as checked N/As in `map.md` per ADR-0007 — the
-lens confirms from source that no in-process decision site exists for
-the behavior, and moves on.
+infrastructure. The security and ownership lens rubrics direct the
+agent to test decisions in-process and record runtime-only behaviors
+as checked N/As in `map.md` per ADR-0007.
 
-In-process testing of remote behavior remains in scope: a remote
+The scope line is one test, not a word list — **the no-socket test**:
+a behavior is in scope if the agent can confirm it by importing code
+and calling a function, with no listening socket; it is out of scope
+if confirming it requires launching a process and sending real HTTP.
+
+| evidence requires a listening socket? | scope | action |
+|---|---|---|
+| no — call a function, import the app, read config | in | finding + in-process regression |
+| yes — observe a live response | out | checked N/A in `map.md`, cite the artifact |
+
+The test keeps terms that merely sound remote on the in-scope side:
+CORS/CSRF config lines, middleware *code order* (`app.use(authz)`
+after handlers), and boot-time fail-fast (calling `load_config()`
+with a required variable unset and asserting the raise) are all
+source-decidable, in-process confirmable defects. What the test
+excludes is *observation*: what a live framework actually emits in
+`Access-Control-Allow-Origin`, real middleware execution order, live
+header handling — evidence that needs a socket and that `replay.py`
+cannot re-verify without managing server lifecycle.
+
+In-process testing of remote behavior stays in scope: a remote
 dependency is tested by injecting a failing or hanging double of it
 (the `failing_gateway` / `hanging_tracker` seed pattern) and asserting
 the caller's handling. The network is never touched.

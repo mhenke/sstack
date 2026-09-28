@@ -47,9 +47,10 @@ report, integrity, drift, and what not to call things — lives in
   infrastructure (ADR-0013, ADR-0014, ADR-0015): the agent runs real
   commands itself — the target's own test frameworks — and quotes
   real output through the emitter. `runners/` stays absent, and
-  runtime/live-surface probing (booting servers, firing HTTP probes)
-  is out of scope: sstack is source-first, in-process negative
-  testing (ADR-0015).
+  live-surface testing is out of scope per ADR-0015's **no-socket
+  test**: a behavior is in scope only if the agent can confirm it by
+  importing code and calling a function; confirming it by launching a
+  process and observing real HTTP is out of scope.
 - **Oracle** — the expected-behavior declaration written *before*
   the attack. Errors, degradation, retry bounds, invariants,
   rejections — not only crashes.
