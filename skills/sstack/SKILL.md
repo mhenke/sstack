@@ -104,8 +104,8 @@ lens: <lens> | verdict: <confirmed | refuted | inconclusive>
   an attack creates, one directory per lens
 - `pristine-src/` — the target's originals, snapshotted before Fix, so
   a repro command still shows the buggy behavior after the fix lands
-- `harden/<date>-<target>-<seq>.md` — harden-mode coverage inventory
-  snapshots (not findings; the trend line reads these)
+- `harden/<date>-<target>-<seq>.md` — harden-mode coverage snapshots
+  (not findings; the trend line reads these)
 
 The emitter is `scripts/emit_findings.py` (or `scripts/emit_findings.js`
 under Node), beside this skill: run it, never rewrite or copy it. Once
