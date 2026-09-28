@@ -33,7 +33,8 @@ GENERIC = {
 # to say in prose — a generic topic word, not a leaked surface. A seed
 # array like `export const orders: Order[]` parses as an identifier but
 # is never called, so naming "orders" leaks nothing.
-TOPIC_WORDS = {"orders", "order", "items", "users", "carts", "payments"}
+TOPIC_WORDS = {"orders", "order", "items", "users", "carts", "payments",
+               "inventory"}
 
 def emit(workspace, finding, fixture="seeded-py"):
     return subprocess.run(
