@@ -278,3 +278,8 @@ def test_pbt_seed_and_counterexample_parity():
         assert py_rep["findings"][0]["counterexample"] == '""'
         assert py_rep == js_rep
 
+        from evals.replay import replay_one
+        rep_res = replay_one(Path(tmp_py) / ".sstack/findings/t1.json")
+        assert rep_res["seed"] == 42891234
+        assert rep_res["integrity"] == "intact"
+

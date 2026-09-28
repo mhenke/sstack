@@ -273,12 +273,12 @@ harness is a broken case, never a verdict.
 If the target repo already has a property-based testing library
 installed, write a property capturing the oracle and let the
 library's generator and shrinker find the counterexample instead of
-hand-designing cases the library would generate:
-
-- Python: Hypothesis
-- TypeScript / JS: fast-check
-- Java / Kotlin: jqwik
-- C++: RapidCheck, Google FuzzTest
+hand-designing cases the library would generate (Python: Hypothesis,
+TS/JS: fast-check, Java: jqwik, C++: RapidCheck, Google FuzzTest).
+Cap scratch runs to 25 iterations (`max_examples=25`, `numRuns: 25`,
+`tries = 25`) to keep attack loops sub-second. When emitting, bake
+the seed into the `repro` command (`--hypothesis-seed=<seed>`,
+`{ seed: <seed> }`) so machine replay runs deterministically.
 
 Hand-designed cases remain the fallback when no library is present,
 and the oracle is still written FIRST either way.
@@ -382,9 +382,11 @@ That is the proof the test catches the bug. A green test on a
 confirmed finding pinned the observed behavior instead of the oracle.
 Rewrite it to assert the oracle.
 
-Verify test sensitivity (the inline mutant check): temporarily negate or
-bypass the fix guard in scratch. The regression test must go red. If it
-passes under inverted logic, the test is vacuous: rewrite it to assert
+Verify test sensitivity (the inline mutant check): in scratch, test against
+at least one canonical mutant on the fix: relational inversion (`<` to `>=`,
+`==` to `!=`), boundary shift ($N$ vs $N \pm 1$), or statement deletion
+(bypassing the guard). The regression test must go red immediately. If it
+passes under mutated logic, the test is vacuous: rewrite it to assert
 the observable contract.
 
 For **refuted** findings and surfaces that already handle the adverse
@@ -426,10 +428,10 @@ Done when every confirmed finding's test is green and the full suite
 passes.
 
 If the target repo has a mutation testing tool installed, run it
-scoped to the surfaces you attacked and record the mutation score.
-PIT (Java), Stryker (JS/TS), mutmut (Python). Survived mutants in
-code you just fixed are evidence your fix or your test is
-incomplete, not evidence the tool is wrong.
+strictly scoped to the fix diff (incremental/diff flags: Stryker
+`--since HEAD`, PIT incremental/`pitest-git`, mutmut line ranges;
+timebox 60s). Survived mutants in code you just fixed are evidence
+your fix or your test is incomplete, not evidence the tool is wrong.
 
 ### Run-end checks
 

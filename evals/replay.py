@@ -43,6 +43,8 @@ def replay_one(path: Path) -> dict:
     computed = fingerprint(ev["stdout"] + ev.get("stderr", ""))
     integrity = "intact" if recorded == computed else "fabricated"
     result = {"finding": path.stem, "integrity": integrity}
+    if "seed" in ev:
+        result["seed"] = ev["seed"]
     if integrity == "fabricated":
         result["fingerprint"] = {"recorded": recorded, "computed": computed}
     try:
