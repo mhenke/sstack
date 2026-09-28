@@ -81,6 +81,30 @@ hardened grader (`evals/test_grader.py` pins both gates):
   regressions landed, 16/16 evidence replay intact, 21 tests green,
   content-matched all 16 seeds (including py-2). Closes the remaining py-2
   gap, achieving 16/16 named coverage on seeded-py.
+- **ColdPy-19 (seeded-py, 2026-09-28).** Cold run against the current
+  skill text (post-ADR-0015 strip, rubric polish, Discover-stage
+  no-socket rule). The subagent produced **29 confirmed findings across
+  all 14 lenses** — machine-executed records with fingerprints, exit
+  codes, and captured output — then hung in the Fix stage and was
+  killed; the orchestrator completed Fix (canonical `paginate` and
+  `Cart.count` fixes, one wrong-oracle scratch test removed), reaching
+  **18/18 tests green**. Grader: **PASS** (`bug-pin` control holds —
+  4 regressions red against pristine source — and `py-5`/`py-9`
+  content-matched with landed regressions).
+  **Caveats, recorded deliberately:** (a) only 7 of 29 findings could
+  be paired unambiguously to a real landed regression; the other 22
+  named regression files/tests that do not exist, so they graded as
+  unlanded — the run's finding count exceeds its regression count and
+  no mapping was guessed to close the gap; (b) `replay` reports
+  **11 of 29 findings `fabricated`** (recorded fingerprint ≠ recomputed
+  — the hung run wrote evidence files whose fingerprints no longer
+  match after the source was fixed) and 12 with `drift`. This run is a
+  **partial re-evidence**: it proves the current text produces
+  confirmed findings across all 14 lenses and that Fix+grade+replay
+  chains work end to end, but it does **not** supersede the
+  16-seed ColdPy-11..18 evidence, which stands. The pre-2026-09-28
+  staleness notes above remain in force.
+
 - **Grader hardening.** The bug-pin control re-runs every confirmed
   finding's regression against the unfixed source (all-green means the
   test asserts the defect), and `matches_golden` gates on executed
