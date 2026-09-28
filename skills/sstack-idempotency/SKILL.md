@@ -17,9 +17,11 @@ and at-least-once message processing.
 - Mutation replay: execute a state-changing mutation ($POST$, method call),
   capture the response, and replay the identical request multiple times
   ($N \ge 2$) with and without idempotency keys.
-- Idempotency-Key tampering (payload mismatch): execute a request with an
-  `Idempotency-Key`, then submit a second request reusing that exact key
-  with an altered payload or modified parameters.
+- Payload divergence mutation (IETF draft §2.7): execute a request with an
+  `Idempotency-Key` and valid payload $P$. Then submit a second request
+  reusing that exact key with a minimal single-field mutation $P'$
+  (e.g. modified amount, recipient, or action). Verifies the key binds to
+  a cryptographic digest of the payload rather than caching blindly.
 - In-flight duplicate submission: send parallel requests with the same
   idempotency key simultaneously before the first request finishes.
 - Safe method side-effect verification: execute `GET`, `HEAD`, or `OPTIONS`
@@ -35,9 +37,10 @@ and at-least-once message processing.
   or emails).
 - Replay fidelity: subsequent retries under matching idempotency keys
   return the original response without re-executing business logic.
-- Key tampering rejection: reusing an existing key with altered parameters
-  fails with explicit diagnostics (HTTP 422 Unprocessable Content or 409
-  Conflict), never executing the altered mutation.
+- Payload divergence rejection: reusing an existing key with altered parameters
+  ($P \neq P'$) returns RFC 9110 HTTP 409 Conflict (or 422 Unprocessable Content)
+  naming the payload mismatch; the server never returns the cached 200 response
+  for $P$ and never executes the mutated action $P'$.
 - In-flight collision protection: concurrent requests sharing an active key
   reject with 409 Conflict or 425 Too Early.
 

@@ -29,20 +29,7 @@ of a run. Anything that does neither is out.
 
 ## Open, in order
 
-### 1. Evidence runners and mutation
-
-- **What**: `mutation` runner. Mutation testing is an evidence runner
-  (Stage 5/6) rather than an attack lens (it mutates ASTs rather than
-  executing adverse client cases). It can be activated today by a target
-  repo with an evidence runner or custom lens, per ADR-0008, without a
-  pack change. All 14 shipped lenses have a seeded defect in
-  `evals/seeded-py` — `py-1` through `py-16`, covering every lens in
-  `BUGS.md` — and fifteen of the sixteen have a verified cold pass
-  with 0 drift in `evals/ACCEPTANCE.md` (py-2 unmatched).
-- **Done when**: mutation runner gates Stage 5/6 with mutant generation
-  and kill metrics.
-
-### 2. Host packaging
+### 1. Host packaging
 
 - **Why**: install is one command (`npx skills add`) but update has
   no forced path; stale copies linger.
@@ -82,6 +69,7 @@ of a run. Anything that does neither is out.
 - Learn loop in skill text.
 - Lifecycle principle mapping.
 - Goldens backfilled for js/java/cpp; junit jar auto-fetch.
+- PBT seed and counterexample captured in evidence schema for replay determinism (ADR-0013).
 
 ## Explicitly not planned
 
@@ -92,6 +80,12 @@ of a run. Anything that does neither is out.
   (ADR-0001).
 - **Mutation as the identity.** A verification strategy, never the
   frame (ADR-0001).
+- **A dedicated PBT runner.** Delegates to target CLI; seed and
+  counterexample captured in findings JSON (ADR-0013).
+- **A built-in mutation runner.** Mutation testing in target repos
+  violates zero-runtime (ADR-0002), fails in repos lacking tooling,
+  explodes run latency, and duplicates the existing red-to-green proof
+  gate (ADR-0014). Target repos delegate opportunistically via ADR-0004.
 
 ## How a roadmap item ships
 

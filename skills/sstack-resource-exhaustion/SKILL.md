@@ -18,6 +18,9 @@ oracle at that transition is the test.
 
 ## Case-generation heuristics
 
+- Paired limit probes: probe at the declared capacity $N$ (must succeed)
+  and $N+1$ (must shed load or reject cleanly). Both vectors are
+  required to verify the boundary is enforced without false rejections.
 - Memory: inputs sized just under and just over any buffer, cache,
   or collection limit the code documents or implies.
 - Connections: open more concurrent connections than the pool size.
@@ -57,6 +60,8 @@ oracle at that transition is the test.
 - Self-healing recovery: the system recovers immediately once pressure
   is removed. Overload, stop, normal request succeeds with standard
   latency.
+- Threshold sensitivity: verify admission at $N$ and rejection at $N+1$;
+  an early gate that rejects at $N$ has turned a valid peak into an outage.
 
 Worked example — Python `export_records(query)` with 2,000,000 matching
 rows and a 10,000 row safety limit: oracle raises

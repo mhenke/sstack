@@ -28,9 +28,17 @@ dependencies across multi-step workflows.
   explicit sequencing rejection.
 - Savepoint and transaction release inversion: release or roll back
   nested transaction savepoints in reverse or arbitrary sequence.
+- Commutativity test: for any two distinct operations $A$ and $B$, evaluate
+  order independence ($A \circ B \equiv B \circ A$). If the contract implies
+  independence, executing $B$ then $A$ must produce the exact same final
+  state as $A$ then $B$. If sequence-dependent, inverting order must be
+  explicitly rejected, never silently applying out-of-order partial state.
 
 ## Oracle patterns
 
+- Commutative stability: independent actions execute to identical end-states
+  regardless of execution order ($A \circ B = B \circ A$). Non-commutative
+  actions enforce strict sequence gates.
 - Unmet prerequisites produce explicit sequencing errors (e.g. HTTP
   409 Conflict, 428 Precondition Required, or domain `IllegalOrderException`),
   naming the missing prerequisite stage.

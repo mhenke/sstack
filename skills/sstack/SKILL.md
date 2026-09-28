@@ -118,8 +118,9 @@ The JSON you pipe is the Report format fields — `lens`, `surface`,
 name for the finding), `fix` (the minimal change you will make), and
 `regression`: `{"file": "tests/test_x.py", "test": "test_name",
 "before": "red", "after": "green"}`. `before` and `after` are the
-literal tokens `red` and `green`, never output snippets. The seven
-fields alone are rejected. A finding with no regression yet is
+literal tokens `red` and `green`, never output snippets. Optional for
+PBT: `seed` (integer/token) and `counterexample` (minimal failing input).
+The seven fields alone are rejected. A finding with no regression yet is
 legitimate during Verify: the emitter warns and records the rest.
 
 Everything sstack creates lives under `.sstack/` — never the workspace
@@ -251,8 +252,13 @@ lens, and as many cases per pair as the surface's contract admits:
 
 1. Design the case (concrete input and action).
 2. Write its oracle in `plan.md` FIRST — the expected behavior
-   under this adverse condition.
-3. Execute for real: a scratch script under `.sstack/scratch/`,
+   under this adverse condition. Anchor to an observable invariant:
+   - *Inverse / Round-trip:* `decode(encode(x)) == x`.
+   - *Idempotence:* `f(f(x)) == f(x)` or repeated call preserves state.
+   - *Metamorphic:* transformation preserves property (`len(sort(x)) == len(x)`).
+   - *Rejection contract:* invalid input yields typed domain error, never crash/500.
+3. Execute for real: a scratch script under `.sstack/scratch/`
+   (iterate the rubric's vector list in a single loop to probe fast),
    or a direct call through the repo's test framework.
 4. Record the actual output verbatim.
 
@@ -343,45 +349,64 @@ keep the report brief.
 ### 4. Minimize
 
 Keep the minimal case and repro easy to inspect, and reduce it in
-independently checkable steps. For each confirmed finding, strip the
-case to the smallest input that still violates the oracle. Update the
-repro command.
+independently checkable steps. For each confirmed finding, shrink the
+input systematically until the smallest failing case is found:
+- Numbers: binary search toward zero (`1000` → `500` → `0` → `-1`).
+- Strings: halve length, then simplify characters (`"payload"` → `"a"` → `""`).
+- Collections & Objects: bisect items; drop keys one by one.
+Update the repro command.
 
-Done when no smaller input still violates the oracle and the
+Done when no simpler input still violates the oracle and the
 finding's repro command runs as written.
 
 ### 5. Test
 
 Test behavior, not implementation, for every regression and hardening
-test. Call the subject as its users do, assert a literal expected value
-or observable effect, and delete or rewrite any test that would pass
-when every imported function returns `undefined`. Preserve the oracle
-and the failure mode in the test itself, so the test stays tied to the
-behavior that matters.
+test. Call the subject as its users do, asserting exact scalar values,
+concrete exception types, and specific error codes or message substrings.
+Delete or rewrite any test that would pass when every imported function
+returns `undefined`. In negative assertions, verify the error identity,
+not merely that an exception was thrown. Preserve the oracle and the
+failure mode in the test itself.
 
 Write a permanent negative test in the host repo's real suite — same
 directory and assert style as existing tests, asserting the oracle.
+Use the target's existing test dependencies only; target build configs
+(`pom.xml`, `package.json`, `build.gradle`) stay read-only.
 
-For **confirmed** findings: the test goes **red** on current code.
+For **confirmed** findings (atomic regression): write exactly one test
+method per finding asserting the single minimized vector. No loops
+(prevents failure masking). The test goes **red** on current code.
 That is the proof the test catches the bug. A green test on a
 confirmed finding pinned the observed behavior instead of the oracle.
 Rewrite it to assert the oracle.
 
+Verify test sensitivity (the inline mutant check): temporarily negate or
+bypass the fix guard in scratch. The regression test must go red. If it
+passes under inverted logic, the test is vacuous: rewrite it to assert
+the observable contract.
+
 For **refuted** findings and surfaces that already handle the adverse
-condition: add the test as a hardening characterization test. It goes
-**green** immediately and locks in the correct behavior against future
-regressions.
+condition (hardening): write an unmasked matrix (`assertAll`, subtests)
+with baseline collections (`Arrays.asList`) so every vector executes.
+It goes **green** immediately and locks in the correct behavior against
+future regressions.
+
+If the target repo already imports a property-based testing library,
+write an invariant property test instead.
 
 Run every new test and confirm the verdict matches: red for confirmed,
-green for refuted/hardened.
+green for refuted/hardened, and passes the sensitivity check.
 
 ### 6. Fix
 
 For each confirmed finding, trace the observed behavior to its root
 cause before editing: reproduce the failure, ask why until the shared
 cause is found, and fix that cause rather than adding a symptom guard.
-Check every sibling caller of the same behavior before applying the
-fix. Remove obsolete complexity rather than adding to it, keep
+Fix the general invariant rather than the single test input: guard the
+entire invalid domain (relational checks like `<= 0`, not literal equality
+`== 0`). Check every sibling caller of the same behavior before applying
+the fix. Remove obsolete complexity rather than adding to it, keep
 boundaries explicit, and keep each change independently checkable.
 
 Then apply the minimal change that satisfies the oracle. Smallest diff
@@ -391,8 +416,10 @@ that turns the red test green.
 - Error handling: wrap the leak in a clean domain error.
 - Missing check: add the check the oracle names.
 
-Re-run the confirmed finding's test: it goes **green**. Then run the
-full suite: the fix must not break any existing test.
+Re-run the confirmed finding's test: it goes **green**. Verify against
+a second distinct vector in the invalid domain to confirm the fix
+generalizes. Then run the full suite: the fix must not break any existing
+test.
 
 Done when every confirmed finding's test is green and the full suite
 passes.
@@ -420,6 +447,8 @@ Before delivering the report, verify all of the following:
    consumes external input).
 3. Every fix is the minimal change that satisfies the oracle.
 4. The full suite passes.
+5. Every confirmed regression test passed the sensitivity check (turns
+   red when the fix guard is bypassed in scratch).
 
 A run that fails any of these is invalid. Fix and re-run before
 reporting.

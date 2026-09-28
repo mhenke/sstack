@@ -18,6 +18,10 @@ the product. For *what* the code does, read [`../ARCHITECTURE.md`](../ARCHITECTU
 | [0008](0008-user-extends-by-naming-a-file.md) | The user extends sstack by naming a file, not by editing ours | Accepted | 2026-09-27 |
 | [0009](0009-uniform-six-part-lens-anatomy.md) | Uniform six-part lens anatomy | Accepted | 2026-09-27 |
 | [0010](0010-cross-language-fixture-parity.md) | Cross-language fixture parity | Accepted | 2026-09-27 |
+| [0011](0011-lens-grid-uniform-accept-two-card-tail.md) | Keep the lens grid uniform and accept the two-card tail | Accepted | 2026-09-27 |
+| [0012](0012-self-host-rubik-variable-fonts.md) | Self-host the Rubik variable fonts | Accepted | 2026-09-27 |
+| [0013](0013-no-dedicated-pbt-runner.md) | Do not build a dedicated PBT runner; record seeds in evidence | Accepted | 2026-09-27 |
+| [0014](0014-do-not-build-mutation-runner.md) | Do not build a mutation runner | Accepted | 2026-09-27 |
 
 ## Status
 

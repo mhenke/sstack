@@ -245,3 +245,34 @@ def test_node_emitter_contract_parity():
 
         bad_slug = base(slug="../../escape")
         assert emit_js(Path(tmp_js), bad_slug).returncode == 2
+
+
+def test_pbt_seed_and_counterexample_parity():
+    """Optional seed and counterexample fields are recorded in json, rendered in md,
+    rebuilt into report.json, and identical across python and node emitters."""
+    with tempfile.TemporaryDirectory(dir=SCRATCH) as tmp_py, tempfile.TemporaryDirectory(dir=SCRATCH) as tmp_js:
+        finding = base(seed=42891234, counterexample='""')
+        res_py = emit(Path(tmp_py), finding)
+        res_js = emit_js(Path(tmp_js), finding)
+        assert res_py.returncode == 0, res_py.stderr
+        assert res_js.returncode == 0, res_js.stderr
+
+        py_rec = json.loads((Path(tmp_py) / ".sstack/findings/t1.json").read_text())
+        js_rec = json.loads((Path(tmp_js) / ".sstack/findings/t1.json").read_text())
+        assert py_rec["seed"] == 42891234
+        assert py_rec["counterexample"] == '""'
+        assert py_rec == js_rec
+
+        py_md = (Path(tmp_py) / ".sstack/findings/t1.md").read_text()
+        js_md = (Path(tmp_js) / ".sstack/findings/t1.md").read_text()
+        assert "## PBT" in py_md
+        assert "seed: `42891234`" in py_md
+        assert 'counterexample: `""`' in py_md
+        assert py_md == js_md
+
+        py_rep = json.loads((Path(tmp_py) / ".sstack/report.json").read_text())
+        js_rep = json.loads((Path(tmp_js) / ".sstack/report.json").read_text())
+        assert py_rep["findings"][0]["seed"] == 42891234
+        assert py_rep["findings"][0]["counterexample"] == '""'
+        assert py_rep == js_rep
+

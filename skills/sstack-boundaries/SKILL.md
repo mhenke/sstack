@@ -16,10 +16,17 @@ page; `page=0` is a boundary the contract almost certainly rejects.
 Declare the oracle from the surface's contract, never from the fact
 that the value sits at an extreme.
 
-## Case-generation heuristics
-
+- Paired boundary probes: probe the exact threshold $N$ (valid or
+  boundary-valid) alongside $N \pm 1$ (the invalid/violating mutation).
+  Probing only the violating side misses off-by-one errors and accepts
+  guards that reject valid boundary values.
 - Numeric arguments: `0`, `1`, `-1`, `-N`, max int, just-over any
-  threshold the code compares against.
+  threshold the code compares against. Float extremes: IEEE 754 `-0.0`
+  (negative zero), `NaN`, `Infinity`, denormals (`5e-324`).
+- Integer wrap: past `MAX_SAFE_INTEGER` (`2**53`), 32-bit signed wrap
+  (`2147483647`, `2147483648`, `-2147483649`).
+- String and text bounds: empty `""`, single space `" "`, lone surrogates
+  (`\uD800`), RTL overrides (`\u202E`), zero-width characters (`\u200B`, `\u200D`).
 - Sizes/limits: `0`, negative, huge (memory-relevant), and `len(x)`
   and `len(x)±1`.
 - Indexes/slices: first, last, `len` (one past end), negative index
@@ -46,6 +53,9 @@ that the value sits at an extreme.
 - Well-defined empty result (`[]`, `0`) documented as correct.
 - Invariant preserved (total never negative; sum always a number;
   large-but-legitimate input still returns a value).
+- Boundary sensitivity: verify admission at $N$ and rejection at $N+1$
+  (or vice versa); an oracle that accepts both or rejects both at the
+  boundary has missed the state transition.
 - No silent truncation, precision loss, or rounding where the
   contract implies exactness (2.675 stored as 2.67 is a boundary bug
   even though 2.675 is in range).

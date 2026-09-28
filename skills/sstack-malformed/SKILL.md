@@ -23,7 +23,8 @@ annotations).
   (`"2024-31-12"`, `"2024-02-30"`).
 - Structural mismatches: arrays/objects where scalars expected
   (`{"id": [1, 2]}`), scalar where collection expected, duplicate
-  conflicting keys.
+  conflicting keys, prototype poison keys (`__proto__`, `constructor`,
+  `prototype`), cyclic references, arrays with holes (`[1, , 3]`).
 - Delimiter and injection hazards: unescaped quotes, delimiters,
   semicolons, embedded NULs (`\0`), syntax fragments that break
   parser layers.
@@ -32,7 +33,9 @@ annotations).
 - Runtime type confusion: string where number expected (`"2"` from a
   form or JSON without strict schema) flowing into arithmetic. Watch
   silent coercion (`0 + "2" === "02"`).
-- Encodings: invalid UTF-8 bytes, control chars.
+- Encodings and normalization: invalid UTF-8 bytes, control chars,
+  Unicode normalization form drift (NFC composite `\u00E9` vs NFD
+  decomposed `e\u0301`).
 
 ## Oracle patterns
 

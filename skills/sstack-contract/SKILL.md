@@ -30,12 +30,20 @@ caught at system boundaries.
 - Boundary contract rejection: submit payloads violating structural
   schema rules (e.g. invalid string patterns, out-of-spec types) to
   verify explicit HTTP 400 or 422 rejection.
+- Paired schema mutation probes: probe the valid schema $S$ alongside
+  a minimal type-mutated schema $S'$ (e.g. numeric string `"123"` vs
+  integer `123`, scalar `1` vs array `[1]`, or inverted boolean `"true"`
+  vs `true`). Verifies parsers enforce explicit types rather than
+  silently coercing or dropping constraints.
 
 ## Oracle patterns
 
 - Strict schema conformance: returned objects strictly validate
   against declared response schemas without missing properties or type
   mismatches.
+- Strict type non-coercion: type mutations fail at the perimeter with
+  HTTP 400 or 422 diagnostic errors; the boundary never silently coerces
+  mismatched primitive types without documented coercion rules.
 - Explicit boundary diagnostics: requests violating schema constraints
   fail at the perimeter with RFC 9110 HTTP 400 Bad Request or 422
   Unprocessable Content, naming the schema violation.

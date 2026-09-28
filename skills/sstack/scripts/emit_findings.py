@@ -17,7 +17,9 @@ the run survives a crash with everything already verified still recorded.
                     "before": "red", "after": "green"}}
     JSON
 
-Optional keys: "fix" (confirmed only, and only when a fix was applied).
+Optional keys: "fix" (confirmed only, and only when a fix was applied),
+"seed" (integer or token for PBT replay), and "counterexample" (the minimal
+failing input).
 """
 
 import argparse
@@ -101,6 +103,13 @@ def render_markdown(finding: dict, run: dict) -> str:
         "```",
         f"exit {run['exit_code']}, fingerprint {run['fingerprint']}",
     ]
+    if finding.get("seed") is not None or finding.get("counterexample") is not None:
+        pbt_lines = []
+        if finding.get("seed") is not None:
+            pbt_lines.append(f"seed: `{finding['seed']}`")
+        if finding.get("counterexample") is not None:
+            pbt_lines.append(f"counterexample: `{finding['counterexample']}`")
+        parts += ["", "## PBT", "\n".join(pbt_lines)]
     regression = finding["regression"]
     if finding["verdict"] == "confirmed" and finding.get("fix"):
         parts += ["", "## Fix", finding["fix"]]
@@ -116,19 +125,22 @@ def rebuild_report(findings_dir: Path, workspace: Path, fixture: str) -> int:
     entries = []
     for evidence in sorted(findings_dir.glob("*.json")):
         record = json.loads(evidence.read_text(errors="replace"))
-        entries.append(
-            {
-                "seed_id": record.get("seed_id", "other"),
-                "lens": record["lens"],
-                "surface": record["surface"],
-                "case": record["case"],
-                "oracle": record["oracle"],
-                "observed": record["stdout"] + record["stderr"],
-                "verdict": record["verdict"],
-                "repro": record["command"],
-                "regression": record["regression"],
-            }
-        )
+        entry = {
+            "seed_id": record.get("seed_id", "other"),
+            "lens": record["lens"],
+            "surface": record["surface"],
+            "case": record["case"],
+            "oracle": record["oracle"],
+            "observed": record["stdout"] + record["stderr"],
+            "verdict": record["verdict"],
+            "repro": record["command"],
+            "regression": record["regression"],
+        }
+        if record.get("seed") is not None:
+            entry["seed"] = record["seed"]
+        if record.get("counterexample") is not None:
+            entry["counterexample"] = record["counterexample"]
+        entries.append(entry)
     (workspace / ".sstack" / "report.json").write_text(json.dumps({"fixture": fixture, "findings": entries}, indent=2) + "\n")
     return len(entries)
 
@@ -180,6 +192,10 @@ def main() -> int:
               "regression": finding["regression"]}
     if finding.get("fix"):
         record["fix"] = finding["fix"]
+    if finding.get("seed") is not None:
+        record["seed"] = finding["seed"]
+    if finding.get("counterexample") is not None:
+        record["counterexample"] = finding["counterexample"]
 
     (findings_dir / f"{slug}.json").write_text(json.dumps(record, indent=2) + "\n")
     (findings_dir / f"{slug}.md").write_text(render_markdown(finding, run))

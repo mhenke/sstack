@@ -114,6 +114,17 @@ function renderMarkdown(finding, run) {
     `exit ${run.exit_code}, fingerprint ${run.fingerprint}`,
   ];
 
+  if (finding.seed !== undefined || finding.counterexample !== undefined) {
+    const pbtLines = [];
+    if (finding.seed !== undefined) {
+      pbtLines.push(`seed: \`${finding.seed}\``);
+    }
+    if (finding.counterexample !== undefined) {
+      pbtLines.push(`counterexample: \`${finding.counterexample}\``);
+    }
+    parts.push('', '## PBT', pbtLines.join('\n'));
+  }
+
   const regression = finding.regression;
   if (finding.verdict === 'confirmed' && finding.fix) {
     parts.push('', '## Fix', finding.fix);
@@ -136,7 +147,7 @@ function rebuildReport(findingsDir, workspace, fixture) {
   const entries = [];
   for (const file of files) {
     const record = JSON.parse(fs.readFileSync(path.join(findingsDir, file), 'utf8'));
-    entries.push({
+    const entry = {
       seed_id: record.seed_id || 'other',
       lens: record.lens,
       surface: record.surface,
@@ -146,7 +157,14 @@ function rebuildReport(findingsDir, workspace, fixture) {
       verdict: record.verdict,
       repro: record.command,
       regression: record.regression,
-    });
+    };
+    if (record.seed !== undefined) {
+      entry.seed = record.seed;
+    }
+    if (record.counterexample !== undefined) {
+      entry.counterexample = record.counterexample;
+    }
+    entries.push(entry);
   }
 
   const reportPath = path.join(workspace, '.sstack', 'report.json');
@@ -241,6 +259,12 @@ function main() {
   };
   if (finding.fix) {
     record.fix = finding.fix;
+  }
+  if (finding.seed !== undefined) {
+    record.seed = finding.seed;
+  }
+  if (finding.counterexample !== undefined) {
+    record.counterexample = finding.counterexample;
   }
 
   fs.writeFileSync(path.join(findingsDir, `${slug}.json`), JSON.stringify(record, null, 2) + '\n');

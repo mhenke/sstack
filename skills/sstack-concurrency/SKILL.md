@@ -29,9 +29,16 @@ critical sections.
   without mutex guards.
 - Interleaved lock acquisition: execute operations that acquire multiple
   locks in differing order to detect deadlocks or livelocks under load.
+- Parallel interleaving exploration: randomize thread/task scheduling
+  across concurrent workers to detect race conditions in non-deterministic
+  execution order.
 
 ## Oracle patterns
 
+- Linearizability: any concurrent execution history must be equivalent
+  to some valid sequential, non-overlapping execution of the operations.
+  System-wide invariant sums (e.g. total funds across accounts, total
+  items across warehouses) remain conserved before and after concurrent batches.
 - Balance and quota conservation: the sum of approved debits never
   exceeds initial funds; final state satisfies $B_{final} \ge 0$.
 - Lost update prevention: concurrent updates with identical base version
