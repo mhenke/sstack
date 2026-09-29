@@ -43,11 +43,12 @@ against current code, since landed fixes invalidate contracts (the
 ADR-0019 baseline line dates the map; the re-verification dates the
 rows).
 
-Probes remain per-run instruments, deleted at run end. The durable
-cross-run product is the map, `learn/`, the landed suite tests, and
-replayable findings evidence; a probe's full specification survives in
-its finding's recorded repro, so deletion loses bytes, not
-information.
+Probes remain per-run instruments, deleted once the run-end checks
+pass (amended 2026-09-29: the checks still exercise scratch — the
+sensitivity mutant runs there). The durable cross-run product is the
+map, `learn/`, the landed suite tests, and replayable findings
+evidence; a probe's full specification survives in its finding's
+recorded repro, so deletion loses bytes, not information.
 
 ## Consequences
 

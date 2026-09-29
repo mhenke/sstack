@@ -216,6 +216,15 @@ confirmed finding whose fix landed; evidence against a `refuted`
 verdict. Not a failure of the evidence.
 _Avoid_: mismatch (it names the symptom, not the meaning)
 
+**False change**:
+A run-over-run difference in recorded evidence that reflects the
+recording machine or its clock — a path that moved with the checkout,
+a timestamp that moved with the emit — never the target. The mirror
+of drift: drift is the target changing under stable evidence; a
+false change is evidence changing under a stable target.
+_Avoid_: noise (names the symptom, not the source), nondeterminism
+(a general property, not a judging term)
+
 **Finding**:
 One attacked case with a recorded outcome — the unit the report format
 carries and the evidence file records. A finding is a claim until its
@@ -302,11 +311,13 @@ _Avoid_: run mode, harness profile
 **Probe**:
 The throwaway script an attack writes to exercise one case — created
 on the fly in `.sstack/scratch/<lens>/`, one directory per lens,
-deleted at run end. A probe is an attack tool, never evidence and
-never a shipped test: its output counts only once it imports and
-runs, a crashed probe is a broken probe (repair and re-run — the
-crash is not a finding), and the permanent form of a confirmed case
-is a regression test in the host suite.
+deleted once the run-end checks pass, not before: the checks still
+exercise scratch (the sensitivity mutant runs there). A probe is an
+attack tool, never evidence and never a shipped test: its output
+counts only once it imports and runs, a crashed probe is a broken
+probe (repair and re-run — the crash is not a finding), and the
+permanent form of a confirmed case is a regression test in the host
+suite.
 _Avoid_: test script (probes are ephemeral; the shipped test is the
 regression or hardening test), payload (names the input, not the
 tool)
