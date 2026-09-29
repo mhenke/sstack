@@ -268,6 +268,18 @@ output is tests and a lifecycle run's is findings. Never a separate
 evidence contract — both emit through the same emitter.
 _Avoid_: run mode, harness profile
 
+**Probe**:
+The throwaway script an attack writes to exercise one case — created
+on the fly in `.sstack/scratch/<lens>/`, one directory per lens,
+deleted at run end. A probe is an attack tool, never evidence and
+never a shipped test: its output counts only once it imports and
+runs, a crashed probe is a broken probe (repair and re-run — the
+crash is not a finding), and the permanent form of a confirmed case
+is a regression test in the host suite.
+_Avoid_: test script (probes are ephemeral; the shipped test is the
+regression or hardening test), payload (names the input, not the
+tool)
+
 **Landed regression**:
 A red→green test whose file exists in the graded workspace and
 contains the named test. A claimed regression that cannot be found on
