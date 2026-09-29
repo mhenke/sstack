@@ -7,6 +7,17 @@ on:
     branches: [main]
 
 jobs:
+  commit-format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate Conventional Commit subject
+        run: >
+          git log --format=%s -1 |
+          grep -qE '^(feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert)(\([a-z0-9-]+\))?: .+' || {
+          echo "not a Conventional Commit:"; git log --format=%s -1; exit 1; }
+
   baselines:
     runs-on: ubuntu-latest
     steps:

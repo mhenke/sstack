@@ -1,0 +1,38 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Draft notes from conventional commits
+        run: |
+          prev=$(git describe --tags --abbrev=0 "${GITHUB_REF_NAME}^" 2>/dev/null || true)
+          range="${prev:+$prev..}${GITHUB_REF_NAME}"
+          echo "range: $range"
+          {
+            echo "## Added"
+            git log --format=%s "$range" | grep -E '^feat' | sed 's/^feat\(([a-z0-9-]*)\)\{0,1\}: /- /' || true
+            echo
+            echo "## Fixed"
+            git log --format=%s "$range" | grep -E '^fix' | sed 's/^fix\(([a-z0-9-]*)\)\{0,1\}: /- /' || true
+            echo
+            echo "## Other"
+            git log --format=%s "$range" | grep -vE '^(feat|fix)' | sed 's/^\([a-z]\{1,\}\)\(([a-z0-9-]*)\)\{0,1\}: /- /' || true
+          } > notes.md
+          cat notes.md
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file notes.md
