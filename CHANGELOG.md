@@ -5,10 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 0.3.0 - 2026-09-29
 
 ### Added
 
+- Stage text names the optional lifecycle skills from cursor/plugins
+  (`principle-attack-the-premise`, `create-verification-skill`,
+  `maintain-verification-skill`, `principle-test-behavior-not-implementation`,
+  `principle-fix-root-causes`) with the install pointer, so the
+  companions are discoverable from the pack itself (#2).
+- Harden mode: `/sstack harden <target>` fills the suite's
+  negative-test gaps — dual isolated assessments (contract side vs
+  suite side), per-lens coverage report with percentage bands and
+  trend snapshots, P0–P3 gap severity, unattended scope default with
+  banner, matrix tests carrying the `sstack_<lens>_` prefix, red
+  flips through the existing Test/Fix lifecycle (ADR-0018). Body in
+  the on-demand `references/` tier (ADR-0016).
 - Lens deselection is now recorded and checked. Discover already
   skipped a lens whose "When not to apply" section ruled the mapped
   surface out, but nothing recorded the decision, so a run that dropped

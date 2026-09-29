@@ -103,7 +103,10 @@ isolated dir).
 > confirmations. A control run over check-7 text is the next evidence
 > run. Staleness: §8's count line reads "live failures found and
 > fixed" (was "bugs") per the glossary's finding entry — prose only;
-> all recorded harden evidence predates the wording.
+> all recorded harden evidence predates the wording. Recorded PASSes
+> also predate the stage-text naming of optional lifecycle skills
+> (a2afe0c, 2026-09-29): wording-level, and no fixture workspace
+> carries those skills, so fixture outcomes are unaffected.
 
 | fixture | verdict | evidence |
 |---|---|---|
