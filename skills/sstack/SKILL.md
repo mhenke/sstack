@@ -219,9 +219,9 @@ surfaces at Attack. Each stage ends with a printed `stage ✓ <count>` line.
 
 **Settle the target.** A repo root or broad directory resolves to the
 language-convention folders inside it (`java/`, `src/main/java`,
-`src/`, `lib/`), one per supported language present; still broader
-than one buildable module → ask the user to name a narrower TARGET.
-The map spans the whole target, not the first file slice read.
+`src/`, `lib/`), one per supported language present; ambiguity across
+buildable modules → ask the user to name the TARGET. The map spans
+the resolved target whole; testability filters surfaces, not size.
 
 **Inventory every surface kind**, not just the ones the first file
 shows: public functions and classes, API routes, services, DAOs,
@@ -458,8 +458,8 @@ Before delivering the report, verify all of the following:
    ran, and the report must not read as though it had.
 7. Every confirmed regression is red against pristine source; one that
    passes with the fix reverted is a false confirmation (record refuted).
-8. Every mapped surface was attacked under every lens selected for
-   it; an un-attacked mapped surface invalidates the run.
+8. Every mapped surface ends attacked or explicitly not-run; a
+   complete-looking report over un-attacked surfaces is invalid.
 
 A run that fails any of these is invalid. Fix and re-run before
 reporting.

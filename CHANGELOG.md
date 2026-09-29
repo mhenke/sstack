@@ -54,6 +54,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   before repairing it (configs stay read-only without approval). A
   pre-existing red suite is recorded as baseline and exempted from
   the pass gate — reported, never silently repaired or ignored.
+- Target resolution is non-discretionary: a resolved target is mapped
+  whole; testability filters surfaces, never target size. Field
+  report: a cold run on an Angular repo framed the job as choosing
+  the "smallest valid target" — the no-socket test's validity
+  vocabulary plus the narrowing rule licensed scope-shrinking. Only
+  ambiguity across buildable modules goes back to the user. Run-end
+  check 8 follows: each mapped surface ends attacked or explicitly
+  not-run, so a whole-target map may span runs without faking
+  completeness.
 
 ## 0.3.0 - 2026-09-29
 

@@ -123,8 +123,7 @@ isolated dir).
 > the chat report ends with coverage counts (untested high-impact
 > surfaces = partial coverage). Recorded cold-run PASSes predate this
 > text; the staleness already flagged for the Discover rewrite now
-> covers these edits, the scratch rationale, prior-map reuse, and the
-> broken-framework baseline rule too.
+> covers these edits and every same-day stage-text change after them.
 > **Staleness note (2026-09-29, 17–19 evidence batch)**: a five-fixture
 > cold batch (ColdEv-Py/Ts/Js/Java/Cpp, prepared workspaces, standard
 > `/sstack` prompts) attempted `*-17`/`*-18`/`*-19` evidence. **All five
@@ -141,9 +140,9 @@ isolated dir).
 > Ts wrote 19 hand-authored finding files with invalid shapes (one is
 > an aggregate run-state blob) and no `report.json`; Js hand-authored
 > 6 findings with typed fingerprints (fabricated per ADR-0006) and no
-> `report.json`; Cpp emitted findings + `report.json` mid-run, then
-> deleted its own evidence at cleanup (empty findings dir at grade
-> time). Grader/replay refused all five — guardrails held.
+> `report.json`; Cpp never emitted at all — it hunted ~7 min for a
+> literal `/sstack` executable (v0 ships none), ran the emitter once
+> with no stdin (crash, no writes), and fixed the source anyway.
 > Post-mortem (same-day transcript review): no run read BUGS.md,
 > goldens, or any file outside its workspace — evidence validity is
 > intact; the Py child's breach was write-side, not answer-key. The
@@ -152,13 +151,18 @@ isolated dir).
 > take ~30 min because the dispatch model (`omniroute/explorer`)
 > averages 60–150 s per turn across 40–110 tool calls; Py's apparent
 > hang was a 25 m 47 s blocking `wait` on its child, not a deadlock.
-> Product-fix candidates logged: (a) run-end cleanup text may read as
-> deletion of the whole `.sstack/` tree — name the exact deletion
-> target and mark `findings/`, `report.json`, `pristine-src/`, `learn/`
-> never-delete; (b) Emit-step abandonment is chronic (4 of 5 runs) —
-> candidates: emitter-output requirement in the chat-report contract,
-> or a harness-side report check at grade time (already implicit:
-> no `report.json` = ungradable).
+> Root cause (all five): the dispatch prompt's phrase "`/sstack` on
+> the src package" reads as an executable to a hostless cold agent —
+> all five hunted for a `/sstack` binary (v0 ships none by scope
+> lock) and improvised their own runner scripts instead of executing
+> the skill's stage text. Fix candidates: (a) harness dispatch prompt
+> says "run the full sstack lifecycle on <target>; the skill text is
+> the command, there is no `/sstack` executable" (evals lane, no
+> product change); (b) emitter prints a usage line with a full
+> heredoc example when stdin is empty instead of a bare JSONDecodeError
+> (product lane, `scripts/` change + emitter test); (c) `prepare`
+> purges stale sibling workspaces so a wandering nested agent cannot
+> land in one (evals lane).
 
 | fixture | verdict | evidence |
 |---|---|---|
