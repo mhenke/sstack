@@ -35,7 +35,7 @@ method note at the end of the file records that.
 ### Negative testing for A01:2025 Broken Access Control (2026-09-26)
 
 Findings: [`negative-testing-a01-broken-access-control.md`](negative-testing-a01-broken-access-control.md).
-Primary-source pass (OWASP Top 10 2025/2021, WSTG ATHZ/APIT, cheat
+Primary-source pass ([OWASP Top 10](https://owasp.org/Top10/) 2025/2021, [WSTG](https://owasp.org/www-project-web-security-testing-guide/) ATHZ/APIT, cheat
 sheets, RFC 9110, CWE, ZAP) on how access control is tested by requests
 that should be denied: baseline-diff oracle (WSTG-ATHZ-02), RFC 9110
 existence neutrality (404/403), IDOR/BOLA, BOPLA, header/IP route
@@ -46,7 +46,7 @@ and [`agents/sstack-ownership-attacker.md`](../../agents/sstack-ownership-attack
 
 ### Negative testing for Resource Exhaustion (2026-09-26)
 
-Primary-source pass (OWASP API4:2023, CWE-400/770/789/1333/409, RFC
+Primary-source pass ([OWASP API Top 10](https://owasp.org/API-Security/editions/2023/en/0x11-t10/) API4:2023, [CWE](https://cwe.mitre.org/)-400/770/789/1333/409, RFC
 6585/9110, Michael Nygard) on negative testing for resource exhaustion:
 early admission gates (413/429), fast load shedding (503), unbounded
 query memory ceilings, connection/thread pool exhaustion, and

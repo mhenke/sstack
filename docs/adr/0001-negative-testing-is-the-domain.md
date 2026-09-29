@@ -18,7 +18,7 @@ Three concepts had to be kept apart:
 
 1. negative testing as the product question (what happens when the
    system gets something it did not expect)
-2. gstack's process model (discrete, artifact-producing, resumable
+2. [gstack](https://github.com/garrytan/gstack)'s process model (discrete, artifact-producing, resumable
    stages)
 3. mutation/proof tooling as one way to earn a verdict
 

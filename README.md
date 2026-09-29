@@ -11,7 +11,7 @@
 
 **sad stack** · negative testing for AI coding agents
 
-gstack, pstack, sstack. Same suffix, same shape: a `SKILL.md` your
+[gstack](https://github.com/garrytan/gstack), pstack, sstack. Same suffix, same shape: a `SKILL.md` your
 agent reads, a directory you copy in, a slash command you type. The
 family ships features and reviews diffs. sstack finds the ways your
 software fails, writes a test for each one that fails today, and

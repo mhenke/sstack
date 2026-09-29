@@ -61,7 +61,7 @@ If the test suite passes against a mutant, the mutant **survives** (test suite
 deficiency). If at least one test fails, the mutant is **killed** (test suite
 strength).
 
-### Tool Ecosystem (PIT, Mutmut, Stryker)
+### Tool Ecosystem ([PIT](https://pitest.org/), [Mutmut](https://github.com/boxed/mutmut), [Stryker](https://stryker-mutator.io/))
 
 Primary documentation from production mutation tools confirms their nature:
 - **PIT (pitest.org):** A fast bytecode mutation testing system for Java. Runs

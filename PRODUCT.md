@@ -88,7 +88,7 @@ suffix family, same install shape.
 
 ## Brand Commitments
 
-- Name: sstack ("sad stack"). Family: gstack, pstack, sstack.
+- Name: sstack ("sad stack"). Family: [gstack](https://github.com/garrytan/gstack), [pstack](https://github.com/cursor/plugins/tree/main/pstack), sstack.
 - Voice (binding, from repo docs): dry, terse, evidence-first.
   "Don't ask whether the software is robust." The not-happy list, the
   oracle-first rule, the four rules — real copy, never invented claims.

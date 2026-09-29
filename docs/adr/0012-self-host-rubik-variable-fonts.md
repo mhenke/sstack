@@ -8,7 +8,7 @@
 
 The site loaded Rubik from fonts.googleapis.com — its only
 third-party runtime dependency. Two references forced the question:
-the impeccable craft floor ("source and self-host a face …; the
+the [impeccable](https://github.com/pbakaus/impeccable) craft floor ("source and self-host a face …; the
 closest installed font is a failure, not a fallback") and the
 harden reference (network failure is a hardening dimension — on an
 offline or filtered connection the page silently renders in

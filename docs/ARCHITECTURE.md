@@ -157,10 +157,10 @@ shipped as one example of the first shape.
 
 ## Prior art
 
-- **gstack** — process model: discrete, artifact-producing,
+- **[gstack](https://github.com/garrytan/gstack)** — process model: discrete, artifact-producing,
   resumable stages. Infra (binaries, daemon) deliberately not
   copied.
-- **pstack** — one launcher skill + on-demand content files.
-- **impeccable** — `references/` per subcommand; `scripts/`
+- **[pstack](https://github.com/cursor/plugins/tree/main/pstack)** — one launcher skill + on-demand content files.
+- **[impeccable](https://github.com/pbakaus/impeccable)** — `references/` per subcommand; `scripts/`
   evidence layer addable later. (sstack rejects impeccable's
   audit-not-fix stance per ADR-0005.)

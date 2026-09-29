@@ -24,9 +24,9 @@ evidence" actually requires. It requires the agent to run the real
 command and quote the real output, not a bespoke binary that does it
 for them. That is achievable in pure prose.
 
-Prior art converged on the same shape: impeccable ships one skill
+Prior art converged on the same shape: [impeccable](https://github.com/pbakaus/impeccable) ships one skill
 with `references/` per command and adds a `scripts/` evidence layer
-only later, additively; pstack ships one launcher with on-demand
+only later, additively; [pstack](https://github.com/cursor/plugins/tree/main/pstack) ships one launcher with on-demand
 content files.
 
 ## Decision

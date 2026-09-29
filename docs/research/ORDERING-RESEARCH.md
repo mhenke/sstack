@@ -54,7 +54,7 @@ Furthermore, RFC 9110 §15.5.23 defines 428 (Precondition Required):
 
 ### CWE-841: User-Controlled Critical Execution Sequence
 
-MITRE CWE-841 explicitly defines the workflow ordering vulnerability:
+[MITRE CWE-841](https://cwe.mitre.org/data/definitions/841.html) explicitly defines the workflow ordering vulnerability:
 
 > "The software allows a user to control the order or timing of execution of
 > critical steps in a process, such as authentication, authorization, or

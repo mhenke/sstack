@@ -3,8 +3,8 @@
 Saved to `docs/research/negative-testing-a01-broken-access-control.md`. Should be
 indexed in [`RESEARCH.md`](RESEARCH.md) (not edited here).
 
-Primary sources only: OWASP Top 10 2025/2021, OWASP WSTG (latest),
-OWASP Cheat Sheet Series, MITRE CWE, RFC 9110, ZAP first-party docs.
+Primary sources only: [OWASP Top 10](https://owasp.org/Top10/) 2025/2021, [OWASP WSTG](https://owasp.org/www-project-web-security-testing-guide/) (latest),
+[OWASP Cheat Sheet Series](https://cheatsheetseries.owasp.org/), [MITRE CWE](https://cwe.mitre.org/), [RFC 9110](https://www.rfc-editor.org/rfc/rfc9110), [ZAP](https://www.zaproxy.org/) first-party docs.
 All accessed 2026-09-26; each citation carries that date.
 
 ## A01:2025 in one pass

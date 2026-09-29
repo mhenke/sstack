@@ -170,7 +170,7 @@ exactly from `README.md`.
     `grid-column: span 1`. At the shipped fourteen lenses the
     ≥1024px grid flows 4 / 4 / 4 / 2. The tail is a count artifact,
     not a hierarchy statement: the lenses are genuine peers, and
-    per the impeccable layout doctrine (variation only when content
+    per the [impeccable](https://github.com/pbakaus/impeccable) layout doctrine (variation only when content
     or priority changes) no card is widened. Copy-fit verified in
     Chromium at 1280px: 264px columns, zero clipped or scrolling
     cards, longest gist (ownership) fits. History: the twelve-lens

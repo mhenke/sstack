@@ -13,7 +13,7 @@ four behavior lenses) grew the count to fourteen, and the grid moved to
 4 columns at ≥1024px, flowing 4/4/4/2. Two audits disagreed on the
 two-card tail: one read it as a regression of DESIGN.md §20's
 uniform-matrix rule and proposed span-2 cards to force four clean rows;
-the other accepted it as a count artifact. The impeccable layout
+the other accepted it as a count artifact. The [impeccable](https://github.com/pbakaus/impeccable) layout
 doctrine settles the tie: "variation is not a goal by itself;
 repetition should support recognition; break it only when content or
 priority changes," and repeated cards are honest when they are
