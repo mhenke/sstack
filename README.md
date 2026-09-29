@@ -148,13 +148,7 @@ gets produced and audited.
 Install only the skills sstack uses across its lifecycle:
 
 ```bash
-npx skills@latest add cursor/plugins \
-  --skill principle-attack-the-premise \
-  --skill create-verification-skill \
-  --skill maintain-verification-skill \
-  --skill principle-test-behavior-not-implementation \
-  --skill principle-fix-root-causes \
-  --global -y
+npx skills@latest add cursor/plugins --skill principle-attack-the-premise --skill create-verification-skill --skill maintain-verification-skill --skill principle-test-behavior-not-implementation --skill principle-fix-root-causes --global -y
 ```
 
 `-y` answers the interactive agent picker. Without it, a non-TTY
