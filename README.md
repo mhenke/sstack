@@ -126,7 +126,8 @@ Nothing to install. The agent reads the skills and runs the pack's
 emitter (`skills/sstack/scripts/emit_findings.py`, with `emit_findings.js`
 as the fallback under Node). Both are stdlib-only reference scripts that
 execute the repro, capture output, compute the SHA256 fingerprint, and
-write findings plus `report.json`.
+write findings plus `report.json` — and refuse to record anything if a
+referenced scratch probe does not compile.
 
 ### Customizing
 
