@@ -117,6 +117,29 @@ user an admin", never "may this user have this record", so the omitted
 inputs name where the missing check belongs.
 _Avoid_: permission (a grant, not the question being asked)
 
+**Target**:
+The resolved scope a run attacks: the module, directory, or function
+the invocation names, or — for a repo root or broad directory — the
+language-convention folders inside it, one per supported language
+present. Resolution is mechanical; ambiguity across buildable modules
+is the one case that goes back to the user. The map spans the target
+whole, and testability filters surfaces, never target size.
+_Avoid_: scope (reads as negotiable); smallest valid target (a cold
+run's invented selection criterion — targets are resolved, never
+chosen)
+
+**Surface**:
+One attacked unit in the map: a public function or class, route,
+service, DAO, parser, validator, loop over collections, or indexer.
+Materially different failure surfaces get rows; variants of one
+assumption share one. A row carries language, assumed contract,
+impact class, and lens selections. Eligible surfaces pass the
+no-socket test: confirmable by importing code and calling a function;
+behaviors needing a launched process are recorded as a checked N/A
+naming the artifact.
+_Avoid_: file (a file holds many surfaces); endpoint (names one
+transport only)
+
 **Collection surface**:
 A surface that returns many records: list, search, index, feed,
 export, report, autocomplete. Its authorization obligation is the
@@ -225,6 +248,14 @@ not run) state the run's shape; defects found are its content, and
 partial is the honest verdict a clean-looking report hides.
 _Avoid_: incomplete run (reads as a harness fault, not a reporting
 duty)
+
+**Baseline**:
+The suite's pre-existing failures, recorded before the run's first
+test lands. Baseline is outside the run: exempted from the pass gate
+and reported as found — a fix may not claim it, and the gate judges
+only the delta the run produced.
+_Avoid_: known failures (implies triaged and accepted); pre-existing
+bugs (unowned until a run points at those surfaces)
 
 **Negative control**:
 The grader's re-execution of every confirmed finding's regression

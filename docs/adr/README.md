@@ -27,6 +27,7 @@ the product. For *what* the code does, read [`../ARCHITECTURE.md`](../ARCHITECTU
 | [0017](0017-grader-gates-on-evidence-integrity.md) | The grader verifies evidence fingerprints itself; a PASS cannot rest on evidence replay could not verify | Accepted | 2026-09-28 |
 | [0018](0018-harden-is-a-routing-subcommand.md) | Harden is a routing subcommand that fills gaps, not a stage or lens | Accepted | 2026-09-29 |
 | [0019](0019-scan-baseline-for-change-triage.md) | map.md records a scan baseline; the next run triages by git diff | Accepted | 2026-09-29 |
+| [0020](0020-targets-are-resolved-never-chosen.md) | The target is resolved, never chosen — whole-target maps span runs | Accepted | 2026-09-29 |
 
 ## Status
 
