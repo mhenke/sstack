@@ -63,6 +63,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   check 8 follows: each mapped surface ends attacked or explicitly
   not-run, so a whole-target map may span runs without faking
   completeness.
+- Recorded evidence is portable and diff-stable: both emitters
+  rewrite the absolute workspace path to `.` at capture (command,
+  stdout, stderr — the fingerprint is computed over the normalized
+  bytes, so identical defects fingerprint identically on any
+  machine) and record no `emitted_at`/`duration_ms` in findings or
+  report.json. Field report: cold-run plan/report files carried
+  absolute workstation paths, duplicate logs, and timestamps —
+  noise when evidence is diffed run over run. The skill states the
+  rule once, in Workspace: no absolute paths, no timestamps;
+  observed output lives once, in the emitted record.
+- The Node emitter's `.py` probe preflight calls `python3 -m
+  py_compile` — it previously ran `node -m py_compile`, which never
+  compiles anything, so any Python scratch probe was refused as
+  non-compiling under Node.
+- Stage text hardened from the 2026-09-29 cold runs: Verify emits
+  the moment a verdict is known (a fix applied before its red
+  evidence is emitted strands it; the first emission doubles as the
+  emitter smoke test); Safety — evidence does not wait on a broken
+  suite, and a target that will not build emits inconclusive
+  findings quoting the build error, not silence; run-end check 9
+  gives prior confirmed findings a disposition (replayed via their
+  regression or blocked with a quoted reason, re-emit on change);
+  Discover narrows an untestable-looking target only by asking the
+  user; `scratch/` is deleted once the run-end checks pass.
 
 ## 0.3.0 - 2026-09-29
 

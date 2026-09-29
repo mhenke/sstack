@@ -163,6 +163,50 @@ isolated dir).
 > (product lane, `scripts/` change + emitter test); (c) `prepare`
 > purges stale sibling workspaces so a wandering nested agent cannot
 > land in one (evals lane).
+> **Validation (ColdSoloPy, 2026-09-29, same day)**: fixes (a)+(b)
+> landed — dispatch reworded ("no `/sstack` executable; the skill text
+> is the command"), emitter prints a stdin example on empty input
+> (test_emitter 14 passed) — then one solo cold run on seeded-py:
+> **contract mechanics fixed** (11 m 51 s vs 28–37 m, no runner
+> invented, emitted through the script, `report.json` present, grade
+> ran instead of refusing), but coverage collapsed: 14 findings all on
+> one surface (cart negative-qty, ~12 slug-drifted re-emits of one
+> case), one lens, 0 seeds content-matched, 2 workspace tests red.
+> 17–19 remains pending. New candidates: (d) emitter dedup guard on
+> (surface, case) so re-emits overwrite instead of accumulating;
+> (e) coverage abandonment — the run stops after the first lens
+> despite the coverage contract. Variance run ColdSoloPy2 dispatched
+> to separate one-off from systemic.
+> **Variance run (ColdSoloPy2, 2026-09-29)**: coverage was variance —
+> 22 surfaces across all four modules, security + exceptional lenses,
+> py-18/py-19 target areas named — but the Emit contract failed
+> again: all 3 findings hand-written (missing `seed_id`, `regression`,
+> `emitted_at`), grader refuses, 0 seeds. **Backend routing discovery
+> (decisive)**: `omniroute/explorer` is a routing chain — `model_usage`
+> events show the recorded PASSes ran on Qwen3.8-Flash / Qwen3.7-Flash
+> / explorer, while all of today's failures ran on glm-5.3 /
+> glm-5.3-flash. "Same model" was a label, not a fact. Today's
+> capability ceiling (breadth XOR emit discipline) is the glm routing,
+> not the skill text — though the rewritten text still carries zero
+> cold-run evidence either way. Next evidence attempt: pin dispatch to
+> a backend that has produced valid evidence (Qwen Flash), one solo
+> run, before any per-lens fan-out machinery.
+> **Staleness note (2026-09-29, evidence hygiene + stage text)**:
+> both emitters now normalize the absolute workspace path out of the
+> recorded command/stdout/stderr at capture — fingerprints become
+> machine-independent — and record no `emitted_at`/`duration_ms`
+> (nothing consumed them; they only broke run-over-run diffs). The
+> Node emitter's `.py` probe preflight now calls `python3 -m
+> py_compile` (it ran `node -m py_compile`, which rejects every
+> python probe). SKILL.md Workspace states the artifact rule (no
+> absolute paths, no timestamps, observed output quoted once),
+> Verify emits the moment a verdict is known, Safety keeps evidence
+> flowing on a broken suite, run-end check 9 gives prior findings a
+> disposition, Discover narrows an untestable-looking target only by
+> asking, and `scratch/` survives until the run-end checks pass.
+> test_emitter 16 passed, test-all green; every recorded cold-run
+> number above predates this text. Old evidence still grades and
+> replays (fingerprints were computed over the bytes as recorded).
 
 | fixture | verdict | evidence |
 |---|---|---|
