@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Discover resolves a broad target to its language-convention folders
+  (or asks for a narrower TARGET), inventories every surface kind
+  across all supported languages — services, DAOs, parsers,
+  validators, loops, indexers — and selects or skips per surface ×
+  lens with recorded evidence: a lens is skipped only when every
+  mapped surface is ruled out. Run-end check 8 invalidates a report
+  produced while a mapped surface carries no executed cases. Field
+  report: lenses were marked checked-N/A from a single file slice
+  instead of being evaluated across all repository surfaces.
 - Attack step 3: a crashed scratch probe is a broken probe, not a
   finding. Probes must import and run before their output counts;
   oversized target files are read in ranges and never probed from a

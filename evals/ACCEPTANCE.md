@@ -109,6 +109,14 @@ isolated dir).
 > carries those skills, so fixture outcomes are unaffected. Attack
 > step-3 probe-validity wording (2026-09-29, post-0.3.0) likewise
 > postdates all recorded evidence; guidance-level.
+> **Staleness note (2026-09-29, Discover rewrite)**: the Discover
+> stage text was rewritten — broad targets resolve to
+> language-convention folders (or the user names a narrower TARGET),
+> inventory spans every surface kind across all supported languages,
+> and lens select/skip is per surface × lens with recorded evidence
+> (run-end check 8 added). Recorded cold-run PASSes predate this
+> text; Discover wording shapes every cold run's map, so the numbers
+> stand on the pre-rewrite text pending a cold re-run.
 
 | fixture | verdict | evidence |
 |---|---|---|

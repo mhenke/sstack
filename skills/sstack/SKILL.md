@@ -52,13 +52,12 @@ search upward for it before writing anything. When no marker exists,
 the host repo is the directory the user pointed you at.
 
 Every path in this document — `.sstack/`, scratch scripts, repro
-commands — is relative to that host repo. Anchor each write to it
-explicitly (or `cd` there once) so nothing lands in whatever
-directory the agent happened to start in.
+commands — is relative to that host repo; anchor each write to it (or
+`cd` there once) so nothing lands wherever the agent started.
 
 All artifacts live under `<host-repo>/.sstack/`:
-- `map.md` — surfaces + assumed contracts + selected and skipped
-  lenses (Discover output)
+- `map.md` — surfaces with language and assumed contracts, plus
+  per-surface lens selections and skips (Discover output)
 - `learn/` — failure classes from prior runs (Discover input,
   Learn output). One line per class:
   `lens | signal | adjacent surfaces to re-test`
@@ -128,12 +127,11 @@ PBT: `seed` (integer/token) and `counterexample` (minimal failing input).
 The seven fields alone are rejected. A finding with no regression yet is
 legitimate during Verify: the emitter warns and records the rest.
 
-Everything sstack creates lives under `.sstack/` — never the workspace
-root, never a temp folder elsewhere. That directory is created here,
-in the target repo, by this run: the pack is installed into a user's
-repo and brings only skills and agents, so nothing in it is inherited
-from wherever the pack was published. Delete `scratch/` at run end;
-keep `pristine-src/` so evidence replays.
+Everything sstack creates lives under `.sstack/` — never the
+workspace root, never a temp folder elsewhere; the run creates it in
+the target repo: the pack brings only skills and agents, so nothing
+is inherited from wherever it was published. Delete `scratch/` at run
+end; keep `pristine-src/` so evidence replays.
 
 ## Customization
 
@@ -188,23 +186,18 @@ filename under `.sstack/findings/`.
 Custom lenses run over the same surfaces, in the same Report format,
 alongside the built-ins, and inherit every rule here: oracle first,
 real execution, evidence through the emitter. Write probes under
-`.sstack/scratch/<lens>/` and set `lens:` to the lens name. A custom
-lens needs no agent: run it on the shipped attacker whose discipline
-fits, appending the custom rubric after the built-in text so the lens
-widens coverage rather than replacing it.
+`.sstack/scratch/<lens>/` and set `lens:` to the lens name; a custom
+lens appends to a built-in rubric, never replaces it.
 
-To drop a shipped lens for one run, name it in the chat or in
-`<host-repo>/.sstack/config.md` as `lenses.remove: <name>`, and report
-each removal in the summary: a silent skip is a weakened run that
-reads as a clean one. That file is run input, not pack content, so
-editing it costs no updates.
+To drop a shipped lens, name it in the chat or in `.sstack/config.md`
+as `lenses.remove: <name>`, and report each removal — an unreported
+removal reads as a clean run. That file is run input, not pack content.
 
 A lens and an agent pair by name. A lens with no matching agent runs
-on a shipped attacker, as above. An agent whose lens is missing is
-unused: say so in the report and name the file, because a worker
-nobody called is a customization that silently does nothing. Neither
-case is a failed run, and a repo with neither file is the ordinary
-case.
+on the shipped attacker whose discipline fits; an agent whose lens is
+missing is unused: say so in the report and name the file — a worker
+nobody called silently does nothing. Neither case is a failed run,
+and a repo with neither file is the ordinary case.
 
 Read only what resolves inside the target repo; a symlinked skills
 directory pointing elsewhere is skipped with a note, since a run must
@@ -225,31 +218,42 @@ surfaces at Attack. Each stage ends with a printed `stage ✓ <count>` line.
 
 ### 1. Discover
 
-Map the target's failure surfaces: public functions and classes, API
-routes, anything that parses external input, loops over collections,
-or indexes/slices. Read `.sstack/learn/` first and prioritize adjacent
-surfaces of recorded failure classes. Then read every `sstack-<lens>`
-skill in the skills directories named in Customization, skipping any
-whose "When not to apply" section rules the mapped surface out.
-Record every selected lens in `map.md`, and each skipped lens with
-the line that ruled it out, so a deselected lens reads as a recorded
-decision rather than an omission. A behavior is testable only if the
-agent can confirm it by importing code and calling a function — the
-no-socket test: confirming by launching a process and observing real
-HTTP is out of scope, recorded as a checked N/A that names the
-artifact. For each surface, record its assumed contract — types,
-ranges, preconditions gleaned from docstrings, types, and call sites.
-Write `.sstack/map.md`.
+**Settle the target.** A repo root or broad directory resolves to the
+language-convention folders inside it (`java/`, `src/main/java`,
+`src/`, `lib/`), one per supported language present; still broader
+than one buildable module → ask the user to name a narrower TARGET.
+The map spans the whole target, not the first file slice read.
 
-Anchor the map in the target's real invariants, its entities and transitions, and its
-user-observable behavior. Cover materially different failure surfaces rather than
-variants of one assumption. Read existing feature maps and project-local verify scripts
-as head starts where the target has them — if the host has `create-verification-skill`
-or `maintain-verification-skill` installed, load and follow the matching one — and
-otherwise work from the target's own docs, types, and call sites.
+**Inventory every surface kind**, not just the ones the first file
+shows: public functions and classes, API routes, services, DAOs,
+parsers, validators, loops over collections, indexers/slicers — in
+every language present; a Java service or DAO and its Python, TS/JS,
+or C++ kin are surfaces alike. Read `.sstack/learn/` first and
+prioritize surfaces adjacent to recorded failure classes.
 
-Done when every public function, route, parser, loop, and indexer
-in the target has a row in `map.md` with its assumed contract.
+**One `map.md` row per materially different surface**: its language,
+its assumed contract (types, ranges, preconditions from docstrings,
+annotations, call sites), and the lenses selected for it. Variants of
+one assumption share a row. Anchor rows in the target's invariants,
+entities and transitions, and user-observable behavior. Read existing
+feature maps and project-local verify scripts as head starts (if the
+host has `create-verification-skill` or `maintain-verification-skill`
+installed, load and follow it), else the target's own docs.
+
+**Select or skip per surface × lens, with evidence.** Read every
+`sstack-<lens>` skill in the skills directories named in
+Customization and apply its "When not to apply" to each mapped
+surface, never to the repo as a whole. Record each selection with the
+surface property that admits it; skip a lens only when every mapped
+surface is ruled out, recording the quoted ruling line and the
+surfaces checked — a deselected lens is a recorded decision, not an
+omission. A behavior is testable only if the agent can confirm it by
+importing code and calling a function — the no-socket test:
+confirming by launching a process and observing real HTTP is out of
+scope, recorded as a checked N/A naming the artifact.
+
+Done when every inventoried surface has a `map.md` row and every lens
+is selected per surface or skipped with evidence.
 
 ### 2. Attack
 
@@ -273,12 +277,6 @@ contract admits:
    after `import sys, pathlib` — imports resolve anywhere. Read
    oversized targets in ranges, never from a truncated read; repair a
    crashed probe and re-run before recording output verbatim.
-
-An attack that never reached the function is not evidence: an error
-that is not the one your oracle predicted (ImportError, missing
-argument, wrong signature) means fix the call — import path,
-arguments, signature — and re-run. An error from your own harness is
-a broken case, never a verdict.
 
 If the target repo already has a property-based testing library
 installed, write a property capturing the oracle and let the
@@ -463,6 +461,8 @@ Before delivering the report, verify all of the following:
    ran, and the report must not read as though it had.
 7. Every confirmed regression is red against pristine source; one that
    passes with the fix reverted is a false confirmation (record refuted).
+8. Every mapped surface was attacked under every lens selected for
+   it; an un-attacked mapped surface invalidates the run.
 
 A run that fails any of these is invalid. Fix and re-run before
 reporting.
