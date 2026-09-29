@@ -1,7 +1,7 @@
 # sstack site package usage
 
 Design package for the sstack marketing site (`site/index.html`). Base:
-the OpenDesign "sentry" package (`design-systems/sentry`). Adapted, not
+the OpenDesign "[sentry](https://github.com/nexu-io/open-design/tree/main/design-systems/sentry)" package (`design-systems/sentry`). Adapted, not
 copied — see `DESIGN.md` §Deltas.
 
 ## Read order

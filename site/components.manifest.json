@@ -7,7 +7,7 @@
   },
   "fixture": {
     "title": "sstack \u2014 reference components",
-    "description": "Reference fixture for site/. Dark purple-black canvas, Rubik, Monaco/Menlo mono, single magenta-pink accent (#fa7faa). Adapted from design-systems/sentry.",
+    "description": "Reference fixture for site/. Dark purple-black canvas, Rubik, Monaco/Menlo mono, single magenta-pink accent (#fa7faa). Adapted from design-systems/sentry (github.com/nexu-io/open-design).",
     "styleBlockCount": 1
   },
   "classes": [

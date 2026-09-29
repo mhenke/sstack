@@ -1,6 +1,6 @@
 {
   "$schema": "https://design-tokens.org/schema/2024.10",
-  "description": "sstack design tokens. Source of truth is tokens.css (:root); this file mirrors it for tooling. Adapted from design-systems/sentry.",
+  "description": "sstack design tokens. Source of truth is tokens.css (:root); this file mirrors it for tooling. Adapted from design-systems/sentry (github.com/nexu-io/open-design).",
   "color": {
     "bg":            { "$type": "color", "$value": "#1f1633", "$description": "Deep purple-black canvas" },
     "surface":       { "$type": "color", "$value": "#150f23", "$description": "Recessed sections, panels, footer" },

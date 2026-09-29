@@ -1,7 +1,7 @@
 # sstack — site design rules
 
 Visual rules for the sstack marketing site. Base package: OpenDesign
-"sentry" (`design-systems/sentry`). This file records what sstack keeps,
+"[sentry](https://github.com/nexu-io/open-design/tree/main/design-systems/sentry)" (`design-systems/sentry`). This file records what sstack keeps,
 what it changes, and the targets the pages must hold.
 
 ## Palette (source of truth: `tokens.css`)
@@ -19,7 +19,7 @@ what it changes, and the targets the pages must hold.
 | `--success` / `--danger` | `#4ade80` / `#f87171` | Red→green evidence states |
 | `--code` | `#dcdcaa` | Syntax tint for mono strings |
 
-Contrast verified arithmetically (WCAG 2.2):
+Contrast verified arithmetically ([WCAG 2.2](https://www.w3.org/TR/WCAG22/)):
 - `#fa7faa` on `#1f1633`: 7.1:1 — AA/AAA pass at all sizes.
 - `#150f23` on `#fa7faa` (CTA): 7.7:1.
 - `#9d96b3` on `#1f1633`: 6.1:1 (AA body).
@@ -30,7 +30,7 @@ Contrast verified arithmetically (WCAG 2.2):
 
 ## Type
 
-- Display + body: **Rubik** (400–800, Google Fonts). Dammit Sans from
+- Display + body: **[Rubik](https://fonts.google.com/specimen/Rubik)** (400–800, Google Fonts). Dammit Sans from
   the base package is unavailable; Rubik bold is the display face, as
   in the base package's own degraded landing template.
 - Mono: **Monaco, Menlo, Ubuntu Mono, ui-monospace**.

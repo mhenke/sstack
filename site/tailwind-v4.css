@@ -1,5 +1,6 @@
 /* Derived from tokens.css. Keep tokens.css as the source of truth.
- * Adapted from design-systems/sentry/tailwind-v4.css. */
+ * Adapted from design-systems/sentry/tailwind-v4.css
+ * (github.com/nexu-io/open-design — design-systems/sentry). */
 @import "tailwindcss";
 @import "./tokens.css";
 
