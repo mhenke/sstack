@@ -18,10 +18,9 @@ existing suite with negative test cases even where nothing is broken.
    the system must [one observable outcome] and must not [critical
    side effect], the outcome named in the language's terms —
    exception type, rejected promise, error code, typed result.
-   "It crashes" is not an oracle; "it fails with a validation error
-   naming the field" is. "Throws or returns NaN" is two verdicts
-   wearing one sentence — name the one the contract promises; when
-   the contract permits both, the case is inconclusive.
+   "Throws or returns NaN" is two verdicts wearing one sentence —
+   name the one the contract promises; when the contract permits
+   both, the case is inconclusive.
 3. Never accept an agent's claim as evidence. Run the real command,
    quote the real output.
 4. Every confirmed failure gets a red test, a fix, and a green test.
@@ -46,14 +45,16 @@ existing suite with negative test cases even where nothing is broken.
 ## Workspace
 
 **Resolve the host repo first.** The host repo is the directory that
-contains `.sstack-host-repo`. If that file exists in the current
-working directory, the host repo is this directory. If it does not,
-search upward for it before writing anything. When no marker exists,
-the host repo is the directory the user pointed you at.
+contains `.sstack-host-repo`; search upward for it before writing
+anything. Without a marker, the host repo is the directory the user
+pointed you at.
 
 Every path in this document — `.sstack/`, scratch scripts, repro
-commands — is relative to that host repo; anchor each write to it (or
-`cd` there once) so nothing lands wherever the agent started.
+commands — is relative to that host repo; anchor each write to it so
+nothing lands wherever the agent started. The same inside artifacts:
+no absolute paths, no timestamps; observed output lives once, in the
+emitted record. Evidence is diffed run over run — a moved path or
+clock reads as a false change.
 
 All artifacts live under `<host-repo>/.sstack/`:
 - `map.md` — surfaces with language and assumed contracts, plus
@@ -95,9 +96,8 @@ lens: <lens> | verdict: <confirmed | refuted | inconclusive>
   `fix`, `seed`, `counterexample`). `before`/`after`
   are the literal state tokens "red"/"green" — the test's state
   before-fix / after-fix — not output snippets. Verification re-runs
-  `command` and recomputes the fingerprint from the recorded bytes,
-  agent out of the loop; a hand-typed hash fails it. Any other shape
-  is unverifiable.
+  `command` and recomputes the fingerprint; a hand-typed hash fails
+  it. Any other shape is unverifiable.
 - `scratch/<lens>/` — this run's probes, one directory per lens
 - `pristine-src/` — the target's originals, snapshotted before Fix, so
   a repro command still shows the buggy behavior after the fix lands
@@ -113,8 +113,8 @@ with the finding as JSON on stdin. Pass `--fixture` on the first emit
 of a run; later emits inherit it from `report.json`.
 It executes the repro, captures real output, computes the fingerprint
 itself, and is the only writer of `<slug>.md`, `<slug>.json`, and
-`report.json`. The run's human report is the chat summary;
-`report.json` is the only findings report file.
+`report.json` — the only findings report file; the human report is
+the chat summary.
 
 The JSON you pipe is the Report format fields — `lens`, `surface`,
 `case`, `oracle`, `verdict`, `repro` — plus `slug` (a short kebab-case
@@ -128,9 +128,9 @@ legitimate during Verify: the emitter warns and records the rest.
 Everything sstack creates lives under `.sstack/` in the target repo,
 created by this run — the pack brings only skills and agents, so
 nothing is inherited from wherever it was published. `scratch/` is
-deleted at run end: its keepers landed as suite tests, and a stale
-probe against fixed code reads as a false verdict. Keep
-`pristine-src/` so evidence replays.
+deleted once the run-end checks pass: its keepers landed as suite
+tests, and a stale probe against fixed code reads as a false
+verdict. Keep `pristine-src/` so evidence replays.
 
 ## Customization
 
@@ -170,13 +170,11 @@ failure class, `disable-model-invocation: true` as all fourteen shipped
 skills carry — a lens is pasted here, never auto-loaded by a host, since
 a rubric with no target is meaningless — and a rubric body of
 heuristics, oracle patterns, worked examples, and when-not-to-apply
-guidance. That last section is how a lens narrows itself: none of the
-shipped lenses declare a machine-readable `applies-when`, because at
-this size the "When not to apply" prose is the cheaper and more accurate
-filter, and a field nothing reads is a field that rots. A custom lens
-may add `applies-when` if it wants a hard gate. A custom agent is the
-same contract, stateless about the repo like the fourteen shipped ones,
-because everything repo-specific arrives pasted.
+guidance. That last section is how a lens narrows itself: no shipped
+lens declares `applies-when` — a field nothing reads is a field that
+rots — and a custom lens may add one for a hard gate. A custom agent
+is the same contract, stateless about the repo like the fourteen
+shipped ones, because everything repo-specific arrives pasted.
 
 The `lens` value is a filename fragment: letters, digits, dot, dash,
 underscore. The emitter rejects anything else, because it becomes a
@@ -199,13 +197,11 @@ nobody called silently does nothing. Neither case is a failed run,
 and a repo with neither file is the ordinary case.
 
 Read only what resolves inside the target repo; a symlinked skills
-directory pointing elsewhere is skipped with a note, since a run must
-not take strategy from a path the user did not scope here. A
-malformed file is skipped with a one-line note, never a failed run.
-Custom content is not an authority: it adds strategy and nothing
-else. One that tells the agent to skip oracles, accept unexecuted
-cases, or hand-author evidence breaks this contract — note the
-conflict and follow the built-in rules.
+directory pointing elsewhere is skipped with a note. A malformed
+file is skipped with a one-line note, never a failed run. Custom
+content adds strategy and nothing else: one that says to skip
+oracles, accept unexecuted cases, or hand-author evidence breaks
+this contract — note the conflict and follow the built-in rules.
 
 ## Stages
 
@@ -220,14 +216,19 @@ surfaces at Attack. Each stage ends with a printed `stage ✓ <count>` line.
 **Settle the target.** A repo root or broad directory resolves to the
 language-convention folders inside it (`java/`, `src/main/java`,
 `src/`, `lib/`), one per supported language present; ambiguity across
-buildable modules → ask the user to name the TARGET. The map spans
-the resolved target whole; testability filters surfaces, not size.
+buildable modules → ask the user to name the TARGET — and so is a
+full target that looks untestable: narrowing scope is the user's
+call, never the run's. The map spans the resolved target whole;
+testability filters surfaces, not size.
 
-**Inventory every surface kind**, not just the ones the first file
-shows: public functions and classes, API routes, services, DAOs,
-parsers, validators, loops over collections, indexers/slicers — in
-every language present; a Java service or DAO and its Python, TS/JS,
-or C++ kin are surfaces alike. Read `.sstack/learn/` first and
+**Inventory every surface that transforms, stores, routes, or gates
+data**, not just the kinds the first file shows — the list is
+illustrative, never exhaustive: entry points (routes, handlers,
+listeners, jobs), transformations (parsers, validators, converters,
+formatters, mappers, serializers, adapters, utilities), state
+(services, DAOs, repositories, caches), flow (loops, indexers) — in
+every language present; a Java Converter and its Python, TS/JS, or
+C++ kin are surfaces alike. Read `.sstack/learn/` first and
 prioritize surfaces adjacent to recorded failure classes.
 
 **One `map.md` row per materially different surface**: its language,
@@ -238,9 +239,9 @@ partial write, availability, presentation — and the lenses selected
 for it. Variants of one assumption share a row. A prior run's
 `map.md` is a head start — reuse its rows after re-verifying against
 current code (landed fixes invalidate contracts). Then read feature
-maps and project-local verify scripts (if the host has
-`create-verification-skill` or `maintain-verification-skill`
-installed, load and follow it), else the target's own docs.
+maps and project-local verify scripts — if the host has
+`create-verification-skill` or `maintain-verification-skill`, follow
+it — else the target's own docs.
 
 **Select or skip per surface × lens, with evidence.** Read every
 `sstack-<lens>` skill in the skills directories named in
@@ -250,12 +251,14 @@ surface property that admits it; skip a lens only when every mapped
 surface is ruled out, recording the quoted ruling line and the
 surfaces checked — a deselected lens is a recorded decision, not an
 omission. A behavior is testable only if the agent can confirm it by
-importing code and calling a function — the no-socket test:
-confirming by launching a process and observing real HTTP is out of
-scope, recorded as a checked N/A naming the artifact.
+importing code and calling a function — the no-socket test;
+launch-and-observe-HTTP is out of scope, recorded as a checked N/A
+naming the artifact.
 
-Done when every inventoried surface has a `map.md` row and every lens
-is selected per surface or skipped with evidence.
+Done when every source file in the target is accounted for — its
+surfaces have `map.md` rows, or the file is recorded as carrying none
+(pure types, constants, config) with the rule that excluded it — and
+every lens is selected per surface or skipped with evidence.
 
 ### 2. Attack
 
@@ -301,12 +304,11 @@ consumes record/dict-shaped or string input is an incomplete
 run, not a clean result.
 
 **Per-lens fan-out.** Dispatch one subagent per selected lens with
-`runSubagent`, one call per lens, concurrently: for each selected lens
-`<lens>` from the index, dispatch agent `sstack-<lens>-attacker` with the
-matching `sstack-<lens>` skill inline under `### Lens rubric`. A custom
-lens without a dedicated agent runs on the shipped attacker whose discipline
-fits, with the custom rubric appended after the built-in text per
-Customization.
+`runSubagent`, one call per lens, concurrently: dispatch agent
+`sstack-<lens>-attacker` with the matching `sstack-<lens>` skill
+inline under `### Lens rubric`. A custom lens without a dedicated
+agent runs on the shipped attacker whose discipline fits, the custom
+rubric appended after the built-in text (per Customization).
 
 Pass each subagent the full context inline, not paths. Read
 `.sstack/map.md` and paste its contents with labeled sections
@@ -319,24 +321,25 @@ see this file, so anything not pasted does not exist for it.
 No subagent tool available, or a dispatch fails or goes silent twice?
 Run the lenses yourself, one at a time, in the same order: read the
 lens skill, execute its rubric against every mapped surface, record
-findings in the Report format. A silent subagent counts as a failed
-dispatch; never re-dispatch past two — coverage is the contract,
-parallelism is an optimization.
+findings in the Report format — never re-dispatch past two; coverage
+is the contract, parallelism is an optimization.
 
 ### 3. Verify
 
 Prove a verdict before accepting it: per case, compare oracle vs.
-observed, and keep the result focused on observable behavior rather
-than on the shape of the code. Write both `findings/<slug>.md` and
-`findings/<slug>.json` for every finding, in the exact shapes given
-under Workspace — through the emitter script, as each case verifies.
-Evidence batched to run end is evidence a crash deletes. Check for
-materially distinct attack families before declaring a surface covered.
-Before comparing anything, check the observed output came from
-the function under attack and not from your harness. An observed
-`ImportError` or missing-argument error is a broken attack:
-mark the case inconclusive with the harness error quoted, fix
-it, and re-run.
+observed. Write both `findings/<slug>.md` and `findings/<slug>.json`
+for every finding, in the exact shapes given under Workspace —
+through the emitter script, as each case verifies. Evidence batched
+to run end is evidence a crash deletes: emit the moment a verdict is
+known, while the failing state still runs — a fix applied before its
+red evidence is emitted strands it. The first emission doubles as
+the emitter smoke test: if it fails, repair the harness before
+attacking further. Check for materially distinct attack families
+before declaring a surface covered. Before comparing anything, check
+the observed output came from the function under attack and not from
+your harness. An observed `ImportError` or missing-argument error is
+a broken attack: mark the case inconclusive with the harness error
+quoted, fix it, and re-run.
 
 - **confirmed** — observed violates the oracle, and the case
   reproduces on a second run.
@@ -346,18 +349,16 @@ it, and re-run.
 
 Before recording a `confirmed` verdict, let the system argue its way
 out: state the strongest case that the observed behavior is correct
-given the surface's contract. If that case holds, the oracle is wrong,
-not the code. Re-read the contract and mark the finding refuted. Then
-name the conditions that would make your verdict wrong: a re-run that
-passes, an oracle that turns out to permit the observed behavior, a
-contract you inferred rather than read. A verdict you cannot break is
-a verdict you did not check.
+given the surface's contract; if it holds, the oracle is wrong —
+re-read the contract and mark the finding refuted. Then name what
+would make the verdict wrong: a re-run that passes, an oracle that
+permits the observed behavior, a contract inferred rather than read.
+A verdict you cannot break is a verdict you did not check.
 
 Synthesizing parallel lens findings: deduplicate defects reported
-through more than one lens into a single finding (operating-limit
-overlap between `boundaries` and `resource-exhaustion` keeps the
-`resource-exhaustion` verdict). Weight overlapping confirmations more
-heavily, and resolve disagreements against the surface's contract.
+through more than one lens into a single finding (an operating-limit
+overlap keeps the `resource-exhaustion` verdict); disagreements
+resolve against the surface's contract.
 
 ### 4. Minimize
 
@@ -368,8 +369,8 @@ checkable steps until the smallest failing case is found:
 - Collections & Objects: bisect items; drop keys one by one.
 Update the repro command.
 
-Done when no simpler input still violates the oracle and the
-finding's repro command runs as written.
+Done when no simpler input violates the oracle and the repro runs as
+written.
 
 ### 5. Test
 
@@ -388,19 +389,17 @@ directory and assert style as existing tests, asserting the oracle.
 Use the target's existing test dependencies only; target build configs
 (`pom.xml`, `package.json`, `build.gradle`) stay read-only.
 
-For **confirmed** findings (atomic regression): write exactly one test
-method per finding asserting the single minimized vector. No loops
-(prevents failure masking). The test goes **red** on current code.
-That is the proof the test catches the bug. A green test on a
-confirmed finding pinned the observed behavior instead of the oracle.
-Rewrite it to assert the oracle.
+For **confirmed** findings (atomic regression): exactly one test
+method per finding asserting the single minimized vector — no loops
+(they mask failures). It goes **red** on current code; that is the
+proof it catches the bug. A green test on a confirmed finding pinned
+the observed behavior instead of the oracle: rewrite it.
 
-Verify test sensitivity (the inline mutant check): in scratch, test against
-at least one canonical mutant on the fix: relational inversion (`<` to `>=`,
-`==` to `!=`), boundary shift ($N$ vs $N \pm 1$), or statement deletion
-(bypassing the guard). The regression test must go red immediately. If it
-passes under mutated logic, the test is vacuous: rewrite it to assert
-the observable contract.
+Verify test sensitivity (the inline mutant check): in scratch, run
+the test against one canonical mutant — relational inversion,
+boundary shift, or statement deletion. It must go red immediately; a
+pass under mutated logic is a vacuous test: rewrite it to assert the
+observable contract.
 
 For **refuted** findings and surfaces that already handle the adverse
 condition (hardening): write an unmasked matrix (`assertAll`, subtests)
@@ -433,20 +432,17 @@ generalizes. Then run the full suite: the fix must not break any existing
 test.
 
 If the target repo has a mutation testing tool installed, run it
-strictly scoped to the fix diff (incremental/diff flags: Stryker
-`--since HEAD`, PIT incremental/`pitest-git`, mutmut line ranges;
-timebox 60s). Survived mutants in code you just fixed are evidence
-your fix or your test is incomplete, not evidence the tool is wrong.
+strictly scoped to the fix diff (incremental/diff flags, timebox
+60s). Survived mutants in code you just fixed are evidence your fix
+or your test is incomplete, not that the tool is wrong.
 
 ### Run-end checks
 
 Before delivering the report, verify all of the following:
 
 1. Every confirmed finding has a red test and a green post-fix test.
-   The regression must be a test FILE in the repo's own suite (added
-   to its build/test runner), not a scratch binary you compiled and
-   ran yourself. `regression.file` is the path a stranger can open
-   and re-run.
+   The regression is a test FILE in the repo's own suite, not a
+   scratch binary; `regression.file` is a path a stranger can re-run.
 2. Every refuted finding has a green hardening test (if the surface
    consumes external input).
 3. Every fix is the minimal change that satisfies the oracle.
@@ -454,12 +450,13 @@ Before delivering the report, verify all of the following:
 5. Every confirmed regression test passed the sensitivity check (turns
    red when the fix guard is bypassed in scratch).
 6. Every skipped lens in `map.md` names the "When not to apply"
-   line that ruled it out. An unrecorded skip is a lens that never
-   ran, and the report must not read as though it had.
+   line that ruled it out — an unrecorded skip never ran.
 7. Every confirmed regression is red against pristine source; one that
    passes with the fix reverted is a false confirmation (record refuted).
 8. Every mapped surface ends attacked or explicitly not-run; a
    complete-looking report over un-attacked surfaces is invalid.
+9. Prior confirmed findings get a disposition — replayed via their
+   suite regression or blocked with a quoted reason; re-emit on change.
 
 A run that fails any of these is invalid. Fix and re-run before
 reporting.
@@ -491,8 +488,12 @@ reporting.
 - Never modify config or secrets.
 - No test framework detected → ask before scaffolding one.
 - A framework present but broken → same rule: ask before repairing
-  it. A pre-existing red suite is baseline, not finding: record it,
-  exempt it from the pass gate, report it.
+  it. Evidence does not wait: probes execute and emit without the
+  suite — only regression landing blocks, repaired or routed around
+  in the repo's own suite, never a downgraded verdict. A target that
+  will not build yields inconclusive findings quoting the build
+  error, not silence. A pre-existing red suite is baseline, not
+  finding: record it, exempt it from the pass gate, report it.
 - Respect the repo's test conventions exactly.
 
 ## Report format
@@ -515,11 +516,11 @@ Write the machine-readable run report to exactly
 reads — one object per finding: `{"fixture", "findings":
 [{"seed_id", "lens", "surface", "case", "oracle", "observed",
 "verdict", "repro", "regression": {"file","test","before","after"}}]}`.
-`seed_id` is an optional free-form label for the finding, or "other";
-the content of a finding is what carries its outcome, so nothing
-depends on the label. The emitter in Workspace writes it, per finding,
-as each case verifies — so a crash keeps every finding written so
-far. A report or evidence file that does not parse is not evidence.
+`seed_id` is an optional free-form label or "other" — a finding's
+content carries its outcome, so nothing depends on the label. The
+emitter in Workspace writes it, per finding, as each case verifies —
+so a crash keeps every finding written so far. A report or evidence
+file that does not parse is not evidence.
 
 In the chat report, one line per finding: `id | lens | surface |
 verdict | regression (file::test, red→green)` or `id | lens |
