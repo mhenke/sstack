@@ -26,6 +26,7 @@ the product. For *what* the code does, read [`../ARCHITECTURE.md`](../ARCHITECTU
 | [0016](0016-on-demand-references-tier.md) | Subcommand bodies live in an on-demand references tier | Accepted | 2026-09-28 |
 | [0017](0017-grader-gates-on-evidence-integrity.md) | The grader verifies evidence fingerprints itself; a PASS cannot rest on evidence replay could not verify | Accepted | 2026-09-28 |
 | [0018](0018-harden-is-a-routing-subcommand.md) | Harden is a routing subcommand that fills gaps, not a stage or lens | Accepted | 2026-09-29 |
+| [0019](0019-scan-baseline-for-change-triage.md) | map.md records a scan baseline; the next run triages by git diff | Accepted | 2026-09-29 |
 
 ## Status
 

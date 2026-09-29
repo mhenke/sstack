@@ -28,7 +28,23 @@ of a run. Anything that does neither is out.
 
 ## Open, in order
 
-### 1. Host packaging *(blocked by v0 scope lock — requires v1 lift)*
+### 1. Scan baseline triage *(designed — ADR-0019)*
+
+- **Why**: a repeat run re-attacks everything with no memory of what
+  changed; "what changed since last time?" is the user's first
+  question on run two.
+- **What**: Discover records the target's HEAD commit SHA in
+  `map.md`; the next run derives changed files with one
+  `git diff --name-only <baseline>..HEAD` and marks their surfaces as
+  priority attack targets, re-deriving and diffing their recorded
+  contracts. Changed = prioritized, never skipped; no baseline, no
+  git, or scope mismatch degrades to a full run (ADR-0007, ADR-0019).
+- **Done when**: a cold run on a changed scope cites its baseline
+  diff in Discover and prioritizes changed surfaces; a non-git target
+  takes the full-Discover path; both recorded in
+  [`evals/ACCEPTANCE.md`](evals/ACCEPTANCE.md).
+
+### 2. Host packaging *(blocked by v0 scope lock — requires v1 lift)*
 
 - **Why**: install is one command (`npx skills add`) but update has
   no forced path; stale copies linger.
