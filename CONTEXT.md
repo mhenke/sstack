@@ -34,12 +34,15 @@ the strategy, an agent is the worker.
 _Avoid_: attacker lens, lens agent (both collapse the pair)
 
 **Oracle**:
-The expected behavior written down *before* the attack: error,
-degradation, retry bound, invariant, rejection — not only crashes.
-"It crashes" isn't an expectation; "it raises a validation error
-naming the field" is. A test that passes against code you just proved
-broken has pinned the bug, and a pinned bug is worse than no test at
-all.
+The expected behavior written down *before* the attack, derived from
+the surface's business invariant — what must stay true under the
+adverse condition — and chosen for what the surface risks, never for
+what is cheapest to execute. One observable outcome, named in the
+target language's terms (exception type, rejected promise, error
+code, typed result): "it crashes" isn't an expectation; "it fails
+with a validation error naming the field" is. A test that passes
+against code you just proved broken has pinned the bug, and a pinned
+bug is worse than no test at all.
 _Avoid_: expected output (a value, not the declared behavior under the
 adverse condition); assertion (the test's mechanism, not the
 declaration)
@@ -123,6 +126,21 @@ every per-object check passes.
 _Avoid_: listing endpoint, read surface (names the transport, not the
 obligation)
 
+**Impact class**:
+A map row's rating of what a failure on the surface touches:
+privilege boundary, sensitive-data mutation (money, legal, personal),
+integrity or partial write, availability, presentation. Set at
+Discover, orders the attack at Attack, and decides which untested
+surfaces make a run partial.
+_Avoid_: severity (ranks findings after the fact; impact ranks
+surfaces before the attack)
+
+**Supported language**:
+One of Python, TypeScript/JavaScript, Java, or C++ — the languages
+every lens rubric's Language notes cover and the eval fixtures
+exercise. Discover inventories surfaces in every one present.
+_Avoid_: target language (names one surface's language, not the set)
+
 **Contamination**:
 A shipped artifact handing a cold run its answer — a worked example
 pairing a seed's trigger with its oracle, an unstripped `BUGS.md`, a
@@ -199,6 +217,14 @@ pristine source — a green gap-fill wearing a red claim. Run-end check
 7 converts it mechanically. It over-claims the report ("N bugs found"
 when none were) while the landed tests themselves stay correct.
 _Avoid_: false positive (names a classifier, not an evidence verdict)
+
+**Partial coverage**:
+A run whose high-impact surfaces went untested. The chat report's
+coverage counts (mapped, executed, refuted, confirmed, inconclusive,
+not run) state the run's shape; defects found are its content, and
+partial is the honest verdict a clean-looking report hides.
+_Avoid_: incomplete run (reads as a harness fault, not a reporting
+duty)
 
 **Negative control**:
 The grader's re-execution of every confirmed finding's regression

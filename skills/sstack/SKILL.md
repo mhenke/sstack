@@ -5,9 +5,6 @@ description: Use when the user wants negative testing, edge-case coverage, failu
 
 # sstack — structured negative testing
 
-> Don't ask whether the software is robust. Exercise the failure
-> condition, write the test that proves it, and fix it.
-
 sstack finds the ways software fails, writes a test that goes red on
 the bug, applies the minimal fix that turns it green, and hardens the
 existing suite with negative test cases even where nothing is broken.
@@ -15,13 +12,16 @@ existing suite with negative test cases even where nothing is broken.
 ## The four rules
 
 1. Attack assumptions.
-2. Define the oracle before the attack. Expected behavior under the
-   adverse condition — error, degradation, retry bound, invariant,
-   rejection. "It crashes" is not an oracle; "it raises a
-   validation error naming the field" is. One oracle, one observable
-   outcome: "throws or returns NaN" is two verdicts wearing one
-   sentence — name the one the contract promises; when the contract
-   genuinely permits both, the case is inconclusive.
+2. Define the oracle before the attack, from the surface's business
+   invariant — what must stay true under the adverse condition — not
+   from what is cheapest to execute. Shape: given [adverse input],
+   the system must [one observable outcome] and must not [critical
+   side effect], the outcome named in the language's terms —
+   exception type, rejected promise, error code, typed result.
+   "It crashes" is not an oracle; "it fails with a validation error
+   naming the field" is. "Throws or returns NaN" is two verdicts
+   wearing one sentence — name the one the contract promises; when
+   the contract permits both, the case is inconclusive.
 3. Never accept an agent's claim as evidence. Run the real command,
    quote the real output.
 4. Every confirmed failure gets a red test, a fix, and a green test.
@@ -233,11 +233,12 @@ prioritize surfaces adjacent to recorded failure classes.
 
 **One `map.md` row per materially different surface**: its language,
 its assumed contract (types, ranges, preconditions from docstrings,
-annotations, call sites), and the lenses selected for it. Variants of
-one assumption share a row. Anchor rows in the target's invariants,
-entities and transitions, and user-observable behavior. Read existing
-feature maps and project-local verify scripts as head starts (if the
-host has `create-verification-skill` or `maintain-verification-skill`
+annotations, call sites), its impact class — privilege boundary,
+sensitive-data mutation (money, legal, personal), integrity or
+partial write, availability, presentation — and the lenses selected
+for it. Variants of one assumption share a row. Read existing feature
+maps and project-local verify scripts as head starts (if the host has
+`create-verification-skill` or `maintain-verification-skill`
 installed, load and follow it), else the target's own docs.
 
 **Select or skip per surface × lens, with evidence.** Read every
@@ -258,12 +259,15 @@ is selected per surface or skipped with evidence.
 ### 2. Attack
 
 Dispatch the matching attacker for each lens selected from the index.
-Identify each surface's actual limits; cover materially different
-attacks, not variants of one. Two fixes sharing a premise and gate —
-if `principle-attack-the-premise` is installed, follow it — write the
-premise down, count actors and failure classes, question it before
-retrying. For each surface × lens, and as many cases per pair as the
-contract admits:
+Order surfaces by impact class — privilege boundaries and
+sensitive-data mutations first, duplicate processing and partial
+writes next, parsers and validators last, still valuable at public
+boundaries — and identify each surface's actual limits; cover
+materially different attacks, not variants of one. Two fixes sharing
+a premise and gate — if `principle-attack-the-premise` is installed,
+follow it — write the premise down, count actors and failure
+classes, question it before retrying. For each surface × lens, and as
+many cases per pair as the contract admits:
 
 1. Design the case (concrete input and action).
 2. Write its oracle in `plan.md` FIRST — the expected behavior under
@@ -352,14 +356,12 @@ Synthesizing parallel lens findings: deduplicate defects reported
 through more than one lens into a single finding (operating-limit
 overlap between `boundaries` and `resource-exhaustion` keeps the
 `resource-exhaustion` verdict). Weight overlapping confirmations more
-heavily, resolve disagreements against the surface's contract, and
-keep the report brief.
+heavily, and resolve disagreements against the surface's contract.
 
 ### 4. Minimize
 
-Keep the minimal case and repro easy to inspect, and reduce it in
-independently checkable steps. For each confirmed finding, shrink the
-input systematically until the smallest failing case is found:
+For each confirmed finding, shrink the input in independently
+checkable steps until the smallest failing case is found:
 - Numbers: binary search toward zero (`1000` → `500` → `0` → `-1`).
 - Strings: halve length, then simplify characters (`"payload"` → `"a"` → `""`).
 - Collections & Objects: bisect items; drop keys one by one.
@@ -371,11 +373,13 @@ finding's repro command runs as written.
 ### 5. Test
 
 Test behavior, not implementation — if the host has
-`principle-test-behavior-not-implementation` installed, load and follow it — for every
-regression and hardening test. Call the subject as its users do, asserting exact scalar
-values, concrete exception types, and specific error codes or message substrings. Delete
-or rewrite any test that would pass when every imported function returns `undefined`. In
-negative assertions, verify the error identity, not merely that an exception was thrown.
+`principle-test-behavior-not-implementation` installed, load and
+follow it. Call the subject as its users do, asserting exact scalar
+values, concrete error types, and specific error codes or message
+substrings. Delete or rewrite any test that would pass when every
+imported function returns `undefined`. Verify error identity, not
+merely that something failed; a returning call is proven by its
+returned state and side effects, not by the absence of an error.
 Preserve the oracle and the failure mode in the test itself.
 
 Write a permanent negative test in the host repo's real suite — same
@@ -416,9 +420,8 @@ editing — if the host has `principle-fix-root-causes` installed, load and foll
 reproduce the failure, ask why until the shared cause is found, and fix that cause
 rather than adding a symptom guard. Fix the general invariant rather than the single
 test input: guard the entire invalid domain (relational checks like `<= 0`, not literal
-equality `== 0`). Check every sibling caller of the same behavior before applying the
-fix. Remove obsolete complexity rather than adding to it, keep boundaries explicit, and
-keep each change independently checkable.
+equality `== 0`). Check every sibling caller of the same behavior
+before applying the fix.
 
 Then apply the minimal change that satisfies the oracle. Smallest diff
 that turns the red test green.
@@ -431,9 +434,6 @@ Re-run the confirmed finding's test: it goes **green**. Verify against
 a second distinct vector in the invalid domain to confirm the fix
 generalizes. Then run the full suite: the fix must not break any existing
 test.
-
-Done when every confirmed finding's test is green and the full suite
-passes.
 
 If the target repo has a mutation testing tool installed, run it
 strictly scoped to the fix diff (incremental/diff flags: Stryker
@@ -523,17 +523,17 @@ far. A report or evidence file that does not parse is not evidence.
 
 In the chat report, one line per finding: `id | lens | surface |
 verdict | regression (file::test, red→green)` or `id | lens |
-surface | refuted | hardening (file::test, green)`. Then per confirmed
-finding the full field set, with observed output quoted verbatim and
-the fix applied. End with counts: confirmed / refuted / inconclusive,
-fixes applied, regressions landed, hardening tests added.
-
-## Learn loop
+surface | refuted | hardening (file::test, green)`. Per confirmed
+finding, the full field set with observed output quoted verbatim and
+the fix applied. End with coverage counts — surfaces mapped,
+executed, refuted, confirmed, inconclusive, not run — then fixes
+applied, regressions landed, hardening tests added. Untested
+high-impact surfaces make the run partial coverage: report it as
+partial.
 
 ### 7. Learn
 
 Record one line per confirmed failure class in
 `.sstack/learn/<lens>.md`: `lens | signal | adjacent surfaces to
-re-test`. Treat learned classes as prioritization for the next
-Discover, never as proof. Never write secrets, transcripts, or one-off
-instructions into `.sstack/learn/`.
+re-test` — prioritization for the next Discover, never proof. Keep
+secrets, transcripts, and one-off instructions out.

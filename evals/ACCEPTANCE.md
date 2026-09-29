@@ -117,6 +117,13 @@ isolated dir).
 > (run-end check 8 added). Recorded cold-run PASSes predate this
 > text; Discover wording shapes every cold run's map, so the numbers
 > stand on the pre-rewrite text pending a cold re-run.
+> **Staleness note (2026-09-29, oracle rules)**: rule 2 now derives
+> oracles from business invariants with a single-outcome shape, map
+> rows carry an impact class, Attack orders surfaces by impact, and
+> the chat report ends with coverage counts (untested high-impact
+> surfaces = partial coverage). Recorded cold-run PASSes predate this
+> text; the staleness already flagged for the Discover rewrite now
+> covers these edits too.
 
 | fixture | verdict | evidence |
 |---|---|---|

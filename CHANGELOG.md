@@ -31,6 +31,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   compile refuses emission (exit 3) and writes nothing. Python probes
   also get a documented import bootstrap so they resolve from any
   working directory.
+- Oracles are derived from the surface's business invariant, not from
+  what is cheapest to execute (field report: oracle selection bias
+  favored easy exceptions over high-impact failures). Rule 2 gains a
+  single-outcome oracle shape — given [adverse input], the system
+  must [one outcome] and must not [critical side effect]. Map rows
+  carry an impact class (privilege boundary, sensitive-data mutation,
+  integrity/partial-write, availability, presentation); Attack orders
+  surfaces by it. The chat report ends with coverage counts —
+  mapped, executed, refuted, confirmed, inconclusive, not run — and a
+  run with untested high-impact surfaces is reported as partial
+  coverage, never clean. Tests must prove returned state and side
+  effects, not merely the absence of a throw. Oracle and test wording
+  stays language-neutral across Python, TS/JS, Java, and C++ —
+  exception type, rejected promise, error code, or typed result.
 
 ## 0.3.0 - 2026-09-29
 
