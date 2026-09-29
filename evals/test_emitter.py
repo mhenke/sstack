@@ -6,6 +6,7 @@ when the shipped text and the shipped script disagree.
 """
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
@@ -64,6 +65,20 @@ def test_broken_scratch_probe_blocks_emit(tmp_path):
     assert "does not compile" in result.stderr
     assert not (tmp_path / ".sstack" / "findings" / "t1.json").exists()
 
+def test_empty_stdin_prints_usage_not_a_bare_parse_error(tmp_path):
+    """A no-stdin invocation (the cold-run failure that stranded Cpp on
+    2026-09-29) must exit 2 with the invocation example on stderr, not
+    a bare JSON parse error."""
+    result = subprocess.run(
+        [sys.executable, str(EMITTER), "--workspace", str(tmp_path),
+         "--fixture", "seeded-py"],
+        input="", capture_output=True, text=True)
+    assert result.returncode == 2
+    assert "no finding on stdin" in result.stderr
+    assert "<<'JSON'" in result.stderr
+    assert not (tmp_path / ".sstack" / "findings").exists() or not any(
+        (tmp_path / ".sstack" / "findings").iterdir())
+
 
 def test_documented_payload_emits_and_replays():
     """The documented payload is accepted, and the recorded fingerprint
@@ -82,6 +97,60 @@ def test_missing_regression_is_rejected():
         finding = base()
         del finding["regression"]
         assert emit(Path(tmp), finding).returncode == 2
+
+
+def test_emitter_io_is_utf8_under_legacy_locale():
+    """Windows cp1252 / C-locale hosts: a unicode finding must round-trip
+    byte-exact. Locale-default open() crashes or mojibakes the markdown
+    view's unicode content; the emitter forces UTF-8 itself."""
+    env = {**os.environ, "PYTHONUTF8": "0", "PYTHONCOERCECLOCALE": "0",
+           "LC_ALL": "C", "LANG": "C"}
+    finding = base(case="café ✓ — unicode")
+    with tempfile.TemporaryDirectory(dir=SCRATCH) as tmp:
+        result = subprocess.run(
+            [sys.executable, str(EMITTER), "--workspace", tmp,
+             "--fixture", "seeded-py"],
+            input=json.dumps(finding), capture_output=True, text=True,
+            env=env)
+        assert result.returncode == 0, result.stderr
+        md = (Path(tmp) / ".sstack/findings/t1.md").read_text(encoding="utf-8")
+        assert "café ✓ — unicode" in md
+        report = json.loads(
+            (Path(tmp) / ".sstack/report.json").read_text(encoding="utf-8"))
+        assert report["findings"][0]["case"] == "café ✓ — unicode"
+
+
+def test_recorded_evidence_is_portable_and_clock_free(tmp_path):
+    """.sstack artifacts are diffed run over run and across machines: the
+    absolute workspace path is rewritten to `.` at capture (a sibling dir
+    sharing the prefix stays intact) and no timestamps or durations are
+    recorded — a moved path or a moved clock reads as a false change."""
+    sibling = f"{tmp_path}2"
+    finding = base(repro=f"echo {tmp_path}/probe.py && echo {sibling}/probe.py")
+
+    res_py = emit(tmp_path, finding)
+    assert res_py.returncode == 0, res_py.stderr
+    record = json.loads((tmp_path / ".sstack/findings/t1.json").read_text())
+    assert record["command"] == f"echo ./probe.py && echo {sibling}/probe.py"
+    assert record["stdout"] == f"./probe.py\n{sibling}/probe.py\n"
+    digest = hashlib.sha256(
+        (record["stdout"] + record["stderr"]).encode()).hexdigest()[:16]
+    assert record["fingerprint"] == digest
+    assert "emitted_at" not in record and "duration_ms" not in record
+
+    report = json.loads((tmp_path / ".sstack/report.json").read_text())
+    entry = report["findings"][0]
+    assert entry["repro"] == record["command"]
+    assert "emitted_at" not in entry and "duration_ms" not in entry
+
+    with tempfile.TemporaryDirectory(dir=SCRATCH) as tmp_js:
+        res_js = emit_js(Path(tmp_js), base(repro=f"echo {tmp_js}/note.txt"))
+        assert res_js.returncode == 0, res_js.stderr
+        js_rec = json.loads(
+            (Path(tmp_js) / ".sstack/findings/t1.json").read_text())
+        assert js_rec["command"] == "echo ./note.txt"
+        assert js_rec["stdout"] == "./note.txt\n"
+        assert "emitted_at" not in js_rec and "duration_ms" not in js_rec
 
 
 def test_state_tokens_must_be_literal():
@@ -265,6 +334,11 @@ def test_node_emitter_contract_parity():
 
         bad_slug = base(slug="../../escape")
         assert emit_js(Path(tmp_js), bad_slug).returncode == 2
+        empty_js = subprocess.run(
+            ["node", str(EMITTER_JS), "--workspace", str(tmp_js), "--fixture", "seeded-py"],
+            input="", capture_output=True, text=True)
+        assert empty_js.returncode == 2
+        assert "no finding on stdin" in empty_js.stderr
 
 
 def test_pbt_seed_and_counterexample_parity():

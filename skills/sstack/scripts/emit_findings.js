@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 /**
  * Evidence emitter: the only writer of .sstack/findings/* and .sstack/report.json.
- * Node.js stdlib-only equivalent to emit_findings.py.
+ * Node.js stdlib-only equivalent to emit_findings.py. Recorded paths are
+ * rewritten host-repo-relative at capture, so evidence diffs clean
+ * across machines and checkouts.
  */
 
 const fs = require('fs');
@@ -24,6 +26,19 @@ function safeSlug(value, field) {
 
 function readFinding() {
   const input = fs.readFileSync(0, 'utf8');
+  if (!input.trim()) {
+    process.stderr.write(
+      `no finding on stdin — pipe the finding JSON here, e.g.:
+node scripts/emit_findings.js --workspace <host-repo> --fixture <fixture> <<'JSON'
+{"slug": "checkout-page-zero", "lens": "boundaries", "surface": "checkout",
+ "case": "checkout(items=[], page=0)", "oracle": "ValueError naming page",
+ "verdict": "confirmed", "repro": "<command that reproduces it>",
+ "regression": {"file": "tests/test_checkout.py", "test": "test_page_zero",
+                "before": "red", "after": "green"}}
+JSON
+`);
+    process.exit(2);
+  }
   let finding;
   try {
     finding = JSON.parse(input);
@@ -68,7 +83,7 @@ function readFinding() {
 // A scratch probe that does not compile is infrastructure failure, not
 // evidence. Compile referenced scratch probes before anything is recorded.
 const PROBE_CHECK = {
-  '.py': [process.execPath, '-m', 'py_compile'],
+  '.py': ['python3', '-m', 'py_compile'],
   '.js': ['node', '--check'],
 };
 
@@ -86,16 +101,24 @@ function preflightProbe(command, workspace) {
   return true;
 }
 
+// Evidence is diffed run over run, so the recorded bytes must not carry
+// the absolute workspace path: it differs on every machine and every
+// temp checkout, and a path that moved reads as a false change. Rewrite
+// it to `.` on path boundaries — a sibling directory sharing the
+// prefix stays intact.
+function normalize(text, workspace) {
+  const escaped = String(workspace).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return text.replace(new RegExp(escaped + '(?![\\w.-])', 'g'), '.');
+}
+
 function runRepro(command, workspace) {
-  const t0 = Date.now();
   const result = spawnSync(command, {
     shell: true,
     cwd: workspace,
     encoding: 'utf8',
   });
-  const durationMs = Date.now() - t0;
-  const stdout = result.stdout || '';
-  const stderr = result.stderr || '';
+  const stdout = normalize(result.stdout || '', workspace);
+  const stderr = normalize(result.stderr || '', workspace);
   const exitCode = result.status !== null ? result.status : (result.signal ? 128 : 1);
   const fingerprint = crypto
     .createHash('sha256')
@@ -104,12 +127,11 @@ function runRepro(command, workspace) {
     .slice(0, 16);
 
   return {
-    command,
+    command: normalize(command, workspace),
     exit_code: exitCode,
     stdout,
     stderr,
     fingerprint,
-    duration_ms: durationMs,
   };
 }
 
@@ -187,12 +209,6 @@ function rebuildReport(findingsDir, workspace, fixture) {
     }
     if (record.counterexample !== undefined) {
       entry.counterexample = record.counterexample;
-    }
-    if (record.duration_ms !== undefined) {
-      entry.duration_ms = record.duration_ms;
-    }
-    if (record.emitted_at) {
-      entry.emitted_at = record.emitted_at;
     }
     entries.push(entry);
   }
@@ -287,7 +303,6 @@ function main() {
     verdict: finding.verdict,
     ...run,
     regression: finding.regression,
-    emitted_at: new Date().toISOString(),
   };
   if (finding.fix) {
     record.fix = finding.fix;

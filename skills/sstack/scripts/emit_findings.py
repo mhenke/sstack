@@ -4,8 +4,9 @@
 Run once per finding, as each case verifies. The finding arrives as JSON on
 stdin; the repro is executed for real, and stdout, stderr, exit code, and
 fingerprint come from that execution and never from transcription.
+Recorded paths are rewritten host-repo-relative at capture, so evidence
+diffs clean across machines and checkouts.
 report.json is rebuilt from the evidence files on disk after every emit, so
-the run survives a crash with everything already verified still recorded.
 
     python3 scripts/emit_findings.py --workspace <host-repo> --fixture <fixture> <<'JSON'
     {"slug": "checkout-page-zero", "lens": "boundaries", "surface": "checkout",
@@ -28,8 +29,6 @@ import json
 import re
 import subprocess
 import sys
-import time
-from datetime import datetime, timezone
 from pathlib import Path
 
 VERDICTS = ("confirmed", "refuted", "inconclusive")
@@ -49,7 +48,21 @@ def safe_slug(value: str, field: str) -> str:
 
 
 def read_finding() -> dict:
-    finding = json.load(sys.stdin)
+    raw = sys.stdin.read()
+    if not raw.strip():
+        print(
+            "no finding on stdin — pipe the finding JSON here, e.g.:\n"
+            "python3 scripts/emit_findings.py --workspace <host-repo> --fixture <fixture> <<'JSON'\n"
+            '{"slug": "checkout-page-zero", "lens": "boundaries", "surface": "checkout",\n'
+            ' "case": "checkout(items=[], page=0)", "oracle": "ValueError naming page",\n'
+            ' "verdict": "confirmed", "repro": "<command that reproduces it>",\n'
+            ' "regression": {"file": "tests/test_checkout.py", "test": "test_page_zero",\n'
+            '                "before": "red", "after": "green"}}\n'
+            "JSON",
+            file=sys.stderr,
+        )
+        raise SystemExit(2)
+    finding = json.loads(raw)
     if not isinstance(finding, dict):
         raise ValueError("finding must be a JSON object")
     missing = [k for k in ("lens", "surface", "case", "oracle", "verdict", "repro") if not finding.get(k)]
@@ -84,25 +97,34 @@ def preflight_probe(command: str, workspace: Path) -> bool:
         path = candidate if candidate.is_absolute() else workspace / candidate
         if path.suffix not in PROBE_COMPILE or "scratch" not in path.parts:
             continue
-        check = subprocess.run(PROBE_COMPILE[path.suffix] + [str(path)], capture_output=True, text=True)
+        check = subprocess.run(PROBE_COMPILE[path.suffix] + [str(path)], capture_output=True, text=True,
+                               encoding="utf-8", errors="replace")
         if check.returncode != 0:
             print(f"scratch probe does not compile — repair it before emitting: {path}\n{check.stderr}", file=sys.stderr)
             return False
     return True
 
 
+def normalize(text: str, workspace: Path) -> str:
+    """Evidence is diffed run over run, so the recorded bytes must not
+    carry the absolute workspace path: it differs on every machine and
+    every temp checkout, and a path that moved reads as a false change.
+    Rewrite it to `.` on path boundaries — a sibling directory sharing
+    the prefix stays intact."""
+    return re.sub(re.escape(str(workspace)) + r"(?![\w.-])", ".", text)
+
+
 def run_repro(command: str, workspace: Path) -> dict:
-    t0 = time.monotonic()
-    done = subprocess.run(command, shell=True, cwd=workspace, capture_output=True, text=True, errors="replace")
-    duration_ms = round((time.monotonic() - t0) * 1000)
-    stdout, stderr = done.stdout, done.stderr
+    done = subprocess.run(command, shell=True, cwd=workspace, capture_output=True, text=True,
+                          encoding="utf-8", errors="replace")
+    stdout = normalize(done.stdout, workspace)
+    stderr = normalize(done.stderr, workspace)
     return {
-        "command": command,
+        "command": normalize(command, workspace),
         "exit_code": done.returncode,
         "stdout": stdout,
         "stderr": stderr,
-        "fingerprint": hashlib.sha256((stdout + stderr).encode()).hexdigest()[:16],
-        "duration_ms": duration_ms,
+        "fingerprint": hashlib.sha256((stdout + stderr).encode("utf-8")).hexdigest()[:16],
     }
 
 
@@ -151,7 +173,7 @@ def render_markdown(finding: dict, run: dict) -> str:
 def rebuild_report(findings_dir: Path, workspace: Path, fixture: str) -> int:
     entries = []
     for evidence in sorted(findings_dir.glob("*.json")):
-        record = json.loads(evidence.read_text(errors="replace"))
+        record = json.loads(evidence.read_text(encoding="utf-8", errors="replace"))
         entry = {
             "seed_id": record.get("seed_id", "other"),
             "lens": record["lens"],
@@ -167,12 +189,8 @@ def rebuild_report(findings_dir: Path, workspace: Path, fixture: str) -> int:
             entry["seed"] = record["seed"]
         if record.get("counterexample") is not None:
             entry["counterexample"] = record["counterexample"]
-        if record.get("duration_ms") is not None:
-            entry["duration_ms"] = record["duration_ms"]
-        if record.get("emitted_at"):
-            entry["emitted_at"] = record["emitted_at"]
         entries.append(entry)
-    (workspace / ".sstack" / "report.json").write_text(json.dumps({"fixture": fixture, "findings": entries}, indent=2) + "\n")
+    (workspace / ".sstack" / "report.json").write_text(json.dumps({"fixture": fixture, "findings": entries}, indent=2) + "\n", encoding="utf-8")
     return len(entries)
 
 
@@ -182,11 +200,16 @@ def warn_unlanded(finding: dict, workspace: Path) -> None:
     path = workspace / regression["file"]
     if not path.is_file():
         print(f"warning: {regression['file']} not on disk yet", file=sys.stderr)
-    elif regression["test"] not in path.read_text(errors="replace"):
+    elif regression["test"] not in path.read_text(encoding="utf-8", errors="replace"):
         print(f"warning: {regression['test']!r} not found in {regression['file']} yet", file=sys.stderr)
 
 
 def main() -> int:
+    # Hosts with a legacy locale (Windows cp1252, C) must not change what
+    # the emitter can read or write; evidence is UTF-8 everywhere.
+    for stream in (sys.stdin, sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--workspace", type=Path, required=True, help="host repo holding .sstack/")
     parser.add_argument("--fixture", help="fixture name; required on the first emit, then preserved")
@@ -205,7 +228,7 @@ def main() -> int:
         return 2
 
     report = stack / "report.json"
-    fixture = args.fixture or (json.loads(report.read_text()).get("fixture") if report.is_file() else None)
+    fixture = args.fixture or (json.loads(report.read_text(encoding="utf-8")).get("fixture") if report.is_file() else None)
     if not fixture:
         print("first emit needs --fixture", file=sys.stderr)
         return 2
@@ -222,8 +245,7 @@ def main() -> int:
     run = run_repro(finding["repro"], workspace)
     record = {"seed_id": finding.get("seed_id", "other"), "lens": finding["lens"], "surface": finding["surface"],
               "case": finding["case"], "oracle": finding["oracle"], "verdict": finding["verdict"], **run,
-              "regression": finding["regression"],
-              "emitted_at": datetime.now(timezone.utc).isoformat()}
+              "regression": finding["regression"]}
     if finding.get("fix"):
         record["fix"] = finding["fix"]
     if finding.get("seed") is not None:
@@ -231,8 +253,8 @@ def main() -> int:
     if finding.get("counterexample") is not None:
         record["counterexample"] = finding["counterexample"]
 
-    (findings_dir / f"{slug}.json").write_text(json.dumps(record, indent=2) + "\n")
-    (findings_dir / f"{slug}.md").write_text(render_markdown(finding, run))
+    (findings_dir / f"{slug}.json").write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+    (findings_dir / f"{slug}.md").write_text(render_markdown(finding, run), encoding="utf-8")
     total = rebuild_report(findings_dir, workspace, fixture)
     warn_unlanded(finding, workspace)
     print(f"emitted {slug}: {finding['verdict']}, exit {run['exit_code']}, fingerprint {run['fingerprint']}; report.json now {total} finding(s)")
