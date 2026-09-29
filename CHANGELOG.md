@@ -45,6 +45,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   effects, not merely the absence of a throw. Oracle and test wording
   stays language-neutral across Python, TS/JS, Java, and C++ —
   exception type, rejected promise, error code, or typed result.
+- Discover treats a prior run's `map.md` as a head start: rows are
+  reused after re-verification against current code, since landed
+  fixes invalidate contracts. Probes stay per-run — `scratch/` is
+  deleted at run end because its keepers land as suite tests and a
+  stale probe against fixed code reads as a false verdict.
 
 ## 0.3.0 - 2026-09-29
 

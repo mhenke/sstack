@@ -58,8 +58,7 @@ commands — is relative to that host repo; anchor each write to it (or
 All artifacts live under `<host-repo>/.sstack/`:
 - `map.md` — surfaces with language and assumed contracts, plus
   per-surface lens selections and skips (Discover output)
-- `learn/` — failure classes from prior runs (Discover input,
-  Learn output). One line per class:
+- `learn/` — prior failure classes, one line each:
   `lens | signal | adjacent surfaces to re-test`
 - `findings/<slug>.md` — the human view, rendered by the emitter in
   exactly this shape (no front-matter, no restated summary, the
@@ -99,8 +98,7 @@ lens: <lens> | verdict: <confirmed | refuted | inconclusive>
   `command` and recomputes the fingerprint from the recorded bytes,
   agent out of the loop; a hand-typed hash fails it. Any other shape
   is unverifiable.
-- `scratch/<lens>/` — every probe, case script, and compiled artifact
-  an attack creates, one directory per lens
+- `scratch/<lens>/` — this run's probes, one directory per lens
 - `pristine-src/` — the target's originals, snapshotted before Fix, so
   a repro command still shows the buggy behavior after the fix lands
 - `harden/<date>-<target>-<seq>.md` — harden-mode coverage snapshots
@@ -127,11 +125,12 @@ PBT: `seed` (integer/token) and `counterexample` (minimal failing input).
 The seven fields alone are rejected. A finding with no regression yet is
 legitimate during Verify: the emitter warns and records the rest.
 
-Everything sstack creates lives under `.sstack/` — never the
-workspace root, never a temp folder elsewhere; the run creates it in
-the target repo: the pack brings only skills and agents, so nothing
-is inherited from wherever it was published. Delete `scratch/` at run
-end; keep `pristine-src/` so evidence replays.
+Everything sstack creates lives under `.sstack/` in the target repo,
+created by this run — the pack brings only skills and agents, so
+nothing is inherited from wherever it was published. `scratch/` is
+deleted at run end: its keepers landed as suite tests, and a stale
+probe against fixed code reads as a false verdict. Keep
+`pristine-src/` so evidence replays.
 
 ## Customization
 
@@ -236,8 +235,10 @@ its assumed contract (types, ranges, preconditions from docstrings,
 annotations, call sites), its impact class — privilege boundary,
 sensitive-data mutation (money, legal, personal), integrity or
 partial write, availability, presentation — and the lenses selected
-for it. Variants of one assumption share a row. Read existing feature
-maps and project-local verify scripts as head starts (if the host has
+for it. Variants of one assumption share a row. A prior run's
+`map.md` is a head start — reuse its rows after re-verifying against
+current code (landed fixes invalidate contracts). Then read feature
+maps and project-local verify scripts (if the host has
 `create-verification-skill` or `maintain-verification-skill`
 installed, load and follow it), else the target's own docs.
 
@@ -425,10 +426,6 @@ before applying the fix.
 
 Then apply the minimal change that satisfies the oracle. Smallest diff
 that turns the red test green.
-
-- Validation: add the guard the oracle describes.
-- Error handling: wrap the leak in a clean domain error.
-- Missing check: add the check the oracle names.
 
 Re-run the confirmed finding's test: it goes **green**. Verify against
 a second distinct vector in the invalid domain to confirm the fix

@@ -123,7 +123,7 @@ isolated dir).
 > the chat report ends with coverage counts (untested high-impact
 > surfaces = partial coverage). Recorded cold-run PASSes predate this
 > text; the staleness already flagged for the Discover rewrite now
-> covers these edits too.
+> covers these edits, the scratch rationale, and prior-map reuse too.
 
 | fixture | verdict | evidence |
 |---|---|---|
