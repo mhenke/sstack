@@ -241,25 +241,25 @@ artifact. For each surface, record its assumed contract — types,
 ranges, preconditions gleaned from docstrings, types, and call sites.
 Write `.sstack/map.md`.
 
-Anchor the map in the target's real invariants, its entities and
-transitions, and its user-observable behavior. Cover materially
-different failure surfaces rather than variants of one assumption. Read
-existing feature maps and project-local verify scripts as head starts
-where the target has them; otherwise work from the target's own docs,
-types, and call sites.
+Anchor the map in the target's real invariants, its entities and transitions, and its
+user-observable behavior. Cover materially different failure surfaces rather than
+variants of one assumption. Read existing feature maps and project-local verify scripts
+as head starts where the target has them — if the host has `create-verification-skill`
+or `maintain-verification-skill` installed, load and follow the matching one — and
+otherwise work from the target's own docs, types, and call sites.
 
 Done when every public function, route, parser, loop, and indexer
 in the target has a row in `map.md` with its assumed contract.
 
 ### 2. Attack
 
-For each applicable lens from the index, dispatch the matching
-attacker for each selected lens. Identify the actual limits on each
-surface, and cover materially different attacks rather than variants of
-one. Whenever two or more fixes share one premise and fail the same
-gate, write the premise down, count the actors and failure classes, and
-question the premise before trying another fix. For each surface ×
-lens, and as many cases per pair as the surface's contract admits:
+For each applicable lens from the index, dispatch the matching attacker for each
+selected lens. Identify the actual limits on each surface, and cover materially
+different attacks rather than variants of one. Whenever two or more fixes share one
+premise and fail the same gate — if the host has `principle-attack-the-premise`
+installed, load and follow it — write the premise down, count the actors and failure
+classes, and question the premise before trying another fix. For each surface × lens,
+and as many cases per pair as the surface's contract admits:
 
 1. Design the case (concrete input and action).
 2. Write its oracle in `plan.md` FIRST — the expected behavior
@@ -372,13 +372,13 @@ finding's repro command runs as written.
 
 ### 5. Test
 
-Test behavior, not implementation, for every regression and hardening
-test. Call the subject as its users do, asserting exact scalar values,
-concrete exception types, and specific error codes or message substrings.
-Delete or rewrite any test that would pass when every imported function
-returns `undefined`. In negative assertions, verify the error identity,
-not merely that an exception was thrown. Preserve the oracle and the
-failure mode in the test itself.
+Test behavior, not implementation — if the host has
+`principle-test-behavior-not-implementation` installed, load and follow it — for every
+regression and hardening test. Call the subject as its users do, asserting exact scalar
+values, concrete exception types, and specific error codes or message substrings. Delete
+or rewrite any test that would pass when every imported function returns `undefined`. In
+negative assertions, verify the error identity, not merely that an exception was thrown.
+Preserve the oracle and the failure mode in the test itself.
 
 Write a permanent negative test in the host repo's real suite — same
 directory and assert style as existing tests, asserting the oracle.
@@ -413,14 +413,14 @@ green for refuted/hardened, and passes the sensitivity check.
 
 ### 6. Fix
 
-For each confirmed finding, trace the observed behavior to its root
-cause before editing: reproduce the failure, ask why until the shared
-cause is found, and fix that cause rather than adding a symptom guard.
-Fix the general invariant rather than the single test input: guard the
-entire invalid domain (relational checks like `<= 0`, not literal equality
-`== 0`). Check every sibling caller of the same behavior before applying
-the fix. Remove obsolete complexity rather than adding to it, keep
-boundaries explicit, and keep each change independently checkable.
+For each confirmed finding, trace the observed behavior to its root cause before
+editing — if the host has `principle-fix-root-causes` installed, load and follow it:
+reproduce the failure, ask why until the shared cause is found, and fix that cause
+rather than adding a symptom guard. Fix the general invariant rather than the single
+test input: guard the entire invalid domain (relational checks like `<= 0`, not literal
+equality `== 0`). Check every sibling caller of the same behavior before applying the
+fix. Remove obsolete complexity rather than adding to it, keep boundaries explicit, and
+keep each change independently checkable.
 
 Then apply the minimal change that satisfies the oracle. Smallest diff
 that turns the red test green.
