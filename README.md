@@ -80,7 +80,7 @@ The portable one-paste version, for an AI CLI or IDE — paste it into
 your agent and it does the copying:
 
 ```text
-Copy the agents/*.md files from https://github.com/mhenke/sstack into ~/.agents/ (create it if missing).
+Copy the agents/*.md files from https://github.com/mhenke/sstack into ~/.agents/ (create it if missing), overwriting files already there.
 ```
 
 For VS Code:
@@ -90,6 +90,14 @@ Copy the agents/*.md files from https://github.com/mhenke/sstack into ~/.copilot
 ```
 
 Only VS Code needs the rename; every other host reads the files as-is.
+
+Re-paste the prompt after an upstream update — it overwrites, which is
+the update. If an agent you installed earlier has since disappeared
+from the repo, the leftover file is harmless: no lens dispatches it,
+and every run reports it by name as an unused customization. Delete it
+when you see the report. Never let an update touch other `sstack-*`
+files in that directory — files you authored there are your own
+customizations, and the update's glob only covers the shipped names.
 
 
 ### Running it
