@@ -450,7 +450,7 @@ Before delivering the report, verify all of the following:
 2. Every refuted finding has a green hardening test (if the surface
    consumes external input).
 3. Every fix is the minimal change that satisfies the oracle.
-4. The full suite passes.
+4. The full suite passes, minus pre-existing baseline failures.
 5. Every confirmed regression test passed the sensitivity check (turns
    red when the fix guard is bypassed in scratch).
 6. Every skipped lens in `map.md` names the "When not to apply"
@@ -490,6 +490,9 @@ reporting.
   Every source change must trace to a finding.
 - Never modify config or secrets.
 - No test framework detected → ask before scaffolding one.
+- A framework present but broken → same rule: ask before repairing
+  it. A pre-existing red suite is baseline, not finding: record it,
+  exempt it from the pass gate, report it.
 - Respect the repo's test conventions exactly.
 
 ## Report format

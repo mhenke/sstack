@@ -50,6 +50,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   fixes invalidate contracts. Probes stay per-run — `scratch/` is
   deleted at run end because its keepers land as suite tests and a
   stale probe against fixed code reads as a false verdict.
+- A test framework present but broken is the no-framework case: ask
+  before repairing it (configs stay read-only without approval). A
+  pre-existing red suite is recorded as baseline and exempted from
+  the pass gate — reported, never silently repaired or ignored.
 
 ## 0.3.0 - 2026-09-29
 
