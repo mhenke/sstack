@@ -253,32 +253,32 @@ in the target has a row in `map.md` with its assumed contract.
 
 ### 2. Attack
 
-For each applicable lens from the index, dispatch the matching attacker for each
-selected lens. Identify the actual limits on each surface, and cover materially
-different attacks rather than variants of one. Whenever two or more fixes share one
-premise and fail the same gate — if the host has `principle-attack-the-premise`
-installed, load and follow it — write the premise down, count the actors and failure
-classes, and question the premise before trying another fix. For each surface × lens,
-and as many cases per pair as the surface's contract admits:
+Dispatch the matching attacker for each lens selected from the index.
+Identify each surface's actual limits; cover materially different
+attacks, not variants of one. Two fixes sharing a premise and gate —
+if `principle-attack-the-premise` is installed, follow it — write the
+premise down, count actors and failure classes, question it before
+retrying. For each surface × lens, and as many cases per pair as the
+contract admits:
 
 1. Design the case (concrete input and action).
-2. Write its oracle in `plan.md` FIRST — the expected behavior
-   under this adverse condition. Anchor to an observable invariant:
-   - *Inverse / Round-trip:* `decode(encode(x)) == x`.
-   - *Idempotence:* `f(f(x)) == f(x)` or repeated call preserves state.
-   - *Metamorphic:* transformation preserves property (`len(sort(x)) == len(x)`).
-   - *Rejection contract:* invalid input yields typed domain error, never crash/500.
-3. Execute for real: a scratch script under `.sstack/scratch/`
-   (iterate the rubric's vector list in a single loop to probe fast),
-   or a direct call through the repo's test framework.
-4. Record the actual output verbatim.
+2. Write its oracle in `plan.md` FIRST — the expected behavior under
+   this adverse condition, anchored to an observable invariant
+   (inverse, idempotence, metamorphic) or a rejection contract:
+   invalid input yields a typed domain error, never crash/500.
+3. Execute for real: a scratch script under `.sstack/scratch/` or a
+   direct call through the repo's test framework. Python probes open
+   with the bootstrap
+   `sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[3]))`
+   after `import sys, pathlib` — imports resolve anywhere. Read
+   oversized targets in ranges, never from a truncated read; repair a
+   crashed probe and re-run before recording output verbatim.
 
-An attack that never reached the function is not evidence. If the
-script raises `ImportError`, `TypeError: missing required
-positional argument`, or any error that is not the one your oracle
-predicted, fix the call — import path, arguments, signature — and
-re-run until the function itself executes. An error from your own
-harness is a broken case, never a verdict.
+An attack that never reached the function is not evidence: an error
+that is not the one your oracle predicted (ImportError, missing
+argument, wrong signature) means fix the call — import path,
+arguments, signature — and re-run. An error from your own harness is
+a broken case, never a verdict.
 
 If the target repo already has a property-based testing library
 installed, write a property capturing the oracle and let the

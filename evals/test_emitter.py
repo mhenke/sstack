@@ -55,6 +55,16 @@ def base(**over):
     return finding
 
 
+def test_broken_scratch_probe_blocks_emit(tmp_path):
+    probe = tmp_path / ".sstack" / "scratch" / "state"
+    probe.mkdir(parents=True)
+    (probe / "probe.py").write_text("def broken(:\n")
+    result = emit(tmp_path, base(repro=f"python3 {probe / 'probe.py'}"))
+    assert result.returncode == 3
+    assert "does not compile" in result.stderr
+    assert not (tmp_path / ".sstack" / "findings" / "t1.json").exists()
+
+
 def test_documented_payload_emits_and_replays():
     """The documented payload is accepted, and the recorded fingerprint
     is the hash of the recorded output."""

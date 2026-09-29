@@ -65,6 +65,27 @@ function readFinding() {
   return finding;
 }
 
+// A scratch probe that does not compile is infrastructure failure, not
+// evidence. Compile referenced scratch probes before anything is recorded.
+const PROBE_CHECK = {
+  '.py': [process.execPath, '-m', 'py_compile'],
+  '.js': ['node', '--check'],
+};
+
+function preflightProbe(command, workspace) {
+  for (const token of command.split(/\s+/)) {
+    const probe = path.isAbsolute(token) ? token : path.join(workspace, token);
+    if (!/\.(py|js)$/.test(probe) || !probe.split(path.sep).includes('scratch')) continue;
+    const [cmd, ...args] = PROBE_CHECK[probe.endsWith('.py') ? '.py' : '.js'];
+    const check = spawnSync(cmd, [...args, probe], { encoding: 'utf8' });
+    if (check.status !== 0) {
+      process.stderr.write(`scratch probe does not compile — repair it before emitting: ${probe}\n${check.stderr || ''}\n`);
+      return false;
+    }
+  }
+  return true;
+}
+
 function runRepro(command, workspace) {
   const t0 = Date.now();
   const result = spawnSync(command, {
@@ -255,6 +276,7 @@ function main() {
     process.exit(2);
   }
 
+  if (!preflightProbe(finding.repro, workspace)) process.exit(3);
   const run = runRepro(finding.repro, workspace);
   const record = {
     seed_id: finding.seed_id || 'other',

@@ -106,7 +106,9 @@ isolated dir).
 > all recorded harden evidence predates the wording. Recorded PASSes
 > also predate the stage-text naming of optional lifecycle skills
 > (a2afe0c, 2026-09-29): wording-level, and no fixture workspace
-> carries those skills, so fixture outcomes are unaffected.
+> carries those skills, so fixture outcomes are unaffected. Attack
+> step-3 probe-validity wording (2026-09-29, post-0.3.0) likewise
+> postdates all recorded evidence; guidance-level.
 
 | fixture | verdict | evidence |
 |---|---|---|

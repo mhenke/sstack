@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Fixed
+
+- Attack step 3: a crashed scratch probe is a broken probe, not a
+  finding. Probes must import and run before their output counts;
+  oversized target files are read in ranges and never probed from a
+  truncated read; a crashed probe is repaired (split read or
+  hand-written against signatures actually read) and re-run before
+  recording. Reported from the field: a generated `probe.py` built
+  from a truncated source read crashed and was recorded as a finding.
+- The emitters enforce it mechanically: before recording, any
+  `.sstack/scratch` `.py`/`.js` file referenced by the repro is
+  compiled (`py_compile` / `node --check`); a probe that does not
+  compile refuses emission (exit 3) and writes nothing. Python probes
+  also get a documented import bootstrap so they resolve from any
+  working directory.
+
 ## 0.3.0 - 2026-09-29
 
 ### Added

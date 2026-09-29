@@ -69,6 +69,28 @@ def read_finding() -> dict:
     return finding
 
 
+PROBE_COMPILE = {".py": [sys.executable, "-m", "py_compile"], ".js": ["node", "--check"]}
+
+
+def preflight_probe(command: str, workspace: Path) -> bool:
+    """A scratch probe that does not compile is infrastructure failure, not evidence.
+
+    Truncated or half-written probes once reached findings as observed
+    behavior. Compile every referenced scratch probe before anything is
+    recorded; refusal exits 3 and writes nothing.
+    """
+    for token in command.split():
+        candidate = Path(token)
+        path = candidate if candidate.is_absolute() else workspace / candidate
+        if path.suffix not in PROBE_COMPILE or "scratch" not in path.parts:
+            continue
+        check = subprocess.run(PROBE_COMPILE[path.suffix] + [str(path)], capture_output=True, text=True)
+        if check.returncode != 0:
+            print(f"scratch probe does not compile — repair it before emitting: {path}\n{check.stderr}", file=sys.stderr)
+            return False
+    return True
+
+
 def run_repro(command: str, workspace: Path) -> dict:
     t0 = time.monotonic()
     done = subprocess.run(command, shell=True, cwd=workspace, capture_output=True, text=True, errors="replace")
@@ -195,6 +217,8 @@ def main() -> int:
     except ValueError as error:
         print(f"invalid finding: {error}", file=sys.stderr)
         return 2
+    if not preflight_probe(finding["repro"], workspace):
+        return 3
     run = run_repro(finding["repro"], workspace)
     record = {"seed_id": finding.get("seed_id", "other"), "lens": finding["lens"], "surface": finding["surface"],
               "case": finding["case"], "oracle": finding["oracle"], "verdict": finding["verdict"], **run,
