@@ -238,9 +238,14 @@ def test_no_text_instructs_hand_writing_evidence():
             assert forbidden not in text, (
                 f"{path.relative_to(ROOT)} says {forbidden!r}")
     verify = SKILL.read_text()
-    assert "emit_findings.py --workspace . --finding <file>" in verify
-    assert "no `fingerprint` field in" in verify
-    assert "the emitter, never you, writes" in verify
+    head = "\n".join(SKILL.read_text().splitlines()[:200])
+    # Cold backends' read truncates ~16KB (~line 230): the emit contract
+    # must live in the guaranteed-read window, beside the shapes the
+    # agent imitates. Flash never saw Verify-stage emit wording — three
+    # reads, none containing it — and hand-wrote the in-window shapes.
+    assert "emit_findings.py --workspace . --finding <file>" in head
+    assert "no\n`fingerprint` field" in head or "no `fingerprint` field" in head
+    assert "### 3. Verify" not in head, "Verify leaked into the window; keep it past truncation"
 
 
 def test_readme_runtime_claim_matches_the_tree():

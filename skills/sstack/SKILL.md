@@ -104,13 +104,16 @@ lens: <lens> | verdict: <confirmed | refuted | inconclusive>
 - `harden/<date>-<target>-<seq>.md` — harden-mode snapshots, not findings
 
 The emitter is `scripts/emit_findings.py` (or `.js` under Node),
-beside this skill: run it, never rewrite or copy it. Add
+beside this skill: run it, never rewrite or copy it. The moment a
+verdict is known, emit from the repo root:
+`python3 skills/sstack/scripts/emit_findings.py --workspace . --finding <file>`
+A finding file is evidence only when the emitter wrote it — no
+`fingerprint` field in `findings/<slug>.json`, no evidence. Add
 `--fixture <name>` on the first emit; later emits inherit it from
-`report.json`. Piping the finding JSON on stdin instead of
-`--finding` also works. It executes the repro, captures real output,
-computes the fingerprint itself, and is the only writer of the
-findings files and `report.json`; the human report is the chat
-summary.
+`report.json`; piping the finding JSON on stdin also works. It
+executes the repro, computes the fingerprint, and is the only writer
+of the findings files and `report.json`; the human report is the
+chat summary.
 
 The JSON you emit is the Report format fields — `lens`, `surface`,
 `case`, `oracle`, `verdict`, `repro` — plus `slug` (a short kebab-case
@@ -323,12 +326,8 @@ is the contract, parallelism is an optimization.
 ### 3. Verify
 
 Prove a verdict before accepting it: per case, compare oracle vs.
-observed. The moment a verdict is known, emit it from the repo root —
-`python3 skills/sstack/scripts/emit_findings.py --workspace . --finding <file>`
-(with the finding JSON in `<file>`). A finding file is evidence only
-when the emitter wrote it: no `fingerprint` field in
-`findings/<slug>.json`, no evidence — the emitter, never you, writes
-`<slug>.md` and `<slug>.json` (shapes under Workspace). Batched
+observed. The moment a verdict is known, emit it — the emitter
+command and the evidence rule sit under Workspace, above. Batched
 evidence is evidence a crash deletes: emit while the failing state
 still runs — a fix applied before its red evidence is emitted
 strands it. The first emission is the emitter smoke test: repair any
