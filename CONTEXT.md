@@ -50,8 +50,26 @@ declaration)
 **Evidence file**:
 The machine-readable record of one finding: command, recorded output,
 fingerprint, oracle, verdict, regression. One per finding, written by
-script, never by hand.
-_Avoid_: findings JSON, slug file
+the emitter from its own execution — an agent may write anything it
+likes into `findings/<slug>.json`, and the `fingerprint` is what
+distinguishes an evidence file from the request sitting beside it.
+Nothing but execution confers that field, so a hand-written file is
+simply not evidence: the grader reads no evidence from it and the
+report never counts it.
+_Avoid_: findings JSON, slug file, evidence (unqualified — a request
+is not a weak evidence file, it is a different artifact)
+
+**Finding request**:
+What an agent writes the moment a verdict is known: the seven report
+format fields plus slug, fix, and regression, with `repro` spelled
+as the exact command run. A request is not a finding and not
+evidence — it is the finding awaiting the machine. The emitter's
+upgrade pass turns requests into evidence by executing each repro;
+a request whose repro carries no command stays a request forever,
+because the machine will not invent the command the agent did not
+write (ADR-0022).
+_Avoid_: finding draft, pending finding (process state, not what the
+artifact is), evidence file (the whole point is that it is not one)
 
 **Report**:
 The run-level summary of all findings, at the canonical workspace
@@ -197,10 +215,13 @@ _Avoid_: validity
 
 **Fabricated**:
 Integrity failed — the fingerprint could not have come from the
-recorded output. The emitter hashes its own execution and is the only
-writer of evidence files, so a mismatch means the file changed after
-emit: a typed-in fingerprint, tampered bytes. Not a capture-time
-error; the emitter cannot mis-hash what it just ran.
+recorded output. Two mechanisms, different in kind. After the
+emitter's: a file changed post-emit, a typed-in fingerprint, tampered
+bytes — the emitter hashes its own execution, so it cannot mis-hash
+what it just ran. Before it: a hand-written file claiming evidence no
+machine ran. A file carrying no `fingerprint` at all is not one of
+these — it is a request, so the run was incomplete, not dishonest.
+_Avoid_: forged (implies intent the artifacts cannot establish)
 
 **Label contradiction**:
 A content-matched finding whose self-reported seed label names a
@@ -309,6 +330,18 @@ default lifecycle run (`ColdPy-…`, `ColdTs-…`, peers) or a harden run
 output is tests and a lifecycle run's is findings. Never a separate
 evidence contract — both emit through the same emitter.
 _Avoid_: run mode, harness profile
+
+**Read window**:
+The opening span of a shipped document that a cold backend actually
+receives: an unbounded `read` of the entry skill truncates around
+16KB, roughly line 230 of a 540-line file. Anything a weak backend
+must obey — the emit contract, the dispatch fallback — lives inside
+that window; a rule past it is not wrong, it is invisible on those
+backends. Distinct from sprawl: a long document can be fine as long
+as its binding rules are reachable, and a short one can still hide a
+rule nobody sees.
+_Avoid_: token limit (names the ceiling, not the reachable span),
+front matter (a packaging position, not a reading guarantee)
 
 **Probe**:
 The throwaway script an attack writes to exercise one case — created

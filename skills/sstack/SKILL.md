@@ -92,7 +92,8 @@ lens: <lens> | verdict: <confirmed | refuted | inconclusive>
 ## Regression
 `<file>::<test>` — <before> → <after>
 ```
-- `findings/<slug>.json` — the machine view (emitted by script, never hand-typed):
+- `findings/<slug>.json` — the machine view (emitter-written; anything
+  you write there without a `fingerprint` is a request, not evidence):
   `{"command": <shell string>, "exit_code": <int>, "stdout": <str>,
   "stderr": <str>, "fingerprint": "<sha256[:16] of stdout+stderr>",
   "oracle": <str>, "verdict": <confirmed|refuted|inconclusive>,
@@ -118,9 +119,7 @@ itself, computes the fingerprint, and writes the evidence — a
 request without a `fingerprint` field is not evidence. To emit one
 finding immediately, pass `--finding <file>` (or pipe the JSON on
 stdin). Add `--fixture <name>` on the first emit; later runs inherit
-it from `report.json`. The emitter is the only writer of the
-evidence files and `report.json`; the human report is the chat
-summary.
+it from `report.json`. The human report is the chat summary.
 
 The request JSON is the Report format fields — `lens`, `surface`,
 `case`, `oracle`, `verdict`, `repro` (the exact command you ran, as
