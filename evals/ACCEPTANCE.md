@@ -263,8 +263,23 @@ isolated dir).
 +> exercised live. Flash re-confirms as contract-failing on the new
 +> text; the emit-path fix remains unit-validated only (19 passed) and
 +> awaits a run on a backend that reaches the emit step — the
-+> non-flash glm-5.3 old-text run got that far and hand-wrote the
+> non-flash glm-5.3 old-text run got that far and hand-wrote the
 +> finding file, which `--finding` now accepts as input.
++> **Routing guard (2026-09-30, red→green)**: the runner-invention
++> root cause is the routing section's slash forms — a cold agent
++> reads `/sstack <target>` as a program, fails to find it in PATH,
++> and builds one (transcript-confirmed on ColdFindingMode:
++> "there's no sstack command available in the PATH"). Fix: one
++> sentence at the routing head — the slash forms are request labels,
++> never a program; you execute each stage yourself. Reproduction:
++> same condition (flash + current text), 8 m 50 s, zero runner
++> construction, real defects found (refund-order silent-swallow
++> confirmed by inspection), fix applied, suite green — and the
++> finding still hand-written (a lone `.md`, no emitter invocation,
++> no report.json); grade refuses. Runner-invention: fixed at the
++> root. Emit contract on flash: still unmet — capability gap, not
++> wording; the remaining lever is dispatching to a backend that
++> reaches the emit step.
 
 | fixture | verdict | evidence |
 |---|---|---|
