@@ -44,6 +44,19 @@ bypasses, and unscoped collection leaks. Applied to
 [`skills/sstack-ownership/SKILL.md`](../../skills/sstack-ownership/SKILL.md),
 and [`agents/sstack-ownership-attacker.md`](../../agents/sstack-ownership-attacker.md).
 
+### BOLA / cross-tenant data-leak negative testing (2026-09-30)
+
+Findings: [`bola-tenant-isolation-negative-testing.md`](bola-tenant-isolation-negative-testing.md).
+Primary-source pass ([OWASP API1:2023](https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/),
+[Authorization Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html),
+[WSTG-ATHZ-04](https://wstg.owasp.org/latest/4-Web_Application_Security_Testing/05-Authorization/04-Insecure_Direct_Object_References/),
+[CWE-639](https://cwe.mitre.org/data/definitions/639.html), RFC 9110/9111)
+on cross-tenant leakage: ID-swap (covered by the ownership lens), plus two
+gaps — per-element authorization on batch/list endpoints (synthesis from
+API1:2023's every-function rule; no OWASP page states it directly) and
+session-vs-argument identity mismatch. Cache/header families classified
+N/A under ADR-0015's no-socket test. Pending review before lens text.
+
 ### Negative testing for Resource Exhaustion (2026-09-26)
 
 Primary-source pass ([OWASP API Top 10](https://owasp.org/API-Security/editions/2023/en/0x11-t10/) API4:2023, [CWE](https://cwe.mitre.org/)-400/770/789/1333/409, RFC
