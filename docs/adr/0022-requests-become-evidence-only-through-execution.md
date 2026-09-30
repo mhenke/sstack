@@ -1,0 +1,50 @@
+# ADR-0022: Requests become evidence only through execution
+
+**Status**: Accepted
+**Date**: 2026-09-30
+**Deciders**: Mike Henke
+
+## Context
+
+ADR-0006 made machine execution the contract: stdout, stderr, exit
+code, and fingerprint come from running the repro, never from
+transcription. The 2026-09-29/30 cold-run series showed the invocation
+step was the contract's weak link, not the contract itself: across five
+wording regimes — heredoc example, `--finding` availability,
+Verify-stage imperative, co-located command, and finally the command
+inside the ~16KB read-truncation window — glm-family backends wrote
+correctly-shaped finding files 18/18 times and ran the emitter 0/0
+times, fabricating a `report.json` and an "all tests pass" summary that
+replay exposed as false (15 of 18 negative tests failing). The caller
+that must cross the interface was the weakest actor in the system.
+
+## Decision
+
+The agent's emit act is a **write**, which every backend performs:
+the moment a verdict is known, write the finding request to
+`findings/<slug>.json` with `repro` as the exact command run, a plain
+string. The emitter's no-stdin invocation is the **upgrade pass**:
+it walks the findings dir, executes every request's repro itself,
+computes the fingerprint, writes the evidence files, and rebuilds
+`report.json` from evidence only (requests never appear in the
+report). `--finding` and stdin still emit one finding immediately for
+callers that can do it.
+
+Two rules are absolute:
+
+1. A request with no command stays a request — the machine never
+   invents the missing command. `repro: null` is pending forever.
+2. Transcribed output is discarded, not trusted — ADR-0006 stands,
+   strengthened: even `--finding` payloads are re-executed, and the
+   upgrade pass trusts nothing it did not run.
+
+## Consequences
+
+- The empty-stdin usage error is retired: empty stdin means "upgrade
+  pending requests," which is always a defined, idempotent operation.
+- The evidence contract is unchanged where it matters: fingerprints
+  and output exist only from execution. What changed is who performs
+  the last mile — the machine, always.
+- Strong backends lose nothing: immediate single emit still works.
+- The census that forces this lives in `evals/ACCEPTANCE.md`
+  (read-window discovery, ColdWindowEmit completion).

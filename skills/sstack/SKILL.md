@@ -109,18 +109,22 @@ lens: <lens> | verdict: <confirmed | refuted | inconclusive>
 
 The emitter is `scripts/emit_findings.py` (or `.js` under Node),
 beside this skill: run it, never rewrite or copy it. The moment a
-verdict is known, emit from the repo root:
-`python3 skills/sstack/scripts/emit_findings.py --workspace . --finding <file>`
-A finding file is evidence only when the emitter wrote it — no
-`fingerprint` field in `findings/<slug>.json`, no evidence. Add
-`--fixture <name>` on the first emit; later emits inherit it from
-`report.json`; piping the finding JSON on stdin also works. It
-executes the repro, computes the fingerprint, and is the only writer
-of the findings files and `report.json`; the human report is the
-chat summary.
+verdict is known, write the finding request to `findings/<slug>.json`
+— `repro` is the exact command you ran, as a plain string. Run the
+emitter from the repo root
+(`python3 skills/sstack/scripts/emit_findings.py --workspace .`) as
+each finding lands or at run end: it executes every request's repro
+itself, computes the fingerprint, and writes the evidence — a
+request without a `fingerprint` field is not evidence. To emit one
+finding immediately, pass `--finding <file>` (or pipe the JSON on
+stdin). Add `--fixture <name>` on the first emit; later runs inherit
+it from `report.json`. The emitter is the only writer of the
+evidence files and `report.json`; the human report is the chat
+summary.
 
-The JSON you emit is the Report format fields — `lens`, `surface`,
-`case`, `oracle`, `verdict`, `repro` — plus `slug` (a short kebab-case
+The request JSON is the Report format fields — `lens`, `surface`,
+`case`, `oracle`, `verdict`, `repro` (the exact command you ran, as
+a plain string) — plus `slug` (a short kebab-case
 name for the finding), `fix` (the minimal change you will make), and
 `regression`: `{"file": "tests/test_x.py", "test": "test_name",
 "before": "red", "after": "green"}`. Optional for

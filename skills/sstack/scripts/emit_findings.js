@@ -4,6 +4,12 @@
  * Node.js stdlib-only equivalent to emit_findings.py. Recorded paths are
  * rewritten host-repo-relative at capture, so evidence diffs clean
  * across machines and checkouts.
+ *
+ * Two invocation modes: a finding JSON on stdin or --finding <file>
+ * emits that one finding immediately; empty stdin runs the upgrade
+ * pass — every findings/<slug>.json whose repro is a command string
+ * is executed and fingerprinted now (requests become evidence only
+ * through execution).
  */
 
 const fs = require('fs');
@@ -24,7 +30,7 @@ function safeSlug(value, field) {
   return value;
 }
 
-function readFinding(findingPath) {
+function readFinding(findingPath, rawStdin) {
   let input;
   if (findingPath) {
     try {
@@ -34,7 +40,7 @@ function readFinding(findingPath) {
       process.exit(2);
     }
   } else {
-    input = fs.readFileSync(0, 'utf8');
+    input = rawStdin;
   }
   if (!input.trim()) {
     process.stderr.write(
@@ -203,6 +209,9 @@ function rebuildReport(findingsDir, workspace, fixture) {
   const entries = [];
   for (const file of files) {
     const record = JSON.parse(fs.readFileSync(path.join(findingsDir, file), 'utf8'));
+    if (record.command === undefined) {
+      continue; // a request (no executed repro yet) is not evidence
+    }
     const entry = {
       seed_id: record.seed_id || 'other',
       lens: record.lens,
@@ -244,6 +253,52 @@ function warnUnlanded(finding, workspace) {
   }
 }
 
+// Requests become evidence only through execution: a request whose repro
+// is a command string is executed here; one without a command stays a
+// request — the machine never invents the missing command.
+function upgradeRequests(findingsDir, workspace, fixture) {
+  let upgraded = 0;
+  let pending = 0;
+  const files = fs
+    .readdirSync(findingsDir)
+    .filter((f) => f.endsWith('.json'))
+    .sort();
+
+  for (const file of files) {
+    const fullPath = path.join(findingsDir, file);
+    const finding = JSON.parse(fs.readFileSync(fullPath, 'utf8'));
+    if (finding.command !== undefined) {
+      continue; // already evidence
+    }
+    const repro = finding.repro;
+    if (typeof repro !== 'string' || !repro.trim() || !preflightProbe(repro, workspace)) {
+      pending += 1;
+      continue;
+    }
+    const run = runRepro(repro, workspace);
+    const record = { ...finding };
+    delete record.repro;
+    Object.assign(record, run);
+    fs.writeFileSync(fullPath, JSON.stringify(record, null, 2) + '\n');
+    fs.writeFileSync(
+      path.join(findingsDir, file.replace(/\.json$/, '.md')),
+      renderMarkdown(finding, run)
+    );
+    warnUnlanded(finding, workspace);
+    process.stdout.write(
+      `upgraded ${file.replace(/\.json$/, '')}: exit ${run.exit_code}, fingerprint ${run.fingerprint}\n`
+    );
+    upgraded += 1;
+  }
+
+  if (upgraded && fixture) {
+    const total = rebuildReport(findingsDir, workspace, fixture);
+    process.stdout.write(`report.json now ${total} finding(s)\n`);
+  }
+  process.stdout.write(`${upgraded} request(s) upgraded, ${pending} still pending (no executable repro)\n`);
+  return 0;
+}
+
 function main() {
   const args = process.argv.slice(2);
   let workspaceArg = null;
@@ -271,14 +326,6 @@ function main() {
 
   fs.mkdirSync(findingsDir, { recursive: true });
 
-  let finding;
-  try {
-    finding = readFinding(findingPath);
-  } catch (err) {
-    process.stderr.write(`invalid finding: ${err.message}\n`);
-    process.exit(2);
-  }
-
   const reportPath = path.join(stack, 'report.json');
   let fixture = fixtureArg;
   if (!fixture && fs.existsSync(reportPath)) {
@@ -286,6 +333,23 @@ function main() {
       const existing = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
       fixture = existing.fixture;
     } catch (_) {}
+  }
+
+  // Empty stdin without --finding is the upgrade pass, not an error.
+  let rawInput = null;
+  if (findingPath === null) {
+    rawInput = fs.readFileSync(0, 'utf8');
+    if (!rawInput.trim()) {
+      return upgradeRequests(findingsDir, workspace, fixture);
+    }
+  }
+
+  let finding;
+  try {
+    finding = readFinding(findingPath, rawInput);
+  } catch (err) {
+    process.stderr.write(`invalid finding: ${err.message}\n`);
+    process.exit(2);
   }
 
   if (!fixture) {

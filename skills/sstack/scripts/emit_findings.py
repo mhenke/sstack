@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """Evidence emitter: the only writer of .sstack/findings/* and .sstack/report.json.
 
-Run once per finding, as each case verifies. The finding arrives as JSON
-in a file passed with --finding, or on stdin. The repro is executed for
+Two invocation modes: a finding JSON in a file passed with --finding, or
+on stdin, emits that one finding immediately; empty stdin runs the
+upgrade pass — every findings/<slug>.json whose repro is a command
+string is executed and fingerprinted now (requests become evidence only
+through execution). The repro is executed for
 real, and stdout, stderr, exit code, and
 fingerprint come from that execution and never from transcription.
 Recorded paths are rewritten host-repo-relative at capture, so evidence
@@ -42,18 +45,27 @@ def safe_slug(value: str, field: str) -> str:
     return value
 
 
+_STDIN = object()
+
+
+class _UpgradeRequested(Exception):
+    """No --finding and nothing on stdin: run the upgrade pass."""
+
+
 def read_finding(path: str | None) -> dict:
-    if path:
+    if path is None or path is _STDIN:
+        raw = sys.stdin.read()
+        if not raw.strip():
+            raise _UpgradeRequested
+    else:
         try:
             raw = Path(path).read_text()
         except OSError as error:
             print(f"cannot read --finding file: {error}", file=sys.stderr)
             raise SystemExit(2) from error
-    else:
-        raw = sys.stdin.read()
     if not raw.strip():
         print(
-            f"no finding {'in ' + path if path else 'on stdin'} — write the finding JSON to a file and pass --finding <file>, e.g.:\n"
+            f"no finding in {path} — write the finding JSON to a file and pass --finding <file>, e.g.:\n"
             "python3 scripts/emit_findings.py --workspace <host-repo> --finding finding.json [--fixture <fixture>]\n"
             '{"slug": "checkout-page-zero", "lens": "boundaries", "surface": "checkout",\n'
             ' "case": "checkout(items=[], page=0)", "oracle": "ValueError naming page",\n'
@@ -175,6 +187,8 @@ def rebuild_report(findings_dir: Path, workspace: Path, fixture: str) -> int:
     entries = []
     for evidence in sorted(findings_dir.glob("*.json")):
         record = json.loads(evidence.read_text(encoding="utf-8", errors="replace"))
+        if "command" not in record:
+            continue  # a request (no executed repro yet) is not evidence
         entry = {
             "seed_id": record.get("seed_id", "other"),
             "lens": record["lens"],
@@ -205,6 +219,39 @@ def warn_unlanded(finding: dict, workspace: Path) -> None:
         print(f"warning: {regression['test']!r} not found in {regression['file']} yet", file=sys.stderr)
 
 
+def upgrade_requests(findings_dir: Path, workspace: Path, fixture: str | None) -> int:
+    """Requests become evidence only through execution. A request whose
+    repro is a command string is executed here, the run dict replaces the
+    string, and the evidence view is written; a request without a command
+    stays a request — the machine never invents the missing command."""
+    upgraded = pending = 0
+    for path in sorted(findings_dir.glob("*.json")):
+        finding = json.loads(path.read_text(encoding="utf-8", errors="replace"))
+        if "command" in finding:
+            continue  # already evidence
+        repro = finding.get("repro")
+        if not isinstance(repro, str) or not repro.strip():
+            pending += 1
+            continue
+        if not preflight_probe(repro, workspace):
+            pending += 1
+            continue
+        run = run_repro(repro, workspace)
+        record = {k: v for k, v in finding.items() if k != "repro"}
+        record.update(run)
+        path.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+        (findings_dir / f"{path.stem}.md").write_text(
+            render_markdown(finding, run), encoding="utf-8")
+        warn_unlanded(finding, workspace)
+        print(f"upgraded {path.stem}: exit {run['exit_code']}, fingerprint {run['fingerprint']}")
+        upgraded += 1
+    if upgraded and fixture:
+        total = rebuild_report(findings_dir, workspace, fixture)
+        print(f"report.json now {total} finding(s)")
+    print(f"{upgraded} request(s) upgraded, {pending} still pending (no executable repro)")
+    return 0
+
+
 def main() -> int:
     # Hosts with a legacy locale (Windows cp1252, C) must not change what
     # the emitter can read or write; evidence is UTF-8 everywhere.
@@ -225,13 +272,16 @@ def main() -> int:
     findings_dir = stack / "findings"
     findings_dir.mkdir(exist_ok=True)
 
+    report = stack / "report.json"
     try:
-        finding = read_finding(args.finding)
+        finding = read_finding(args.finding if args.finding else _STDIN)
+    except _UpgradeRequested:
+        fixture = args.fixture or (json.loads(report.read_text(encoding="utf-8")).get("fixture") if report.is_file() else None)
+        return upgrade_requests(findings_dir, workspace, fixture)
     except (json.JSONDecodeError, ValueError) as error:
         print(f"invalid finding: {error}", file=sys.stderr)
         return 2
 
-    report = stack / "report.json"
     fixture = args.fixture or (json.loads(report.read_text(encoding="utf-8")).get("fixture") if report.is_file() else None)
     if not fixture:
         print("first emit needs --fixture", file=sys.stderr)

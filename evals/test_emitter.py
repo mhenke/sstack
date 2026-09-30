@@ -65,20 +65,84 @@ def test_broken_scratch_probe_blocks_emit(tmp_path):
     assert "does not compile" in result.stderr
     assert not (tmp_path / ".sstack" / "findings" / "t1.json").exists()
 
-def test_empty_stdin_prints_usage_not_a_bare_parse_error(tmp_path):
-    """A no-stdin invocation (the cold-run failure that stranded Cpp on
-    2026-09-29) must exit 2 with the invocation example on stderr, not
-    a bare JSON parse error."""
+def test_empty_stdin_runs_the_upgrade_pass(tmp_path):
+    """Empty stdin is no longer an error: the emitter upgrades pending
+    requests. An empty workspace upgrades nothing and exits 0 — the
+    bare-parse-error failure that stranded Cpp is retired by design."""
     result = subprocess.run(
-        [sys.executable, str(EMITTER), "--workspace", str(tmp_path),
-         "--fixture", "seeded-py"],
+        [sys.executable, str(EMITTER), "--workspace", str(tmp_path)],
         input="", capture_output=True, text=True)
-    assert result.returncode == 2
-    assert "no finding on stdin" in result.stderr
-    assert "--finding" in result.stderr
-    assert not (tmp_path / ".sstack" / "findings").exists() or not any(
-        (tmp_path / ".sstack" / "findings").iterdir())
+    assert result.returncode == 0
+    assert "0 request(s) upgraded" in result.stdout
 
+
+def request(slug="t1", repro="echo 0"):
+    finding = base(slug=slug)
+    finding["repro"] = repro
+    return finding
+
+
+def upgrade(workspace, emitter=None, fixture="seeded-py"):
+    binary = [sys.executable, str(EMITTER)] if emitter is None else ["node", str(EMITTER_JS)]
+    return subprocess.run(
+        [*binary, "--workspace", str(workspace), "--fixture", fixture],
+        input="", capture_output=True, text=True)
+
+
+def test_upgrade_executes_request_into_evidence(tmp_path):
+    """A request whose repro is a command string becomes fingerprinted
+    evidence only through execution by the emitter."""
+    findings = tmp_path / ".sstack" / "findings"
+    findings.mkdir(parents=True)
+    (findings / "t1.json").write_text(json.dumps(request()))
+    result = upgrade(tmp_path)
+    assert result.returncode == 0, result.stderr
+    assert "upgraded t1" in result.stdout
+    record = json.loads((findings / "t1.json").read_text())
+    assert record["command"] == "echo 0"
+    assert record["exit_code"] == 0
+    assert record["fingerprint"]
+    assert (findings / "t1.md").exists()
+    report = json.loads((tmp_path / ".sstack" / "report.json").read_text())
+    assert [f["repro"] for f in report["findings"]] == ["echo 0"]
+
+
+def test_upgrade_never_invents_a_missing_command(tmp_path):
+    """A request with no command stays a request — the machine never
+    fabricates the execution. This is the flash-run shape: repro None."""
+    findings = tmp_path / ".sstack" / "findings"
+    findings.mkdir(parents=True)
+    finding = request()
+    finding["repro"] = None
+    (findings / "t1.json").write_text(json.dumps(finding))
+    result = upgrade(tmp_path)
+    assert result.returncode == 0
+    assert "0 request(s) upgraded, 1 still pending" in result.stdout
+    assert json.loads((findings / "t1.json").read_text())["repro"] is None
+    assert not (tmp_path / ".sstack" / "report.json").exists()
+
+
+def test_upgrade_is_idempotent(tmp_path):
+    findings = tmp_path / ".sstack" / "findings"
+    findings.mkdir(parents=True)
+    (findings / "t1.json").write_text(json.dumps(request()))
+    assert upgrade(tmp_path).returncode == 0
+    fingerprint = json.loads((findings / "t1.json").read_text())["fingerprint"]
+    result = upgrade(tmp_path)
+    assert "0 request(s) upgraded" in result.stdout
+    assert json.loads((findings / "t1.json").read_text())["fingerprint"] == fingerprint
+
+
+def test_upgrade_js_parity(tmp_path):
+    """The Node emitter upgrades the same request into identical evidence."""
+    findings = tmp_path / ".sstack" / "findings"
+    findings.mkdir(parents=True)
+    (findings / "t1.json").write_text(json.dumps(request()))
+    result = upgrade(tmp_path, emitter="js")
+    assert result.returncode == 0, result.stderr
+    record = json.loads((findings / "t1.json").read_text())
+    assert record["command"] == "echo 0"
+    assert record["fingerprint"]
 
 def test_documented_payload_emits_and_replays():
     """The documented payload is accepted, and the recorded fingerprint
@@ -212,7 +276,7 @@ def test_skill_documents_every_required_payload_key():
     """A cold agent that follows SKILL.md verbatim must produce a
     payload the emitter accepts."""
     text = SKILL.read_text()
-    doc = re.search(r"The JSON you emit is the Report format fields(.*?)\n\n",
+    doc = re.search(r"The request JSON is the Report format fields(.*?)\n\n",
                     text, re.S)
     assert doc, "SKILL.md does not document the emitter payload"
     missing = [k for k in PAYLOAD_KEYS if k not in doc.group(1)]
@@ -237,14 +301,14 @@ def test_no_text_instructs_hand_writing_evidence():
         for forbidden in ("write the finding as JSON", "hand-write"):
             assert forbidden not in text, (
                 f"{path.relative_to(ROOT)} says {forbidden!r}")
-    verify = SKILL.read_text()
     head = "\n".join(SKILL.read_text().splitlines()[:200])
     # Cold backends' read truncates ~16KB (~line 230): the emit contract
     # must live in the guaranteed-read window, beside the shapes the
     # agent imitates. Flash never saw Verify-stage emit wording — three
     # reads, none containing it — and hand-wrote the in-window shapes.
-    assert "emit_findings.py --workspace . --finding <file>" in head
-    assert "no\n`fingerprint` field" in head or "no `fingerprint` field" in head
+    assert "write the finding request to `findings/<slug>.json`" in head
+    assert "executes every request's repro" in head
+    assert "not evidence" in head
     assert "Dispatch fallback: per-lens subagents that fail or go silent" in head
     assert "### 3. Verify" not in head, "Verify leaked into the window; keep it past truncation"
 
@@ -429,8 +493,8 @@ def test_node_emitter_contract_parity():
         empty_js = subprocess.run(
             ["node", str(EMITTER_JS), "--workspace", str(tmp_js), "--fixture", "seeded-py"],
             input="", capture_output=True, text=True)
-        assert empty_js.returncode == 2
-        assert "no finding on stdin" in empty_js.stderr
+        assert empty_js.returncode == 0
+        assert "0 request(s) upgraded" in empty_js.stdout
 
 
 def test_pbt_seed_and_counterexample_parity():

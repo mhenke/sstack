@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Added
+- **Emitter upgrade pass (ADR-0022)** — empty stdin now upgrades
+  pending requests: the agent's emit act is writing
+  `findings/<slug>.json` with `repro` as the exact command run (a
+  plain string), and the emitter executes every request itself,
+  fingerprints it, and rebuilds `report.json` from evidence only.
+  A request without a command stays pending — the machine never
+  invents it. Field evidence: across five wording regimes cold
+  agents wrote finding files 18/18 times and invoked the emitter
+  0/0 times, fabricating report and test results that replay
+  exposed; the agent's emit act is now the write every backend
+  performs, and the last mile is always machine execution. The
+  empty-stdin usage error is retired.
 
 - Emitters accept `--finding <file>`: the finding JSON may be written
   to a file and passed by path, with stdin piping still working.
