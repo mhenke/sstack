@@ -245,6 +245,7 @@ def test_no_text_instructs_hand_writing_evidence():
     # reads, none containing it — and hand-wrote the in-window shapes.
     assert "emit_findings.py --workspace . --finding <file>" in head
     assert "no\n`fingerprint` field" in head or "no `fingerprint` field" in head
+    assert "Dispatch fallback: per-lens subagents that fail or go silent" in head
     assert "### 3. Verify" not in head, "Verify leaked into the window; keep it past truncation"
 
 

@@ -42,6 +42,10 @@ binary exists — you execute each stage yourself with your tools.
 - `/sstack harden <target>` — negative-test gap-filling without a
   full attack; load `references/harden.md` and follow it.
 
+Dispatch fallback: per-lens subagents that fail or go silent twice
+transfer to you — run every lens yourself, one at a time, in index
+order (fan-out detail under Attack).
+
 ## Workspace
 
 **Resolve the host repo first.** The host repo is the directory that
@@ -316,12 +320,6 @@ with the map contents). Paste the matching lens skill's `SKILL.md`
 contents inline under `### Lens rubric`, and the Report format block
 below under `### Report format` — a subagent starts blank and cannot
 see this file, so anything not pasted does not exist for it.
-
-No subagent tool available, or a dispatch fails or goes silent twice?
-Run the lenses yourself, one at a time, in the same order: read the
-lens skill, execute its rubric against every mapped surface, record
-findings in the Report format — never re-dispatch past two; coverage
-is the contract, parallelism is an optimization.
 
 ### 3. Verify
 
