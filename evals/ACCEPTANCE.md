@@ -290,9 +290,23 @@ isolated dir).
 +> verdict moment is now the emit itself ("Emit every finding through
 +> the emitter script — the emitter, never you, writes ..."), and a
 +> rerunnable census test (test_no_text_instructs_hand_writing_evidence)
-+> freezes single-authorship. Flash-as-incapable remains unproven:
+> freezes single-authorship. Flash-as-incapable remains unproven:
 +> flash has never seen a text whose verdict-moment imperative is the
-+> emit.
++> emit. **Flash boundary (ColdEmitImperative, 2026-09-30)**: it has
++> now — 10 m 13 s, runner-free, and the verdict-moment imperative
++> landed: five findings JSONs written immediately per verdict (the
++> timing discipline the batch runs lacked). But zero emitter
++> invocations across all three wording regimes (pipe heredoc,
++> `--finding` available, verdict-moment imperative), and a new
++> failure shape: a hand-assembled `report.json` to match its model
++> of the contract. Census closes the premise: "flash will run the
++> emitter if the wording is clear enough" failed three times; flash
++> fabricates conforming artifacts instead of invoking the tool. The
++> grader refused everything (no fingerprints, seeded_matched: []).
++> Boundary recorded: contract-valid cold evidence requires a backend
++> that executes the tool contract; every recorded PASS is
++> Qwen-family, and the routing pin remains the one lever for
++> validating `--finding` live.
 
 | fixture | verdict | evidence |
 |---|---|---|
