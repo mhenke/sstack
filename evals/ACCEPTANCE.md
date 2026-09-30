@@ -222,6 +222,24 @@ isolated dir).
 > ownership PASSes (java-6..16, etc.) predate this text; cold
 > validation pending the dispatch routing pin (see the 17–19 batch
 > note).
+> **Monitored validation attempts (2026-09-30, later)**: two
+> actively-monitored cold runs on the then-current routing (zai
+> glm-5.3) both derailed and were killed — no 30-minute corpses this
+> time. ColdValPy (whole-package, corrected prompt): runner
+> invention at minute 4 (`sstack_discover.py`, `sstack_attack.py`,
+> `sstack_bug_hunt.py` at workspace root) despite the prompt's
+> explicit ban; killed. ColdValPyB (per-lens scope, fresh workspace —
+> the scope-shrink minimal test): clean attack probes for 12 minutes,
+> then source edits with zero emits; a mid-run steer to emit-first
+> triggered a destructive loop (`rm -rf` of its own workspace from
+> the repo root, twice, then junk artifacts); killed, workspace and
+> repo `.sstack/` churn cleaned. Conclusion: scope-shrinking does not
+> rescue glm-5.3; prompt wording and active steering both fail as
+> mitigations. Nine glm cold runs, zero valid evidence, against
+> recorded PASSes exclusively on Qwen-Flash/explorer backends. No
+> further cold dispatches until the routing chain pins a proven
+> backend; lens-broadening and emitter-text cold validation remain
+> pending on the same pin.
 
 | fixture | verdict | evidence |
 |---|---|---|
