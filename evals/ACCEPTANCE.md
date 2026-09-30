@@ -305,8 +305,24 @@ isolated dir).
 +> grader refused everything (no fingerprints, seeded_matched: []).
 +> Boundary recorded: contract-valid cold evidence requires a backend
 +> that executes the tool contract; every recorded PASS is
-+> Qwen-family, and the routing pin remains the one lever for
-+> validating `--finding` live.
+> Qwen-family, and the routing pin remains the one lever for
++> validating `--finding` live. **Read-window discovery
++> (2026-09-30, supersedes the boundary claim)**: transcript
++> instrumentation shows every cold read of SKILL.md truncates at
++> ~16KB (~line 230 of 538) — ColdEmitCoLocated read the file three
++> times; none contained the Verify stage. All four prior emit
++> wording rounds edited the dark zone; the agent faithfully
++> hand-wrote the Workspace shapes because they were the only
++> contract it ever saw. The window also hid the dispatch fallback
++> (line 320): ColdWindowContract fanned out per lens, its dispatch
++> failed silently, it read the attacker files (half-taking the
++> fallback), then relapsed into waiting on a child that never
++> existed — killed at deadlock. Fixes: the emit contract (command,
++> fingerprint criterion, emit moment) and the dispatch fallback now
++> live in-window (lines 45-116), beside the shapes; the census test
++> pins both inside the first 200 lines and pins Verify outside.
++> Remaining question under "works regardless of mode": does an
++> in-window contract raise the emitter attempt rate on flash.
 
 | fixture | verdict | evidence |
 |---|---|---|
