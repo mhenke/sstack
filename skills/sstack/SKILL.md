@@ -104,19 +104,19 @@ lens: <lens> | verdict: <confirmed | refuted | inconclusive>
 - `harden/<date>-<target>-<seq>.md` — harden-mode coverage snapshots
   (not findings; the trend line reads these)
 
-The emitter is `scripts/emit_findings.py` (or `scripts/emit_findings.js`
-under Node), beside this skill: run it, never rewrite or copy it. Once
-per finding, as that case verifies —
-`python3 <pack>/skills/sstack/scripts/emit_findings.py --workspace
-<host-repo> --fixture <fixture-name>` (or `node ... emit_findings.js`)
-with the finding as JSON on stdin. Pass `--fixture` on the first emit
-of a run; later emits inherit it from `report.json`.
-It executes the repro, captures real output, computes the fingerprint
-itself, and is the only writer of `<slug>.md`, `<slug>.json`, and
-`report.json` — the only findings report file; the human report is
-the chat summary.
+The emitter is `scripts/emit_findings.py` (or `.js` under Node),
+beside this skill: run it, never rewrite or copy it. Once per
+finding, as that case verifies, write the finding JSON to a file and
+run `python3 <pack>/skills/sstack/scripts/emit_findings.py
+--workspace <host-repo> --finding <file>` (or `node ... .js`), adding
+`--fixture <name>` on the first emit; later emits inherit it from
+`report.json`. Piping the JSON on stdin instead of `--finding` also
+works. It executes the repro, captures real output, computes the
+fingerprint itself, and is the only writer of `<slug>.md`,
+`<slug>.json`, and `report.json` — the only findings report file;
+the human report is the chat summary.
 
-The JSON you pipe is the Report format fields — `lens`, `surface`,
+The JSON you emit is the Report format fields — `lens`, `surface`,
 `case`, `oracle`, `verdict`, `repro` — plus `slug` (a short kebab-case
 name for the finding), `fix` (the minimal change you will make), and
 `regression`: `{"file": "tests/test_x.py", "test": "test_name",

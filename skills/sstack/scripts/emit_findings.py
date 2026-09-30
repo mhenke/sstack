@@ -1,22 +1,17 @@
 #!/usr/bin/env python3
 """Evidence emitter: the only writer of .sstack/findings/* and .sstack/report.json.
 
-Run once per finding, as each case verifies. The finding arrives as JSON on
-stdin; the repro is executed for real, and stdout, stderr, exit code, and
+Run once per finding, as each case verifies. The finding arrives as JSON
+in a file passed with --finding, or on stdin. The repro is executed for
+real, and stdout, stderr, exit code, and
 fingerprint come from that execution and never from transcription.
 Recorded paths are rewritten host-repo-relative at capture, so evidence
 diffs clean across machines and checkouts.
 report.json is rebuilt from the evidence files on disk after every emit, so
 
-    python3 scripts/emit_findings.py --workspace <host-repo> --fixture <fixture> <<'JSON'
-    {"slug": "checkout-page-zero", "lens": "boundaries", "surface": "checkout",
-     "case": "checkout(items=[], page=0)",
-     "oracle": "ValueError naming page", "verdict": "confirmed",
-     "repro": "<command that reproduces it>",
-     "fix": "raise when page < 1",
-     "regression": {"file": "tests/test_checkout.py", "test": "test_page_zero",
-                    "before": "red", "after": "green"}}
-    JSON
+    echo '{"slug": "checkout-page-zero", ...}' > finding.json
+    python3 scripts/emit_findings.py --workspace <host-repo> --finding finding.json --fixture <fixture>
+    (the finding JSON may instead be piped on stdin)
 
 Optional keys: "fix" (confirmed only, and only when a fix was applied),
 "seed" (integer or token for PBT replay), and "counterexample" (the minimal
@@ -47,18 +42,24 @@ def safe_slug(value: str, field: str) -> str:
     return value
 
 
-def read_finding() -> dict:
-    raw = sys.stdin.read()
+def read_finding(path: str | None) -> dict:
+    if path:
+        try:
+            raw = Path(path).read_text()
+        except OSError as error:
+            print(f"cannot read --finding file: {error}", file=sys.stderr)
+            raise SystemExit(2) from error
+    else:
+        raw = sys.stdin.read()
     if not raw.strip():
         print(
-            "no finding on stdin — pipe the finding JSON here, e.g.:\n"
-            "python3 scripts/emit_findings.py --workspace <host-repo> --fixture <fixture> <<'JSON'\n"
+            f"no finding {'in ' + path if path else 'on stdin'} — write the finding JSON to a file and pass --finding <file>, e.g.:\n"
+            "python3 scripts/emit_findings.py --workspace <host-repo> --finding finding.json [--fixture <fixture>]\n"
             '{"slug": "checkout-page-zero", "lens": "boundaries", "surface": "checkout",\n'
             ' "case": "checkout(items=[], page=0)", "oracle": "ValueError naming page",\n'
             ' "verdict": "confirmed", "repro": "<command that reproduces it>",\n'
             ' "regression": {"file": "tests/test_checkout.py", "test": "test_page_zero",\n'
-            '                "before": "red", "after": "green"}}\n'
-            "JSON",
+            '                "before": "red", "after": "green"}}',
             file=sys.stderr,
         )
         raise SystemExit(2)
@@ -211,6 +212,9 @@ def main() -> int:
         if hasattr(stream, "reconfigure"):
             stream.reconfigure(encoding="utf-8", errors="replace")
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument(
+        "--finding", help="file holding the finding JSON; stdin if omitted"
+    )
     parser.add_argument("--workspace", type=Path, required=True, help="host repo holding .sstack/")
     parser.add_argument("--fixture", help="fixture name; required on the first emit, then preserved")
     args = parser.parse_args()
@@ -222,7 +226,7 @@ def main() -> int:
     findings_dir.mkdir(exist_ok=True)
 
     try:
-        finding = read_finding()
+        finding = read_finding(args.finding)
     except (json.JSONDecodeError, ValueError) as error:
         print(f"invalid finding: {error}", file=sys.stderr)
         return 2

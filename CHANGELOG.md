@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- Emitters accept `--finding <file>`: the finding JSON may be written
+  to a file and passed by path, with stdin piping still working.
+  Field evidence across nine cold runs: agents reliably write the
+  finding file and reliably skip the heredoc-pipe invocation, on every
+  backend and both text generations — the pipe was the one step no
+  model survived. The emitter still executes the repro and computes
+  the fingerprint itself, so machine execution remains the contract
+  (ADR-0006 unchanged).
+
 ### Fixed
 
 - Emitters print the full invocation with a heredoc example when

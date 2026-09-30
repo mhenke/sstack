@@ -75,7 +75,7 @@ def test_empty_stdin_prints_usage_not_a_bare_parse_error(tmp_path):
         input="", capture_output=True, text=True)
     assert result.returncode == 2
     assert "no finding on stdin" in result.stderr
-    assert "<<'JSON'" in result.stderr
+    assert "--finding" in result.stderr
     assert not (tmp_path / ".sstack" / "findings").exists() or not any(
         (tmp_path / ".sstack" / "findings").iterdir())
 
@@ -90,6 +90,44 @@ def test_documented_payload_emits_and_replays():
         digest = hashlib.sha256(
             (record["stdout"] + record["stderr"]).encode()).hexdigest()[:16]
         assert record["fingerprint"] == digest
+
+
+def test_finding_file_flag_matches_stdin():
+    """--finding <file> is the primary invocation: identical output to
+    the stdin path."""
+    with tempfile.TemporaryDirectory(dir=SCRATCH) as tmp_file, \
+            tempfile.TemporaryDirectory(dir=SCRATCH) as tmp_stdin:
+        finding_file = Path(tmp_file) / "finding.json"
+        finding_file.write_text(json.dumps(base()))
+        by_file = subprocess.run(
+            [sys.executable, str(EMITTER), "--workspace", tmp_file,
+             "--finding", str(finding_file), "--fixture", "seeded-py"],
+            input="", capture_output=True, text=True)
+        by_stdin = emit(Path(tmp_stdin), base())
+        assert by_file.returncode == 0, by_file.stderr
+        assert by_stdin.returncode == 0, by_stdin.stderr
+        for rel in (".sstack/findings/t1.json", ".sstack/findings/t1.md",
+                    ".sstack/report.json"):
+            assert (Path(tmp_file) / rel).read_text() == \
+                (Path(tmp_stdin) / rel).read_text(), rel
+
+
+def test_finding_file_missing_or_empty_errors(tmp_path):
+    missing = subprocess.run(
+        [sys.executable, str(EMITTER), "--workspace", str(tmp_path),
+         "--finding", str(tmp_path / "nope.json")],
+        input="", capture_output=True, text=True)
+    assert missing.returncode == 2
+    assert "cannot read --finding file" in missing.stderr
+    empty = tmp_path / "empty.json"
+    empty.write_text("")
+    no_content = subprocess.run(
+        [sys.executable, str(EMITTER), "--workspace", str(tmp_path),
+         "--finding", str(empty)],
+        input="", capture_output=True, text=True)
+    assert no_content.returncode == 2
+    assert "no finding in" in no_content.stderr
+    assert str(empty) in no_content.stderr
 
 
 def test_missing_regression_is_rejected():
@@ -174,7 +212,7 @@ def test_skill_documents_every_required_payload_key():
     """A cold agent that follows SKILL.md verbatim must produce a
     payload the emitter accepts."""
     text = SKILL.read_text()
-    doc = re.search(r"The JSON you pipe is the Report format fields(.*?)\n\n",
+    doc = re.search(r"The JSON you emit is the Report format fields(.*?)\n\n",
                     text, re.S)
     assert doc, "SKILL.md does not document the emitter payload"
     missing = [k for k in PAYLOAD_KEYS if k not in doc.group(1)]
@@ -295,6 +333,32 @@ def emit_js(workspace, finding, fixture="seeded-py"):
         ["node", str(EMITTER_JS), "--workspace", str(workspace),
          "--fixture", fixture],
         input=json.dumps(finding), capture_output=True, text=True)
+
+
+def test_node_emitter_file_mode_matches_python():
+    """The --finding file invocation is the primary shape; both emitters
+    agree through it."""
+    with tempfile.TemporaryDirectory(dir=SCRATCH) as tmp_py, tempfile.TemporaryDirectory(dir=SCRATCH) as tmp_js:
+        f_py = Path(tmp_py) / "finding.json"
+        f_js = Path(tmp_js) / "finding.json"
+        f_py.write_text(json.dumps(base()))
+        f_js.write_text(json.dumps(base()))
+        res_py = subprocess.run(
+            [sys.executable, str(EMITTER), "--workspace", tmp_py,
+             "--finding", str(f_py), "--fixture", "seeded-py"],
+            input="", capture_output=True, text=True)
+        res_js = subprocess.run(
+            ["node", str(EMITTER_JS), "--workspace", tmp_js,
+             "--finding", str(f_js), "--fixture", "seeded-py"],
+            input="", capture_output=True, text=True)
+        assert res_py.returncode == 0, res_py.stderr
+        assert res_js.returncode == 0, res_js.stderr
+        py_obj = json.loads((Path(tmp_py) / ".sstack/findings/t1.json").read_text())
+        js_obj = json.loads((Path(tmp_js) / ".sstack/findings/t1.json").read_text())
+        for obj in (py_obj, js_obj):
+            obj.pop("emitted_at", None)
+            obj.pop("duration_ms", None)
+        assert py_obj == js_obj
 
 
 def test_node_emitter_contract_parity():

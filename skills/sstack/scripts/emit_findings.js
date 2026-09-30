@@ -24,12 +24,22 @@ function safeSlug(value, field) {
   return value;
 }
 
-function readFinding() {
-  const input = fs.readFileSync(0, 'utf8');
+function readFinding(findingPath) {
+  let input;
+  if (findingPath) {
+    try {
+      input = fs.readFileSync(findingPath, 'utf8');
+    } catch (err) {
+      process.stderr.write(`cannot read --finding file: ${err.message}\n`);
+      process.exit(2);
+    }
+  } else {
+    input = fs.readFileSync(0, 'utf8');
+  }
   if (!input.trim()) {
     process.stderr.write(
-      `no finding on stdin — pipe the finding JSON here, e.g.:
-node scripts/emit_findings.js --workspace <host-repo> --fixture <fixture> <<'JSON'
+      `no finding ${findingPath ? `in ${findingPath}` : 'on stdin'} — write the finding JSON to a file and pass --finding <file>, e.g.:
+node scripts/emit_findings.js --workspace <host-repo> --finding finding.json
 {"slug": "checkout-page-zero", "lens": "boundaries", "surface": "checkout",
  "case": "checkout(items=[], page=0)", "oracle": "ValueError naming page",
  "verdict": "confirmed", "repro": "<command that reproduces it>",
@@ -238,12 +248,15 @@ function main() {
   const args = process.argv.slice(2);
   let workspaceArg = null;
   let fixtureArg = null;
+  let findingPath = null;
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--workspace') {
       workspaceArg = args[++i];
     } else if (args[i] === '--fixture') {
       fixtureArg = args[++i];
+    } else if (args[i] === '--finding') {
+      findingPath = args[++i];
     }
   }
 
@@ -260,7 +273,7 @@ function main() {
 
   let finding;
   try {
-    finding = readFinding();
+    finding = readFinding(findingPath);
   } catch (err) {
     process.stderr.write(`invalid finding: ${err.message}\n`);
     process.exit(2);
