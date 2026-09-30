@@ -333,13 +333,27 @@ isolated dir).
 +> 15 of 18 tests fail — the coupon, page-zero, and null-discount
 +> fixes are wrong, the red→green claims unverified. ADR-0006 is the
 +> guardrail that caught it: machine execution is the only
-+> evidence. Workspace kept at
-+> `.sstack/scratch/sstack-seeded-py-5tmmakg2` as the fixture for
-+> the request-upgrade decision.
+> evidence.
+>
+> **ColdRequestMode (2026-09-30, ADR-0022 validation)**: the first
+> contract-valid cold PASS under the request-upgrade contract, and
+> the first evidence ever recorded from `kimi-code/k3` — a backend
+> the protocol had never run. 23 m 13 s: 27 findings emitted (24
+> confirmed, 3 refuted), 24 genuine red→green (24 red against
+> `pristine-src`), 10 seeds content-matched, `pass: True`, 0 label
+> contradictions, no absolute paths or timestamps in any artifact.
+> The agent wrote the requests (26 plain-string, 1 nested) and ran
+> the upgrade pass; the graded result is `pass: True`. The one
+> nested request — the evidence-view shape agents copy — is why the
+> upgrade now extracts `repro.command` and keys evidence by
+> `fingerprint`. Coverage honesty: the run itself reported PARTIAL
+> coverage (2 of 21 mapped surfaces never executed). The Qwen-era
+> PASSes (ColdPy-5..18) predate the in-window contract and the
+> read-window discovery.
 
 | fixture | verdict | evidence |
 |---|---|---|
-| seeded-py | PASS | ColdPy-5 covers py-1/3/4/5/6 (5/5 seeds, 17 tests green, 12/12 replay intact). ColdPy-11 verified py-7 (ownership), py-8 (ordering), py-9 (exceptional-conditions), py-10 (resource-exhaustion), and py-11 (concurrency): 5 confirmed red→green in `tests/test_shop.py`, 5/5 evidence replay intact, 0 drift, 10 tests green. ColdPy-12 verified py-12 (idempotency): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-13 verified py-13 (dependency-failure): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-14 verified py-14 (contract): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-15 verified py-15 (security): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-16 verified py-16 (agent): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-18 (2026-09-27, fresh full-lifecycle rerun after SSOT deduplication): 16 confirmed red→green, 16/16 evidence replay intact, 21 tests green, content-matched all 16 seeds including py-2. Full 16/16 named coverage achieved; seeds 17–19 have no cold-run evidence. |
+| seeded-py | PASS | ColdPy-5 covers py-1/3/4/5/6 (5/5 seeds, 17 tests green, 12/12 replay intact). ColdPy-11 verified py-7 (ownership), py-8 (ordering), py-9 (exceptional-conditions), py-10 (resource-exhaustion), and py-11 (concurrency): 5 confirmed red→green in `tests/test_shop.py`, 5/5 evidence replay intact, 0 drift, 10 tests green. ColdPy-12 verified py-12 (idempotency): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-13 verified py-13 (dependency-failure): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-14 verified py-14 (contract): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-15 verified py-15 (security): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-16 verified py-16 (agent): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-18 (2026-09-27, fresh full-lifecycle rerun after SSOT deduplication): 16 confirmed red→green, 16/16 evidence replay intact, 21 tests green, content-matched all 16 seeds including py-2. ColdRequestMode (2026-09-30, ADR-0022 request-upgrade, kimi-code/k3): 27 emitted findings, 24 confirmed red→green, `pass: True`, content-matched 10 seeds including **py-17 and py-19**, which had no cold-run evidence before. py-18 is now the only py seed without cold-run evidence. |
 | seeded-java | PASS | 16 of 19 seeds across all 14 lenses verified (seeds 17–19, added by f279baf, have no cold-run evidence). java-1..5 verified in ColdJava-3 (3/5 seeds, 7/7 replay intact); java-6..16 verified in ColdJava-4 (11/11 seeds content-matched, 14/14 tests green, 11 confirmed red→green regressions landed in ShopTest.java, 11/11 evidence replay intact, 0 drift). |
 | seeded-ts | PASS | 16 of 19 seeds across all 14 lenses verified (seeds 17–19, added by f279baf, have no cold-run evidence). ts-1..5 verified in CleanTs/ColdTs-4 (5/5 seeds, 19/19 replay intact); ts-6..16 verified in ColdTs-5 (11/11 seeds content-matched, 17/17 tests green, 11 confirmed red→green regressions landed, 11/11 evidence replay intact, 0 drift). |
 | seeded-js | PASS | 16 of 19 seeds across all 14 lenses verified (seeds 17–19, added by f279baf, have no cold-run evidence). js-1..5 verified in ColdJs-2 (5/5 seeds, 12/12 replay intact); js-6..16 verified in ColdJs-3 (11/11 seeds content-matched, 12/12 tests green, 11 confirmed red→green regressions landed, 11/11 evidence replay intact, 0 drift). |

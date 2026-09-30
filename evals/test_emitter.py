@@ -133,6 +133,21 @@ def test_upgrade_is_idempotent(tmp_path):
     assert json.loads((findings / "t1.json").read_text())["fingerprint"] == fingerprint
 
 
+def test_upgrade_accepts_nested_command_request(tmp_path):
+    """Cold agents copy the evidence-view shape and nest the command
+    under repro.command — the upgrade extracts and executes it."""
+    findings = tmp_path / ".sstack" / "findings"
+    findings.mkdir(parents=True)
+    finding = request()
+    finding["repro"] = {"command": "echo 0", "exit_code": 1, "stdout": "lied"}
+    (findings / "t1.json").write_text(json.dumps(finding))
+    result = upgrade(tmp_path)
+    assert result.returncode == 0, result.stderr
+    record = json.loads((findings / "t1.json").read_text())
+    assert record["command"] == "echo 0"
+    assert record["stdout"] == "0\n"  # transcribed "lied" discarded
+    assert record["fingerprint"]
+
 def test_upgrade_js_parity(tmp_path):
     """The Node emitter upgrades the same request into identical evidence."""
     findings = tmp_path / ".sstack" / "findings"

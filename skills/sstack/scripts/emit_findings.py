@@ -161,7 +161,7 @@ def render_markdown(finding: dict, run: dict) -> str:
         "",
         "## Repro",
         "```",
-        finding["repro"],
+        run["command"],
         "```",
         f"exit {run['exit_code']}, fingerprint {run['fingerprint']}",
     ]
@@ -187,7 +187,7 @@ def rebuild_report(findings_dir: Path, workspace: Path, fixture: str) -> int:
     entries = []
     for evidence in sorted(findings_dir.glob("*.json")):
         record = json.loads(evidence.read_text(encoding="utf-8", errors="replace"))
-        if "command" not in record:
+        if "fingerprint" not in record:
             continue  # a request (no executed repro yet) is not evidence
         entry = {
             "seed_id": record.get("seed_id", "other"),
@@ -227,13 +227,15 @@ def upgrade_requests(findings_dir: Path, workspace: Path, fixture: str | None) -
     upgraded = pending = 0
     for path in sorted(findings_dir.glob("*.json")):
         finding = json.loads(path.read_text(encoding="utf-8", errors="replace"))
-        if "command" in finding:
+        if "fingerprint" in finding:
             continue  # already evidence
         repro = finding.get("repro")
+        # A request may spell the command as a string or nest it under
+        # "command" — the evidence view's shape invites the object form.
+        # Either way the machine executes it; it never invents one.
+        if isinstance(repro, dict):
+            repro = repro.get("command")
         if not isinstance(repro, str) or not repro.strip():
-            pending += 1
-            continue
-        if not preflight_probe(repro, workspace):
             pending += 1
             continue
         run = run_repro(repro, workspace)

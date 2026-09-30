@@ -171,7 +171,7 @@ function renderMarkdown(finding, run) {
     '',
     '## Repro',
     '```',
-    finding.repro,
+    run.command,
     '```',
     `exit ${run.exit_code}, fingerprint ${run.fingerprint}`,
   ];
@@ -209,7 +209,7 @@ function rebuildReport(findingsDir, workspace, fixture) {
   const entries = [];
   for (const file of files) {
     const record = JSON.parse(fs.readFileSync(path.join(findingsDir, file), 'utf8'));
-    if (record.command === undefined) {
+    if (record.fingerprint === undefined) {
       continue; // a request (no executed repro yet) is not evidence
     }
     const entry = {
@@ -267,10 +267,13 @@ function upgradeRequests(findingsDir, workspace, fixture) {
   for (const file of files) {
     const fullPath = path.join(findingsDir, file);
     const finding = JSON.parse(fs.readFileSync(fullPath, 'utf8'));
-    if (finding.command !== undefined) {
+    if (finding.fingerprint !== undefined) {
       continue; // already evidence
     }
-    const repro = finding.repro;
+    let repro = finding.repro;
+    if (repro !== null && typeof repro === 'object') {
+      repro = repro.command; // the evidence-view shape nests the command
+    }
     if (typeof repro !== 'string' || !repro.trim() || !preflightProbe(repro, workspace)) {
       pending += 1;
       continue;

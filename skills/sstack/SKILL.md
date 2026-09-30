@@ -99,9 +99,9 @@ lens: <lens> | verdict: <confirmed | refuted | inconclusive>
   "regression": {"file","test","before","after"}}` (plus optional
   `fix`, `seed`, `counterexample`). `before`/`after`
   are the literal state tokens "red"/"green" — the test's state
-  before-fix / after-fix — not output snippets. Verification re-runs
-  `command` and recomputes the fingerprint; a hand-typed hash fails
-  it. Any other shape is unverifiable.
+  before-fix / after-fix. Verification re-runs `command` and recomputes the
+  fingerprint; a hand-typed hash fails it. Any other shape is
+  unverifiable.
 - `scratch/<lens>/` — this run's probes, one directory per lens
 - `pristine-src/` — the target's originals, snapshotted before Fix, so
   a repro command still shows the buggy behavior after the fix lands

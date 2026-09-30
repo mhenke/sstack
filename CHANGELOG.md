@@ -20,7 +20,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   exposed; the agent's emit act is now the write every backend
   performs, and the last mile is always machine execution. The
   empty-stdin usage error is retired.
-
+- The upgrade pass accepts a request that nests the command under
+  `repro.command` (the evidence-view shape cold agents copy) and
+  identifies evidence by the `fingerprint` field rather than
+  `command`, so transcribed output on a nested request is discarded,
+  never trusted. ColdRequestMode (2026-09-30, kimi-code/k3) wrote 26
+  of 27 requests as plain strings and one nested; both now execute.
 - Emitters accept `--finding <file>`: the finding JSON may be written
   to a file and passed by path, with stdin piping still working.
   Field evidence across nine cold runs: agents reliably write the
