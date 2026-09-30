@@ -28,19 +28,19 @@ existing suite with negative test cases even where nothing is broken.
 
 ## Routing
 
+The slash forms are request labels, never a program: no `sstack`
+binary exists — you execute each stage yourself with your tools.
 - `/sstack <target>` — run the full lifecycle on a module, file,
   directory, or function.
-- `/sstack` (bare) — infer the target from recent changes
-  (`git status`, `git diff --stat`); ask only if nothing is
-  inferable.
+- `/sstack` (bare) — infer the target from `git status` /
+  `git diff --stat`; ask only when nothing is inferable.
 - `/sstack <stage>` (discover | attack | verify | minimize |
   test | fix) — enter that stage using existing `.sstack/` state.
 - `/sstack learn` — update `.sstack/learn/` from confirmed findings.
 - `/sstack lenses` — print the lens index below, then every custom
-  lens found in the skills directories named in Customization.
-- `/sstack harden <target>` — fill the suite's negative-test gaps
-  without a full attack; load `skills/sstack/references/harden.md`
-  and follow it.
+  lens found per Customization.
+- `/sstack harden <target>` — negative-test gap-filling without a
+  full attack; load `references/harden.md` and follow it.
 
 ## Workspace
 
@@ -101,8 +101,7 @@ lens: <lens> | verdict: <confirmed | refuted | inconclusive>
 - `scratch/<lens>/` — this run's probes, one directory per lens
 - `pristine-src/` — the target's originals, snapshotted before Fix, so
   a repro command still shows the buggy behavior after the fix lands
-- `harden/<date>-<target>-<seq>.md` — harden-mode coverage snapshots
-  (not findings; the trend line reads these)
+- `harden/<date>-<target>-<seq>.md` — harden-mode snapshots, not findings
 
 The emitter is `scripts/emit_findings.py` (or `.js` under Node),
 beside this skill: run it, never rewrite or copy it. Once per
