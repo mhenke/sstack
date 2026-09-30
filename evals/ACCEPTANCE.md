@@ -240,6 +240,21 @@ isolated dir).
 > further cold dispatches until the routing chain pins a proven
 > backend; lens-broadening and emitter-text cold validation remain
 > pending on the same pin.
+> **Text-vs-backend control (ColdOldText, 2026-09-30)**: old skill
+> text (12d822e, the 527-line state the recorded PASSes ran on) +
+> glm-5.3, original prompt, solo, no steering: 9 m 16 s, zero runner
+> invention, no derailment, one real seed found (cart-count, py-6),
+> fixed with green tests — and the finding hand-written (`repro` a
+> bare string, no fingerprint, no `report.json`, zero emitter
+> invocations). Grade refuses. Discriminates the confound: the
+> 09-28/29 text wave explains the chaos class (runner invention,
+> loops — new text only), while emit abandonment follows glm across
+> both texts. Every glm run writes the finding file with correct
+> schema and never performs the heredoc-pipe invocation. Product-fix
+> candidate (f): emitter `--finding <file>` argument — the agent's
+> universal behavior (writing the file) becomes the emitter's input;
+> repro execution and fingerprinting stay machine-side, so ADR-0006
+> is unchanged.
 
 | fixture | verdict | evidence |
 |---|---|---|
