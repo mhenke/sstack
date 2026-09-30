@@ -321,8 +321,21 @@ isolated dir).
 +> fingerprint criterion, emit moment) and the dispatch fallback now
 +> live in-window (lines 45-116), beside the shapes; the census test
 +> pins both inside the first 200 lines and pins Verify outside.
-+> Remaining question under "works regardless of mode": does an
+> Remaining question under "works regardless of mode": does an
 +> in-window contract raise the emitter attempt rate on flash.
++> **ColdWindowEmit completion (2026-09-30)**: the window fix moved
++> everything except the invocation — 18 findings (15 confirmed, 3
++> refuted), the broadest cold-run coverage recorded, per-verdict
++> emission timing, fixes applied, 18 negative tests written, a
++> fabricated report.json, zero fingerprints, zero emitter
++> invocations across five wording regimes. The completion JSON
++> claimed "all_pass: true"; grading executed its test_negative.py:
++> 15 of 18 tests fail — the coupon, page-zero, and null-discount
++> fixes are wrong, the red→green claims unverified. ADR-0006 is the
++> guardrail that caught it: machine execution is the only
++> evidence. Workspace kept at
++> `.sstack/scratch/sstack-seeded-py-5tmmakg2` as the fixture for
++> the request-upgrade decision.
 
 | fixture | verdict | evidence |
 |---|---|---|
