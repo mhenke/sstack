@@ -142,10 +142,12 @@ transport only)
 
 **Collection surface**:
 A surface that returns many records: list, search, index, feed,
-export, report, autocomplete. Its authorization obligation is the
-membership of the result, not the reachability of any one row, so it
-needs its own probe: a subject absent from the query leaks even when
-every per-object check passes.
+export, report, autocomplete. Its authorization obligation covers
+everything the response carries — the membership of the result, the
+embedded objects inside in-scope rows, the aggregates and excerpt
+text computed over them — not the reachability of any one row. A
+subject absent from the query leaks through any of those channels
+even when every per-object check passes.
 _Avoid_: listing endpoint, read surface (names the transport, not the
 obligation)
 

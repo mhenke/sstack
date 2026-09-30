@@ -106,6 +106,21 @@ Prove the scope by the contents of the result, not by the code path.
 - Check every output of the same handler: the rows, the count, the
   facets, the pagination total, and the error path all disclose
   something. A correct row filter with a leaked total is still a leak.
+- Scoped rows carrying unscoped embeds: a check, invoice, or document
+  row may embed related objects (issuer, comments, attachments,
+  joined relations) fetched without the subject predicate. Every
+  embedded object must obey the row's scope; assert no other subject's
+  data inside an in-scope row.
+- Suggestion and autocomplete surfaces are collections too: a match
+  list built from an unscoped population returns other subjects'
+  values. Same oracle as the main collection.
+- Aggregates computed over the unscoped population — totals,
+  breakdowns, averages — leak another subject's volume or values even
+  when every row is correctly scoped. Assert each aggregate agrees
+  with the scoped rows.
+- Snippets and highlights: a search that excludes another subject's
+  rows but returns excerpt text drawn from their content has leaked
+  it. Excerpt fields obey the same oracle as rows.
 - Exhaustive export and report paths first; they are the same defect
   with a wider blast radius.
 
@@ -175,6 +190,10 @@ persists it. A token case: log out, replay the same bearer token; oracle
 | count or facet leak | scoped rows, unscoped total/count/facets | counts and facets agree with the returned rows |
 | scope bypassed by filter shape | wildcard, empty, or attribute-only query | scope holds when the match is broad |
 | scope as a request parameter | `include`/`expand`/`with`/`fields` adding other rows or fields | rejected or scoped to the caller |
+| scoped row, unscoped embed | read a row that embeds related objects | every embedded object obeys the row's scope |
+| aggregate over unscoped population | run a total/breakdown surface as subject A | aggregates agree with A's scoped rows |
+| snippet or highlight leak | search returns excerpt text | excerpts contain only A-scoped content |
+| suggestion list unscoped | autocomplete as subject A | every match is A-scoped |
 | export/report wider than the UI | run the export path behind the same subject | export honours the same scope |
 | list-then-fetch pair | IDs from a scoped list replayed on the detail route | both routes scoped, tested together |
 | BOPLA read (V8.2.3) | read a privileged field | field absent from the response |
