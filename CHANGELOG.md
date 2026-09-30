@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Fixed
+
+- Emitters print the full invocation with a heredoc example when
+  invoked with no finding on stdin (exit 2, both languages), instead
+  of a bare JSON parse error. Field report: a cold agent hit the bare
+  error, could not tell what to pipe, and abandoned the run's evidence
+  step.
+- The ownership lens's collection-leak section gains four probes —
+  unscoped embeds on scoped rows, suggestion/autocomplete match
+  lists, aggregates over an unscoped population, and snippet/highlight
+  text — with matching failure-class rows. Motivated by the
+  check-search leak scenario (search by a non-key attribute returning
+  all subjects' records), which the section already covered; these
+  broaden sibling leak shapes. Grounding research:
+  `docs/research/bola-tenant-isolation-negative-testing.md`. Cold
+  validation pending.
+
 ## 0.3.1 - 2026-09-29
 
 ### Fixed

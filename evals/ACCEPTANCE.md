@@ -180,8 +180,11 @@ isolated dir).
 > **Variance run (ColdSoloPy2, 2026-09-29)**: coverage was variance —
 > 22 surfaces across all four modules, security + exceptional lenses,
 > py-18/py-19 target areas named — but the Emit contract failed
-> again: all 3 findings hand-written (missing `seed_id`, `regression`,
-> `emitted_at`), grader refuses, 0 seeds. **Backend routing discovery
+> again: all 3 findings hand-written — missing `seed_id` and
+> `regression`, both fields the emitter always writes (they also lack
+> `emitted_at`, which the ADR-0021 portable-evidence emitter no longer
+> writes either, so only the first two discriminate) — grader refuses,
+> 0 seeds. **Backend routing discovery
 > (decisive)**: `omniroute/explorer` is a routing chain — `model_usage`
 > events show the recorded PASSes ran on Qwen3.8-Flash / Qwen3.7-Flash
 > / explorer, while all of today's failures ran on glm-5.3 /
@@ -207,6 +210,18 @@ isolated dir).
 > test_emitter 16 passed, test-all green; every recorded cold-run
 > number above predates this text. Old evidence still grades and
 > replays (fingerprints were computed over the bytes as recorded).
+> **Staleness note (2026-09-30, ownership collection probes)**: the
+> lens's collection-leak section gained four probes — unscoped embeds
+> on scoped rows, suggestion/autocomplete match lists, aggregates over
+> an unscoped population, and snippet/highlight text — plus matching
+> failure-class rows. Motivated by the check-search leak scenario
+> (search by a non-key attribute returning all subjects' records),
+> which the section already covered; these broaden sibling leak
+> shapes. Grounding:
+> docs/research/bola-tenant-isolation-negative-testing.md. Recorded
+> ownership PASSes (java-6..16, etc.) predate this text; cold
+> validation pending the dispatch routing pin (see the 17–19 batch
+> note).
 
 | fixture | verdict | evidence |
 |---|---|---|
