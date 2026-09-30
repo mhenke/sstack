@@ -255,6 +255,16 @@ isolated dir).
 > universal behavior (writing the file) becomes the emitter's input;
 > repro execution and fingerprinting stay machine-side, so ADR-0006
 > is unchanged.
+> **ColdFindingMode kill (2026-09-30)**: current text
+> (with the `--finding` wording) + glm-5.3-flash: 18 min of clean
++> discovery and probing, zero runner invention until the emit-adjacent
++> moment, then root-runner construction (`sstack.py` at workspace root
++> with `__main__` blocks). Killed on criteria; `--finding` was never
++> exercised live. Flash re-confirms as contract-failing on the new
++> text; the emit-path fix remains unit-validated only (19 passed) and
++> awaits a run on a backend that reaches the emit step — the
++> non-flash glm-5.3 old-text run got that far and hand-wrote the
++> finding file, which `--finding` now accepts as input.
 
 | fixture | verdict | evidence |
 |---|---|---|
