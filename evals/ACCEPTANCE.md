@@ -278,8 +278,21 @@ isolated dir).
 +> finding still hand-written (a lone `.md`, no emitter invocation,
 +> no report.json); grade refuses. Runner-invention: fixed at the
 +> root. Emit contract on flash: still unmet — capability gap, not
-+> wording; the remaining lever is dispatching to a backend that
-+> reaches the emit step.
+> wording; the remaining lever is dispatching to a backend that
++> reaches the emit step. **Premise attack (2026-09-30)**: that
++> "capability, not wording" claim failed its own census — the Verify
++> stage opened "Write both `findings/<slug>.md` and
++> `findings/<slug>.json`", with the emitter as a trailing qualifier
++> and the prohibition 20 lines away. Every glm-family run that
++> reached the verdict moment obeyed the local imperative and
++> hand-wrote, as instructed; Qwen reconciled globally and emitted.
++> The text assigned the behavior. Fixed: the imperative at the
++> verdict moment is now the emit itself ("Emit every finding through
++> the emitter script — the emitter, never you, writes ..."), and a
++> rerunnable census test (test_no_text_instructs_hand_writing_evidence)
++> freezes single-authorship. Flash-as-incapable remains unproven:
++> flash has never seen a text whose verdict-moment imperative is the
++> emit.
 
 | fixture | verdict | evidence |
 |---|---|---|
