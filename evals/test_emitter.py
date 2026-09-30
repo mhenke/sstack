@@ -221,6 +221,27 @@ def test_skill_documents_every_required_payload_key():
         assert opt in doc.group(1), f"emitter payload paragraph never mentions optional: {opt}"
 
 
+def test_no_text_instructs_hand_writing_evidence():
+    """Census, rerunnable: the Verify stage once opened 'Write both
+    findings/<slug>.md and .json' with the emitter clause as a
+    trailing qualifier — every backend that obeys the local imperative
+    hand-wrote its evidence (glm family, all cold runs) while only the
+    globally-reconciling backend emitted. The imperative at the
+    verdict moment must be the emit, everywhere, always."""
+    shipped = ([p for p in (ROOT / "skills").rglob("*.md")]
+               + [p for p in (ROOT / "agents").rglob("*.md")])
+    for path in sorted(shipped):
+        text = path.read_text()
+        assert not re.search(r"[Ww]rite (both )?`?findings/", text), (
+            f"{path.relative_to(ROOT)} instructs hand-writing evidence files")
+        for forbidden in ("write the finding as JSON", "hand-write"):
+            assert forbidden not in text, (
+                f"{path.relative_to(ROOT)} says {forbidden!r}")
+    verify = SKILL.read_text()
+    assert "Emit every finding through the emitter script" in verify
+    assert "the emitter, never you, writes" in verify
+
+
 def test_readme_runtime_claim_matches_the_tree():
     """README promises what the pack ships. It used to say 'it is
     Markdown' while the pack carried a Python script."""

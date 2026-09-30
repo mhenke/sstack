@@ -326,12 +326,12 @@ is the contract, parallelism is an optimization.
 ### 3. Verify
 
 Prove a verdict before accepting it: per case, compare oracle vs.
-observed. Write both `findings/<slug>.md` and `findings/<slug>.json`
-for every finding, in the exact shapes given under Workspace —
-through the emitter script, as each case verifies. Evidence batched
-to run end is evidence a crash deletes: emit the moment a verdict is
-known, while the failing state still runs — a fix applied before its
-red evidence is emitted strands it. The first emission doubles as
+observed. Emit every finding through the emitter script the moment
+the verdict is known — the emitter, never you, writes
+`findings/<slug>.md` and `<slug>.json` (shapes under Workspace).
+Batched evidence is evidence a crash deletes: emit while the failing
+state still runs — a fix applied before its red evidence is emitted
+strands it. The first emission doubles as
 the emitter smoke test: if it fails, repair the harness before
 attacking further. Check for materially distinct attack families
 before declaring a surface covered. Before comparing anything, check
