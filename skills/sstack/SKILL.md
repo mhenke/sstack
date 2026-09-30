@@ -104,16 +104,13 @@ lens: <lens> | verdict: <confirmed | refuted | inconclusive>
 - `harden/<date>-<target>-<seq>.md` — harden-mode snapshots, not findings
 
 The emitter is `scripts/emit_findings.py` (or `.js` under Node),
-beside this skill: run it, never rewrite or copy it. Once per
-finding, as that case verifies, write the finding JSON to a file and
-run `python3 <pack>/skills/sstack/scripts/emit_findings.py
---workspace <host-repo> --finding <file>` (or `node ... .js`), adding
+beside this skill: run it, never rewrite or copy it. Add
 `--fixture <name>` on the first emit; later emits inherit it from
-`report.json`. Piping the JSON on stdin instead of `--finding` also
-works. It executes the repro, captures real output, computes the
-fingerprint itself, and is the only writer of `<slug>.md`,
-`<slug>.json`, and `report.json` — the only findings report file;
-the human report is the chat summary.
+`report.json`. Piping the finding JSON on stdin instead of
+`--finding` also works. It executes the repro, captures real output,
+computes the fingerprint itself, and is the only writer of the
+findings files and `report.json`; the human report is the chat
+summary.
 
 The JSON you emit is the Report format fields — `lens`, `surface`,
 `case`, `oracle`, `verdict`, `repro` — plus `slug` (a short kebab-case
@@ -326,14 +323,16 @@ is the contract, parallelism is an optimization.
 ### 3. Verify
 
 Prove a verdict before accepting it: per case, compare oracle vs.
-observed. Emit every finding through the emitter script the moment
-the verdict is known — the emitter, never you, writes
-`findings/<slug>.md` and `<slug>.json` (shapes under Workspace).
-Batched evidence is evidence a crash deletes: emit while the failing
-state still runs — a fix applied before its red evidence is emitted
-strands it. The first emission doubles as
-the emitter smoke test: if it fails, repair the harness before
-attacking further. Check for materially distinct attack families
+observed. The moment a verdict is known, emit it from the repo root —
+`python3 skills/sstack/scripts/emit_findings.py --workspace . --finding <file>`
+(with the finding JSON in `<file>`). A finding file is evidence only
+when the emitter wrote it: no `fingerprint` field in
+`findings/<slug>.json`, no evidence — the emitter, never you, writes
+`<slug>.md` and `<slug>.json` (shapes under Workspace). Batched
+evidence is evidence a crash deletes: emit while the failing state
+still runs — a fix applied before its red evidence is emitted
+strands it. The first emission is the emitter smoke test: repair any
+failure before attacking further. Check for materially distinct attack families
 before declaring a surface covered. Before comparing anything, check
 the observed output came from the function under attack and not from
 your harness. An observed `ImportError` or missing-argument error is

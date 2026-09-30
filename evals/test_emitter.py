@@ -238,7 +238,8 @@ def test_no_text_instructs_hand_writing_evidence():
             assert forbidden not in text, (
                 f"{path.relative_to(ROOT)} says {forbidden!r}")
     verify = SKILL.read_text()
-    assert "Emit every finding through the emitter script" in verify
+    assert "emit_findings.py --workspace . --finding <file>" in verify
+    assert "no `fingerprint` field in" in verify
     assert "the emitter, never you, writes" in verify
 
 
