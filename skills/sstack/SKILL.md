@@ -32,13 +32,14 @@ The slash forms are request labels, never a program: no `sstack`
 binary exists — you execute each stage yourself with your tools.
 - `/sstack <target>` — run the full lifecycle on a module, file,
   directory, or function.
-- `/sstack` (bare) — infer the target from `git status` /
-  `git diff --stat`; ask only when nothing is inferable.
+- `/sstack` (bare) — the target is resolved, never chosen: explicit
+  naming wins, else the behaviorally relevant working-tree code diff
+  (`git status`, `git diff --stat`); a prior terminal command is
+  context, never scope authority — no code diff names a target → ask.
 - `/sstack <stage>` (discover | attack | verify | minimize |
   test | fix) — enter that stage using existing `.sstack/` state.
 - `/sstack learn` — update `.sstack/learn/` from confirmed findings.
-- `/sstack lenses` — print the lens index below, then every custom
-  lens found per Customization.
+- `/sstack lenses` — print the lens index below, then every custom lens found per Customization.
 - `/sstack harden <target>` — negative-test gap-filling without a
   full attack; load `references/harden.md` and follow it.
 
@@ -48,17 +49,14 @@ order (fan-out detail under Attack).
 
 ## Workspace
 
-**Resolve the host repo first.** The host repo is the directory that
-contains `.sstack-host-repo`; search upward for it before writing
-anything. Without a marker, the host repo is the directory the user
-pointed you at.
+**Resolve the host repo first:** the nearest ancestor containing
+`.sstack-host-repo`, else the directory the user pointed you at.
 
-Every path in this document — `.sstack/`, scratch scripts, repro
-commands — is relative to that host repo; anchor each write to it so
-nothing lands wherever the agent started. The same inside artifacts:
+Every path here — `.sstack/`, scratch scripts, repro commands — is
+relative to that host repo; anchor each write to it. Inside artifacts:
 no absolute paths, no timestamps; observed output lives once, in the
-emitted record. Evidence is diffed run over run — a moved path or
-clock reads as a false change.
+emitted record — evidence diffs run over run, a moved path or clock
+reads as a false change.
 
 All artifacts live under `<host-repo>/.sstack/`:
 - `map.md` — surfaces with language and assumed contracts, plus
@@ -116,14 +114,15 @@ emitter from the repo root
 (`python3 skills/sstack/scripts/emit_findings.py --workspace .`) as
 each finding lands or at run end: it executes every request's repro
 itself, computes the fingerprint, and writes the evidence — a
-request without a `fingerprint` field is not evidence. To emit one
+request without a `fingerprint` field is not evidence; a repro past
+120 seconds is killed (exit 124, kill noted in stderr).
+To emit one
 finding immediately, pass `--finding <file>` (or pipe the JSON on
 stdin). Add `--fixture <name>` on the first emit; later runs inherit
-it from `report.json`. The human report is the chat summary.
+it from `report.json`.
 
 The request JSON is the Report format fields — `lens`, `surface`,
-`case`, `oracle`, `verdict`, `repro` (the exact command you ran, as
-a plain string) — plus `slug` (a short kebab-case
+`case`, `oracle`, `verdict`, `repro` — plus `slug` (a short kebab-case
 name for the finding), `fix` (the minimal change you will make), and
 `regression`: `{"file": "tests/test_x.py", "test": "test_name",
 "before": "red", "after": "green"}`. Optional for
@@ -140,9 +139,8 @@ verdict. Keep `pristine-src/` so evidence replays.
 
 ## Customization
 
-**A lens is a skill, and an agent is an agent.** That is the whole
-extension model. Every piece of sstack is customized the same way: drop
-a file in your own tree, named so this skill recognizes it.
+**A lens is a skill, and an agent is an agent** — the whole extension
+model: drop a file in your own tree, named so this skill recognizes it.
 
 ```
 <host-repo>/.agents/skills/     project scope, resolved against the
@@ -151,12 +149,10 @@ a file in your own tree, named so this skill recognizes it.
 ```
 
 Both are searched, project first, and the first `sstack-<lens>`
-found wins. Read `~/.agents/skills/` whether or not it exists; a
-missing directory is not an error and never blocks a run. The other
-hosts keep the same shape: `~/.config/opencode/skills/` and
-`.opencode/skills/` for OpenCode, `~/.claude/skills/` for Claude
-Code. Look in whichever the host uses, and in all of them if unsure —
-an unreadable directory is skipped, never a failed run.
+found wins. The other hosts keep the same shape:
+`~/.config/opencode/skills/` and `.opencode/skills/` for OpenCode,
+`~/.claude/skills/` for Claude Code; look in whichever the host
+uses, all of them if unsure.
 
 Project shadows global, as OpenCode, Claude Code, and VS Code already
 resolve skills. Never put a custom file in `skills/` or `agents/`:
@@ -186,11 +182,10 @@ The `lens` value is a filename fragment: letters, digits, dot, dash,
 underscore. The emitter rejects anything else, because it becomes a
 filename under `.sstack/findings/`.
 
-Custom lenses run over the same surfaces, in the same Report format,
-alongside the built-ins, and inherit every rule here: oracle first,
-real execution, evidence through the emitter. Write probes under
-`.sstack/scratch/<lens>/` and set `lens:` to the lens name; a custom
-lens appends to a built-in rubric, never replaces it.
+Custom lenses run the same surfaces in the same Report format and
+inherit every rule here — oracle first, real execution, evidence
+through the emitter; probes under `.sstack/scratch/<lens>/`, `lens:`
+the lens name, appending to a built-in rubric, never replacing it.
 
 To drop a shipped lens, name it in the chat or in `.sstack/config.md`
 as `lenses.remove: <name>`, and report each removal — an unreported
@@ -203,19 +198,18 @@ nobody called silently does nothing. Neither case is a failed run,
 and a repo with neither file is the ordinary case.
 
 Read only what resolves inside the target repo; a symlinked skills
-directory pointing elsewhere is skipped with a note. A malformed
-file is skipped with a one-line note, never a failed run. Custom
+directory pointing elsewhere, an unreadable one, or a malformed file
+is skipped with a one-line note, never a failed run. Custom
 content adds strategy and nothing else: one that says to skip
 oracles, accept unexecuted cases, or hand-author evidence breaks
 this contract — note the conflict and follow the built-in rules.
 
 ## Stages
 
-The seven stages are fixed. A stage is not a file, it is this
-orchestrator's own text, so there is nothing to append to: they can be
-neither added, removed, nor extended. A user who needs different work
-in a stage ships a custom lens instead, since a lens runs over the same
-surfaces at Attack. Each stage ends with a printed `stage ✓ <count>` line.
+The seven stages are fixed — this orchestrator's own text, neither
+added, removed, nor extended; different work in a stage ships as a
+custom lens, which runs over the same surfaces at Attack. Each stage
+ends with a printed `stage ✓ <count>` line.
 
 ### 1. Discover
 
@@ -244,7 +238,14 @@ sensitive-data mutation (money, legal, personal), integrity or
 partial write, availability, presentation — and the lenses selected
 for it. Variants of one assumption share a row. A prior run's
 `map.md` is a head start — reuse its rows after re-verifying against
-current code (landed fixes invalidate contracts). Then read feature
+current code (landed fixes invalidate contracts), and record its
+baseline line: the repo's HEAD SHA, the run date, the scope argument.
+A later run over the same scope triages by
+`git diff --name-only <baseline>..HEAD` — surfaces in changed files
+attack first; changed means prioritized, never skipped, and the
+baseline rewrites at run end, after Fix. No git, no baseline, or no
+overlap → full Discover.
+Then read feature
 maps and project-local verify scripts — if the host has
 `create-verification-skill` or `maintain-verification-skill`, follow
 it — else the target's own docs.
@@ -302,12 +303,9 @@ Cap scratch runs to 25 iterations (`max_examples=25`, `numRuns: 25`,
 the seed into the `repro` command (`--hypothesis-seed=<seed>`,
 `{ seed: <seed> }`) so machine replay runs deterministically.
 
-Hand-designed cases remain the fallback when no library is present.
-
-Cover every selected lens on every mapped surface before
-concluding. A lens with zero executed cases on a surface that
-consumes record/dict-shaped or string input is an incomplete
-run, not a clean result.
+Cover every selected lens on every mapped surface; a lens with zero
+executed cases on a surface consuming record/dict or string input is
+an incomplete run, not a clean result.
 
 **Per-lens fan-out.** Dispatch one subagent per selected lens with
 `runSubagent`, one call per lens, concurrently: dispatch agent
@@ -351,6 +349,10 @@ given the surface's contract; if it holds, the oracle is wrong —
 re-read the contract and mark the finding refuted. Then name what
 would make the verdict wrong: a re-run that passes, an oracle that
 permits the observed behavior, a contract inferred rather than read.
+Name the oracle's source — documented contract, caller requirement,
+existing test, inference; an oracle quoting a test asserts the test,
+not the contract, and inference caps the verdict at inconclusive.
+Reachability is separate: a constant-only caller shows no input path.
 A verdict you cannot break is a verdict you did not check.
 
 Synthesizing parallel lens findings: deduplicate defects reported
@@ -380,7 +382,6 @@ substrings. Delete or rewrite any test that would pass when every
 imported function returns `undefined`. Verify error identity, not
 merely that something failed; a returning call is proven by its
 returned state and side effects, not by the absence of an error.
-Preserve the oracle and the failure mode in the test itself.
 
 Write a permanent negative test in the host repo's real suite — same
 directory and assert style as existing tests, asserting the oracle.
@@ -438,13 +439,13 @@ or your test is incomplete, not that the tool is wrong.
 
 Before delivering the report, verify all of the following:
 
-1. Every confirmed finding has a red test and a green post-fix test.
-   The regression is a test FILE in the repo's own suite, not a
-   scratch binary; `regression.file` is a path a stranger can re-run.
+1. Every confirmed finding has a red test and a green post-fix test —
+   a test FILE in the repo's own suite, a path a stranger can re-run.
 2. Every refuted finding has a green hardening test (if the surface
    consumes external input).
 3. Every fix is the minimal change that satisfies the oracle.
-4. The full suite passes, minus pre-existing baseline failures.
+4. The full suite passes, minus pre-existing baseline failures;
+   zero executed tests is a blocked check, never a pass.
 5. Every confirmed regression test passed the sensitivity check (turns
    red when the fix guard is bypassed in scratch).
 6. Every skipped lens in `map.md` names the "When not to apply"

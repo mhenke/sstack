@@ -28,7 +28,7 @@ and both start blank, so paste each everything it needs.
 
 No subagent tool, or a dispatch fails or goes silent twice: run A,
 then B, inline, and open the report with `⚠️ DEGRADED: single-context`
-— Attack's serial fallback convention.
+— harden's degraded-mode banner, mirroring Attack's serial fallback.
 
 ## 3. Synthesize
 

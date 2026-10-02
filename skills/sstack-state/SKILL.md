@@ -115,14 +115,11 @@ site — write-through through a parameter.
 
 The surface is pure: it reads nothing beyond its arguments, mutates
 nothing, caches nothing, and returns freshly built values. No object
-lifetime, no state to go stale.
-
-## Interaction with other lenses
-
+lifetime, no state to go stale. Race conditions belong to
+`concurrency`, pipeline call sequencing to `ordering`, and duplicate
+retry divergence to `idempotency` — distinct lenses in the taxonomy;
 `state` owns object lifetime, shared mutable memory, and transition
-invariants. Parallel execution race conditions (`concurrency`), pipeline
-call sequencing (`ordering`), and duplicate retry divergence (`idempotency`)
-are distinct lenses in the taxonomy. When those custom lenses are absent,
-`state` tests that atomic rollback, optimistic locking, and transition
+invariants. When a sibling lens is absent from the run, `state` still
+tests that atomic rollback, optimistic locking, and transition
 rejections protect data integrity.
 

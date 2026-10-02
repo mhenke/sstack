@@ -48,3 +48,14 @@ Two rules are absolute:
 - Strong backends lose nothing: immediate single emit still works.
 - The census that forces this lives in `evals/ACCEPTANCE.md`
   (read-window discovery, ColdWindowEmit completion).
+
+Amended 2026-10-02, from the VS Code StringUtil field failure: a TTY
+stdin counts as empty — the upgrade pass is the defined noninteractive
+fallback, because reading a terminal blocks the call forever. Repro
+execution is bounded at 120 seconds (`SSTACK_REPRO_TIMEOUT` overrides,
+minimum 1): a hung repro is killed and recorded as exit 124 with the
+kill noted in stderr — evidence about the repro's reliability, not an
+emitter hang; partial output on a kill is discarded. The Python
+upgrade pass also preflights referenced scratch probes, matching the
+Node emitter (a probe that does not compile is infrastructure failure,
+pending, not evidence).

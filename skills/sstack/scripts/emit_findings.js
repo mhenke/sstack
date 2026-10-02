@@ -21,6 +21,13 @@ const VERDICTS = new Set(['confirmed', 'refuted', 'inconclusive']);
 const STATES = new Set(['red', 'green']);
 const SAFE = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 
+// Repro execution is bounded: a hung repro is killed and recorded as
+// exit 124 with the kill noted in stderr (SSTACK_REPRO_TIMEOUT, seconds).
+const REPRO_TIMEOUT = Math.max(
+  1,
+  Number.parseInt(process.env.SSTACK_REPRO_TIMEOUT || '120', 10) || 120
+);
+
 function safeSlug(value, field) {
   if (!value || !SAFE.test(value) || value === '.' || value === '..') {
     throw new Error(
@@ -132,10 +139,21 @@ function runRepro(command, workspace) {
     shell: true,
     cwd: workspace,
     encoding: 'utf8',
+    timeout: REPRO_TIMEOUT,
   });
-  const stdout = normalize(result.stdout || '', workspace);
-  const stderr = normalize(result.stderr || '', workspace);
-  const exitCode = result.status !== null ? result.status : (result.signal ? 128 : 1);
+  let stdout = normalize(result.stdout || '', workspace);
+  let stderr = normalize(result.stderr || '', workspace);
+  let exitCode;
+  if (result.status === null && result.signal) {
+    // ponytail: with shell:true the kill hits the shell, not detached
+    // grandchildren; a repro that spawns daemons can outlive it, and an
+    // externally signalled repro is recorded as the timeout kill.
+    exitCode = 124;
+    stdout = '';
+    stderr = `emitter: repro exceeded ${REPRO_TIMEOUT}s and was killed\n`;
+  } else {
+    exitCode = result.status !== null ? result.status : 1;
+  }
   const fingerprint = crypto
     .createHash('sha256')
     .update(stdout + stderr)
@@ -341,7 +359,9 @@ function main() {
   // Empty stdin without --finding is the upgrade pass, not an error.
   let rawInput = null;
   if (findingPath === null) {
-    rawInput = fs.readFileSync(0, 'utf8');
+    // A TTY counts as empty (empty stdin runs the upgrade pass):
+    // reading a terminal would block an interactive call forever.
+    rawInput = process.stdin.isTTY ? '' : fs.readFileSync(0, 'utf8');
     if (!rawInput.trim()) {
       return upgradeRequests(findingsDir, workspace, fixture);
     }

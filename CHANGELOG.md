@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 0.4.0 - 2026-10-02
 
 ### Added
 - **Emitter upgrade pass (ADR-0022)** — empty stdin now upgrades
@@ -34,6 +34,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   model survived. The emitter still executes the repro and computes
   the fingerprint itself, so machine execution remains the contract
   (ADR-0006 unchanged).
+
+### Changed
+
+- **Repro execution is bounded at 120 seconds** (ADR-0022,
+  `SSTACK_REPRO_TIMEOUT` overrides, minimum 1): a hung repro is
+  killed and recorded as exit 124 with the kill noted in stderr —
+  evidence about the repro's reliability, not an emitter hang;
+  partial output on a kill is discarded. A TTY stdin counts as
+  empty, so the upgrade pass is the defined noninteractive fallback
+  instead of blocking forever (VS Code StringUtil field failure).
+  The Python upgrade pass preflights referenced scratch probes,
+  matching the Node emitter — a probe that does not compile is
+  infrastructure failure: pending, not evidence.
+- **ADR-0023** records the read-window placement rule: binding rules
+  (emit contract, dispatch fallback, routing execution model) live
+  inside the first ~200 lines of SKILL.md, pinned by a rerunnable
+  contract test. Evidence: four wording regimes edited the skill
+  correctly and produced zero emitter invocations because the
+  contract sat past a cold backend's ~16KB read truncation.
 
 ### Fixed
 

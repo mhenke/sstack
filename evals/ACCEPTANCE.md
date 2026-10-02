@@ -257,82 +257,82 @@ isolated dir).
 > is unchanged.
 > **ColdFindingMode kill (2026-09-30)**: current text
 > (with the `--finding` wording) + glm-5.3-flash: 18 min of clean
-+> discovery and probing, zero runner invention until the emit-adjacent
-+> moment, then root-runner construction (`sstack.py` at workspace root
-+> with `__main__` blocks). Killed on criteria; `--finding` was never
-+> exercised live. Flash re-confirms as contract-failing on the new
-+> text; the emit-path fix remains unit-validated only (19 passed) and
-+> awaits a run on a backend that reaches the emit step — the
+> discovery and probing, zero runner invention until the emit-adjacent
+> moment, then root-runner construction (`sstack.py` at workspace root
+> with `__main__` blocks). Killed on criteria; `--finding` was never
+> exercised live. Flash re-confirms as contract-failing on the new
+> text; the emit-path fix remains unit-validated only (19 passed) and
+> awaits a run on a backend that reaches the emit step — the
 > non-flash glm-5.3 old-text run got that far and hand-wrote the
-+> finding file, which `--finding` now accepts as input.
-+> **Routing guard (2026-09-30, red→green)**: the runner-invention
-+> root cause is the routing section's slash forms — a cold agent
-+> reads `/sstack <target>` as a program, fails to find it in PATH,
-+> and builds one (transcript-confirmed on ColdFindingMode:
-+> "there's no sstack command available in the PATH"). Fix: one
-+> sentence at the routing head — the slash forms are request labels,
-+> never a program; you execute each stage yourself. Reproduction:
-+> same condition (flash + current text), 8 m 50 s, zero runner
-+> construction, real defects found (refund-order silent-swallow
-+> confirmed by inspection), fix applied, suite green — and the
-+> finding still hand-written (a lone `.md`, no emitter invocation,
-+> no report.json); grade refuses. Runner-invention: fixed at the
-+> root. Emit contract on flash: still unmet — capability gap, not
+> finding file, which `--finding` now accepts as input.
+> **Routing guard (2026-09-30, red→green)**: the runner-invention
+> root cause is the routing section's slash forms — a cold agent
+> reads `/sstack <target>` as a program, fails to find it in PATH,
+> and builds one (transcript-confirmed on ColdFindingMode:
+> "there's no sstack command available in the PATH"). Fix: one
+> sentence at the routing head — the slash forms are request labels,
+> never a program; you execute each stage yourself. Reproduction:
+> same condition (flash + current text), 8 m 50 s, zero runner
+> construction, real defects found (refund-order silent-swallow
+> confirmed by inspection), fix applied, suite green — and the
+> finding still hand-written (a lone `.md`, no emitter invocation,
+> no report.json); grade refuses. Runner-invention: fixed at the
+> root. Emit contract on flash: still unmet — capability gap, not
 > wording; the remaining lever is dispatching to a backend that
-+> reaches the emit step. **Premise attack (2026-09-30)**: that
-+> "capability, not wording" claim failed its own census — the Verify
-+> stage opened "Write both `findings/<slug>.md` and
-+> `findings/<slug>.json`", with the emitter as a trailing qualifier
-+> and the prohibition 20 lines away. Every glm-family run that
-+> reached the verdict moment obeyed the local imperative and
-+> hand-wrote, as instructed; Qwen reconciled globally and emitted.
-+> The text assigned the behavior. Fixed: the imperative at the
-+> verdict moment is now the emit itself ("Emit every finding through
-+> the emitter script — the emitter, never you, writes ..."), and a
-+> rerunnable census test (test_no_text_instructs_hand_writing_evidence)
+> reaches the emit step. **Premise attack (2026-09-30)**: that
+> "capability, not wording" claim failed its own census — the Verify
+> stage opened "Write both `findings/<slug>.md` and
+> `findings/<slug>.json`", with the emitter as a trailing qualifier
+> and the prohibition 20 lines away. Every glm-family run that
+> reached the verdict moment obeyed the local imperative and
+> hand-wrote, as instructed; Qwen reconciled globally and emitted.
+> The text assigned the behavior. Fixed: the imperative at the
+> verdict moment is now the emit itself ("Emit every finding through
+> the emitter script — the emitter, never you, writes ..."), and a
+> rerunnable census test (test_no_text_instructs_hand_writing_evidence)
 > freezes single-authorship. Flash-as-incapable remains unproven:
-+> flash has never seen a text whose verdict-moment imperative is the
-+> emit. **Flash boundary (ColdEmitImperative, 2026-09-30)**: it has
-+> now — 10 m 13 s, runner-free, and the verdict-moment imperative
-+> landed: five findings JSONs written immediately per verdict (the
-+> timing discipline the batch runs lacked). But zero emitter
-+> invocations across all three wording regimes (pipe heredoc,
-+> `--finding` available, verdict-moment imperative), and a new
-+> failure shape: a hand-assembled `report.json` to match its model
-+> of the contract. Census closes the premise: "flash will run the
-+> emitter if the wording is clear enough" failed three times; flash
-+> fabricates conforming artifacts instead of invoking the tool. The
-+> grader refused everything (no fingerprints, seeded_matched: []).
-+> Boundary recorded: contract-valid cold evidence requires a backend
-+> that executes the tool contract; every recorded PASS is
+> flash has never seen a text whose verdict-moment imperative is the
+> emit. **Flash boundary (ColdEmitImperative, 2026-09-30)**: it has
+> now — 10 m 13 s, runner-free, and the verdict-moment imperative
+> landed: five findings JSONs written immediately per verdict (the
+> timing discipline the batch runs lacked). But zero emitter
+> invocations across all three wording regimes (pipe heredoc,
+> `--finding` available, verdict-moment imperative), and a new
+> failure shape: a hand-assembled `report.json` to match its model
+> of the contract. Census closes the premise: "flash will run the
+> emitter if the wording is clear enough" failed three times; flash
+> fabricates conforming artifacts instead of invoking the tool. The
+> grader refused everything (no fingerprints, seeded_matched: []).
+> Boundary recorded: contract-valid cold evidence requires a backend
+> that executes the tool contract; every recorded PASS is
 > Qwen-family, and the routing pin remains the one lever for
-+> validating `--finding` live. **Read-window discovery
-+> (2026-09-30, supersedes the boundary claim)**: transcript
-+> instrumentation shows every cold read of SKILL.md truncates at
-+> ~16KB (~line 230 of 538) — ColdEmitCoLocated read the file three
-+> times; none contained the Verify stage. All four prior emit
-+> wording rounds edited the dark zone; the agent faithfully
-+> hand-wrote the Workspace shapes because they were the only
-+> contract it ever saw. The window also hid the dispatch fallback
-+> (line 320): ColdWindowContract fanned out per lens, its dispatch
-+> failed silently, it read the attacker files (half-taking the
-+> fallback), then relapsed into waiting on a child that never
-+> existed — killed at deadlock. Fixes: the emit contract (command,
-+> fingerprint criterion, emit moment) and the dispatch fallback now
-+> live in-window (lines 45-116), beside the shapes; the census test
-+> pins both inside the first 200 lines and pins Verify outside.
+> validating `--finding` live. **Read-window discovery
+> (2026-09-30, supersedes the boundary claim)**: transcript
+> instrumentation shows every cold read of SKILL.md truncates at
+> ~16KB (~line 230 of 538) — ColdEmitCoLocated read the file three
+> times; none contained the Verify stage. All four prior emit
+> wording rounds edited the dark zone; the agent faithfully
+> hand-wrote the Workspace shapes because they were the only
+> contract it ever saw. The window also hid the dispatch fallback
+> (line 320): ColdWindowContract fanned out per lens, its dispatch
+> failed silently, it read the attacker files (half-taking the
+> fallback), then relapsed into waiting on a child that never
+> existed — killed at deadlock. Fixes: the emit contract (command,
+> fingerprint criterion, emit moment) and the dispatch fallback now
+> live in-window (lines 45-116), beside the shapes; the census test
+> pins both inside the first 200 lines and pins Verify outside.
 > Remaining question under "works regardless of mode": does an
-+> in-window contract raise the emitter attempt rate on flash.
-+> **ColdWindowEmit completion (2026-09-30)**: the window fix moved
-+> everything except the invocation — 18 findings (15 confirmed, 3
-+> refuted), the broadest cold-run coverage recorded, per-verdict
-+> emission timing, fixes applied, 18 negative tests written, a
-+> fabricated report.json, zero fingerprints, zero emitter
-+> invocations across five wording regimes. The completion JSON
-+> claimed "all_pass: true"; grading executed its test_negative.py:
-+> 15 of 18 tests fail — the coupon, page-zero, and null-discount
-+> fixes are wrong, the red→green claims unverified. ADR-0006 is the
-+> guardrail that caught it: machine execution is the only
+> in-window contract raise the emitter attempt rate on flash.
+> **ColdWindowEmit completion (2026-09-30)**: the window fix moved
+> everything except the invocation — 18 findings (15 confirmed, 3
+> refuted), the broadest cold-run coverage recorded, per-verdict
+> emission timing, fixes applied, 18 negative tests written, a
+> fabricated report.json, zero fingerprints, zero emitter
+> invocations across five wording regimes. The completion JSON
+> claimed "all_pass: true"; grading executed its test_negative.py:
+> 15 of 18 tests fail — the coupon, page-zero, and null-discount
+> fixes are wrong, the red→green claims unverified. ADR-0006 is the
+> guardrail that caught it: machine execution is the only
 > evidence.
 >
 > **ColdRequestMode (2026-09-30, ADR-0022 validation)**: the first
@@ -350,6 +350,32 @@ isolated dir).
 > coverage (2 of 21 mapped surfaces never executed). The Qwen-era
 > PASSes (ColdPy-5..18) predate the in-window contract and the
 > read-window discovery.
+> **Staleness note (2026-10-02, scope authority + oracle source +
+> bounded repro)**: routing's bare invocation now resolves the target
+> — explicit naming, else the behaviorally relevant working-tree code
+> diff; a prior terminal command is context, never scope authority —
+> writing ADR-0020's decision into the line a cold agent reads (the
+> VS Code StringUtil audit ran on the pre-ADR wording). Verify names
+> the oracle's source (documented contract, caller requirement,
+> existing test, inference; inference caps at inconclusive) and
+> treats reachability as separate evidence; run-end check 4 makes
+> zero-executed-tests a blocked check; repro execution is bounded
+> (120s kill recorded as exit 124, `SSTACK_REPRO_TIMEOUT` override)
+> and the Python upgrade pass now preflights scratch probes like the
+> Node one (test_emitter 29 passed, test-all green). Discover also
+> restores ADR-0019's map baseline (HEAD SHA, run date, scope) and
+> rerun triage by `git diff --name-only <baseline>..HEAD` — the
+> third decision-to-text gap found by this audit, beside the routing
+> line; no run before this text ever saw the rule, so none skipped
+> or prioritized by it. Same-day audit fixes: the state rubric's
+> cross-lens scope note folded into When-not-to-apply (and it no
+> longer calls shipped lenses "custom"); harden's ⚠️ DEGRADED banner
+> is now attributed to harden itself, not to an Attack convention
+> SKILL.md never defined; the Python emitter docstring's cut-off
+> sentence completed. Every recorded
+> cold-run number predates this text; cold re-evidence remains
+> pending on the routing-chain backend pin (see the 2026-09-30
+> monitored-validation note).
 
 | fixture | verdict | evidence |
 |---|---|---|

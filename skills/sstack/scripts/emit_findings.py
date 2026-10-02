@@ -5,12 +5,12 @@ Two invocation modes: a finding JSON in a file passed with --finding, or
 on stdin, emits that one finding immediately; empty stdin runs the
 upgrade pass — every findings/<slug>.json whose repro is a command
 string is executed and fingerprinted now (requests become evidence only
-through execution). The repro is executed for
-real, and stdout, stderr, exit code, and
-fingerprint come from that execution and never from transcription.
-Recorded paths are rewritten host-repo-relative at capture, so evidence
-diffs clean across machines and checkouts.
-report.json is rebuilt from the evidence files on disk after every emit, so
+through execution). The repro is executed for real, and stdout, stderr,
+exit code, and fingerprint come from that execution and never from
+transcription. Recorded paths are rewritten host-repo-relative at
+capture, so evidence diffs clean across machines and checkouts.
+report.json is rebuilt from the evidence files on disk after every
+emit, so requests never appear in it — evidence only.
 
     echo '{"slug": "checkout-page-zero", ...}' > finding.json
     python3 scripts/emit_findings.py --workspace <host-repo> --finding finding.json --fixture <fixture>
@@ -24,6 +24,7 @@ failing input).
 import argparse
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
@@ -32,6 +33,13 @@ from pathlib import Path
 VERDICTS = ("confirmed", "refuted", "inconclusive")
 STATES = ("red", "green")
 SAFE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+
+# Repro execution is bounded: a hung repro is killed and recorded as
+# exit 124 with the kill noted in stderr (SSTACK_REPRO_TIMEOUT, seconds).
+try:
+    REPRO_TIMEOUT = max(1, int(os.environ.get("SSTACK_REPRO_TIMEOUT", "120")))
+except ValueError:
+    REPRO_TIMEOUT = 120
 
 
 def safe_slug(value: str, field: str) -> str:
@@ -54,7 +62,9 @@ class _UpgradeRequested(Exception):
 
 def read_finding(path: str | None) -> dict:
     if path is None or path is _STDIN:
-        raw = sys.stdin.read()
+        # A TTY counts as empty (empty stdin runs the upgrade pass):
+        # reading a terminal would block an interactive call forever.
+        raw = "" if getattr(sys.stdin, "isatty", lambda: True)() else sys.stdin.read()
         if not raw.strip():
             raise _UpgradeRequested
     else:
@@ -128,8 +138,20 @@ def normalize(text: str, workspace: Path) -> str:
 
 
 def run_repro(command: str, workspace: Path) -> dict:
-    done = subprocess.run(command, shell=True, cwd=workspace, capture_output=True, text=True,
-                          encoding="utf-8", errors="replace")
+    # ponytail: the timeout kills the shell, not detached grandchildren —
+    # a repro that spawns daemons can outlive it.
+    try:
+        done = subprocess.run(command, shell=True, cwd=workspace, capture_output=True, text=True,
+                              encoding="utf-8", errors="replace", timeout=REPRO_TIMEOUT)
+    except subprocess.TimeoutExpired:
+        stderr = f"emitter: repro exceeded {REPRO_TIMEOUT}s and was killed\n"
+        return {
+            "command": normalize(command, workspace),
+            "exit_code": 124,
+            "stdout": "",
+            "stderr": stderr,
+            "fingerprint": hashlib.sha256(stderr.encode("utf-8")).hexdigest()[:16],
+        }
     stdout = normalize(done.stdout, workspace)
     stderr = normalize(done.stderr, workspace)
     return {
@@ -235,7 +257,7 @@ def upgrade_requests(findings_dir: Path, workspace: Path, fixture: str | None) -
         # Either way the machine executes it; it never invents one.
         if isinstance(repro, dict):
             repro = repro.get("command")
-        if not isinstance(repro, str) or not repro.strip():
+        if not isinstance(repro, str) or not repro.strip() or not preflight_probe(repro, workspace):
             pending += 1
             continue
         run = run_repro(repro, workspace)

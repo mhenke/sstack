@@ -13,12 +13,17 @@ import sys
 import tempfile
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parent.parent
 EMITTER = ROOT / "skills/sstack/scripts/emit_findings.py"
 EMITTER_JS = ROOT / "skills/sstack/scripts/emit_findings.js"
 SKILL = ROOT / "skills/sstack/SKILL.md"
 SCRATCH = ROOT / ".sstack" / "scratch"
 SCRATCH.mkdir(parents=True, exist_ok=True)
+
+sys.path.insert(0, str(ROOT / "skills" / "sstack" / "scripts"))
+import emit_findings  # noqa: E402 — script module, imported for unit checks
 
 PAYLOAD_KEYS = ["slug", "lens", "surface", "case", "oracle", "verdict",
                 "repro", "fix", "regression"]
@@ -76,6 +81,33 @@ def test_empty_stdin_runs_the_upgrade_pass(tmp_path):
     assert "0 request(s) upgraded" in result.stdout
 
 
+def test_tty_stdin_upgrades_instead_of_blocking(monkeypatch):
+    """A terminal stdin counts as empty (ADR-0022): the upgrade pass
+    runs. Reading a TTY would block an interactive invocation forever —
+    the emitter hang observed on VS Code sandbox launches."""
+    class _TTY:
+        def isatty(self):
+            return True
+
+        def read(self):
+            raise AssertionError("emitter must not read a terminal")
+
+    monkeypatch.setattr(emit_findings.sys, "stdin", _TTY())
+    with pytest.raises(emit_findings._UpgradeRequested):
+        emit_findings.read_finding(None)
+
+
+def test_tty_stdin_js_upgrades_instead_of_blocking(tmp_path):
+    """Node emitter parity: an isTTY stdin runs the upgrade pass and
+    never blocks on fd 0."""
+    code = "process.stdin.isTTY = true; require(process.argv[1]);"
+    result = subprocess.run(
+        ["node", "-e", code, str(EMITTER_JS), "--workspace", str(tmp_path)],
+        capture_output=True, text=True, timeout=30)
+    assert result.returncode == 0, result.stderr
+    assert "0 request(s) upgraded" in result.stdout
+
+
 def request(slug="t1", repro="echo 0"):
     finding = base(slug=slug)
     finding["repro"] = repro
@@ -122,6 +154,25 @@ def test_upgrade_never_invents_a_missing_command(tmp_path):
     assert not (tmp_path / ".sstack" / "report.json").exists()
 
 
+def test_upgrade_preflights_scratch_probes(tmp_path):
+    """A request whose repro runs a broken scratch probe stays pending,
+    not evidence — the Python upgrade pass preflights like the Node one;
+    a probe that does not compile is infrastructure failure."""
+    findings = tmp_path / ".sstack" / "findings"
+    findings.mkdir(parents=True)
+    probe = tmp_path / ".sstack" / "scratch" / "state"
+    probe.mkdir(parents=True)
+    (probe / "probe.py").write_text("def broken(:\n")
+    (findings / "t1.json").write_text(
+        json.dumps(request(repro=f"python3 {probe / 'probe.py'}")))
+    for emitter in (None, "js"):
+        result = upgrade(tmp_path, emitter=emitter)
+        assert result.returncode == 0, result.stderr
+        assert "1 still pending" in result.stdout
+        record = json.loads((findings / "t1.json").read_text())
+        assert "fingerprint" not in record
+
+
 def test_upgrade_is_idempotent(tmp_path):
     findings = tmp_path / ".sstack" / "findings"
     findings.mkdir(parents=True)
@@ -158,6 +209,29 @@ def test_upgrade_js_parity(tmp_path):
     record = json.loads((findings / "t1.json").read_text())
     assert record["command"] == "echo 0"
     assert record["fingerprint"]
+
+
+def test_repro_timeout_kills_and_records(tmp_path):
+    """A hung repro is killed at the bounded limit and recorded as exit
+    124 with the kill noted in stderr — evidence about the repro's
+    reliability, not an emitter hang. Both emitters agree byte-for-byte."""
+    env = {**os.environ, "SSTACK_REPRO_TIMEOUT": "1"}
+    records = {}
+    for name, binary in (("py", [sys.executable, str(EMITTER)]),
+                         ("js", ["node", str(EMITTER_JS)])):
+        ws = tmp_path / name
+        findings = ws / ".sstack" / "findings"
+        findings.mkdir(parents=True)
+        (findings / "t1.json").write_text(json.dumps(request(repro="sleep 5")))
+        result = subprocess.run(
+            [*binary, "--workspace", str(ws), "--fixture", "seeded-py"],
+            input="", capture_output=True, text=True, env=env, timeout=30)
+        assert result.returncode == 0, result.stderr
+        records[name] = json.loads((findings / "t1.json").read_text())
+    for record in records.values():
+        assert record["exit_code"] == 124
+        assert "exceeded 1s and was killed" in record["stderr"]
+    assert records["py"] == records["js"]
 
 def test_documented_payload_emits_and_replays():
     """The documented payload is accepted, and the recorded fingerprint

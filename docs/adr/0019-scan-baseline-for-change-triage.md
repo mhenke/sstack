@@ -53,3 +53,7 @@ today's behavior — the never-skip rule is the guardrail, and a run
 that skips unchanged surfaces is invalid. Semantic contract diffing
 (comparing derived contracts, not files) is a v1 project; this ADR
 triages, it does not diff contracts.
+
+Shipped-text note (2026-10-02): the baseline line and triage rule now
+live in SKILL.md's Discover stage; no recorded cold run predating
+that text exercised the rule.

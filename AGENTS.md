@@ -106,7 +106,7 @@ the skill and the decontaminated fixture together in one temp dir.
 ## Testing
 
 Baselines, green before any commit:
-- `python3 -m pytest evals/test_emitter.py -q` → 12 passed (emitter/skill contract)
+- `python3 -m pytest evals/test_emitter.py -q` → 29 passed (emitter/skill contract)
 - `python3 evals/acceptance.py test-all` → ALL FIXTURES GREEN (py, ts, js, java, cpp)
   (or per-fixture: `python3 evals/acceptance.py test <fixture>`)
 
