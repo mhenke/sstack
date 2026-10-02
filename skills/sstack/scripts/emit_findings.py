@@ -128,6 +128,19 @@ def preflight_probe(command: str, workspace: Path) -> bool:
     return True
 
 
+def fingerprint_is_wellformed(value: object) -> bool:
+    """A fingerprint is 16 lowercase hex characters, or absent.
+
+    The upgrade pass treats any file carrying a `fingerprint` key as
+    evidence and skips it. A model that pads or invents one therefore
+    promotes its own guess past the only check that runs inside the loop,
+    and nothing catches it until replay. Malformed means "not evidence":
+    the file stays a request and the upgrade pass executes its repro.
+    """
+    return value is None or (isinstance(value, str)
+                             and re.fullmatch(r"[0-9a-f]{16}", value) is not None)
+
+
 def normalize(text: str, workspace: Path) -> str:
     """Evidence is diffed run over run, so the recorded bytes must not
     carry the absolute workspace path: it differs on every machine and
@@ -209,24 +222,28 @@ def rebuild_report(findings_dir: Path, workspace: Path, fixture: str) -> int:
     entries = []
     for evidence in sorted(findings_dir.glob("*.json")):
         record = json.loads(evidence.read_text(encoding="utf-8", errors="replace"))
-        if "fingerprint" not in record:
+        # Evidence requires a fingerprint to exist AND be well-formed; the
+        # validator alone says a request's absent key is fine.
+        if not record.get("fingerprint") or not fingerprint_is_wellformed(record["fingerprint"]):
             continue  # a request (no executed repro yet) is not evidence
         entry = {
             "seed_id": record.get("seed_id", "other"),
-            "lens": record["lens"],
-            "surface": record["surface"],
-            "case": record["case"],
-            "oracle": record["oracle"],
-            "observed": record["stdout"] + record["stderr"],
-            "verdict": record["verdict"],
-            "repro": record["command"],
-            "regression": record["regression"],
+            "lens": record.get("lens", "other"),
+            "surface": record.get("surface", ""),
+            "case": record.get("case", ""),
+            "oracle": record.get("oracle", ""),
+            "observed": record.get("stdout", "") + record.get("stderr", ""),
+            "verdict": record.get("verdict", "inconclusive"),
+            "repro": record.get("command", ""),
+            "regression": record.get("regression"),
         }
         if record.get("seed") is not None:
             entry["seed"] = record["seed"]
         if record.get("counterexample") is not None:
             entry["counterexample"] = record["counterexample"]
         entries.append(entry)
+    if not entries:
+        return 0  # no evidence yet: writing an empty report would grade as a clean run
     (workspace / ".sstack" / "report.json").write_text(json.dumps({"fixture": fixture, "findings": entries}, indent=2) + "\n", encoding="utf-8")
     return len(entries)
 
@@ -250,7 +267,10 @@ def upgrade_requests(findings_dir: Path, workspace: Path, fixture: str | None) -
     for path in sorted(findings_dir.glob("*.json")):
         finding = json.loads(path.read_text(encoding="utf-8", errors="replace"))
         if "fingerprint" in finding:
-            continue  # already evidence
+            if fingerprint_is_wellformed(finding["fingerprint"]):
+                continue  # already evidence
+            print(f"{path.stem}: malformed fingerprint — treating as a request "
+                  f"and re-executing its repro", file=sys.stderr)
         repro = finding.get("repro")
         # A request may spell the command as a string or nest it under
         # "command" — the evidence view's shape invites the object form.
@@ -273,7 +293,8 @@ def upgrade_requests(findings_dir: Path, workspace: Path, fixture: str | None) -
     # was upgraded: editing a finding's case/oracle after its repro already
     # ran leaves the evidence file and report.json out of step, and the
     # grader only ever reads the report.
-    if fixture and any(json.loads(p.read_text(encoding="utf-8", errors="replace")).get("fingerprint")
+    if fixture and any(fingerprint_is_wellformed(
+            json.loads(p.read_text(encoding="utf-8", errors="replace")).get("fingerprint"))
                        for p in findings_dir.glob("*.json")):
         total = rebuild_report(findings_dir, workspace, fixture)
         if upgraded:

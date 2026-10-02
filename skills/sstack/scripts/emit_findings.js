@@ -227,7 +227,8 @@ function rebuildReport(findingsDir, workspace, fixture) {
   const entries = [];
   for (const file of files) {
     const record = JSON.parse(fs.readFileSync(path.join(findingsDir, file), 'utf8'));
-    if (record.fingerprint === undefined) {
+    // Evidence requires a fingerprint to exist AND be well-formed.
+    if (!record.fingerprint || !fingerprintIsWellformed(record.fingerprint)) {
       continue; // a request (no executed repro yet) is not evidence
     }
     const entry = {
@@ -250,6 +251,9 @@ function rebuildReport(findingsDir, workspace, fixture) {
     entries.push(entry);
   }
 
+  if (entries.length === 0) {
+    return 0; // no evidence yet: writing an empty report would grade as a clean run
+  }
   const reportPath = path.join(workspace, '.sstack', 'report.json');
   fs.writeFileSync(
     reportPath,
@@ -271,6 +275,16 @@ function warnUnlanded(finding, workspace) {
   }
 }
 
+
+// A fingerprint is 16 lowercase hex characters — or absent. The upgrade
+// pass treats any file carrying one as evidence and skips it, so a
+// padded or invented value would otherwise pass the only check that
+// runs inside the loop. Malformed means "not evidence": the file stays
+// a request and its repro is executed.
+function fingerprintIsWellformed(value) {
+  if (value === undefined || value === null) return true;
+  return typeof value === 'string' && /^[0-9a-f]{16}$/.test(value);
+}
 // Requests become evidence only through execution: a request whose repro
 // is a command string is executed here; one without a command stays a
 // request — the machine never invents the missing command.
@@ -286,7 +300,12 @@ function upgradeRequests(findingsDir, workspace, fixture) {
     const fullPath = path.join(findingsDir, file);
     const finding = JSON.parse(fs.readFileSync(fullPath, 'utf8'));
     if (finding.fingerprint !== undefined) {
-      continue; // already evidence
+      if (fingerprintIsWellformed(finding.fingerprint)) {
+        continue; // already evidence
+      }
+      process.stderr.write(
+        `${path.basename(file, '.json')}: malformed fingerprint — treating as a request and re-executing its repro\n`
+      );
     }
     let repro = finding.repro;
     if (repro !== null && typeof repro === 'object') {
@@ -312,9 +331,17 @@ function upgradeRequests(findingsDir, workspace, fixture) {
     upgraded += 1;
   }
 
-  if (upgraded && fixture) {
+  // Rebuild whenever there is evidence to report, not only when something
+  // was upgraded: editing a finding's case/oracle after its repro already
+  // ran leaves the evidence file and report.json out of step, and the
+  // grader only ever reads the report.
+  const hasEvidence = files.some((f) => {
+    const rec = JSON.parse(fs.readFileSync(path.join(findingsDir, f), 'utf8'));
+    return rec.fingerprint !== undefined && fingerprintIsWellformed(rec.fingerprint);
+  });
+  if (fixture && hasEvidence) {
     const total = rebuildReport(findingsDir, workspace, fixture);
-    process.stdout.write(`report.json now ${total} finding(s)\n`);
+    if (upgraded) process.stdout.write(`report.json now ${total} finding(s)\n`);
   }
   process.stdout.write(`${upgraded} request(s) upgraded, ${pending} still pending (no executable repro)\n`);
   return 0;

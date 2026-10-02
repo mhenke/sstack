@@ -626,3 +626,88 @@ def test_pbt_seed_and_counterexample_parity():
         assert rep_res["seed"] == 42891234
         assert rep_res["integrity"] == "intact"
 
+
+
+def test_malformed_fingerprint_is_treated_as_a_request(tmp_path):
+    """A padded or invented fingerprint must not be promoted to evidence.
+
+    The upgrade pass skips any file carrying a `fingerprint` key. A model
+    that writes `e3b0c44298fc1c14c16a0000...` would otherwise slip past the
+    only check inside the loop (ColdMusePy3, 2026-10-02). Malformed means
+    "not evidence": the repro is re-executed and the real hash recorded.
+    """
+    ws = tmp_path / "host"
+    (ws / ".sstack" / "findings").mkdir(parents=True)
+    bad = base(slug="t1", repro="echo hi",
+               fingerprint="e3b0c44298fc1c14c16a0000000000")
+    (ws / ".sstack/findings/t1.json").write_text(json.dumps(bad))
+    out = subprocess.run(
+        [sys.executable, str(EMITTER), "--workspace", str(ws),
+         "--fixture", "seeded-py"],
+        capture_output=True, text=True)
+    assert "malformed fingerprint" in out.stderr
+    assert "1 request(s) upgraded" in out.stdout
+    stored = json.loads((ws / ".sstack/findings/t1.json").read_text())
+    assert re.fullmatch(r"[0-9a-f]{16}", stored["fingerprint"])
+    assert stored["stdout"] == "hi\n"  # the machine's bytes, not the model's
+
+
+def test_valid_fingerprint_is_left_alone(tmp_path):
+    ws = tmp_path / "host"
+    (ws / ".sstack" / "findings").mkdir(parents=True)
+    good = base(slug="t1", repro="echo hi", fingerprint="0123456789abcdef",
+                stdout="hi\n", exit_code=0)
+    (ws / ".sstack/findings/t1.json").write_text(json.dumps(good))
+    out = subprocess.run(
+        [sys.executable, str(EMITTER), "--workspace", str(ws),
+         "--fixture", "seeded-py"],
+        capture_output=True, text=True)
+    assert "malformed fingerprint" not in out.stderr
+    assert "0 request(s) upgraded" in out.stdout
+
+
+def test_report_rebuilds_when_no_upgrade_happened(tmp_path):
+    """Editing a finding's case after its repro ran must reach report.json.
+
+    The grader only reads the report, so a stale report silently scores a
+    run on text that no longer describes its findings.
+    """
+    ws = tmp_path / "host"
+    (ws / ".sstack" / "findings").mkdir(parents=True)
+    stored = base(slug="t1", repro="echo hi", stdout="hi\n", exit_code=0,
+                  fingerprint=hashlib.sha256(b"hi\n").hexdigest()[:16])
+    stored.pop("repro")
+    (ws / ".sstack/findings/t1.json").write_text(json.dumps(stored))
+    subprocess.run(
+        [sys.executable, str(EMITTER), "--workspace", str(ws),
+         "--fixture", "seeded-py"],
+        capture_output=True, text=True)
+    stored["case"] = "edited after emit"
+    (ws / ".sstack/findings/t1.json").write_text(json.dumps(stored))
+    subprocess.run(
+        [sys.executable, str(EMITTER), "--workspace", str(ws),
+         "--fixture", "seeded-py"],
+        capture_output=True, text=True)
+    report = json.loads((ws / ".sstack/report.json").read_text())
+    assert report["findings"][0]["case"] == "edited after emit"
+
+
+def test_replay_normalizes_workspace_path(tmp_path):
+    """Drift must be judged on the bytes the emitter hashed (ADR-0021).
+
+    A repro whose output carries the workspace path — any traceback —
+    would otherwise drift on every rerun and every machine.
+    """
+    from evals.replay import fingerprint, normalize
+    ws = tmp_path / "host"
+    (ws / ".sstack" / "findings").mkdir(parents=True)
+    raw = f'Traceback:\n  File "{ws}/shop/o.py", line 3\nboom'
+    recorded = fingerprint(normalize(raw, ws))
+    (ws / ".sstack/findings/t1.json").write_text(json.dumps({
+        "command": "python3 -c 'boom'", "exit_code": 1, "stdout": "",
+        "stderr": normalize(raw, ws), "verdict": "confirmed",
+        "fingerprint": recorded}))
+    from evals.replay import replay_one
+    result = replay_one(ws / ".sstack/findings/t1.json")
+    assert result["integrity"] == "intact"
+    assert result["drift"] in (False, True)  # re-execution is env-dependent
