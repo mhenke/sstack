@@ -29,6 +29,8 @@ the product. For *what* the code does, read [`../ARCHITECTURE.md`](../ARCHITECTU
 | [0019](0019-scan-baseline-for-change-triage.md) | map.md records a scan baseline; the next run triages by git diff | Accepted | 2026-09-29 |
 | [0020](0020-targets-are-resolved-never-chosen.md) | The target is resolved, never chosen — whole-target maps span runs | Accepted | 2026-09-29 |
 | [0021](0021-evidence-is-recorded-portable-not-verbatim.md) | Evidence is recorded portable, not byte-verbatim | Accepted | 2026-09-29 |
+| [0022](0022-requests-become-evidence-only-through-execution.md) | Requests become evidence only through execution | Accepted | 2026-09-30 |
+| [0023](0023-binding-rules-live-inside-the-read-window.md) | Binding rules live inside the cold backend's read window | Accepted | 2026-09-30 |
 
 ## Status
 
