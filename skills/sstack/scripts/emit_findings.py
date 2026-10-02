@@ -269,9 +269,15 @@ def upgrade_requests(findings_dir: Path, workspace: Path, fixture: str | None) -
         warn_unlanded(finding, workspace)
         print(f"upgraded {path.stem}: exit {run['exit_code']}, fingerprint {run['fingerprint']}")
         upgraded += 1
-    if upgraded and fixture:
+    # Rebuild whenever there is evidence to report, not only when something
+    # was upgraded: editing a finding's case/oracle after its repro already
+    # ran leaves the evidence file and report.json out of step, and the
+    # grader only ever reads the report.
+    if fixture and any(json.loads(p.read_text(encoding="utf-8", errors="replace")).get("fingerprint")
+                       for p in findings_dir.glob("*.json")):
         total = rebuild_report(findings_dir, workspace, fixture)
-        print(f"report.json now {total} finding(s)")
+        if upgraded:
+            print(f"report.json now {total} finding(s)")
     print(f"{upgraded} request(s) upgraded, {pending} still pending (no executable repro)")
     return 0
 

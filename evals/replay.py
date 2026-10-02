@@ -20,11 +20,23 @@ Exit 0 when every evidence file is intact.
 """
 import hashlib
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
 
 REQUIRED_KEYS = {"command", "exit_code", "stdout", "verdict"}
+
+
+def normalize(text: str, workspace: Path) -> str:
+    """Mirror the emitter's capture-time normalization (ADR-0021).
+
+    The emitter rewrites the absolute workspace path to `.` before
+    hashing, so drift must be judged against the same bytes. Without this
+    a repro whose output carries the path — any traceback — drifts on
+    every rerun, which is a replay defect, not evidence.
+    """
+    return re.sub(re.escape(str(workspace.resolve())) + r"(?![\w.-])", ".", text)
 
 
 def fingerprint(text: str) -> str:
@@ -50,8 +62,9 @@ def replay_one(path: Path) -> dict:
     try:
         run = subprocess.run(ev["command"], shell=True, capture_output=True, text=True,
                              cwd=path.parents[2], timeout=120)
+        rerun = normalize(run.stdout + run.stderr, path.parents[2])
         result["drift"] = (run.returncode != ev["exit_code"]
-                           or fingerprint(run.stdout + run.stderr) != computed)
+                           or fingerprint(rerun) != computed)
     except (subprocess.TimeoutExpired, OSError) as e:
         result["drift"] = f"error: {e.__class__.__name__}"
     return result
