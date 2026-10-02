@@ -28,20 +28,18 @@ existing suite with negative test cases even where nothing is broken.
 
 ## Routing
 
-The slash forms are request labels, never a program: no `sstack`
-binary exists — you execute each stage yourself with your tools.
-- `/sstack <target>` — run the full lifecycle on a module, file,
-  directory, or function.
-- `/sstack` (bare) — the target is resolved, never chosen: explicit
-  naming wins, else the behaviorally relevant working-tree code diff
-  (`git status`, `git diff --stat`); a prior terminal command is
-  context, never scope authority — no code diff names a target → ask.
-- `/sstack <stage>` (discover | attack | verify | minimize |
-  test | fix) — enter that stage using existing `.sstack/` state.
+The slash forms below are request labels, not a program: v0 ships no
+`sstack` binary — you execute each stage yourself with your tools.
+- `/sstack <target>` — full lifecycle on a module, file, directory, or function.
+- `/sstack` (bare) — target resolved, never chosen: explicit naming wins, else the
+  behaviorally relevant working-tree code diff (`git diff --stat`); a prior terminal
+  command is context, never scope authority — no code diff names a target → ask.
+- `/sstack <stage>` (discover | attack | verify | minimize | test | fix) — enter that
+  stage using existing `.sstack/` state.
 - `/sstack learn` — update `.sstack/learn/` from confirmed findings.
-- `/sstack lenses` — print the lens index below, then every custom lens found per Customization.
-- `/sstack harden <target>` — negative-test gap-filling without a
-  full attack; load `references/harden.md` and follow it.
+- `/sstack lenses` — print the lens index below, then every custom lens per Customization.
+- `/sstack harden <target>` — negative-test gap-filling without a full attack; load
+  `references/harden.md` and follow it.
 
 Dispatch fallback: per-lens subagents that fail or go silent twice
 transfer to you — run every lens yourself, one at a time, in index
@@ -52,11 +50,10 @@ order (fan-out detail under Attack).
 **Resolve the host repo first:** the nearest ancestor containing
 `.sstack-host-repo`, else the directory the user pointed you at.
 
-Every path here — `.sstack/`, scratch scripts, repro commands — is
-relative to that host repo; anchor each write to it. Inside artifacts:
-no absolute paths, no timestamps; observed output lives once, in the
-emitted record — evidence diffs run over run, a moved path or clock
-reads as a false change.
+Every path here — `.sstack/`, scratch scripts, repro commands — is relative to that
+host repo; anchor each write to it. Inside artifacts: no absolute paths, no
+timestamps; observed output lives once, in the emitted record — evidence diffs run
+over run, and a moved path or clock reads as a false change.
 
 All artifacts live under `<host-repo>/.sstack/`:
 - `map.md` — surfaces with language and assumed contracts, plus
@@ -116,10 +113,13 @@ each finding lands or at run end: it executes every request's repro
 itself, computes the fingerprint, and writes the evidence — a
 request without a `fingerprint` field is not evidence; a repro past
 120 seconds is killed (exit 124, kill noted in stderr).
-To emit one
-finding immediately, pass `--finding <file>` (or pipe the JSON on
-stdin). Add `--fixture <name>` on the first emit; later runs inherit
-it from `report.json`.
+To emit one finding immediately, pass `--finding <file>` (or pipe the JSON on
+stdin). Add `--fixture <name>` on the first emit; later runs inherit it from
+`report.json`, which is written by the emitter alone — never by hand, and never
+with a `last_run` field or any other key the emitter does not write. A hand-written
+report is not evidence: the grader re-derives every fingerprint from it. Never
+`rm -rf .sstack`: that erases `map.md`, `pristine-src/`, and every finding already
+emitted. If the directory looks wrong, add the missing subdirectory instead.
 
 The request JSON is the Report format fields — `lens`, `surface`,
 `case`, `oracle`, `verdict`, `repro` — plus `slug` (a short kebab-case
