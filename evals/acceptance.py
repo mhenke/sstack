@@ -41,7 +41,11 @@ def ensure_junit() -> Path:
         urllib.request.urlretrieve(JUNIT_URL, jar)
     return jar
 
-SCRATCH = ROOT / ".sstack" / "scratch"
+# Outside the repo on purpose: a conforming cold run deletes its own
+# `scratch/` at run end (SKILL.md, run-end checks), so a workspace under
+# the sstack repo's `.sstack/` sits inside the blast radius of a correct
+# run, not only a misbehaving one. Containment becomes filesystem-enforced.
+SCRATCH = Path(tempfile.gettempdir()) / "sstack-cold"
 
 
 def prepare(fixture: str) -> Path:
