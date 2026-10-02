@@ -13,6 +13,7 @@ launches its cold agent there. `prepare-all` does this for every fixture.
 import argparse
 import json
 import shutil
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -72,6 +73,20 @@ def prepare(fixture: str) -> Path:
         "against. Do not write anywhere else.\n"
         f"Fixture name: {fixture}. Pass it verbatim to emit_findings.py\n"
         "--fixture; the grader rejects any other name.\n"
+    )
+    # The skill resolves a bare `/sstack` from the working-tree code diff and
+    # asks when no diff names a target (ADR-0020). Without a repo that
+    # precondition can never hold, so a bare-invocation run stalls on a
+    # question instead of attacking. Committed after the pack copy so the
+    # baseline diff describes the target repo, not the skill's own arrival.
+    subprocess.run(["git", "init", "-q"], cwd=workspace, check=True)
+    subprocess.run(
+        ["git", "add", "-A", "--", ":(exclude).sstack"], cwd=workspace, check=True
+    )
+    subprocess.run(
+        ["git", "-c", "user.email=cold@sstack", "-c", "user.name=cold",
+         "commit", "-qm", "cold-run baseline"],
+        cwd=workspace, check=True,
     )
     return workspace
 
