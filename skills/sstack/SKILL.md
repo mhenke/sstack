@@ -115,11 +115,7 @@ request without a `fingerprint` field is not evidence; a repro past
 120 seconds is killed (exit 124, kill noted in stderr).
 To emit one finding immediately, pass `--finding <file>` (or pipe the JSON on
 stdin). Add `--fixture <name>` on the first emit; later runs inherit it from
-`report.json`, which is written by the emitter alone — never by hand, and never
-with a `last_run` field or any other key the emitter does not write. A hand-written
-report is not evidence: the grader re-derives every fingerprint from it. Never
-`rm -rf .sstack`: that erases `map.md`, `pristine-src/`, and every finding already
-emitted. If the directory looks wrong, add the missing subdirectory instead.
+`report.json`, which the emitter writes.
 
 The request JSON is the Report format fields — `lens`, `surface`,
 `case`, `oracle`, `verdict`, `repro` — plus `slug` (a short kebab-case

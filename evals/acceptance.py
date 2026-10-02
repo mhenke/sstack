@@ -74,6 +74,13 @@ def prepare(fixture: str) -> Path:
         f"Fixture name: {fixture}. Pass it verbatim to emit_findings.py\n"
         "--fixture; the grader rejects any other name.\n"
     )
+    # Pre-create the artifact tree. A run that opens with a failing write
+    # (`cat > .sstack/report.json: No such file or directory`) repairs by
+    # `rm -rf .sstack && mkdir -p ...`, erasing its own map and findings —
+    # 91 such calls in ColdMusePy4. The directory is part of the contract,
+    # so the harness satisfies it rather than the agent rediscovering it.
+    for sub in ("findings", "scratch", "pristine-src", "learn"):
+        (workspace / ".sstack" / sub).mkdir(parents=True, exist_ok=True)
     # The skill resolves a bare `/sstack` from the working-tree code diff and
     # asks when no diff names a target (ADR-0020). Without a repo that
     # precondition can never hold, so a bare-invocation run stalls on a
