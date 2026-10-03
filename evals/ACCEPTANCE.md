@@ -68,6 +68,18 @@ isolated dir).
 > an int). Confirms: unenforced conventions get invented regardless
 > of prose clarity. Grade now derives the report view from evidence,
 > making report.json authoring irrelevant to the outcome.
+> **Staleness note (2026-10-02, third)**: ColdEvalPy3 (after da69310)
+> graded **fail**: an emission runaway — 100 findings written, one
+> per probe across the lens×surface grid instead of one per
+> confirmed violation; zero regressions landed; a shell script
+> invented in the workspace (scope-lock violation). Three runs,
+> three novel failure shapes (inventory-as-findings, clobbered
+> view, emission runaway), each caught with a machine-precise
+> reason, hygiene held after the cleanup-instruction deletion.
+> Conclusion: the referee is proven against every observed cheat;
+> on muse-spark-1.3 the failure does not converge — each run
+> invents a new contract. The unmeasured question is the product
+> on a capable backend; that needs a different model pin.
 > **Staleness note (2026-09-28, later)**: SKILL.md lens index gained the
 > missing `idempotency` row (a duplicate `agent` row was removed) and was
 > pruned for headroom (527 lines). Recorded cold-run PASSes predate this
