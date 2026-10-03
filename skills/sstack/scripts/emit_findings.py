@@ -392,7 +392,7 @@ def main() -> int:
     run = run_repro(finding["repro"], workspace)
     record = {"seed_id": finding.get("seed_id", "other"), "lens": finding["lens"], "surface": finding["surface"],
               "case": finding["case"], "oracle": finding["oracle"], "verdict": finding["verdict"], **run,
-              "regression": finding["regression"]}
+              "regression": finding["regression"], "fixture": fixture}
     if finding.get("fix"):
         record["fix"] = finding["fix"]
     if finding.get("seed") is not None:

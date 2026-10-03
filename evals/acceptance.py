@@ -113,10 +113,35 @@ def grade(report_path: Path) -> int:
     from seeded_acceptance import grade_file
 
     report, workspace = resolve_report(report_path)
+    fixture_name = None
+    view_is_valid = False
     try:
-        fixture_name = json.loads(report.read_text()).get("fixture")
+        parsed = json.loads(report.read_text())
+        view_is_valid = isinstance(parsed, dict) and isinstance(parsed.get("findings"), list)
+        if view_is_valid:
+            fixture_name = parsed.get("fixture")
     except (json.JSONDecodeError, OSError):
-        fixture_name = None
+        pass
+    if workspace is not None and not view_is_valid:
+        # The report view is missing, malformed, or foreign (ColdEvalPy2
+        # clobbered it with its own schema). The view is derived state:
+        # re-derive it from evidence with the emitter's own rebuild, so
+        # authoring report.json cannot affect the outcome. Evidence
+        # records self-describe their fixture (stamped at emit).
+        evidence_dir = workspace / ".sstack" / "findings"
+        if evidence_dir.is_dir():
+            sys.path.insert(0, str(EVALS.parent / "skills" / "sstack" / "scripts"))
+            from emit_findings import rebuild_report
+            for record in sorted(evidence_dir.glob("*.json")):
+                try:
+                    stamp = json.loads(record.read_text(encoding="utf-8", errors="replace")).get("fixture")
+                except (json.JSONDecodeError, OSError):
+                    continue
+                if stamp:
+                    fixture_name = stamp
+                    break
+            if fixture_name in FIXTURES:
+                rebuild_report(evidence_dir, workspace, fixture_name)
     fixture_dir = EVALS / fixture_name if fixture_name in FIXTURES else None
     result = grade_file(
         str(report),

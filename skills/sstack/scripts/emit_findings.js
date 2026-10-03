@@ -470,6 +470,7 @@ function main() {
     verdict: finding.verdict,
     ...run,
     regression: finding.regression,
+    fixture,
   };
   if (finding.fix) {
     record.fix = finding.fix;

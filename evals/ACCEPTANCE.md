@@ -58,6 +58,16 @@ isolated dir).
 > definition of a finding does not survive contact with this
 > backend. Claimed summary ("2 bugs fixed, 6 tests passing") was
 > false at the finding level and true at the suite level.
+> **Staleness note (2026-10-02, later still)**: ColdEvalPy2 (same
+> protocol, one changed variable: finding definition moved into the
+> read window, dd5b47d→61532dd) graded **fail**, one stage later in
+> the pipeline: findings were defect-shaped (boundaries/malformed/
+> security/state — the right lens classes), but regressions landed
+> as unimportable mangled names (suite 20 collection errors) and
+> report.json was hand-clobbered with a foreign schema (findings as
+> an int). Confirms: unenforced conventions get invented regardless
+> of prose clarity. Grade now derives the report view from evidence,
+> making report.json authoring irrelevant to the outcome.
 > **Staleness note (2026-09-28, later)**: SKILL.md lens index gained the
 > missing `idempotency` row (a duplicate `agent` row was removed) and was
 > pruned for headroom (527 lines). Recorded cold-run PASSes predate this

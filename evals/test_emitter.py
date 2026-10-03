@@ -751,3 +751,13 @@ def test_report_without_report_json_errors(tmp_path):
         capture_output=True, text=True)
     assert summary.returncode == 2
     assert "no report.json" in summary.stderr
+
+
+def test_evidence_record_stamps_fixture(tmp_path):
+    """Evidence self-describes its fixture so the grader can derive the
+    view from evidence when report.json is clobbered (ColdEvalPy2)."""
+    ws = tmp_path / "ws"
+    ws.mkdir(parents=True)
+    emit(ws, base())
+    record = json.loads((ws / ".sstack" / "findings" / "t1.json").read_text())
+    assert record["fixture"] == "seeded-py"

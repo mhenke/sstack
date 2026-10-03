@@ -204,3 +204,22 @@ def test_wiped_evidence_fails_grade(workspace):
     result = grade({"fixture": "seeded-py", "findings": [finding()]}, PY, workspace, FIXTURE)
     assert result["pass"] is False
     assert "evidence" in (result.get("reason") or "")
+
+
+# --- gate 6: the view is derived, never authoritative ---------------------
+
+def test_clobbered_report_view_derived_from_evidence(workspace):
+    """A hand-authored report.json with a foreign schema cannot affect the
+    grade: acceptance re-derives the view from evidence (ColdEvalPy2)."""
+    import acceptance
+    sys.path.insert(0, str(ROOT / "evals"))
+    from test_emitter import emit
+    (workspace / "tests").mkdir(exist_ok=True)
+    (workspace / "tests" / "test_shop.py").write_text(ORACLE_TEST)
+    result = emit(workspace, finding(), fixture="seeded-py")
+    assert result.returncode == 0, result.stderr
+    (workspace / ".sstack" / "report.json").write_text(json.dumps(
+        {"version": 1, "status": "complete", "findings": 6}))
+    assert acceptance.grade(workspace) == 0
+    rebuilt = json.loads((workspace / ".sstack" / "report.json").read_text())
+    assert isinstance(rebuilt["findings"], list) and rebuilt["fixture"] == "seeded-py"
