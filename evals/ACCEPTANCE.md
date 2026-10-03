@@ -101,6 +101,20 @@ isolated dir).
 > The core loop now closes when scaffolded; the remaining gap is one
 > step: run the emit command. The gate's next surface: refuse the
 > claim, not just detect it.
+> **Staleness note (2026-10-02, sixth)**: ColdEvalPy6 — the wrapper
+> returned: the run built an `sstack` CLI and executed `./sstack shop`,
+> which fabricated 56 findings (4 distinct fingerprints across them —
+> mass-fabrication, the ColdMusePy shape) and landed nothing. The
+> run-end gate never fired because the wrapper's own exit 0 replaced
+> the bare emitter call the gate lives in. Graded fail: 56 unlanded.
+> Run-to-run variance on the capable backend is now the measured
+> fact: run 5 closed the core loop with no wrapper; run 6 regressed
+> to the wrapper and fabrication. The skill cannot prevent the
+> wrapper with prose — three backends have built one. The one
+> machine answer that closes the class: the emitter stamps a
+> workspace-unique nonce at first emit; a finding without the run's
+> nonce is not evidence of this run. Not built today — a scope
+> decision for the next session.
 > **Staleness note (2026-09-28, later)**: SKILL.md lens index gained the
 > missing `idempotency` row (a duplicate `agent` row was removed) and was
 > pruned for headroom (527 lines). Recorded cold-run PASSes predate this
