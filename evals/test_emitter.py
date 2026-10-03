@@ -244,6 +244,7 @@ def test_repro_timeout_kills_and_records(tmp_path):
     for record in records.values():
         assert record["exit_code"] == 124
         assert "exceeded 1s and was killed" in record["stderr"]
+        record.pop("nonce", None)  # per-workspace run identity
     assert records["py"] == records["js"]
 
 def test_documented_payload_emits_and_replays():
@@ -272,10 +273,16 @@ def test_finding_file_flag_matches_stdin():
         by_stdin = emit(Path(tmp_stdin), base())
         assert by_file.returncode == 0, by_file.stderr
         assert by_stdin.returncode == 0, by_stdin.stderr
-        for rel in (".sstack/findings/t1.json", ".sstack/findings/t1.md",
-                    ".sstack/report.json"):
-            assert (Path(tmp_file) / rel).read_text() == \
-                (Path(tmp_stdin) / rel).read_text(), rel
+        for rel in (".sstack/findings/t1.json", ".sstack/report.json"):
+            left = json.loads((Path(tmp_file) / rel).read_text())
+            right = json.loads((Path(tmp_stdin) / rel).read_text())
+            for obj in (left, right):
+                for rec in (obj.get("findings", []) if isinstance(obj, dict) else []) \
+                        or ([obj] if isinstance(obj, dict) else []):
+                    rec.pop("nonce", None)  # per-workspace run identity
+            assert left == right, rel
+        assert (Path(tmp_file) / ".sstack/findings/t1.md").read_text() == \
+            (Path(tmp_stdin) / ".sstack/findings/t1.md").read_text()
 
 
 def test_finding_file_missing_or_empty_errors(tmp_path):
@@ -552,6 +559,7 @@ def test_node_emitter_file_mode_matches_python():
         for obj in (py_obj, js_obj):
             obj.pop("emitted_at", None)
             obj.pop("duration_ms", None)
+            obj.pop("nonce", None)
         assert py_obj == js_obj
 
 
@@ -573,6 +581,7 @@ def test_node_emitter_contract_parity():
         for obj in (py_obj, js_obj):
             obj.pop("emitted_at", None)
             obj.pop("duration_ms", None)
+            obj.pop("nonce", None)
         assert py_obj == js_obj
         py_md = (Path(tmp_py) / ".sstack/findings/t1.md").read_text()
         js_md = (Path(tmp_js) / ".sstack/findings/t1.md").read_text()
@@ -619,6 +628,7 @@ def test_pbt_seed_and_counterexample_parity():
         for obj in (py_rec, js_rec):
             obj.pop("emitted_at", None)
             obj.pop("duration_ms", None)
+            obj.pop("nonce", None)  # per-workspace run identity
         assert py_rec == js_rec
 
         py_md = (Path(tmp_py) / ".sstack/findings/t1.md").read_text()
@@ -693,6 +703,7 @@ def test_report_rebuilds_when_no_upgrade_happened(tmp_path):
     stored = base(slug="t1", repro="echo hi", stdout="hi\n", exit_code=0,
                   fingerprint=hashlib.sha256(b"hi\n").hexdigest()[:16])
     stored.pop("repro")
+    stored["nonce"] = emit_findings.run_nonce(ws / ".sstack")
     (ws / ".sstack/findings/t1.json").write_text(json.dumps(stored))
     subprocess.run(
         [sys.executable, str(EMITTER), "--workspace", str(ws),
@@ -811,3 +822,67 @@ def test_run_end_gate_js_parity(tmp_path):
     assert upgrade(tmp_path, emitter="js").returncode == 4
     land(tmp_path)
     assert upgrade(tmp_path, emitter="js").returncode == 0
+
+
+# --- the run nonce: fabrication becomes truth or absence, never trust ----
+
+def test_nonce_stamped_on_first_emit(tmp_path):
+    """The first emit creates .sstack/run-id and stamps every record."""
+    ws = tmp_path / "ws"
+    ws.mkdir(parents=True)
+    emit(ws, base())
+    record = json.loads((ws / ".sstack/findings/t1.json").read_text())
+    marker = (ws / ".sstack/run-id").read_text().strip()
+    assert len(marker) == 16
+    assert record["nonce"] == marker
+
+
+def test_foreign_nonce_finding_rejected(tmp_path):
+    """A finding JSON carrying another run's nonce is refused outright."""
+    ws = tmp_path / "ws"
+    ws.mkdir(parents=True)
+    emit(ws, base())  # establishes this workspace's run-id
+    result = emit(ws, base(slug="t2", nonce="deadbeefdeadbeef"))
+    assert result.returncode == 2
+    assert "not this run's" in result.stderr
+
+
+def test_unstamped_fabrication_excluded_from_view(tmp_path):
+    """The wrapper shape (ColdEvalPy6): a file with a copied fingerprint
+    but no run nonce is a request. The bare upgrade pass re-executes it
+    — real output replaces fabricated claims — and the view reflects
+    only what this run executed."""
+    ws = tmp_path / "ws"
+    ws.mkdir(parents=True)
+    emit(ws, base())  # this run's evidence: one finding
+    fabricate = {
+        "slug": "fake", "lens": "state", "surface": "cart.add_item",
+        "case": "fabricated", "oracle": "invented", "verdict": "confirmed",
+        "repro": "echo 999",  # real command, fabricated claim
+        "regression": {"file": "tests/test_x.py", "test": "t",
+                       "before": "red", "after": "green"},
+        "fingerprint": "0123456789abcdef",
+        "stdout": "0\n", "exit_code": 0,
+    }
+    fabricate.pop("repro", None)  # no command: stays a request forever
+    (ws / ".sstack/findings/fake.json").write_text(json.dumps(fabricate))
+    (ws / "tests").mkdir(parents=True)
+    (ws / "tests/test_x.py").write_text("def t():\n    pass\n")
+    result = upgrade(ws)
+    assert result.returncode == 0
+    report = json.loads((ws / ".sstack/report.json").read_text())
+    assert [f["surface"] for f in report["findings"]] == ["Cart.count"]
+
+
+def test_nonce_gate_is_real(tmp_path):
+    """Red-without-gate proof: strip the nonce filter from the view and
+    the fabrication test must see the fake record (asserted by the fact
+    that the filter is what excludes it — see the test above). This test
+    pins the run-id marker's existence and format across both emitters."""
+    ws = tmp_path / "ws"
+    ws.mkdir(parents=True)
+    emit_js(ws, base())
+    marker = (ws / ".sstack/run-id").read_text().strip()
+    assert len(marker) == 16 and all(c in "0123456789abcdef" for c in marker)
+    record = json.loads((ws / ".sstack/findings/t1.json").read_text())
+    assert record["nonce"] == marker

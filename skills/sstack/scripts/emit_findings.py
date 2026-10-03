@@ -42,6 +42,28 @@ except ValueError:
     REPRO_TIMEOUT = 120
 
 
+def run_nonce(stack: Path) -> str:
+    """The run's identity: created at the first emit of a workspace and
+    never changed after. Every record the emitter writes carries it; a
+    record without the run's nonce is a request — the machine re-executes
+    its repro or excludes it from the view. Fabrication by any other
+    writer becomes truth (re-executed) or absence (excluded), never
+    trusted. A finding JSON may carry a 'nonce' to bind itself to a run
+    mid-flight; a mismatched one is rejected outright — a finding from
+    another run does not belong in this one."""
+    marker = stack / "run-id"
+    if marker.is_file():
+        return marker.read_text(encoding="utf-8").strip()
+    nonce = hashlib.sha256(os.urandom(8)).hexdigest()[:16]
+    stack.mkdir(parents=True, exist_ok=True)
+    marker.write_text(nonce + "\n", encoding="utf-8")
+    return nonce
+
+
+def stamp(record: dict, stack: Path) -> dict:
+    record["nonce"] = run_nonce(stack)
+    return record
+
 def safe_slug(value: str, field: str) -> str:
     """A slug becomes a filename under .sstack/findings/. A lens name can
     come from user-authored frontmatter, so `lens: ../../etc` would
@@ -219,9 +241,15 @@ def render_markdown(finding: dict, run: dict) -> str:
 
 
 def rebuild_report(findings_dir: Path, workspace: Path, fixture: str) -> int:
+    nonce = run_nonce(workspace / ".sstack")
     entries = []
     for evidence in sorted(findings_dir.glob("*.json")):
         record = json.loads(evidence.read_text(encoding="utf-8", errors="replace"))
+        # Only this run's evidence appears in the view. A record from any
+        # other writer (a wrapper, a stale run, a fabrication) is a request:
+        # the upgrade pass re-executes it and stamps it, or it stays out.
+        if record.get("nonce") != nonce:
+            continue
         # Evidence requires a fingerprint to exist AND be well-formed; the
         # validator alone says a request's absent key is fine.
         if not record.get("fingerprint") or not fingerprint_is_wellformed(record["fingerprint"]):
@@ -269,8 +297,11 @@ def unlanded_confirmed(findings_dir: Path, workspace: Path) -> int:
     confirmed finding whose regression is not a landed test means it is
     not. Exit 4 carries the count; each one prints its landing sequence."""
     unlanded = 0
+    nonce = run_nonce(workspace / ".sstack")
     for path in sorted(findings_dir.glob("*.json")):
         record = json.loads(path.read_text(encoding="utf-8", errors="replace"))
+        if record.get("nonce") != nonce:
+            continue
         if record.get("verdict") != "confirmed" or not fingerprint_is_wellformed(
                 record.get("fingerprint") or ""):
             continue
@@ -351,19 +382,21 @@ def upgrade_requests(findings_dir: Path, workspace: Path, fixture: str | None) -
         run = run_repro(repro, workspace)
         record = {k: v for k, v in finding.items() if k != "repro"}
         record.update(run)
+        stamp(record, findings_dir.parent)
         path.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
         (findings_dir / f"{path.stem}.md").write_text(
             render_markdown(finding, run), encoding="utf-8")
         warn_unlanded(finding, workspace)
         print(f"upgraded {path.stem}: exit {run['exit_code']}, fingerprint {run['fingerprint']}")
         upgraded += 1
-    # Rebuild whenever there is evidence to report, not only when something
-    # was upgraded: editing a finding's case/oracle after its repro already
-    # ran leaves the evidence file and report.json out of step, and the
-    # grader only ever reads the report.
-    if fixture and any(fingerprint_is_wellformed(
-            json.loads(p.read_text(encoding="utf-8", errors="replace")).get("fingerprint"))
-                       for p in findings_dir.glob("*.json")):
+    nonce = run_nonce(workspace / ".sstack")
+    # Rebuild whenever this run has stamped evidence to report: a record
+    # from another writer never reaches the view.
+    if fixture and any(
+            (lambda r: fingerprint_is_wellformed(r.get("fingerprint") or "")
+             and r.get("nonce") == nonce)(
+                json.loads(p.read_text(encoding="utf-8", errors="replace")))
+            for p in findings_dir.glob("*.json")):
         total = rebuild_report(findings_dir, workspace, fixture)
         if upgraded:
             print(f"report.json now {total} finding(s)")
@@ -424,12 +457,18 @@ def main() -> int:
     except ValueError as error:
         print(f"invalid finding: {error}", file=sys.stderr)
         return 2
+    supplied = finding.get("nonce")
+    expected = run_nonce(stack)
+    if supplied is not None and supplied != expected:
+        print(f"invalid finding: nonce {supplied!r} is not this run's "
+              f"({expected}) — a finding from another run does not belong here", file=sys.stderr)
+        return 2
     if not preflight_probe(finding["repro"], workspace):
         return 3
     run = run_repro(finding["repro"], workspace)
     record = {"seed_id": finding.get("seed_id", "other"), "lens": finding["lens"], "surface": finding["surface"],
               "case": finding["case"], "oracle": finding["oracle"], "verdict": finding["verdict"], **run,
-              "regression": finding["regression"], "fixture": fixture}
+              "regression": finding["regression"], "fixture": fixture, "nonce": expected}
     if finding.get("fix"):
         record["fix"] = finding["fix"]
     if finding.get("seed") is not None:

@@ -28,6 +28,22 @@ const REPRO_TIMEOUT = Math.max(
   Number.parseInt(process.env.SSTACK_REPRO_TIMEOUT || '120', 10) || 120
 );
 
+function runNonce(stack) {
+  const marker = path.join(stack, 'run-id');
+  if (fs.existsSync(marker)) {
+    return fs.readFileSync(marker, 'utf8').trim();
+  }
+  const nonce = crypto.randomBytes(8).toString('hex');
+  fs.mkdirSync(stack, { recursive: true });
+  fs.writeFileSync(marker, nonce + '\n');
+  return nonce;
+}
+
+function stamp(record, stack) {
+  record.nonce = runNonce(stack);
+  return record;
+}
+
 function safeSlug(value, field) {
   if (!value || !SAFE.test(value) || value === '.' || value === '..') {
     throw new Error(
@@ -219,6 +235,7 @@ function renderMarkdown(finding, run) {
 }
 
 function rebuildReport(findingsDir, workspace, fixture) {
+  const nonce = runNonce(path.join(workspace, '.sstack'));
   const files = fs
     .readdirSync(findingsDir)
     .filter((f) => f.endsWith('.json'))
@@ -227,6 +244,12 @@ function rebuildReport(findingsDir, workspace, fixture) {
   const entries = [];
   for (const file of files) {
     const record = JSON.parse(fs.readFileSync(path.join(findingsDir, file), 'utf8'));
+    // Only this run's evidence appears in the view. A record from any
+    // other writer (a wrapper, a stale run, a fabrication) is a request:
+    // the upgrade pass re-executes it and stamps it, or it stays out.
+    if (record.nonce !== nonce) {
+      continue;
+    }
     // Evidence requires a fingerprint to exist AND be well-formed.
     if (!record.fingerprint || !fingerprintIsWellformed(record.fingerprint)) {
       continue; // a request (no executed repro yet) is not evidence
@@ -347,6 +370,7 @@ function upgradeRequests(findingsDir, workspace, fixture) {
     const record = { ...finding };
     delete record.repro;
     Object.assign(record, run);
+    stamp(record, path.join(workspace, '.sstack'));
     fs.writeFileSync(fullPath, JSON.stringify(record, null, 2) + '\n');
     fs.writeFileSync(
       path.join(findingsDir, file.replace(/\.json$/, '.md')),
@@ -494,6 +518,11 @@ function main() {
     process.exit(2);
   }
 
+  if (finding.nonce !== undefined && finding.nonce !== runNonce(path.join(workspace, '.sstack'))) {
+    process.stderr.write(
+      `invalid finding: nonce '${finding.nonce}' is not this run's — a finding from another run does not belong here\n`);
+    process.exit(2);
+  }
   if (!preflightProbe(finding.repro, workspace)) process.exit(3);
   const run = runRepro(finding.repro, workspace);
   const record = {
@@ -506,6 +535,7 @@ function main() {
     ...run,
     regression: finding.regression,
     fixture,
+    nonce: runNonce(path.join(workspace, '.sstack')),
   };
   if (finding.fix) {
     record.fix = finding.fix;
