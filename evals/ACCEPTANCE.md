@@ -47,6 +47,17 @@ isolated dir).
 > landing gated on disk). Runs graded under the old bar are claims-
 > grade, not evidence-grade; none count under the current contract
 > until re-run.
+> **Staleness note (2026-10-02, later)**: ColdEvalPy1 (seeded-py,
+> muse-spark-1.3, current text, all gates live) graded **fail**:
+> 7 confirmed findings claimed red→green regressions that never
+> landed — all 7 were Discover inventory items emitted as findings,
+> their "regressions" pointing at `.sstack/map.md`. Hygiene held
+> (zero destructive calls, 5/5 evidence intact, fixture safe, real
+> test files landed, suite 6-pass) but no defect finding was
+> emitted. Top agent-facing defect is now semantic: the skill's
+> definition of a finding does not survive contact with this
+> backend. Claimed summary ("2 bugs fixed, 6 tests passing") was
+> false at the finding level and true at the suite level.
 > **Staleness note (2026-09-28, later)**: SKILL.md lens index gained the
 > missing `idempotency` row (a duplicate `agent` row was removed) and was
 > pruned for headroom (527 lines). Recorded cold-run PASSes predate this
