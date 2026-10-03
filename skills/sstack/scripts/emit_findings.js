@@ -347,11 +347,45 @@ function upgradeRequests(findingsDir, workspace, fixture) {
   return 0;
 }
 
+function renderSummary(stack, workspace) {
+  const reportPath = path.join(stack, 'report.json');
+  if (!fs.existsSync(reportPath)) {
+    process.stderr.write('no report.json — nothing emitted yet\n');
+    process.exit(2);
+  }
+  const data = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+  const findings = data.findings || [];
+  const counts = { confirmed: 0, refuted: 0, inconclusive: 0 };
+  let fixes = 0, landed = 0, hardened = 0;
+  for (const f of findings) {
+    const v = f.verdict || 'inconclusive';
+    counts[v] = (counts[v] || 0) + 1;
+    const reg = f.regression || {};
+    const rfile = reg.file || '', rtest = reg.test || '';
+    const p = rfile ? path.join(workspace, rfile) : null;
+    const onDisk = !!(p && fs.existsSync(p) && (!rtest || fs.readFileSync(p, 'utf8').includes(rtest)));
+    if (v === 'confirmed') {
+      if (onDisk) landed++;
+    } else if (onDisk) {
+      hardened++;
+    }
+    if (f.fix) fixes++;
+    const kind = v === 'confirmed'
+      ? `regression (${rfile}::${rtest}, ${onDisk ? 'red->green' : 'NOT ON DISK'})`
+      : `hardening (${rfile}::${rtest}, ${onDisk ? 'green' : 'NOT ON DISK'})`;
+    console.log(`${f.seed_id || 'other'} | ${f.lens || 'other'} | ${f.surface || ''} | ${v} | ${kind}`);
+  }
+  console.log(`confirmed ${counts.confirmed} / refuted ${counts.refuted} / ` +
+    `inconclusive ${counts.inconclusive}; fixes applied ${fixes}; ` +
+    `regressions landed ${landed}; hardening tests added ${hardened}`);
+}
+
 function main() {
   const args = process.argv.slice(2);
   let workspaceArg = null;
   let fixtureArg = null;
   let findingPath = null;
+  let reportMode = false;
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--workspace') {
@@ -360,6 +394,8 @@ function main() {
       fixtureArg = args[++i];
     } else if (args[i] === '--finding') {
       findingPath = args[++i];
+    } else if (args[i] === '--report') {
+      reportMode = true;
     }
   }
 
@@ -373,6 +409,10 @@ function main() {
   const findingsDir = path.join(stack, 'findings');
 
   fs.mkdirSync(findingsDir, { recursive: true });
+
+  if (reportMode) {
+    return renderSummary(stack, workspace);
+  }
 
   const reportPath = path.join(stack, 'report.json');
   let fixture = fixtureArg;

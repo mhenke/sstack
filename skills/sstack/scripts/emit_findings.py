@@ -258,6 +258,43 @@ def warn_unlanded(finding: dict, workspace: Path) -> None:
         print(f"warning: {regression['test']!r} not found in {regression['file']} yet", file=sys.stderr)
 
 
+def render_summary(stack: Path, workspace: Path) -> int:
+    """Render the chat summary from report.json. The agent relays this;
+    it never counts findings itself, so counts cannot be invented."""
+    report_path = stack / "report.json"
+    if not report_path.is_file():
+        print("no report.json — nothing emitted yet", file=sys.stderr)
+        return 2
+    data = json.loads(report_path.read_text(encoding="utf-8"))
+    findings = data.get("findings", [])
+    counts = {"confirmed": 0, "refuted": 0, "inconclusive": 0}
+    fixes = landed = hardened = 0
+    for f in findings:
+        v = f.get("verdict", "inconclusive")
+        counts[v] = counts.get(v, 0) + 1
+        reg = f.get("regression") or {}
+        rfile, rtest = reg.get("file", ""), reg.get("test", "")
+        path = workspace / rfile if rfile else None
+        on_disk = bool(path and path.is_file()
+                       and (not rtest or rtest in path.read_text(encoding="utf-8", errors="replace")))
+        if v == "confirmed":
+            kind = f"regression ({rfile}::{rtest}, {'red->green' if on_disk else 'NOT ON DISK'})"
+            if on_disk:
+                landed += 1
+        else:
+            kind = f"hardening ({rfile}::{rtest}, {'green' if on_disk else 'NOT ON DISK'})"
+            if on_disk:
+                hardened += 1
+        print(f"{f.get('seed_id', 'other')} | {f.get('lens', 'other')} | "
+              f"{f.get('surface', '')} | {v} | {kind}")
+        if f.get("fix"):
+            fixes += 1
+    print(f"confirmed {counts['confirmed']} / refuted {counts['refuted']} / "
+          f"inconclusive {counts['inconclusive']}; fixes applied {fixes}; "
+          f"regressions landed {landed}; hardening tests added {hardened}")
+    return 0
+
+
 def upgrade_requests(findings_dir: Path, workspace: Path, fixture: str | None) -> int:
     """Requests become evidence only through execution. A request whose
     repro is a command string is executed here, the run dict replaces the
@@ -315,6 +352,8 @@ def main() -> int:
     )
     parser.add_argument("--workspace", type=Path, required=True, help="host repo holding .sstack/")
     parser.add_argument("--fixture", help="fixture name; required on the first emit, then preserved")
+    parser.add_argument("--report", action="store_true",
+                        help="print the run summary from report.json and exit")
     args = parser.parse_args()
 
     workspace = args.workspace.resolve()
@@ -322,6 +361,9 @@ def main() -> int:
     stack.mkdir(parents=True, exist_ok=True)
     findings_dir = stack / "findings"
     findings_dir.mkdir(exist_ok=True)
+
+    if args.report:
+        return render_summary(stack, workspace)
 
     report = stack / "report.json"
     try:

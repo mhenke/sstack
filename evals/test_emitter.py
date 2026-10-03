@@ -711,3 +711,43 @@ def test_replay_normalizes_workspace_path(tmp_path):
     result = replay_one(ws / ".sstack/findings/t1.json")
     assert result["integrity"] == "intact"
     assert result["drift"] in (False, True)  # re-execution is env-dependent
+
+
+# --- --report: the summary is rendered, never authored -------------------
+
+def test_report_renders_counts_from_report_json(tmp_path):
+    """emit --report prints the run summary; landed checks the disk."""
+    ws = tmp_path / "ws"
+    (ws / "tests").mkdir(parents=True)
+    (ws / "tests/test_x.py").write_text("def t():\n    assert 0\n")
+    result = emit(ws, base())
+    assert result.returncode == 0
+    summary = subprocess.run(
+        [sys.executable, str(EMITTER), "--workspace", str(ws), "--report"],
+        capture_output=True, text=True)
+    assert summary.returncode == 0
+    assert "confirmed 1 / refuted 0 / inconclusive 0" in summary.stdout
+    assert "regressions landed 1" in summary.stdout
+    assert "red->green" in summary.stdout
+
+
+def test_report_flags_unlanded_regression(tmp_path):
+    """A claimed regression with no file on disk renders NOT ON DISK."""
+    ws = tmp_path / "ws"
+    ws.mkdir(parents=True)
+    emit(ws, base())
+    summary = subprocess.run(
+        [sys.executable, str(EMITTER), "--workspace", str(ws), "--report"],
+        capture_output=True, text=True)
+    assert "NOT ON DISK" in summary.stdout
+    assert "regressions landed 0" in summary.stdout
+
+
+def test_report_without_report_json_errors(tmp_path):
+    ws = tmp_path / "ws"
+    ws.mkdir(parents=True)
+    summary = subprocess.run(
+        [sys.executable, str(EMITTER), "--workspace", str(ws), "--report"],
+        capture_output=True, text=True)
+    assert summary.returncode == 2
+    assert "no report.json" in summary.stderr
