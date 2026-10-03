@@ -130,10 +130,8 @@ legitimate during Verify: the emitter warns and records the rest.
 
 Everything sstack creates lives under `.sstack/` in the target repo,
 created by this run — the pack brings only skills and agents, so
-nothing is inherited from wherever it was published. `scratch/` is
-deleted once the run-end checks pass: its keepers landed as suite
-tests, and a stale probe against fixed code reads as a false
-verdict. Keep `pristine-src/` so evidence replays.
+nothing is inherited from wherever it was published. Keep
+`pristine-src/` so evidence replays.
 
 ## Customization
 
