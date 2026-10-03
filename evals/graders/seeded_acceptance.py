@@ -268,10 +268,22 @@ def grade(report: object, goldens: list[dict], workspace: Path | None = None, fi
     # bytes). Run before the bug-pin control so a corrupted run fails
     # loudly instead of passing on claims we cannot replay.
     if workspace is not None:
-        integrity_fail = _evidence_integrity(workspace / ".sstack" / "findings")
+        evidence_dir = workspace / ".sstack" / "findings"
+        if confirmed and not any(evidence_dir.glob("*.json")):
+            return {"pass": False,
+                    "reason": "confirmed findings but no evidence files under .sstack/findings — evidence wiped or never emitted",
+                    "fixture": fixture, "confirmed": len(confirmed),
+                    "red_green_claimed": len(claimed)}
+        integrity_fail = _evidence_integrity(evidence_dir)
         if integrity_fail:
             return {"pass": False, "reason": integrity_fail, "fixture": fixture,
                     "confirmed": len(confirmed), "red_green_claimed": len(claimed)}
+        unlanded = [f for f in claimed if not _regression_lands(f, workspace, fixture_dir)]
+        if unlanded:
+            return {"pass": False,
+                    "reason": f"{len(unlanded)} confirmed finding(s) claim a red→green regression that never landed on disk",
+                    "fixture": fixture, "confirmed": len(confirmed),
+                    "red_green_claimed": len(claimed)}
     # The negative control: every confirmed finding's regression must be
     # RED against the unfixed source. Run before matching so a bug-pinned
     # run fails loudly instead of passing on a function name.

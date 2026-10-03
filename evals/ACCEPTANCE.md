@@ -40,6 +40,13 @@ isolated dir).
 > added across all five fixtures. Goldens present; cold-run evidence
 > pending. Existing 16-seed PASS verdicts remain valid — new seeds are
 > additive.
+> **Staleness note (2026-10-02)**: Recorded cold-run passes predate the
+> raised grading bar: the evidence-integrity gate (f403454, 09-28 —
+> tampered fingerprints rejected) and ADR-0022 (09-30 — a request
+> becomes evidence only through emitter execution; regression
+> landing gated on disk). Runs graded under the old bar are claims-
+> grade, not evidence-grade; none count under the current contract
+> until re-run.
 > **Staleness note (2026-09-28, later)**: SKILL.md lens index gained the
 > missing `idempotency` row (a duplicate `agent` row was removed) and was
 > pruned for headroom (527 lines). Recorded cold-run PASSes predate this

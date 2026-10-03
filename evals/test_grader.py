@@ -120,6 +120,7 @@ def test_real_findings_still_match(golden_id):
 def test_bug_pinned_run_fails(workspace):
     """The invalid shape of runs #1 and #7 must not pass the grader."""
     land(workspace, BUG_PINNING_TEST)
+    _seed_evidence(workspace, "4355a46b19d348dc")  # sha256("1\n")[:16]
     result = grade({"fixture": "seeded-py", "findings": [finding()]}, PY, workspace, FIXTURE)
     assert result["pass"] is False
     assert "bug-pin" in (result.get("reason") or "")
@@ -128,6 +129,7 @@ def test_bug_pinned_run_fails(workspace):
 def test_genuine_run_passes(workspace):
     """A regression asserting the oracle is red on unfixed source: the run counts."""
     land(workspace, ORACLE_TEST)
+    _seed_evidence(workspace, "4355a46b19d348dc")  # sha256("1\n")[:16]
     result = grade({"fixture": "seeded-py", "findings": [finding()]}, PY, workspace, FIXTURE)
     assert result["pass"] is True
     assert result["seeded_matched"] == ["py-1"]
@@ -177,3 +179,28 @@ def test_intact_fingerprint_still_passes(workspace):
     _seed_evidence(workspace, "4355a46b19d348dc")  # sha256("1\n")[:16]
     result = grade({"fixture": "seeded-py", "findings": [finding()]}, PY, workspace, FIXTURE)
     assert result["pass"] is True
+
+
+# --- gate 5: run 5's failure shapes ---------------------------------------
+#
+# A cold run landed the regression file but wiped .sstack/ mid-run, then
+# reported success. Two shapes must never grade as PASS: a regression
+# claimed but never written, and confirmed findings with no evidence
+# files on disk (integrity must not pass vacuously on an empty dir).
+
+
+def test_unlanded_regression_fails_grade(workspace):
+    """Claiming red→green for a test that was never written must fail."""
+    _seed_evidence(workspace, "4355a46b19d348dc")  # sha256("1\n")[:16]
+    result = grade({"fixture": "seeded-py", "findings": [finding()]}, PY, workspace, FIXTURE)
+    assert result["pass"] is False
+    assert "landed" in (result.get("reason") or "")
+
+
+def test_wiped_evidence_fails_grade(workspace):
+    """Confirmed findings with an empty evidence dir must fail, not pass vacuously."""
+    land(workspace, ORACLE_TEST)
+    (workspace / ".sstack" / "findings").mkdir(parents=True, exist_ok=True)  # wiped: exists, empty
+    result = grade({"fixture": "seeded-py", "findings": [finding()]}, PY, workspace, FIXTURE)
+    assert result["pass"] is False
+    assert "evidence" in (result.get("reason") or "")
