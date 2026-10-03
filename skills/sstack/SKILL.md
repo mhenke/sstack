@@ -41,6 +41,8 @@ expected result, not a problem to solve.
 - `/sstack lenses` — print the lens index below, then every custom lens per Customization.
 - `/sstack harden <target>` — negative-test gap-filling without a full attack; load
   `references/harden.md` and follow it.
+- `/sstack triage <target>` — churn-ranked surface heat before a full Discover; load
+  `references/triage.md` and follow it.
 
 Dispatch fallback: per-lens subagents that fail or go silent twice
 transfer to you — run every lens yourself, one at a time, in index
@@ -531,15 +533,15 @@ emitter in Workspace writes it, per finding, as each case verifies —
 so a crash keeps every finding written so far. A report or evidence
 file that does not parse is not evidence.
 
-In the chat report, one line per finding: `id | lens | surface |
-verdict | regression (file::test, red→green)` or `id | lens |
-surface | refuted | hardening (file::test, green)`. Per confirmed
-finding, the full field set with observed output quoted verbatim and
-the fix applied. End with coverage counts — surfaces mapped,
-executed, refuted, confirmed, inconclusive, not run — then fixes
-applied, regressions landed, hardening tests added. Untested
-high-impact surfaces make the run partial coverage: report it as
-partial.
+The chat report opens with the emitter's summary, quoted verbatim:
+`python3 skills/sstack/scripts/emit_findings.py --workspace . --report`
+— its one-line-per-finding block and its counts are the run's record,
+relayed as printed. The same bare call without `--report` must exit 0
+first: exit 4 means a confirmed finding's regression is still not
+landed and the run is not done. After the emitter block, per confirmed
+finding add the full field set with observed output quoted verbatim
+and the fix applied. Untested high-impact surfaces make the run
+partial coverage: report it as partial.
 
 ### 7. Learn
 
