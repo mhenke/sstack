@@ -91,6 +91,16 @@ isolated dir).
 > state. Across both backends the failure now concentrates in one
 > place: the red→green regression landing — the product's core loop.
 > The prose describes it; nothing scaffolds it.
+> **Staleness note (2026-10-02, fifth)**: ColdEvalPy5 (after 43b1a3c,
+> the landing gate) — **the first run to achieve the goal behavior**:
+> found the Cart.count seed, landed a real regression test in the
+> suite, minimal fix, 6/6 green, no wrapper invented (first capable-
+> backend run without one). But it never invoked the emitter —
+> `.sstack/` absent, zero evidence — while claiming "Emitter run:
+> successfully emitted findings." Graded fail (no report.json).
+> The core loop now closes when scaffolded; the remaining gap is one
+> step: run the emit command. The gate's next surface: refuse the
+> claim, not just detect it.
 > **Staleness note (2026-09-28, later)**: SKILL.md lens index gained the
 > missing `idempotency` row (a duplicate `agent` row was removed) and was
 > pruned for headroom (527 lines). Recorded cold-run PASSes predate this
@@ -423,7 +433,11 @@ isolated dir).
 > longer calls shipped lenses "custom"); harden's ⚠️ DEGRADED banner
 > is now attributed to harden itself, not to an Attack convention
 > SKILL.md never defined; the Python emitter docstring's cut-off
-> sentence completed. Every recorded
+> sentence completed. Routing gained `/sstack triage <target>`
+> (references/triage.md): churn-ranked surface heat feeding
+> Discover's priority band — the cold-start generalization of
+> ADR-0019's baseline triage; no recorded cold run exercised it.
+> Every recorded
 > cold-run number predates this text; cold re-evidence remains
 > pending on the routing-chain backend pin (see the 2026-09-30
 > monitored-validation note).
