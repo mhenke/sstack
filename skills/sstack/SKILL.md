@@ -28,8 +28,9 @@ existing suite with negative test cases even where nothing is broken.
 
 ## Routing
 
-The slash forms below are request labels, not a program: v0 ships no
-`sstack` binary — you execute each stage yourself with your tools.
+Each slash form below names a stage you execute yourself with your tools;
+v0 ships no `sstack` binary, so a shell answers `not found` — the
+expected result, not a problem to solve.
 - `/sstack <target>` — full lifecycle on a module, file, directory, or function.
 - `/sstack` (bare) — target resolved, never chosen: explicit naming wins, else the
   behaviorally relevant working-tree code diff (`git diff --stat`); a prior terminal
@@ -104,7 +105,8 @@ lens: <lens> | verdict: <confirmed | refuted | inconclusive>
 - `harden/<date>-<target>-<seq>.md` — harden-mode snapshots, not findings
 
 The emitter is `scripts/emit_findings.py` (or `.js` under Node),
-beside this skill: run it, never rewrite or copy it. The moment a
+beside this skill: run it as shipped. It alone writes evidence, so a copy
+or an edit invalidates every fingerprint it produced. The moment a
 verdict is known, write the finding request to `findings/<slug>.json`
 — `repro` is the exact command you ran, as a plain string. Run the
 emitter from the repo root
@@ -480,15 +482,15 @@ reporting.
 - Only modify target source in the Fix stage, only for confirmed
   findings, and only the minimal change that turns a red test green.
   Every source change must trace to a finding.
-- Never modify config or secrets.
+- Config and secrets stay untouched; treat both as read-only.
 - No test framework detected → ask before scaffolding one.
 - A framework present but broken → same rule: ask before repairing
   it. Evidence does not wait: probes execute and emit without the
   suite — only regression landing blocks, repaired or routed around
-  in the repo's own suite, never a downgraded verdict. A target that
-  will not build yields inconclusive findings quoting the build
-  error, not silence. A pre-existing red suite is baseline, not
-  finding: record it, exempt it from the pass gate, report it.
+  in the repo's own suite. A target that will not build yields
+  inconclusive findings quoting the build error, not silence.
+  A pre-existing red suite is baseline, not finding: record it,
+  exempt it from the pass gate, report it.
 - Respect the repo's test conventions exactly.
 
 ## Report format
