@@ -129,10 +129,18 @@ The request JSON is the Report format fields — `lens`, `surface`,
 `case`, `oracle`, `verdict`, `repro` — plus `slug` (a short kebab-case
 name for the finding), `fix` (the minimal change you will make), and
 `regression`: `{"file": "tests/test_x.py", "test": "test_name",
-"before": "red", "after": "green"}`. Optional for
+"before": "red", "after": "green"}`. A regression is a test that exists
+in the repo's own suite before the run ends: write it into
+`tests/test_x.py`, run it and watch it fail, apply the fix, run it and
+watch it pass — the file is the test's path, the test is its def name.
+The `before`/`after` fields describe what you watched, they do not
+replace watching it. Optional for
 PBT: `seed` (integer/token) and `counterexample` (minimal failing input).
-The seven fields alone are rejected. A finding with no regression yet is
-legitimate during Verify: the emitter warns and records the rest.
+The seven fields alone are rejected. A finding emitted before its
+regression test exists is legitimate during Verify; the emitter prints
+the landing sequence, and a bare emitter call at run end exits 4 while
+any confirmed finding's test is still missing — exit 0 is the run's
+done signal.
 
 Everything sstack creates lives under `.sstack/` in the target repo,
 created by this run — the pack brings only skills and agents, so
@@ -217,10 +225,10 @@ ends with a printed `stage ✓ <count>` line.
 
 **Settle the target.** A repo root or broad directory resolves to the
 language-convention folders inside it (`java/`, `src/main/java`,
-`src/`, `lib/`), one per supported language present; ambiguity across
-buildable modules → ask the user to name the TARGET — and so is a
-full target that looks untestable: narrowing scope is the user's
-call, never the run's. The map spans the resolved target whole;
+`src/`, `lib/`), one per supported language present; ask only on
+ambiguity across buildable modules or an untestable-looking target —
+narrowing scope is the user's call, never the run's. The map spans
+the resolved target whole;
 testability filters surfaces, not size.
 
 **Inventory every surface that transforms, stores, routes, or gates

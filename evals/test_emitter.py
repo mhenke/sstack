@@ -114,6 +114,13 @@ def request(slug="t1", repro="echo 0"):
     return finding
 
 
+def land(ws):
+    """Land the base() regression (tests/test_x.py::t) so confirmed
+    findings pass the run-end gate."""
+    (ws / "tests").mkdir(parents=True, exist_ok=True)
+    (ws / "tests" / "test_x.py").write_text("def t():\n    pass\n")
+
+
 def upgrade(workspace, emitter=None, fixture="seeded-py"):
     binary = [sys.executable, str(EMITTER)] if emitter is None else ["node", str(EMITTER_JS)]
     return subprocess.run(
@@ -127,6 +134,7 @@ def test_upgrade_executes_request_into_evidence(tmp_path):
     findings = tmp_path / ".sstack" / "findings"
     findings.mkdir(parents=True)
     (findings / "t1.json").write_text(json.dumps(request()))
+    land(tmp_path)
     result = upgrade(tmp_path)
     assert result.returncode == 0, result.stderr
     assert "upgraded t1" in result.stdout
@@ -177,6 +185,7 @@ def test_upgrade_is_idempotent(tmp_path):
     findings = tmp_path / ".sstack" / "findings"
     findings.mkdir(parents=True)
     (findings / "t1.json").write_text(json.dumps(request()))
+    land(tmp_path)
     assert upgrade(tmp_path).returncode == 0
     fingerprint = json.loads((findings / "t1.json").read_text())["fingerprint"]
     result = upgrade(tmp_path)
@@ -192,6 +201,7 @@ def test_upgrade_accepts_nested_command_request(tmp_path):
     finding = request()
     finding["repro"] = {"command": "echo 0", "exit_code": 1, "stdout": "lied"}
     (findings / "t1.json").write_text(json.dumps(finding))
+    land(tmp_path)
     result = upgrade(tmp_path)
     assert result.returncode == 0, result.stderr
     record = json.loads((findings / "t1.json").read_text())
@@ -204,6 +214,7 @@ def test_upgrade_js_parity(tmp_path):
     findings = tmp_path / ".sstack" / "findings"
     findings.mkdir(parents=True)
     (findings / "t1.json").write_text(json.dumps(request()))
+    land(tmp_path)
     result = upgrade(tmp_path, emitter="js")
     assert result.returncode == 0, result.stderr
     record = json.loads((findings / "t1.json").read_text())
@@ -223,6 +234,8 @@ def test_repro_timeout_kills_and_records(tmp_path):
         findings = ws / ".sstack" / "findings"
         findings.mkdir(parents=True)
         (findings / "t1.json").write_text(json.dumps(request(repro="sleep 5")))
+        (ws / "tests").mkdir(parents=True, exist_ok=True)
+        (ws / "tests" / "test_x.py").write_text("def t():\n    pass\n")
         result = subprocess.run(
             [*binary, "--workspace", str(ws), "--fixture", "seeded-py"],
             input="", capture_output=True, text=True, env=env, timeout=30)
@@ -547,6 +560,9 @@ def test_node_emitter_contract_parity():
     validation, fingerprinting, and report rebuilding."""
     with tempfile.TemporaryDirectory(dir=SCRATCH) as tmp_py, tempfile.TemporaryDirectory(dir=SCRATCH) as tmp_js:
         finding = base()
+        for ws in (tmp_py, tmp_js):
+            (Path(ws) / "tests").mkdir(parents=True, exist_ok=True)
+            (Path(ws) / "tests" / "test_x.py").write_text("def t():\n    pass\n")
         res_py = emit(Path(tmp_py), finding)
         res_js = emit_js(Path(tmp_js), finding)
         assert res_js.returncode == 0, res_js.stderr
@@ -761,3 +777,37 @@ def test_evidence_record_stamps_fixture(tmp_path):
     emit(ws, base())
     record = json.loads((ws / ".sstack" / "findings" / "t1.json").read_text())
     assert record["fixture"] == "seeded-py"
+
+
+# --- the run-end gate: exit 4 while a confirmed regression is unlanded ---
+
+def test_run_end_gate_exit_4_when_unlanded(tmp_path):
+    """A bare emitter call at run end asks 'is the run done?'. A confirmed
+    finding whose regression test was never written answers no: exit 4,
+    the landing sequence on stderr. This is ColdEvalPy4's failure caught
+    at write time."""
+    findings = tmp_path / ".sstack" / "findings"
+    findings.mkdir(parents=True)
+    (findings / "t1.json").write_text(json.dumps(request()))
+    result = upgrade(tmp_path)
+    assert result.returncode == 4
+    assert "run not done" in result.stderr
+    assert "NOT LANDED: t1" in result.stderr
+
+
+def test_run_end_gate_exit_0_once_landed(tmp_path):
+    """Land the test and the bare call answers done: exit 0."""
+    findings = tmp_path / ".sstack" / "findings"
+    findings.mkdir(parents=True)
+    (findings / "t1.json").write_text(json.dumps(request()))
+    land(tmp_path)
+    assert upgrade(tmp_path).returncode == 0
+
+
+def test_run_end_gate_js_parity(tmp_path):
+    findings = tmp_path / ".sstack" / "findings"
+    findings.mkdir(parents=True)
+    (findings / "t1.json").write_text(json.dumps(request()))
+    assert upgrade(tmp_path, emitter="js").returncode == 4
+    land(tmp_path)
+    assert upgrade(tmp_path, emitter="js").returncode == 0

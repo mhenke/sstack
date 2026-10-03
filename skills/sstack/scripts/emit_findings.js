@@ -266,13 +266,41 @@ function warnUnlanded(finding, workspace) {
   const regression = finding.regression;
   const filePath = path.join(workspace, regression.file);
   if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
-    process.stderr.write(`warning: ${regression.file} not on disk yet\n`);
+    process.stderr.write(
+      `regression not landed: ${regression.file} does not exist. ` +
+      `Write the test '${regression.test}' into it, run it (red), apply the fix, run it (green), then emit again.\n`);
   } else {
     const content = fs.readFileSync(filePath, 'utf8');
     if (!content.includes(regression.test)) {
-      process.stderr.write(`warning: '${regression.test}' not found in ${regression.file} yet\n`);
+      process.stderr.write(
+        `regression not landed: '${regression.test}' not found in ${regression.file}. ` +
+        `Write it, run it (red), apply the fix, run it (green), then emit again.\n`);
     }
   }
+}
+
+
+function unlandedConfirmed(findingsDir, workspace) {
+  let unlanded = 0;
+  for (const file of fs.readdirSync(findingsDir)) {
+    if (!file.endsWith('.json')) continue;
+    let record;
+    try { record = JSON.parse(fs.readFileSync(path.join(findingsDir, file), 'utf8')); }
+    catch (_) { continue; }
+    if (record.verdict !== 'confirmed' || !fingerprintIsWellformed(record.fingerprint || '')) continue;
+    const regression = record.regression;
+    if (!regression || typeof regression !== 'object') continue;
+    const p = regression.file ? path.join(workspace, regression.file) : null;
+    const landed = !!(p && fs.existsSync(p) && fs.statSync(p).isFile()
+      && (!regression.test || fs.readFileSync(p, 'utf8').includes(regression.test)));
+    if (!landed) {
+      unlanded++;
+      process.stderr.write(
+        `NOT LANDED: ${file.replace(/\.json$/, '')} — ${regression.file}::${regression.test}. ` +
+        `Write the test, run it (red), apply the fix, run it (green), then emit the finding again.\n`);
+    }
+  }
+  return unlanded;
 }
 
 
@@ -430,7 +458,14 @@ function main() {
     // reading a terminal would block an interactive call forever.
     rawInput = process.stdin.isTTY ? '' : fs.readFileSync(0, 'utf8');
     if (!rawInput.trim()) {
-      return upgradeRequests(findingsDir, workspace, fixture);
+      const rc = upgradeRequests(findingsDir, workspace, fixture);
+      const unlanded = unlandedConfirmed(findingsDir, workspace);
+      if (unlanded) {
+        process.stderr.write(
+          `run not done: ${unlanded} confirmed finding(s) without a landed regression test\n`);
+        process.exit(4);
+      }
+      return rc;
     }
   }
 

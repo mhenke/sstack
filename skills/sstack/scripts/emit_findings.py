@@ -249,13 +249,44 @@ def rebuild_report(findings_dir: Path, workspace: Path, fixture: str) -> int:
 
 
 def warn_unlanded(finding: dict, workspace: Path) -> None:
-    """Advisory only: during Verify the regression test may legitimately not exist yet."""
+    """Feedback at emit time: prints the landing sequence when a confirmed
+    finding's regression is not yet a landed test. Exit stays 0 — Verify
+    legitimately precedes Test; the hard gate is the bare run-end call."""
     regression = finding["regression"]
     path = workspace / regression["file"]
     if not path.is_file():
-        print(f"warning: {regression['file']} not on disk yet", file=sys.stderr)
+        print(f"regression not landed: {regression['file']} does not exist. "
+              f"Write the test {regression['test']!r} into it, run it (red), "
+              f"apply the fix, run it (green), then emit again.", file=sys.stderr)
     elif regression["test"] not in path.read_text(encoding="utf-8", errors="replace"):
-        print(f"warning: {regression['test']!r} not found in {regression['file']} yet", file=sys.stderr)
+        print(f"regression not landed: {regression['test']!r} not found in "
+              f"{regression['file']}. Write it, run it (red), apply the fix, "
+              f"run it (green), then emit again.", file=sys.stderr)
+
+
+def unlanded_confirmed(findings_dir: Path, workspace: Path) -> int:
+    """The run-end gate: a bare emitter call asks 'is the run done?'. Any
+    confirmed finding whose regression is not a landed test means it is
+    not. Exit 4 carries the count; each one prints its landing sequence."""
+    unlanded = 0
+    for path in sorted(findings_dir.glob("*.json")):
+        record = json.loads(path.read_text(encoding="utf-8", errors="replace"))
+        if record.get("verdict") != "confirmed" or not fingerprint_is_wellformed(
+                record.get("fingerprint") or ""):
+            continue
+        regression = record.get("regression")
+        if not isinstance(regression, dict):
+            continue
+        p = workspace / (regression.get("file") or "")
+        if not (p and p.is_file()
+                and (not regression.get("test")
+                     or regression["test"] in p.read_text(encoding="utf-8", errors="replace"))):
+            unlanded += 1
+            print(f"NOT LANDED: {path.stem} — {regression.get('file')}::"
+                  f"{regression.get('test')}. Write the test, run it (red), "
+                  f"apply the fix, run it (green), then emit the finding again.",
+                  file=sys.stderr)
+    return unlanded
 
 
 def render_summary(stack: Path, workspace: Path) -> int:
@@ -370,7 +401,13 @@ def main() -> int:
         finding = read_finding(args.finding if args.finding else _STDIN)
     except _UpgradeRequested:
         fixture = args.fixture or (json.loads(report.read_text(encoding="utf-8")).get("fixture") if report.is_file() else None)
-        return upgrade_requests(findings_dir, workspace, fixture)
+        rc = upgrade_requests(findings_dir, workspace, fixture)
+        unlanded = unlanded_confirmed(findings_dir, workspace)
+        if unlanded:
+            print(f"run not done: {unlanded} confirmed finding(s) without a landed "
+                  f"regression test", file=sys.stderr)
+            return 4
+        return rc
     except (json.JSONDecodeError, ValueError) as error:
         print(f"invalid finding: {error}", file=sys.stderr)
         return 2
