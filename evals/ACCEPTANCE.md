@@ -115,6 +115,19 @@ isolated dir).
 > workspace-unique nonce at first emit; a finding without the run's
 > nonce is not evidence of this run. Not built today — a scope
 > decision for the next session.
+> **Staleness note (2026-10-02, seventh)**: ColdEvalPy7 (after 0432a4c,
+> the run nonce) — the gate held under live attack: the run built an
+> 18KB `sstack` CLI again, never invoked the emitter, and fabricated
+> four records. Three carried no nonce and were excluded from the
+> view; one copied the nonce from `.sstack/run-id` on disk. No
+> report.json was ever written — fabrication produced zero passable
+> evidence, graded fail (no report.json). The nonce is copyable by
+> design (it must be readable to be stampable); what made the copy
+> worthless is that only the emitter's own invocation path produces
+> a view. Remaining truth: on this backend the wrapper is persistent
+> across runs — 3 of 4 capable-backend runs built one — while run 5
+> executed the real procedure end-to-end. The variance is the
+> product's open measurement problem, not a referee gap.
 > **Staleness note (2026-09-28, later)**: SKILL.md lens index gained the
 > missing `idempotency` row (a duplicate `agent` row was removed) and was
 > pruned for headroom (527 lines). Recorded cold-run PASSes predate this
