@@ -80,6 +80,17 @@ isolated dir).
 > on muse-spark-1.3 the failure does not converge — each run
 > invents a new contract. The unmeasured question is the product
 > on a capable backend; that needs a different model pin.
+> **Staleness note (2026-10-02, fourth)**: ColdEvalPy4 (this session's
+> model — the capable-backend cell) graded **fail**, but convergent:
+> it found a real seeded defect (apply_coupon float rounding), emitted
+> ONE finding (right count), valid fingerprint, minimal correct fix —
+> then self-graded the finding `inconclusive`, pointed its "regression"
+> at the source function (`shop/pricing.py::apply_coupon`) instead of
+> a test, landed no regression test, and invented an `sstack` shell
+> wrapper (scope lock). Post-fix replay drift is the honest fixed-code
+> state. Across both backends the failure now concentrates in one
+> place: the red→green regression landing — the product's core loop.
+> The prose describes it; nothing scaffolds it.
 > **Staleness note (2026-09-28, later)**: SKILL.md lens index gained the
 > missing `idempotency` row (a duplicate `agent` row was removed) and was
 > pruned for headroom (527 lines). Recorded cold-run PASSes predate this
