@@ -106,7 +106,13 @@ lens: <lens> | verdict: <confirmed | refuted | inconclusive>
 
 The emitter is `scripts/emit_findings.py` (or `.js` under Node),
 beside this skill: run it as shipped. It alone writes evidence, so a copy
-or an edit invalidates every fingerprint it produced. The moment a
+or an edit invalidates every fingerprint it produced. A finding is a
+violated oracle: a specific case where the observed behavior differed
+from the behavior the surface owed. A mapped surface, a contract
+summary, or a row of the surface map is Discover context, never a
+finding —
+a finding names the defect, shows the command that exposed it, and
+names the test that now fails. The moment a
 verdict is known, write the finding request to `findings/<slug>.json`
 — `repro` is the exact command you ran, as a plain string. Run the
 emitter from the repo root
