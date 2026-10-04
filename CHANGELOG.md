@@ -5,6 +5,53 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.5.1 - 2026-10-04
+
+### Added
+- **5/5 Multi-language cold evaluation baselines (`evals/baseline-cold-eval-*.json`)** —
+  recorded verified cold run passes across all five supported languages (`seeded-py`,
+  `seeded-ts`, `seeded-js`, `seeded-cpp`, and `seeded-java`), covering seeds `*-17`
+  (boundaries/precision), `*-18` (dependency-failure/timeout), and `*-19`
+  (security/injection) with landed red→green regressions and intact evidence replays.
+- **Bounded concurrency and serial execution controls (`acceptance.py eval --serial`, `--concurrency <n>`)** —
+  instructs cold eval agents to evaluate lenses serially or with bounded concurrency to
+  prevent upstream LLM rate-limit bursts (HTTP 429) and classfile write collisions in
+  shared build directories.
+- **Emitter contract tests (`evals/test_emitter.py`)** —
+  added unit test coverage verifying schema tolerance on top-level `command`, upgrade
+  requests, and shorthand fixture alias resolution.
+
+### Fixed
+- **Emitter schema & fixture alias normalization (`emit_findings.py`, `emit_findings.js`)** —
+  normalized finding ingestion to accept both `command` and `repro` (and nested
+  `repro.command`), and canonicalized short fixture names (`py`, `ts`, `js`, `java`, `cpp`)
+  to `seeded-<name>` with `.sstack-host-repo` fallback.
+- **Seeded Java CLI repro dispatcher (`evals/seeded-java/src/main/java/com/sstack/Orders.java`)** —
+  added CLI switch cases in `Orders.main` for seeds 17–19 (`applycoupon-precision-loss`,
+  `fetchtrackingstatus-timeout`, `searchordernotes-sql-injection`), allowing CLI
+  reproduction of defect behavior without altering frozen defect implementations.
+- **Upstream LLM safety filter false-positives (`skills/sstack-security/SKILL.md`)** —
+  neutralized destructive examples (`daily; rm -rf /` → `daily; id`, `DROP TABLE` → schema probe)
+  using `writing-for-agents` principles to prevent commercial LLM safety moderation refusal
+  loops while preserving semantic coverage and avoiding answer-key leaks.
+- **Grader executed fields for content matching (`evals/graders/seeded_acceptance.py`)** —
+  added `repro` to `EXECUTED_FIELDS`, allowing the content matcher to recognize trigger
+  function calls in the executed repro command line.
+- **Site formatting & frozen-copy sync** —
+  fixed 320px viewport overflows, cleaned roman accent words, and synced frozen examples.
+
+### Changed
+- **Root-cause principles codified**:
+  - `evals/README.md`: documented root cause of Windows VS Code sandbox launch failures
+    (`&` call operator syntax error in Git Bash/MINGW64 terminals) and mandated matching
+    terminal shell profile without disabling sandboxing.
+  - `skills/sstack/SKILL.md`: reinforced that prior terminal commands are never scope
+    authority; IDE-only or non-code diffs require an explicit target query before starting an audit.
+  - `docs/ETHOS.md` & `skills/sstack/SKILL.md`: codified that reproducing a failed assertion
+    proves runtime behavior, not contract or exploit paths; oracles must be grounded in
+    documented caller invariants and reachability assessed separately.
+  - Maintained strict line count ceiling in `skills/sstack/SKILL.md` (537 lines ≤ 540).
+
 ## 0.5.0 - 2026-10-04
 
 ### Added
