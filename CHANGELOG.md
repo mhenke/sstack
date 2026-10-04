@@ -24,6 +24,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Explicit `--upgrade` flag on emitters (`emit_findings.py`, `emit_findings.js`)** —
   allows running the request upgrade pass without relying on stdin piping. Non-blocking
   `select` check on non-TTY stdin prevents EOF hangs on bare invocations.
+- **`emit --report` summary rendering** —
+  renders formatted run summary directly from `report.json`.
+
+### Fixed
+- Emitter stdin no longer hangs on non-TTY EOF via non-blocking select check.
+- Cold-run workspaces isolated outside the repository tree (`/tmp/sstack-cold/`).
+- Malformed fingerprints treated as requests rather than valid evidence.
+- Replay path normalization across host and isolated workspaces.
+- Report view strictly derived from verified evidence files, never authoritative state.
 
 ### Changed
 - **Architectural reset**: hard reset back to commit 5410309, discarding experimental
