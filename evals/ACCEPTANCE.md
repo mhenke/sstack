@@ -102,6 +102,15 @@ isolated dir).
 > - Emitter & Grader: all findings emitted via official emitter with
 >   real fingerprints; `acceptance.py grade` → `pass: true`; `replay` →
 >   17/17 integrity intact.
+>
+> Graded cold run on `seeded-ts` (`ColdEvalTs-Reset`): **PASS**.
+> - Findings: 16 confirmed, 0 refuted, 0 inconclusive.
+> - Regressions: 16 red→green suite tests landed in `tests/shop.test.ts`,
+>   0 test failures (full suite 22/22 green in vitest).
+> - Emitter & Grader: all findings emitted via official emitter with
+>   real fingerprints; `acceptance.py grade` → `pass: true`; `replay` →
+>   16/16 integrity intact (all 16 verified red against pristine source,
+>   green against fix). Baseline token: `evals/baseline-cold-eval-ts.json`.
 > **Staleness note (2026-09-28, later)**: SKILL.md lens index gained the
 > missing `idempotency` row (a duplicate `agent` row was removed) and was
 > pruned for headroom (527 lines). Recorded cold-run PASSes predate this
