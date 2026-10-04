@@ -106,23 +106,23 @@ the skill and the decontaminated fixture together in one temp dir.
 ## Testing
 
 Baselines, green before any commit:
-- `python3 -m pytest evals/test_emitter.py -q` → 29 passed (emitter/skill contract)
+- `python3 -m pytest evals/test_emitter.py -q` → 39 passed (emitter/skill contract)
 - `python3 evals/acceptance.py test-all` → ALL FIXTURES GREEN (py, ts, js, java, cpp)
   (or per-fixture: `python3 evals/acceptance.py test <fixture>`)
 
 The unified eval entry point is `python3 evals/acceptance.py`:
 `prepare <fixture>`, `prepare-all`, `test <fixture>`, `test-all`,
-`grade <workspace>`, and `replay <workspace>`. It never launches a
-host-specific cold agent. `grade` matches findings to goldens by
-content, not by seed labels. No coverage tooling exists and none is
-needed.
+`grade <workspace>`, `replay <workspace>`, and `eval <fixture>`. It never launches a
+host-specific cold agent without `--agent-cmd`. `grade` matches findings to goldens by
+content, not by seed labels. Full cold agent instructions live in
+`evals/README.md`.
 
 ## Layout
 
 - `skills/sstack/SKILL.md` — routing, rules, stage instructions, lens
   index, and nothing else
 - `skills/sstack/references/` — on-demand subcommand bodies
-  (`harden.md`, `triage.md`), loaded by routing, never by host scan
+  (`harden.md`, `triage.md`, `discover.md`), loaded by routing, never by host scan
   (ADR-0016, ADR-0018)
 - `agents/sstack-<lens>-attacker.md` — one failure class each
 - `skills/sstack-<lens>/SKILL.md` — lens rubric
