@@ -5,6 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.5.0 - 2026-10-04
+
+### Added
+- **`/sstack triage <target>` pre-lifecycle subcommand (`references/triage.md`)** —
+  churn-ranked surface heat before a full Discover. Ranks target surfaces by git
+  touch frequency, `learn/` adjacency, and impact class; performs a friction walk;
+  writes snapshot to `.sstack/triage/`. Discover consumes newest snapshot to prioritize
+  hot surfaces without shrinking the whole-target map (ADR-0016, ADR-0018, ADR-0020).
+- **Parallel exploration and deterministic AST caller tracing (`references/discover.md`)** —
+  on-demand reference for multi-surface targets structuring Discover into four roles
+  (Gateways/Auth, Models/State, APIs/Parsers, External Boundaries) with local stdlib
+  AST caller tracing (dynamic args vs. constant-only callers vs. shallow helper traps)
+  without vector stores.
+- **Automated model evaluation runner (`evals/acceptance.py eval`)** —
+  automates workspace preparation, cold agent invocation with timeouts, grading,
+  and replay verification, recording baseline tokens (`evals/baseline-<model>.json`).
+- **Explicit `--upgrade` flag on emitters (`emit_findings.py`, `emit_findings.js`)** —
+  allows running the request upgrade pass without relying on stdin piping. Non-blocking
+  `select` check on non-TTY stdin prevents EOF hangs on bare invocations.
+
+### Changed
+- **Architectural reset**: hard reset back to commit 5410309, discarding experimental
+  anti-cheat/DRM gates (run nonces, exit-4 traps, report recitation) to return to
+  first principles: sstack is a negative-testing skill pack, not an anti-tamper harness.
+- **Scope authority & target resolution**: bare `/sstack` resolves scope strictly via
+  working tree code diff (`git diff --stat`). Terminal command history is explicitly
+  banned from defining scope. Non-code diffs trigger a mandatory user query.
+- Banned creating `sstack` CLI wrappers or shell scripts in target workspaces (scope lock).
+- Clarified `regression` anatomy in `skills/sstack/SKILL.md`: `file` must point to a test
+  suite file under `tests/` (never source code under test) and `test` to its def/method name.
+- Emphasized explicit execution of the emitter via command tools so `.sstack/report.json`
+  is generated on disk rather than hallucinated in chat.
+- Clarified that business invariants and documented domain contracts are valid oracle
+  sources in Verify, distinguishing them from unstated preferences; constant-only callers
+  demonstrate no input path.
+- Purged heavy AST reachability machinery from ROADMAP, preserving zero-runtime simplicity.
+- Graded cold eval on `seeded-py` PASS (15 confirmed findings, 15 red→green suite tests, 0 failures, 17/17 replay integrity intact).
+
 ## 0.4.0 - 2026-10-02
 
 ### Added

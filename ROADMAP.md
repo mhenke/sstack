@@ -28,7 +28,7 @@ of a run. Anything that does neither is out.
 
 ## Open, in order
 
-### 1. Scan baseline triage *(designed — ADR-0019)*
+### 1. Scan baseline triage *(shipped in text 2026-10-02 — cold evidence pending)*
 
 - **Why**: a repeat run re-attacks everything with no memory of what
   changed; "what changed since last time?" is the user's first
@@ -52,6 +52,15 @@ of a run. Anything that does neither is out.
   No plugin API, no marketplace entry, no runtime. Requires lifting
   the scope lock's "no CLI, daemon, or binary" constraint (ADR pending).
 - **Done when**: install and update are one command per host.
+
+## Watch signals
+
+- **`/sstack triage` skipped in practice**: if cold/field runs go
+  straight to `/sstack <target>` without a triage pass, fold the
+  heat pass into Discover's inventory step and retire the
+  subcommand — the ideas (churn weighting, friction walk) then live
+  in stage text, and `references/triage.md` shrinks to the snapshot
+  format. Packaging follows usage, not precedent.
 
 ## Shipped — acceptance baseline, 2026-09-27
 
@@ -106,6 +115,16 @@ of a run. Anything that does neither is out.
   and probes with `curl` through the emitter; a wrapper script adds no
   signal over the native command and would cost replay lifecycle
   management (ADR-0015).
+- **Heavy reachability machinery on map rows.** Turns sstack into an
+  AST security auditor or code-structure analyzer rather than negative
+  testing (ADR-0001, ADR-0002). Reachability is an attack constraint
+  ("a constant-only caller demonstrates no input path" in Verify), not
+  an upfront mapping pass requiring AST or compiler toolchains.
+- **Mechanical test-runner replay or baseline audits in the emitter.**
+  evals/replay.py verifies evidence integrity outside the loop. The
+  emitter records evidence and executes finding requests; it is not a
+  test runner, CI orchestrator, or git state validator (ADR-0002,
+  ADR-0006, ADR-0014).
 
 ## How a roadmap item ships
 

@@ -1,23 +1,46 @@
 # Evals
 
-Cold-agent evaluation for sstack. The repo ships a prepared fixture
-set, a deterministic grader, and one Python entry point. It does not
-launch agents itself because agent APIs differ by host.
+Cold-agent evaluation for sstack.
+
+## Evals vs. Cold Agent
+
+- **Eval harness (`evals/acceptance.py`)**: Deterministic local referee (zero LLM calls). Tests baseline fixtures (`test-all`), prepares decontaminated workspaces (`prepare`), grades findings against goldens (`grade`), and verifies evidence integrity (`replay`).
+- **Cold agent**: The live AI model being evaluated. Starts in an isolated sandbox with zero context, no answer key, and no memory; reads `skills/sstack/SKILL.md` cold, executes `/sstack`, and emits evidence.
 
 ## Quick start
 
 From the repository root:
 
 ```bash
-# Build one isolated workspace. The command prints its path.
+# 1. Build an isolated workspace (prints workspace path)
 python3 evals/acceptance.py prepare seeded-py
 
-# Launch a fresh cold agent in the printed directory.
-# Run /sstack against the fixture.
+# 2. Launch a fresh cold agent inside the printed directory (see prompt below)
 
-# Score the JSON report.
-python3 evals/acceptance.py grade path/to/workspace
+# 3. Grade the run's findings against goldens
+python3 evals/acceptance.py grade /tmp/sstack-cold/sstack-seeded-py-<id>
+
+# 4. Verify evidence integrity out-of-loop
+python3 evals/acceptance.py replay /tmp/sstack-cold/sstack-seeded-py-<id>
 ```
+
+## Running the Cold Agent
+
+### 1. Cold Agent Prompt Template
+
+Provide the agent with this exact prompt:
+
+```text
+Your workspace root is `<prepared-workspace-path>`.
+Read `skills/sstack/SKILL.md` inside that workspace and execute `/sstack shop` against the codebase.
+All file reads, file edits, and commands must be executed within `<prepared-workspace-path>`.
+Report your findings when finished.
+```
+
+### 2. Containment Rules
+- **No access to sstack repo or `BUGS.md`**: `prepare` strips `BUGS.md` and initializes a clean git baseline. The cold agent must never read the source repo or answer key.
+- **Working directory**: All agent tool calls (`read_file`, `write_file`, `bash`) must set `cwd=<prepared-workspace-path>`.
+- **Zero wrappers**: The agent must follow `SKILL.md` and run the emitter directly; creating custom shell wrappers violates the scope lock.
 
 For every fixture:
 
@@ -95,6 +118,20 @@ recorded `fingerprint` must equal sha256[:16] of the recorded
 re-runs the recorded command and reports `drift` — expected after a
 landed fix, evidence against a `refuted` verdict. Exit 0 only when
 every evidence file is intact.
+
+### `eval <fixture> [--model <name>] [--agent-cmd "<cmd>"]`
+
+Automated end-to-end evaluation against a model or agent CLI (eval-harness-first pattern).
+Prepares the workspace, executes the agent, runs `grade` and `replay`, and records
+`evals/baseline-<model>.json`:
+
+```bash
+# Automated evaluation with an agent CLI:
+python3 evals/acceptance.py eval seeded-py --model claude-3-7-sonnet --agent-cmd "claude -p '{prompt}'"
+
+# Or prepare and view the prompt template for manual / subagent execution:
+python3 evals/acceptance.py eval seeded-py
+```
 
 ## Fixtures
 

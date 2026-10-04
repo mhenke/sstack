@@ -28,9 +28,9 @@ existing suite with negative test cases even where nothing is broken.
 
 ## Routing
 
-Each slash form below names a stage you execute yourself with your tools;
-v0 ships no `sstack` binary, so a shell answers `not found` — the
-expected result, not a problem to solve.
+Each slash form below is a prompt command to you, not a shell command:
+execute the stages yourself with your tools. Do not create an sstack
+script, CLI, or binary wrapper (scope lock).
 - `/sstack <target>` — full lifecycle on a module, file, directory, or function.
 - `/sstack` (bare) — target resolved, never chosen: explicit naming wins, else the
   behaviorally relevant working-tree code diff (`git diff --stat`); a prior terminal
@@ -41,6 +41,8 @@ expected result, not a problem to solve.
 - `/sstack lenses` — print the lens index below, then every custom lens per Customization.
 - `/sstack harden <target>` — negative-test gap-filling without a full attack; load
   `references/harden.md` and follow it.
+- `/sstack triage <target>` — churn-ranked surface heat before a full Discover; load
+  `references/triage.md` and follow it.
 
 Dispatch fallback: per-lens subagents that fail or go silent twice
 transfer to you — run every lens yourself, one at a time, in index
@@ -110,29 +112,24 @@ or an edit invalidates every fingerprint it produced. A finding is a
 violated oracle: a specific case where the observed behavior differed
 from the behavior the surface owed. A mapped surface, a contract
 summary, or a row of the surface map is Discover context, never a
-finding —
-a finding names the defect, shows the command that exposed it, and
-names the test that now fails. The moment a
-verdict is known, write the finding request to `findings/<slug>.json`
-— `repro` is the exact command you ran, as a plain string. Run the
-emitter from the repo root
-(`python3 skills/sstack/scripts/emit_findings.py --workspace .`) as
-each finding lands or at run end: it executes every request's repro
-itself, computes the fingerprint, and writes the evidence — a
-request without a `fingerprint` field is not evidence; a repro past
-120 seconds is killed (exit 124, kill noted in stderr).
-To emit one finding immediately, pass `--finding <file>` (or pipe the JSON on
-stdin). Add `--fixture <name>` on the first emit; later runs inherit it from
-`report.json`, which the emitter writes.
+finding — a finding names the defect, shows the command that exposed
+it, and names the test that now fails. The moment a verdict is known,
+write the finding request to `findings/<slug>.json` (`repro` is the exact command
+run). Execute the emitter (`python3 skills/sstack/scripts/emit_findings.py --workspace .`)
+with your command tool: it executes every request's repro itself, computes
+the fingerprint, and writes `.sstack/report.json` — chat claims are
+not evidence. To emit immediately, pass `--finding <file>`. Add
+`--fixture <name>` on first emit.
 
 The request JSON is the Report format fields — `lens`, `surface`,
-`case`, `oracle`, `verdict`, `repro` — plus `slug` (a short kebab-case
-name for the finding), `fix` (the minimal change you will make), and
-`regression`: `{"file": "tests/test_x.py", "test": "test_name",
-"before": "red", "after": "green"}`. Optional for
-PBT: `seed` (integer/token) and `counterexample` (minimal failing input).
-The seven fields alone are rejected. A finding with no regression yet is
-legitimate during Verify: the emitter warns and records the rest.
+`case`, `oracle`, `verdict`, `repro` — plus `slug` (short kebab-case name),
+`fix` (minimal source change), and `regression`: `{"file": "tests/test_x.py",
+"test": "test_name", "before": "red", "after": "green"}`. A regression is
+a test in the repo's suite: `file` is the test file (never source code),
+`test` is the test method name. Write it into the suite, run it (red),
+apply the minimal fix, run it (green). Optional for PBT: `seed`,
+`counterexample`. The seven fields alone are rejected. A finding with no
+regression yet is legitimate during Verify: the emitter warns and records.
 
 Everything sstack creates lives under `.sstack/` in the target repo,
 created by this run — the pack brings only skills and agents, so
@@ -224,14 +221,12 @@ call, never the run's. The map spans the resolved target whole;
 testability filters surfaces, not size.
 
 **Inventory every surface that transforms, stores, routes, or gates
-data**, not just the kinds the first file shows — the list is
-illustrative, never exhaustive: entry points (routes, handlers,
-listeners, jobs), transformations (parsers, validators, converters,
-formatters, mappers, serializers, adapters, utilities), state
-(services, DAOs, repositories, caches), flow (loops, indexers) — in
-every language present; a Java Converter and its Python, TS/JS, or
-C++ kin are surfaces alike. Read `.sstack/learn/` first and
-prioritize surfaces adjacent to recorded failure classes.
+data**, not just the kinds the first file shows — entry points (routes,
+handlers, jobs), transforms (parsers, validators, formatters,
+serializers, adapters), state (services, DAOs, caches), flow. Read
+`.sstack/learn/` first; prioritize surfaces adjacent to recorded
+failure classes. Multi-surface targets: load `references/discover.md`
+for parallel role exploration and deterministic AST caller tracing.
 
 **One `map.md` row per materially different surface**: its language,
 its assumed contract (types, ranges, preconditions from docstrings,
@@ -247,10 +242,9 @@ A later run over the same scope triages by
 attack first; changed means prioritized, never skipped, and the
 baseline rewrites at run end, after Fix. No git, no baseline, or no
 overlap → full Discover.
-Then read feature
-maps and project-local verify scripts — if the host has
-`create-verification-skill` or `maintain-verification-skill`, follow
-it — else the target's own docs.
+Then read feature maps, project verify scripts, `docs/adr/`, or domain
+glossaries to ground invariants — if the host has
+`create-verification-skill` or `maintain-verification-skill`, follow it.
 
 **Select or skip per surface × lens, with evidence.** Read every
 `sstack-<lens>` skill in the skills directories named in
@@ -309,12 +303,12 @@ Cover every selected lens on every mapped surface; a lens with zero
 executed cases on a surface consuming record/dict or string input is
 an incomplete run, not a clean result.
 
-**Per-lens fan-out.** Dispatch one subagent per selected lens with
-`runSubagent`, one call per lens, concurrently: dispatch agent
-`sstack-<lens>-attacker` with the matching `sstack-<lens>` skill
-inline under `### Lens rubric`. A custom lens without a dedicated
-agent runs on the shipped attacker whose discipline fits, the custom
-rubric appended after the built-in text (per Customization).
+**Per-lens fan-out.** Small or single-file target: run inline without
+fan-out. Multi-surface target: dispatch one subagent per selected lens
+concurrently (`runSubagent`), agent `sstack-<lens>-attacker` with
+matching `sstack-<lens>` skill inline under `### Lens rubric`. A custom
+lens without a dedicated agent runs on the attacker whose discipline fits,
+custom rubric appended after built-in text (per Customization).
 
 Pass each subagent the full context inline, not paths. Read
 `.sstack/map.md` and paste its contents with labeled sections
@@ -351,11 +345,12 @@ given the surface's contract; if it holds, the oracle is wrong —
 re-read the contract and mark the finding refuted. Then name what
 would make the verdict wrong: a re-run that passes, an oracle that
 permits the observed behavior, a contract inferred rather than read.
-Name the oracle's source — documented contract, caller requirement,
-existing test, inference; an oracle quoting a test asserts the test,
-not the contract, and inference caps the verdict at inconclusive.
-Reachability is separate: a constant-only caller shows no input path.
-A verdict you cannot break is a verdict you did not check.
+Name the oracle's source — documented contract, business invariant
+(types, precision, domain rules), caller requirement, existing test;
+an oracle asserting unstated preferences without contract or invariant
+basis caps the verdict at inconclusive. Reachability is separate: a
+constant-only caller shows no input path. A verdict you cannot break
+is a verdict you did not check.
 
 Synthesizing parallel lens findings: deduplicate defects reported
 through more than one lens into a single finding (an operating-limit
@@ -378,12 +373,12 @@ written.
 
 Test behavior, not implementation — if the host has
 `principle-test-behavior-not-implementation` installed, load and
-follow it. Call the subject as its users do, asserting exact scalar
-values, concrete error types, and specific error codes or message
-substrings. Delete or rewrite any test that would pass when every
-imported function returns `undefined`. Verify error identity, not
-merely that something failed; a returning call is proven by its
-returned state and side effects, not by the absence of an error.
+follow it. Call the subject at the seam where its contract is owed;
+assert at the caller's seam (testing an internal helper in isolation
+misses caller misuse: the locality trap). Assert exact scalar values,
+concrete error types, and specific error codes or substrings. Delete
+or rewrite any test passing when imported functions return `undefined`.
+Verify error identity; returning calls prove by state and side effects.
 
 Write a permanent negative test in the host repo's real suite — same
 directory and assert style as existing tests, asserting the oracle.

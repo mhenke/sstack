@@ -108,7 +108,7 @@ def resolve_report(path: Path) -> tuple[Path, Path | None]:
     return path, None
 
 
-def grade(report_path: Path) -> int:
+def grade_workspace(report_path: Path) -> dict:
     sys.path.insert(0, str(EVALS / "graders"))
     from seeded_acceptance import grade_file
 
@@ -143,14 +143,91 @@ def grade(report_path: Path) -> int:
             if fixture_name in FIXTURES:
                 rebuild_report(evidence_dir, workspace, fixture_name)
     fixture_dir = EVALS / fixture_name if fixture_name in FIXTURES else None
-    result = grade_file(
+    return grade_file(
         str(report),
         str(EVALS / "goldens.jsonl"),
         str(workspace) if workspace else None,
         str(fixture_dir) if fixture_dir else None,
     )
+
+
+def grade(report_path: Path) -> int:
+    result = grade_workspace(report_path)
     print(json.dumps(result, indent=2, sort_keys=True))
     return 0 if result["pass"] else 1
+
+
+def run_eval(
+    fixture: str,
+    agent_cmd: str | None = None,
+    model: str | None = None,
+    prompt_override: str | None = None,
+    timeout: int = 600,
+) -> int:
+    workspace = prepare(fixture)
+    prompt = prompt_override or (
+        f"Your workspace root is `{workspace}`.\n"
+        f"Read `skills/sstack/SKILL.md` inside that workspace and execute `/sstack shop` against the codebase.\n"
+        f"All file reads, file edits, and commands must be executed within `{workspace}`.\n"
+        f"Report your findings when finished."
+    )
+
+    if not agent_cmd:
+        print(f"Prepared workspace: {workspace}\n")
+        print("To run an agent against this fixture, pass --agent-cmd with your command:")
+        print(f"  python3 evals/acceptance.py eval {fixture} --model <name> --agent-cmd \"claude -p '{{prompt}}'\"")
+        print("\nPrompt template:")
+        print(prompt)
+        return 0
+
+    cmd = agent_cmd.format(prompt=prompt, workspace=str(workspace))
+    print(f"Running agent in {workspace}...")
+    try:
+        subprocess.run(
+            cmd,
+            shell=True,
+            cwd=workspace,
+            timeout=timeout,
+            text=True,
+            input=prompt if "{prompt}" not in agent_cmd else None,
+        )
+    except subprocess.TimeoutExpired:
+        print(f"Agent execution timed out after {timeout}s", file=sys.stderr)
+        return 2
+
+    # Score output
+    try:
+        grade_res = grade_workspace(workspace)
+    except (Exception, SystemExit) as e:
+        grade_res = {"pass": False, "error": str(e)}
+
+    sys.path.insert(0, str(EVALS))
+    from replay import replay_workspace
+    replay_res = replay_workspace(workspace)
+
+    import datetime
+    summary = {
+        "model": model or "unspecified",
+        "fixture": fixture,
+        "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        "pass": grade_res.get("pass", False),
+        "grade": grade_res,
+        "replay": {
+            "intact": sum(1 for r in replay_res if r.get("integrity") == "intact"),
+            "total": len(replay_res),
+            "findings": replay_res,
+        },
+    }
+
+    print("\n==> Evaluation Summary:")
+    print(json.dumps(summary, indent=2))
+
+    if model:
+        baseline_file = EVALS / f"baseline-{model}.json"
+        baseline_file.write_text(json.dumps(summary, indent=2) + "\n")
+        print(f"Recorded baseline token: {baseline_file}")
+
+    return 0 if summary["pass"] else 1
 
 
 def test_fixture(fixture: str) -> int:
@@ -228,6 +305,12 @@ def main() -> int:
     grade_parser.add_argument("report", type=Path)
     replay_parser = sub.add_parser("replay", help="re-verify .sstack/findings/*.json evidence, no agent")
     replay_parser.add_argument("workspace", type=Path)
+    eval_parser = sub.add_parser("eval", help="run end-to-end evaluation against an agent/model")
+    eval_parser.add_argument("fixture", choices=FIXTURES)
+    eval_parser.add_argument("--agent-cmd", help="command template to execute the agent, supporting {prompt} and {workspace}")
+    eval_parser.add_argument("--model", help="model name (writes evals/baseline-<model>.json)")
+    eval_parser.add_argument("--prompt", help="override default cold agent prompt")
+    eval_parser.add_argument("--timeout", type=int, default=600, help="max execution seconds (default 600)")
     args = parser.parse_args()
     if args.command == "prepare":
         print(prepare(args.fixture))
@@ -242,6 +325,14 @@ def main() -> int:
         sys.path.insert(0, str(EVALS))
         from replay import main as replay_main
         return replay_main([str(args.workspace)])
+    elif args.command == "eval":
+        return run_eval(
+            args.fixture,
+            agent_cmd=args.agent_cmd,
+            model=args.model,
+            prompt_override=args.prompt,
+            timeout=args.timeout,
+        )
     else:
         return grade(args.report)
     return 0

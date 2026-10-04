@@ -122,8 +122,8 @@ needed.
 - `skills/sstack/SKILL.md` — routing, rules, stage instructions, lens
   index, and nothing else
 - `skills/sstack/references/` — on-demand subcommand bodies
-  (`harden.md`), loaded by routing, never by host scan (ADR-0016,
-  ADR-0018)
+  (`harden.md`, `triage.md`), loaded by routing, never by host scan
+  (ADR-0016, ADR-0018)
 - `agents/sstack-<lens>-attacker.md` — one failure class each
 - `skills/sstack-<lens>/SKILL.md` — lens rubric
 - `docs/ETHOS.md` — the four rules

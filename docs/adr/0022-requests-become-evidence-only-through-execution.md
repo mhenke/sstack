@@ -59,3 +59,9 @@ emitter hang; partial output on a kill is discarded. The Python
 upgrade pass also preflights referenced scratch probes, matching the
 Node emitter (a probe that does not compile is infrastructure failure,
 pending, not evidence).
+
+Amended 2026-10-04: The upgrade pass processes pending requests into
+evidence records; it does not re-execute or re-verify existing evidence
+records. Replaying evidence belongs to out-of-loop tooling (`evals/replay.py`),
+not the emitter (ADR-0002, ADR-0014). The emitter remains a recorder,
+never a test runner.

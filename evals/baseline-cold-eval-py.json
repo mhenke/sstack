@@ -1,0 +1,113 @@
+{
+  "model": "cold-eval-agent",
+  "fixture": "seeded-py",
+  "timestamp": "2026-10-04T15:02:03.025892+00:00",
+  "pass": true,
+  "grade": {
+    "pass": true,
+    "fixture": "seeded-py",
+    "confirmed": 15,
+    "red_green_claimed": 15,
+    "seeded_matched": [
+      "py-1",
+      "py-15",
+      "py-16",
+      "py-17",
+      "py-4",
+      "py-8"
+    ],
+    "label_contradictions": [],
+    "reason": null
+  },
+  "replay": {
+    "intact": 17,
+    "total": 17,
+    "findings": [
+      {
+        "finding": "agent-dispatch-tool",
+        "integrity": "intact",
+        "drift": true
+      },
+      {
+        "finding": "boundaries-apply-coupon",
+        "integrity": "intact",
+        "drift": true
+      },
+      {
+        "finding": "boundaries-paginate",
+        "integrity": "intact",
+        "drift": true
+      },
+      {
+        "finding": "concurrency-reserve-stock",
+        "integrity": "intact",
+        "drift": true
+      },
+      {
+        "finding": "contract-export-order-summary",
+        "integrity": "intact",
+        "drift": true
+      },
+      {
+        "finding": "dependency-failure-recommendations",
+        "integrity": "intact",
+        "drift": true
+      },
+      {
+        "finding": "exceptional-conditions-refund-order",
+        "integrity": "intact",
+        "drift": true
+      },
+      {
+        "finding": "idempotency-process-payment",
+        "integrity": "intact",
+        "drift": true
+      },
+      {
+        "finding": "malformed-search-order-notes",
+        "integrity": "intact",
+        "drift": true
+      },
+      {
+        "finding": "missing-line-total",
+        "integrity": "intact",
+        "drift": true
+      },
+      {
+        "finding": "ordering-complete-checkout",
+        "integrity": "intact",
+        "drift": true
+      },
+      {
+        "finding": "ordering-pay-checkout",
+        "integrity": "intact",
+        "drift": false
+      },
+      {
+        "finding": "ownership-get-order",
+        "integrity": "intact",
+        "drift": false
+      },
+      {
+        "finding": "ownership-search-orders",
+        "integrity": "intact",
+        "drift": true
+      },
+      {
+        "finding": "resource-exhaustion-fetch-tracking-status",
+        "integrity": "intact",
+        "drift": true
+      },
+      {
+        "finding": "security-resolve-receipt-path",
+        "integrity": "intact",
+        "drift": true
+      },
+      {
+        "finding": "state-cart",
+        "integrity": "intact",
+        "drift": true
+      }
+    ]
+  }
+}

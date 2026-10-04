@@ -6,6 +6,8 @@ docs/superpowers/
 # Python
 __pycache__/
 *.pyc
+venv/
+env/
 
 # sstack run artifacts (runtime output of the skill, not source).
 # Authored content inside is kept by .sstack/.gitignore, which a user

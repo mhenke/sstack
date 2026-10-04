@@ -118,6 +118,11 @@ a directory keeps it broad.
 > cover and writes the missing ones. A harden test that comes back red
 > is a live bug and flips into the lifecycle; the rest land as
 > hardening tests.
+>
+> **Triage** — `/sstack triage <scope>` runs churn-ranked surface heat
+> before a full Discover: it ranks target surfaces by git touch
+> frequency, `learn/` adjacency, and impact class to focus the attack
+> without shrinking the whole-target map.
 
 In an agent without slash commands, say the same thing in a prompt:
 "use the sstack skill on src/checkout.ts".
@@ -193,7 +198,7 @@ the loop.
 
 | Fixture | Seeds | Current cold evidence |
 |---|---|---|
-| seeded-py | 19 | PASS; 16 of 19 seeds have a verified cold pass (17–19 pending). ColdPy-5 covered py-1/3/4/5/6; ColdPy-11 verified py-7 (ownership) through py-11 (concurrency), 5 confirmed red→green; ColdPy-12..16 verified py-12..16 individually; ColdPy-18 verified all 16 seeds (16 confirmed red→green, 16/16 replay intact). Every evidence file replays with integrity ok, 0 drift. History is in `evals/ACCEPTANCE.md` |
+| seeded-py | 19 | PASS; 16 of 19 seeds have a verified cold pass (17–19 pending). ColdPy-18 verified all 16 seeds; ColdEvalPy-Reset (2026-10-04) verified 15 confirmed red→green regressions in tests/test_shop.py, 2 hardening tests, 22/22 suite green, 17/17 replay intact, `grade` pass: true. Full history in `evals/ACCEPTANCE.md` |
 | seeded-ts | 19 | PASS; 16 of 19 seeds have a verified cold pass (17–19 pending). ColdTs-4 covered ts-1..5; ColdTs-5 verified ts-6..16 with 11 confirmed red→green, 11/11 evidence replay intact, 0 drift |
 | seeded-js | 19 | PASS; 16 of 19 seeds have a verified cold pass (17–19 pending). ColdJs-2 covered js-1..5; ColdJs-3 verified js-6..16 with 11 confirmed red→green, 11/11 evidence replay intact, 0 drift |
 | seeded-java | 19 | PASS; 16 of 19 seeds have a verified cold pass (17–19 pending). ColdJava-3 covered java-1..5; ColdJava-4 verified java-6..16 with 11 confirmed red→green, 11/11 evidence replay intact, 0 drift |
@@ -208,12 +213,12 @@ the skill: [`evals/ACCEPTANCE.md`](evals/ACCEPTANCE.md).
 
 ## What's new
 
-v0.2.0
-(2026-09-27): eleven lenses (ownership, exceptional-conditions,
-resource-exhaustion, and state among them) join the original three,
-per-lens attacker agents, user customization via the `sstack-` prefix, a
-shipped evidence emitter with machine-replayable findings, and cold
-acceptance PASS on all five fixtures.
+v0.5.0 (2026-10-04): `/sstack triage <target>` pre-lifecycle subcommand
+(churn heat, friction walk, priority ranking without whole-target map
+shrinkage); emitter `--upgrade` flag and non-blocking stdin handling;
+target scope authority anchored to code diffs rather than terminal
+history; architectural reset back to first principles with cold eval
+PASS on `seeded-py`.
 
 Full changelog: [`CHANGELOG.md`](CHANGELOG.md).
 

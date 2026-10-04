@@ -386,6 +386,7 @@ function main() {
   let fixtureArg = null;
   let findingPath = null;
   let reportMode = false;
+  let upgradeMode = false;
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--workspace') {
@@ -396,6 +397,8 @@ function main() {
       findingPath = args[++i];
     } else if (args[i] === '--report') {
       reportMode = true;
+    } else if (args[i] === '--upgrade') {
+      upgradeMode = true;
     }
   }
 
@@ -421,6 +424,10 @@ function main() {
       const existing = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
       fixture = existing.fixture;
     } catch (_) {}
+  }
+
+  if (upgradeMode) {
+    return upgradeRequests(findingsDir, workspace, fixture);
   }
 
   // Empty stdin without --finding is the upgrade pass, not an error.

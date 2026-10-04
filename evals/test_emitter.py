@@ -108,6 +108,24 @@ def test_tty_stdin_js_upgrades_instead_of_blocking(tmp_path):
     assert "0 request(s) upgraded" in result.stdout
 
 
+def test_upgrade_flag_explicit_py(tmp_path):
+    """Passing --upgrade explicitly runs the upgrade pass without reading stdin."""
+    result = subprocess.run(
+        [sys.executable, str(EMITTER), "--workspace", str(tmp_path), "--upgrade"],
+        capture_output=True, text=True, timeout=10)
+    assert result.returncode == 0, result.stderr
+    assert "0 request(s) upgraded" in result.stdout
+
+
+def test_upgrade_flag_explicit_js(tmp_path):
+    """Passing --upgrade to Node emitter runs the upgrade pass without reading stdin."""
+    result = subprocess.run(
+        ["node", str(EMITTER_JS), "--workspace", str(tmp_path), "--upgrade"],
+        capture_output=True, text=True, timeout=10)
+    assert result.returncode == 0, result.stderr
+    assert "0 request(s) upgraded" in result.stdout
+
+
 def request(slug="t1", repro="echo 0"):
     finding = base(slug=slug)
     finding["repro"] = repro

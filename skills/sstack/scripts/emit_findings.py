@@ -26,6 +26,7 @@ import hashlib
 import json
 import os
 import re
+import select
 import subprocess
 import sys
 from pathlib import Path
@@ -60,11 +61,23 @@ class _UpgradeRequested(Exception):
     """No --finding and nothing on stdin: run the upgrade pass."""
 
 
+def _stdin_is_empty() -> bool:
+    if getattr(sys.stdin, "isatty", lambda: True)():
+        return True
+    try:
+        r, _, _ = select.select([sys.stdin], [], [], 0.0)
+        if not r:
+            return True
+    except (OSError, ValueError):
+        pass
+    return False
+
+
 def read_finding(path: str | None) -> dict:
     if path is None or path is _STDIN:
-        # A TTY counts as empty (empty stdin runs the upgrade pass):
-        # reading a terminal would block an interactive call forever.
-        raw = "" if getattr(sys.stdin, "isatty", lambda: True)() else sys.stdin.read()
+        # A TTY or pipe without immediate data counts as empty:
+        # reading would block forever.
+        raw = "" if _stdin_is_empty() else sys.stdin.read()
         if not raw.strip():
             raise _UpgradeRequested
     else:
@@ -354,6 +367,8 @@ def main() -> int:
     parser.add_argument("--fixture", help="fixture name; required on the first emit, then preserved")
     parser.add_argument("--report", action="store_true",
                         help="print the run summary from report.json and exit")
+    parser.add_argument("--upgrade", action="store_true",
+                        help="run the upgrade pass over pending finding requests")
     args = parser.parse_args()
 
     workspace = args.workspace.resolve()
@@ -366,6 +381,10 @@ def main() -> int:
         return render_summary(stack, workspace)
 
     report = stack / "report.json"
+    if args.upgrade:
+        fixture = args.fixture or (json.loads(report.read_text(encoding="utf-8")).get("fixture") if report.is_file() else None)
+        return upgrade_requests(findings_dir, workspace, fixture)
+
     try:
         finding = read_finding(args.finding if args.finding else _STDIN)
     except _UpgradeRequested:

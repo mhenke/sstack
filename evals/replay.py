@@ -70,14 +70,20 @@ def replay_one(path: Path) -> dict:
     return result
 
 
+def replay_workspace(ws: Path) -> list[dict]:
+    findings = sorted((ws / ".sstack" / "findings").glob("*.json"))
+    if not findings:
+        return []
+    return [replay_one(f) for f in findings]
+
+
 def main(argv=None) -> int:
     argv = argv or sys.argv[1:]
     ws = Path(argv[0])
-    findings = sorted((ws / ".sstack" / "findings").glob("*.json"))
-    if not findings:
+    results = replay_workspace(ws)
+    if not results:
         print(f"no evidence JSONs under {ws}/.sstack/findings/", file=sys.stderr)
         return 1
-    results = [replay_one(f) for f in findings]
     for r in results:
         print(json.dumps(r, sort_keys=True))
     return 0 if all(r["integrity"] == "intact" for r in results) else 1

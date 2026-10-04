@@ -80,6 +80,28 @@ isolated dir).
 > on muse-spark-1.3 the failure does not converge — each run
 > invents a new contract. The unmeasured question is the product
 > on a capable backend; that needs a different model pin.
+> **Reset note & ColdEvalPy-Reset (2026-10-04, post-reset to 5410309)**:
+> After commit 5410309, experimental anti-cheat gates (exit-4 on
+> unlanded regressions, run nonces, report verbatim recitation) caused
+> an escalating adversarial spiral where runs invented wrapper scripts
+> and DRM workarounds. The branch was hard-reset back to 5410309 to
+> discard the anti-cheat machinery and return to first principles: sstack
+> is a negative-testing skill pack, not an anti-tamper harness. Root-cause
+> fixes applied: (1) bare `/sstack` scope authority clarified — terminal
+> command history explicitly banned from defining scope, non-code diffs
+> trigger mandatory user query, wrapper scripts banned; (2) `regression`
+> anatomy anchored to repo test suite under `tests/`; (3) emitter stdin
+> hangs resolved by adding `--upgrade` flag and non-blocking `select` check
+> on non-TTY stdin; (4) heavy reachability AST machinery and runner replay
+> rejected from ROADMAP, preserving zero-runtime simplicity.
+>
+> Graded cold run on `seeded-py` (`ColdEvalPy-Reset`): **PASS**.
+> - Findings: 15 confirmed, 2 refuted (hardening tests), 0 inconclusive.
+> - Regressions: 15 red→green suite tests landed in `tests/test_shop.py`,
+>   2 hardening tests landed, 0 test failures (full suite 22/22 green).
+> - Emitter & Grader: all findings emitted via official emitter with
+>   real fingerprints; `acceptance.py grade` → `pass: true`; `replay` →
+>   17/17 integrity intact.
 > **Staleness note (2026-09-28, later)**: SKILL.md lens index gained the
 > missing `idempotency` row (a duplicate `agent` row was removed) and was
 > pruned for headroom (527 lines). Recorded cold-run PASSes predate this
@@ -443,7 +465,7 @@ isolated dir).
 
 | fixture | verdict | evidence |
 |---|---|---|
-| seeded-py | PASS | ColdPy-5 covers py-1/3/4/5/6 (5/5 seeds, 17 tests green, 12/12 replay intact). ColdPy-11 verified py-7 (ownership), py-8 (ordering), py-9 (exceptional-conditions), py-10 (resource-exhaustion), and py-11 (concurrency): 5 confirmed red→green in `tests/test_shop.py`, 5/5 evidence replay intact, 0 drift, 10 tests green. ColdPy-12 verified py-12 (idempotency): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-13 verified py-13 (dependency-failure): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-14 verified py-14 (contract): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-15 verified py-15 (security): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-16 verified py-16 (agent): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-18 (2026-09-27, fresh full-lifecycle rerun after SSOT deduplication): 16 confirmed red→green, 16/16 evidence replay intact, 21 tests green, content-matched all 16 seeds including py-2. ColdRequestMode (2026-09-30, ADR-0022 request-upgrade, kimi-code/k3): 27 emitted findings, 24 confirmed red→green, `pass: True`, content-matched 10 seeds including **py-17 and py-19**, which had no cold-run evidence before. py-18 is now the only py seed without cold-run evidence. |
+| seeded-py | PASS | ColdPy-5 covers py-1/3/4/5/6 (5/5 seeds, 17 tests green, 12/12 replay intact). ColdPy-11 verified py-7 (ownership), py-8 (ordering), py-9 (exceptional-conditions), py-10 (resource-exhaustion), and py-11 (concurrency): 5 confirmed red→green in `tests/test_shop.py`, 5/5 evidence replay intact, 0 drift, 10 tests green. ColdPy-12 verified py-12 (idempotency): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-13 verified py-13 (dependency-failure): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-14 verified py-14 (contract): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-15 verified py-15 (security): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-16 verified py-16 (agent): 1 confirmed red→green in `tests/test_shop.py`, 1/1 evidence replay intact, 0 drift. ColdPy-18 (2026-09-27, fresh full-lifecycle rerun after SSOT deduplication): 16 confirmed red→green, 16/16 evidence replay intact, 21 tests green, content-matched all 16 seeds including py-2. ColdRequestMode (2026-09-30, ADR-0022 request-upgrade, kimi-code/k3): 27 emitted findings, 24 confirmed red→green, `pass: True`, content-matched 10 seeds including **py-17 and py-19**, which had no cold-run evidence before. py-18 is now the only py seed without cold-run evidence. ColdEvalPy-Reset (2026-10-04, post-reset to 5410309): 15 confirmed red→green regressions in `tests/test_shop.py`, 2 hardening tests landed, 22/22 tests green, 17/17 evidence replay intact, `grade` pass: true. |
 | seeded-java | PASS | 16 of 19 seeds across all 14 lenses verified (seeds 17–19, added by f279baf, have no cold-run evidence). java-1..5 verified in ColdJava-3 (3/5 seeds, 7/7 replay intact); java-6..16 verified in ColdJava-4 (11/11 seeds content-matched, 14/14 tests green, 11 confirmed red→green regressions landed in ShopTest.java, 11/11 evidence replay intact, 0 drift). |
 | seeded-ts | PASS | 16 of 19 seeds across all 14 lenses verified (seeds 17–19, added by f279baf, have no cold-run evidence). ts-1..5 verified in CleanTs/ColdTs-4 (5/5 seeds, 19/19 replay intact); ts-6..16 verified in ColdTs-5 (11/11 seeds content-matched, 17/17 tests green, 11 confirmed red→green regressions landed, 11/11 evidence replay intact, 0 drift). |
 | seeded-js | PASS | 16 of 19 seeds across all 14 lenses verified (seeds 17–19, added by f279baf, have no cold-run evidence). js-1..5 verified in ColdJs-2 (5/5 seeds, 12/12 replay intact); js-6..16 verified in ColdJs-3 (11/11 seeds content-matched, 12/12 tests green, 11 confirmed red→green regressions landed, 11/11 evidence replay intact, 0 drift). |
