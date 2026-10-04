@@ -198,11 +198,11 @@ the loop.
 
 | Fixture | Seeds | Current cold evidence |
 |---|---|---|
-| seeded-py | 19 | PASS; 16 of 19 seeds have a verified cold pass (17–19 pending). ColdPy-18 verified all 16 seeds; ColdEvalPy-Reset (2026-10-04) verified 15 confirmed red→green regressions in tests/test_shop.py, 2 hardening tests, 22/22 suite green, 17/17 replay intact, `grade` pass: true. Full history in `evals/ACCEPTANCE.md` |
-| seeded-ts | 19 | PASS; 16 of 19 seeds have a verified cold pass (17–19 pending). ColdTs-4 covered ts-1..5; ColdTs-5 verified ts-6..16 with 11 confirmed red→green, 11/11 evidence replay intact, 0 drift |
-| seeded-js | 19 | PASS; 16 of 19 seeds have a verified cold pass (17–19 pending). ColdJs-2 covered js-1..5; ColdJs-3 verified js-6..16 with 11 confirmed red→green, 11/11 evidence replay intact, 0 drift |
-| seeded-java | 19 | PASS; 16 of 19 seeds have a verified cold pass (17–19 pending). ColdJava-3 covered java-1..5; ColdJava-4 verified java-6..16 with 11 confirmed red→green, 11/11 evidence replay intact, 0 drift |
-| seeded-cpp | 19 | PASS; 16 of 19 seeds have a verified cold pass (17–19 pending). ColdCpp-2 covered cpp-1..5; ColdCpp-3 verified cpp-6..16 with 11 confirmed red→green, 11/11 evidence replay intact, 0 drift |
+| seeded-py | 19 | PASS; ColdEvalPy-Reset (2026-10-04) verified 15 confirmed red→green regressions in tests/test_shop.py, 2 hardening tests, 22/22 suite green, 17/17 replay intact, `grade` pass: true. Seeds 17–19 verified (ColdRequestMode py-17/py-19; ColdEvalPy-Reset py-17/py-18). Baseline: `evals/baseline-cold-eval-py.json`. |
+| seeded-ts | 19 | PASS; ColdEvalTs-Reset (2026-10-04) verified 16 confirmed red→green regressions in tests/shop.test.ts, 22/22 suite green in vitest, 16/16 replay intact, `grade` pass: true, content-matched seeds including ts-17. Baseline: `evals/baseline-cold-eval-ts.json`. |
+| seeded-js | 19 | PASS; ColdEvalJs-2026-10-04 verified 14 confirmed findings, 14 red→green regressions landed, 0 drift, `grade` pass: true, content-matched seeds including js-17. Baseline: `evals/baseline-cold-eval-js.json`. |
+| seeded-java | 19 | PASS; ColdEvalJava-2026-10-04 verified 14 confirmed findings, 14 red→green regressions landed in ShopTest.java, 0 drift, `grade` pass: true, content-matched seeds including java-17 and java-19. Baseline: `evals/baseline-cold-eval-java.json`. |
+| seeded-cpp | 19 | PASS; ColdEvalCpp-2026-10-04 verified 14 confirmed findings, 14 red→green regressions landed in tests/shop_test.cpp, 0 drift, `grade` pass: true, content-matched seeds including cpp-17, cpp-18, cpp-19. Baseline: `evals/baseline-cold-eval-cpp.json`. |
 
 All five fixtures (`seeded-py`, `seeded-ts`, `seeded-js`, `seeded-java`, and `seeded-cpp`) are re-run on the current 14-lens set. Earlier waves' failures, including
 fabricated fingerprints and regressions that never landed, are in the
@@ -212,6 +212,14 @@ Full record, including the runs that failed and what each one taught
 the skill: [`evals/ACCEPTANCE.md`](evals/ACCEPTANCE.md).
 
 ## What's new
+
+v0.5.1 (2026-10-04): 5/5 cold evaluation baselines verified across all five
+supported languages (`seeded-py`, `seeded-ts`, `seeded-js`, `seeded-cpp`,
+`seeded-java`) covering seeds `*-17` through `*-19`; bounded concurrency and
+serial execution controls in `acceptance.py eval`; emitter schema normalization
+for `command` vs `repro` and shorthand fixture aliases; safety filter false
+positive neutralization in security rubrics; root-cause principles codified
+across evals, ethos, and routing.
 
 v0.5.0 (2026-10-04): `/sstack triage <target>` pre-lifecycle subcommand
 (churn heat, friction walk, priority ranking without whole-target map

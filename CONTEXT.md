@@ -35,17 +35,20 @@ _Avoid_: attacker lens, lens agent (both collapse the pair)
 
 **Oracle**:
 The expected behavior written down *before* the attack, derived from
-the surface's business invariant — what must stay true under the
-adverse condition — and chosen for what the surface risks, never for
-what is cheapest to execute. One observable outcome, named in the
-target language's terms (exception type, rejected promise, error
-code, typed result): "it crashes" isn't an expectation; "it fails
-with a validation error naming the field" is. A test that passes
-against code you just proved broken has pinned the bug, and a pinned
-bug is worse than no test at all.
+the surface's documented contract or caller invariant — what must
+stay true under the adverse condition — and chosen for what the
+surface risks, never for what is cheapest to execute. Reproducing a
+failed assertion proves runtime behavior, not the invariant or a
+production exploit path; reachability is assessed separately. One
+observable outcome, named in the target language's terms (exception
+type, rejected promise, error code, typed result): "it crashes" isn't
+an expectation; "it fails with a validation error naming the field" is.
+A test that passes against code you just proved broken has pinned the
+bug, and a pinned bug is worse than no test at all.
 _Avoid_: expected output (a value, not the declared behavior under the
 adverse condition); assertion (the test's mechanism, not the
-declaration)
+declaration); reproduced assertion (reproducing a failure proves
+behavior, not an exploit path or contract violation)
 
 **Evidence file**:
 The machine-readable record of one finding: command, recorded output,
@@ -62,14 +65,25 @@ is not a weak evidence file, it is a different artifact)
 **Finding request**:
 What an agent writes the moment a verdict is known: the seven report
 format fields plus slug, fix, and regression, with `repro` spelled
-as the exact command run. A request is not a finding and not
-evidence — it is the finding awaiting the machine. The emitter's
-upgrade pass turns requests into evidence by executing each repro;
-a request whose repro carries no command stays a request forever,
-because the machine will not invent the command the agent did not
-write (ADR-0022).
+as the command string or an object containing `command`. A request
+is not a finding and not evidence — it is the finding awaiting the
+machine. The emitter's upgrade pass turns requests into evidence by
+executing each repro; a request whose repro carries no executable
+command stays a request forever, because the machine will not invent
+the command the agent did not write (ADR-0022).
 _Avoid_: finding draft, pending finding (process state, not what the
 artifact is), evidence file (the whole point is that it is not one)
+
+**Emitter**:
+The stdlib-only reference script (`skills/sstack/scripts/emit_findings.py`,
+fallback `emit_findings.js`) that serves as the single source of truth
+for converting finding requests into verified evidence. Executes repro
+commands, captures exit code and output, strips machine-specific absolute
+paths and timestamps, derives the deterministic SHA256 fingerprint, and
+writes both `findings/<slug>.json` and canonical `report.json`. Refuses to
+emit if scratch probes fail compilation.
+_Avoid_: reporter, test runner, harness (the emitter records evidence; it
+does not orchestrate the run)
 
 **Report**:
 The run-level summary of all findings, at the canonical workspace
@@ -137,14 +151,17 @@ _Avoid_: permission (a grant, not the question being asked)
 
 **Target**:
 The resolved scope a run attacks: the module, directory, or function
-the invocation names, or — for a repo root or broad directory — the
-language-convention folders inside it, one per supported language
-present. Resolution is mechanical; ambiguity across buildable modules
-is the one case that goes back to the user. The map spans the target
-whole, and testability filters surfaces, never target size.
+the invocation names, or — for a bare invocation — the behaviorally
+relevant working-tree code diff; a prior terminal command is context,
+never scope authority (ADR-0020). For a repo root or broad directory,
+target resolves to the language-convention folders inside it, one per
+supported language present. When working-tree changes are non-code
+or IDE-only, the agent must ask for an explicit target rather than
+guessing. The map spans the target whole, and testability filters
+surfaces, never target size.
 _Avoid_: scope (reads as negotiable); smallest valid target (a cold
 run's invented selection criterion — targets are resolved, never
-chosen)
+chosen); prior command as scope (terminal history is context only)
 
 **Surface**:
 One attacked unit in the map: a public function or class, route,
@@ -179,10 +196,14 @@ _Avoid_: severity (ranks findings after the fact; impact ranks
 surfaces before the attack)
 
 **Supported language**:
-One of Python, TypeScript/JavaScript, Java, or C++ — the languages
-every lens rubric's Language notes cover and the eval fixtures
-exercise. Discover inventories surfaces in every one present.
-_Avoid_: target language (names one surface's language, not the set)
+One of Python, TypeScript, JavaScript, Java, or C++ — the five
+languages every lens rubric's Language notes cover and the eval fixtures
+exercise (`seeded-py`, `seeded-ts`, `seeded-js`, `seeded-java`,
+`seeded-cpp`). Discover inventories surfaces in every one present.
+TypeScript and JavaScript maintain separate fixtures and test frameworks
+(`vitest` vs Node `--test`).
+_Avoid_: target language (names one surface's language, not the set);
+collapsing TS/JS (distinct runtimes and fixtures)
 
 **Contamination**:
 A shipped artifact handing a cold run its answer — a worked example
@@ -322,6 +343,16 @@ test that comes back red is a live bug and flips into the lifecycle,
 everything else is a hardening test.
 _Avoid_: negative-test mode, gap-fill stage (it is neither a stage nor
 only a fill)
+
+**Triage mode**:
+Surface-prioritization mode, `/sstack triage <target>`: ranks target
+surfaces by churn heat, git touch frequency, `learn/` failure adjacency,
+and impact class before a full Discover run. Not a stage and never a
+filter that shrinks the whole-target surface map; it orders the attack
+to focus effort where risk concentrates without abandoning whole-scope
+coverage.
+_Avoid_: target filter (it reorders attack priority, never trims the map);
+triage stage (a pre-lifecycle subcommand, not one of the seven stages)
 
 **Run type**:
 Which shape a cold run took, named in the acceptance record: a
