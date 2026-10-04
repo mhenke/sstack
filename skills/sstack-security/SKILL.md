@@ -15,7 +15,7 @@ or unverified cryptographic authentication tokens.
 ## Case-generation heuristics
 
 - SQL injection (OWASP A03 / CWE-89): supply string inputs containing SQL
-  syntax metacharacters (`' OR '1'='1' --`, `'; DROP TABLE...`, `UNION SELECT`)
+  syntax metacharacters (`' OR '1'='1' --`, `'; SELECT 1; --`, `UNION SELECT`)
   to endpoints and functions constructing database queries.
 - OS command injection (CWE-78): supply arguments containing shell metacharacters
   (`;`, `|`, `&&`, `$()`, `` ` ``, `\n`) to functions invoking subprocesses or
@@ -47,7 +47,7 @@ or unverified cryptographic authentication tokens.
   parsers (e.g. JSON), never executing native object instantiation hooks.
 
 Worked example — Python `BackupRunner` building a shell command for a
-tar archive from a caller-supplied `label`: case `label = "daily; rm -rf /"`,
+tar archive from a caller-supplied `label`: case `label = "daily; id"`,
 oracle passes the argument as a list element to `subprocess.run` with
 `shell=False`, so the semicolon is data and the archive label contains it
 verbatim, observed (bug) interpolates it into an f-string passed to

@@ -1,0 +1,229 @@
+{
+  "fixture": "seeded-js",
+  "findings": [
+    {
+      "seed_id": "js-16",
+      "lens": "agent",
+      "surface": "dispatchAgentTool",
+      "case": "dispatchAgentTool('lookupOrder', { orderId: 9999 })",
+      "oracle": "Returns structured error result { isError: true, error: ... } instead of throwing",
+      "observed": "crashed: no such order\n",
+      "verdict": "confirmed",
+      "repro": "node .sstack/scratch/agent/probe.js",
+      "regression": {
+        "file": "tests/shop.test.js",
+        "test": "test_dispatch_agent_tool_catches_error",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "js-boundaries",
+      "lens": "boundaries",
+      "surface": "applyCoupon",
+      "case": "applyCoupon(19.99, 15)",
+      "oracle": "Discounted price is rounded to 2 decimal places (16.99)",
+      "observed": "16.9915\n",
+      "verdict": "confirmed",
+      "repro": "node .sstack/scratch/boundaries/probe.js",
+      "regression": {
+        "file": "tests/shop.test.js",
+        "test": "test_apply_coupon_rounding",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "js-11",
+      "lens": "concurrency",
+      "surface": "reserveStock",
+      "case": "Promise.all([reserveStock('gizmo', 2), reserveStock('gizmo', 2)]) with inventory 2",
+      "oracle": "Only one reservation succeeds, second fails with insufficient stock error",
+      "observed": "both reserved, remaining: -2\n",
+      "verdict": "confirmed",
+      "repro": "node .sstack/scratch/concurrency/probe.js",
+      "regression": {
+        "file": "tests/shop.test.js",
+        "test": "test_reserve_stock_prevents_double_reservation",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "js-14",
+      "lens": "contract",
+      "surface": "exportOrderSummary",
+      "case": "exportOrderSummary(orderId)",
+      "oracle": "Does not leak internalCost or gatewayRef private fields in public summary contract",
+      "observed": "{\"id\":1,\"userId\":\"alice\",\"sku\":\"widget\",\"qty\":2,\"internalCost\":4.5,\"gatewayRef\":\"gw_secret_99\"}\n",
+      "verdict": "confirmed",
+      "repro": "node .sstack/scratch/contract/probe.js",
+      "regression": {
+        "file": "tests/shop.test.js",
+        "test": "test_export_order_summary_no_internal_cost_leak",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "js-13",
+      "lens": "dependency-failure",
+      "surface": "getOrderRecommendations",
+      "case": "getOrderRecommendations(session, orderId, failingRecommender)",
+      "oracle": "Degrades gracefully to empty recommendations [] when external dependency fails",
+      "observed": "crashed: recommender service unavailable\n",
+      "verdict": "confirmed",
+      "repro": "node .sstack/scratch/dependency-failure/probe-recommender.js",
+      "regression": {
+        "file": "tests/shop.test.js",
+        "test": "test_get_order_recommendations_graceful_fallback",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "other",
+      "lens": "dependency-failure",
+      "surface": "fetchTrackingStatus",
+      "case": "fetchTrackingStatus(orderId, blockingTracker, { timeout: 50 })",
+      "oracle": "Enforces timeout bound on external tracking call, rejecting when SLA is exceeded",
+      "observed": "hung (no timeout)\n",
+      "verdict": "confirmed",
+      "repro": "node .sstack/scratch/dependency-failure/probe-timeout.js",
+      "regression": {
+        "file": "tests/shop.test.js",
+        "test": "test_fetch_tracking_status_timeout",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "js-9",
+      "lens": "exceptional-conditions",
+      "surface": "refundOrder",
+      "case": "refundOrder(session, orderId, failingGateway)",
+      "oracle": "Does not report refunded: true when payment gateway throws an error",
+      "observed": "{\"refunded\":true}\n",
+      "verdict": "confirmed",
+      "repro": "node .sstack/scratch/exceptional-conditions/probe.js",
+      "regression": {
+        "file": "tests/shop.test.js",
+        "test": "test_refund_order_gateway_failure",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "js-12",
+      "lens": "idempotency",
+      "surface": "processPayment",
+      "case": "processPayment(1, 10, 'key') twice with identical arguments",
+      "oracle": "Second call returns the existing payment record (same payment id)",
+      "observed": "p1=pay_1, p2=pay_2\n",
+      "verdict": "confirmed",
+      "repro": "node .sstack/scratch/idempotency/probe.js",
+      "regression": {
+        "file": "tests/shop.test.js",
+        "test": "test_process_payment_idempotency_returns_cached",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "js-8",
+      "lens": "ordering",
+      "surface": "completeCheckout",
+      "case": "completeCheckout(unpaidCheckoutId)",
+      "oracle": "Throws Error('checkout not paid') when attempting to complete unpaid checkout",
+      "observed": "{\"id\":5,\"userId\":\"guest\",\"sku\":\"gizmo\",\"qty\":1}\n",
+      "verdict": "confirmed",
+      "repro": "node .sstack/scratch/ordering/probe.js",
+      "regression": {
+        "file": "tests/shop.test.js",
+        "test": "test_complete_checkout_requires_paid",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "js-7",
+      "lens": "ownership",
+      "surface": "searchOrders",
+      "case": "searchOrders({ userId: 'alice' }, 'gizmo')",
+      "oracle": "Search results are scoped to session.userId, excluding other users' orders",
+      "observed": "[{\"id\":2,\"userId\":\"bob\"},{\"id\":3,\"userId\":\"alice\"}]\n",
+      "verdict": "confirmed",
+      "repro": "node .sstack/scratch/ownership/probe.js",
+      "regression": {
+        "file": "tests/shop.test.js",
+        "test": "test_search_orders_scoped_to_session_user",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "js-10",
+      "lens": "resource-exhaustion",
+      "surface": "batchLookupOrders",
+      "case": "batchLookupOrders(session, Array.from({ length: 51 }))",
+      "oracle": "Throws error when batch size exceeds limit (50)",
+      "observed": "processed batch of 100 items without limit\n",
+      "verdict": "confirmed",
+      "repro": "node .sstack/scratch/resource-exhaustion/probe.js",
+      "regression": {
+        "file": "tests/shop.test.js",
+        "test": "test_batch_lookup_orders_length_ceiling",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "js-15",
+      "lens": "security",
+      "surface": "resolveReceiptPath",
+      "case": "resolveReceiptPath(1, '../../etc/passwd')",
+      "oracle": "Throws error when resolved path escapes receiptsDir sandbox",
+      "observed": "/var/etc/passwd\n",
+      "verdict": "confirmed",
+      "repro": "node .sstack/scratch/security/probe-traversal.js",
+      "regression": {
+        "file": "tests/shop.test.js",
+        "test": "test_resolve_receipt_path_prevents_traversal",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "other",
+      "lens": "security",
+      "surface": "searchOrderNotes",
+      "case": "searchOrderNotes(\"item'\")",
+      "oracle": "Sanitizes quotes in search query to prevent injection into filter expression",
+      "observed": "note LIKE '%item'%'\n",
+      "verdict": "confirmed",
+      "repro": "node .sstack/scratch/security/probe-injection.js",
+      "regression": {
+        "file": "tests/shop.test.js",
+        "test": "test_search_order_notes_sanitizes_quotes",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "js-6",
+      "lens": "state",
+      "surface": "CartSession",
+      "case": "session = new CartSession({ a: 1 }); session.track('b', 2); session.count()",
+      "oracle": "count() reflects items added via track() (returns 3)",
+      "observed": "1\n",
+      "verdict": "confirmed",
+      "repro": "node .sstack/scratch/state/probe.js",
+      "regression": {
+        "file": "tests/shop.test.js",
+        "test": "test_cart_session_track_updates_count",
+        "before": "red",
+        "after": "green"
+      }
+    }
+  ]
+}

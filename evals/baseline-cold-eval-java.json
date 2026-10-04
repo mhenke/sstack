@@ -1,0 +1,229 @@
+{
+  "fixture": "seeded-java",
+  "findings": [
+    {
+      "seed_id": "other",
+      "lens": "boundaries",
+      "surface": "applyCoupon",
+      "case": "discount creating floating point error",
+      "oracle": "returns price rounded to cents",
+      "observed": "coupon=7.069999999999999\n",
+      "verdict": "confirmed",
+      "repro": "java -cp target/classes com.sstack.Orders applycoupon-precision-loss",
+      "regression": {
+        "file": "src/test/java/com/sstack/ShopTest.java",
+        "test": "testApplyCouponPrecisionLoss",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "other",
+      "lens": "resource-exhaustion",
+      "surface": "batchLookupOrders",
+      "case": "batch size > ceiling",
+      "oracle": "rejects oversized batch",
+      "observed": "processed=150\n",
+      "verdict": "confirmed",
+      "repro": "java -cp target/classes com.sstack.Orders batchlookuporders-unbounded-batch",
+      "regression": {
+        "file": "src/test/java/com/sstack/ShopTest.java",
+        "test": "testBatchLookupOrdersUnbounded",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "other",
+      "lens": "state",
+      "surface": "CartSession.track",
+      "case": "track is called after constructor",
+      "oracle": "count reflects tracked items",
+      "observed": "count=0\n",
+      "verdict": "confirmed",
+      "repro": "java -cp target/classes com.sstack.Orders cartsession-stale-count",
+      "regression": {
+        "file": "src/test/java/com/sstack/ShopTest.java",
+        "test": "testCartSession",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "other",
+      "lens": "ordering",
+      "surface": "completeCheckout",
+      "case": "complete unpaid checkout",
+      "oracle": "throws exception if unpaid",
+      "observed": "order=5\n",
+      "verdict": "confirmed",
+      "repro": "java -cp target/classes com.sstack.Orders completecheckout-unpaid",
+      "regression": {
+        "file": "src/test/java/com/sstack/ShopTest.java",
+        "test": "testCompleteCheckoutUnpaid",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "other",
+      "lens": "agent",
+      "surface": "dispatchAgentTool",
+      "case": "tool throws exception",
+      "oracle": "returns ToolResult with isError=true",
+      "observed": "Exception: IllegalArgumentException: orderId must be a number\n",
+      "verdict": "confirmed",
+      "repro": "java -cp target/classes com.sstack.Orders dispatchagenttool-raw-exception",
+      "regression": {
+        "file": "src/test/java/com/sstack/ShopTest.java",
+        "test": "testDispatchAgentToolException",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "other",
+      "lens": "contract",
+      "surface": "exportOrderSummary",
+      "case": "export order",
+      "oracle": "does not leak internal fields",
+      "observed": "leaked=true\n",
+      "verdict": "confirmed",
+      "repro": "java -cp target/classes com.sstack.Orders exportordersummary-schema-leak",
+      "regression": {
+        "file": "src/test/java/com/sstack/ShopTest.java",
+        "test": "testExportOrderSummaryLeak",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "other",
+      "lens": "resource-exhaustion",
+      "surface": "fetchTrackingStatus",
+      "case": "tracker blocks",
+      "oracle": "timeouts on external call",
+      "observed": "status=timeout\n",
+      "verdict": "confirmed",
+      "repro": "java -cp target/classes com.sstack.Orders fetchtrackingstatus-timeout",
+      "regression": {
+        "file": "src/test/java/com/sstack/ShopTest.java",
+        "test": "testFetchTrackingStatusTimeout",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "other",
+      "lens": "dependency-failure",
+      "surface": "getOrderRecommendations",
+      "case": "recommender throws exception",
+      "oracle": "graceful degradation",
+      "observed": "Exception: RuntimeException: service unavailable\n",
+      "verdict": "confirmed",
+      "repro": "java -cp target/classes com.sstack.Orders getorderrecommendations-dependency-crash",
+      "regression": {
+        "file": "src/test/java/com/sstack/ShopTest.java",
+        "test": "testOrderRecommendationsCrash",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "other",
+      "lens": "idempotency",
+      "surface": "processPayment",
+      "case": "same idempotency key twice",
+      "oracle": "returns cached payment",
+      "observed": "p1=pay_1, p2=pay_2\n",
+      "verdict": "confirmed",
+      "repro": "java -cp target/classes com.sstack.Orders processpayment-duplicate-charge",
+      "regression": {
+        "file": "src/test/java/com/sstack/ShopTest.java",
+        "test": "testProcessPaymentDuplicate",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "other",
+      "lens": "exceptional-conditions",
+      "surface": "refundOrder",
+      "case": "gateway throws exception",
+      "oracle": "propagates error or returns failed status",
+      "observed": "refunded=true\n",
+      "verdict": "confirmed",
+      "repro": "java -cp target/classes com.sstack.Orders refundorder-swallowed-gateway-error",
+      "regression": {
+        "file": "src/test/java/com/sstack/ShopTest.java",
+        "test": "testRefundOrderGatewayError",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "other",
+      "lens": "concurrency",
+      "surface": "reserveStock",
+      "case": "parallel stock reservation",
+      "oracle": "atomically reserves stock",
+      "observed": "stock=0\n",
+      "verdict": "confirmed",
+      "repro": "java -cp target/classes com.sstack.Orders reservestock-concurrency-gap",
+      "regression": {
+        "file": "src/test/java/com/sstack/ShopTest.java",
+        "test": "testReserveStockConcurrency",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "other",
+      "lens": "security",
+      "surface": "resolveReceiptPath",
+      "case": "path with ../",
+      "oracle": "rejects path traversal",
+      "observed": "path=/var/etc/passwd\n",
+      "verdict": "confirmed",
+      "repro": "java -cp target/classes com.sstack.Orders resolvereceiptpath-path-traversal",
+      "regression": {
+        "file": "src/test/java/com/sstack/ShopTest.java",
+        "test": "testResolveReceiptPathTraversal",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "other",
+      "lens": "security",
+      "surface": "searchOrderNotes",
+      "case": "sql injection in user query",
+      "oracle": "sanitizes input",
+      "observed": "res=0\n",
+      "verdict": "confirmed",
+      "repro": "java -cp target/classes com.sstack.Orders searchordernotes-sql-injection",
+      "regression": {
+        "file": "src/test/java/com/sstack/ShopTest.java",
+        "test": "testSearchOrderNotesInjection",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "other",
+      "lens": "ownership",
+      "surface": "searchOrders",
+      "case": "search by query without user id check",
+      "oracle": "only returns orders for the session user",
+      "observed": "found=2\n",
+      "verdict": "confirmed",
+      "repro": "java -cp target/classes com.sstack.Orders searchorders-unscoped-collection",
+      "regression": {
+        "file": "src/test/java/com/sstack/ShopTest.java",
+        "test": "testSearchOrdersUnscoped",
+        "before": "red",
+        "after": "green"
+      }
+    }
+  ]
+}

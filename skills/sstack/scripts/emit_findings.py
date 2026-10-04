@@ -101,6 +101,10 @@ def read_finding(path: str | None) -> dict:
     finding = json.loads(raw)
     if not isinstance(finding, dict):
         raise ValueError("finding must be a JSON object")
+    if not finding.get("repro") and finding.get("command"):
+        finding["repro"] = finding["command"]
+    elif isinstance(finding.get("repro"), dict) and finding["repro"].get("command"):
+        finding["repro"] = finding["repro"]["command"]
     missing = [k for k in ("lens", "surface", "case", "oracle", "verdict", "repro") if not finding.get(k)]
     if missing:
         raise ValueError(f"missing fields: {', '.join(missing)}")
@@ -247,7 +251,7 @@ def rebuild_report(findings_dir: Path, workspace: Path, fixture: str) -> int:
             "oracle": record.get("oracle", ""),
             "observed": record.get("stdout", "") + record.get("stderr", ""),
             "verdict": record.get("verdict", "inconclusive"),
-            "repro": record.get("command", ""),
+            "repro": record.get("command") or record.get("repro", ""),
             "regression": record.get("regression"),
         }
         if record.get("seed") is not None:
@@ -308,6 +312,33 @@ def render_summary(stack: Path, workspace: Path) -> int:
     return 0
 
 
+KNOWN_FIXTURES = {"seeded-py", "seeded-ts", "seeded-js", "seeded-java", "seeded-cpp"}
+SHORT_FIXTURES = {"py": "seeded-py", "ts": "seeded-ts", "js": "seeded-js", "java": "seeded-java", "cpp": "seeded-cpp"}
+
+
+def resolve_fixture(fixture_arg: str | None, workspace: Path, report_path: Path) -> str | None:
+    candidate = fixture_arg
+    if not candidate and report_path.is_file():
+        try:
+            candidate = json.loads(report_path.read_text(encoding="utf-8")).get("fixture")
+        except Exception:
+            pass
+    if not candidate:
+        host_marker = workspace / ".sstack-host-repo"
+        if host_marker.is_file():
+            text = host_marker.read_text(encoding="utf-8", errors="replace")
+            m = re.search(r"Fixture name:\s*(\S+)", text)
+            if m:
+                candidate = m.group(1).rstrip(".")
+    if candidate:
+        candidate = candidate.strip()
+        if candidate in SHORT_FIXTURES:
+            return SHORT_FIXTURES[candidate]
+        if f"seeded-{candidate}" in KNOWN_FIXTURES:
+            return f"seeded-{candidate}"
+    return candidate
+
+
 def upgrade_requests(findings_dir: Path, workspace: Path, fixture: str | None) -> int:
     """Requests become evidence only through execution. A request whose
     repro is a command string is executed here, the run dict replaces the
@@ -321,7 +352,7 @@ def upgrade_requests(findings_dir: Path, workspace: Path, fixture: str | None) -
                 continue  # already evidence
             print(f"{path.stem}: malformed fingerprint — treating as a request "
                   f"and re-executing its repro", file=sys.stderr)
-        repro = finding.get("repro")
+        repro = finding.get("repro") or finding.get("command")
         # A request may spell the command as a string or nest it under
         # "command" — the evidence view's shape invites the object form.
         # Either way the machine executes it; it never invents one.
@@ -334,6 +365,7 @@ def upgrade_requests(findings_dir: Path, workspace: Path, fixture: str | None) -
         record = {k: v for k, v in finding.items() if k != "repro"}
         record.update(run)
         path.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+        finding["repro"] = repro
         (findings_dir / f"{path.stem}.md").write_text(
             render_markdown(finding, run), encoding="utf-8")
         warn_unlanded(finding, workspace)
@@ -382,19 +414,19 @@ def main() -> int:
 
     report = stack / "report.json"
     if args.upgrade:
-        fixture = args.fixture or (json.loads(report.read_text(encoding="utf-8")).get("fixture") if report.is_file() else None)
+        fixture = resolve_fixture(args.fixture, workspace, report)
         return upgrade_requests(findings_dir, workspace, fixture)
 
     try:
         finding = read_finding(args.finding if args.finding else _STDIN)
     except _UpgradeRequested:
-        fixture = args.fixture or (json.loads(report.read_text(encoding="utf-8")).get("fixture") if report.is_file() else None)
+        fixture = resolve_fixture(args.fixture, workspace, report)
         return upgrade_requests(findings_dir, workspace, fixture)
     except (json.JSONDecodeError, ValueError) as error:
         print(f"invalid finding: {error}", file=sys.stderr)
         return 2
 
-    fixture = args.fixture or (json.loads(report.read_text(encoding="utf-8")).get("fixture") if report.is_file() else None)
+    fixture = resolve_fixture(args.fixture, workspace, report)
     if not fixture:
         print("first emit needs --fixture", file=sys.stderr)
         return 2

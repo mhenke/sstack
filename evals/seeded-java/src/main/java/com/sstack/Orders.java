@@ -334,6 +334,26 @@ public final class Orders {
         case "dispatchagenttool-raw-exception" -> {
           dispatchAgentTool("lookupOrder", Map.of("orderId", "not-a-number"));
         }
+        case "applycoupon-precision-loss" -> {
+          double res = Shop.applyCoupon(10.10, 30);
+          System.out.println("discounted=" + res);
+        }
+        case "fetchtrackingstatus-timeout" -> {
+          int delay = args.length > 1 ? Integer.parseInt(args[1]) : 60000;
+          fetchTrackingStatus(1, oid -> {
+            try {
+              Thread.sleep(delay);
+            } catch (InterruptedException e) {
+              Thread.currentThread().interrupt();
+            }
+            return "delivered";
+          });
+        }
+        case "searchordernotes-sql-injection" -> {
+          String q = args.length > 1 ? args[1] : "'; DROP TABLE orders; --";
+          List<Map<String, Object>> res = searchOrderNotes(q);
+          System.out.println("notes=" + res);
+        }
         default -> System.err.println("unknown cmd: " + cmd);
       }
     } catch (Throwable t) {

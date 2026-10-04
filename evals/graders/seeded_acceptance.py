@@ -50,10 +50,10 @@ STOPWORDS = {
     "with", "from", "into", "that", "this", "when", "then", "call", "calls",
 }
 
-# A `surface` is a label; `case` and `observed` are what was executed. A
+# A `surface` is a label; `case`, `observed`, and `repro` are what was executed. A
 # finding earns a match only by executing the trigger's function, so the
 # match never reads `surface` alone.
-EXECUTED_FIELDS = ("case", "observed")
+EXECUTED_FIELDS = ("case", "observed", "repro")
 
 # Words that appear in essentially any defect description. A golden's
 # oracle restated verbatim by the finding proves nothing, so matching on

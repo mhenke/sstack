@@ -303,11 +303,11 @@ Cover every selected lens on every mapped surface; a lens with zero
 executed cases on a surface consuming record/dict or string input is
 an incomplete run, not a clean result.
 
-**Per-lens fan-out.** Small or single-file target: run inline without
-fan-out. Multi-surface target: dispatch one subagent per selected lens
-concurrently (`runSubagent`), agent `sstack-<lens>-attacker` with
-matching `sstack-<lens>` skill inline under `### Lens rubric`. A custom
-lens without a dedicated agent runs on the attacker whose discipline fits,
+**Per-lens fan-out.** Small, shared-build, or single-file target: run
+serially or bounded inline to avoid build and rate collisions. Other
+targets: dispatch one subagent per selected lens (`runSubagent`), agent
+`sstack-<lens>-attacker` with matching `sstack-<lens>` skill inline under
+`### Lens rubric`. A custom lens runs on the attacker whose discipline fits,
 custom rubric appended after built-in text (per Customization).
 
 Pass each subagent the full context inline, not paths. Read

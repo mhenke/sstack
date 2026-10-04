@@ -779,3 +779,48 @@ def test_evidence_record_stamps_fixture(tmp_path):
     emit(ws, base())
     record = json.loads((ws / ".sstack" / "findings" / "t1.json").read_text())
     assert record["fixture"] == "seeded-py"
+
+
+def test_finding_accepts_command_key_at_top_level(tmp_path):
+    """A finding request providing 'command' instead of 'repro' is normalized."""
+    ws = tmp_path / "ws"
+    ws.mkdir(parents=True)
+    f = base()
+    f["command"] = f.pop("repro")
+    result = emit(ws, f)
+    assert result.returncode == 0
+    report = json.loads((ws / ".sstack" / "report.json").read_text())
+    assert len(report["findings"]) == 1
+    assert report["findings"][0]["repro"] == "echo 0"
+
+
+def test_finding_normalizes_short_fixture_name(tmp_path):
+    """Passing short fixture name like 'java' normalizes to 'seeded-java'."""
+    ws = tmp_path / "ws"
+    ws.mkdir(parents=True)
+    result = emit(ws, base(), fixture="java")
+    assert result.returncode == 0
+    report = json.loads((ws / ".sstack" / "report.json").read_text())
+    assert report["fixture"] == "seeded-java"
+    record = json.loads((ws / ".sstack" / "findings" / "t1.json").read_text())
+    assert record["fixture"] == "seeded-java"
+
+
+def test_upgrade_requests_accepts_command_key(tmp_path):
+    """The upgrade pass upgrades requests written with top-level 'command'."""
+    ws = tmp_path / "ws"
+    findings_dir = ws / ".sstack" / "findings"
+    findings_dir.mkdir(parents=True)
+    req = base()
+    req["command"] = req.pop("repro")
+    (findings_dir / "t1.json").write_text(json.dumps(req))
+
+    result = subprocess.run(
+        [sys.executable, str(EMITTER), "--workspace", str(ws), "--fixture", "seeded-py", "--upgrade"],
+        capture_output=True, text=True)
+    assert result.returncode == 0
+    assert "1 request(s) upgraded" in result.stdout
+    report = json.loads((ws / ".sstack" / "report.json").read_text())
+    assert len(report["findings"]) == 1
+    assert report["findings"][0]["repro"] == "echo 0"
+

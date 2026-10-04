@@ -73,6 +73,12 @@ JSON
     throw new Error('finding must be a JSON object');
   }
 
+  if (!finding.repro && finding.command) {
+    finding.repro = finding.command;
+  } else if (finding.repro && typeof finding.repro === 'object' && finding.repro.command) {
+    finding.repro = finding.repro.command;
+  }
+
   const missing = ['lens', 'surface', 'case', 'oracle', 'verdict', 'repro'].filter(
     (k) => !finding[k]
   );
@@ -239,7 +245,7 @@ function rebuildReport(findingsDir, workspace, fixture) {
       oracle: record.oracle,
       observed: record.stdout + record.stderr,
       verdict: record.verdict,
-      repro: record.command,
+      repro: record.command || record.repro || '',
       regression: record.regression,
     };
     if (record.seed !== undefined) {
@@ -307,7 +313,7 @@ function upgradeRequests(findingsDir, workspace, fixture) {
         `${path.basename(file, '.json')}: malformed fingerprint — treating as a request and re-executing its repro\n`
       );
     }
-    let repro = finding.repro;
+    let repro = finding.repro || finding.command;
     if (repro !== null && typeof repro === 'object') {
       repro = repro.command; // the evidence-view shape nests the command
     }
@@ -318,8 +324,10 @@ function upgradeRequests(findingsDir, workspace, fixture) {
     const run = runRepro(repro, workspace);
     const record = { ...finding };
     delete record.repro;
+    delete record.command;
     Object.assign(record, run);
     fs.writeFileSync(fullPath, JSON.stringify(record, null, 2) + '\n');
+    finding.repro = repro;
     fs.writeFileSync(
       path.join(findingsDir, file.replace(/\.json$/, '.md')),
       renderMarkdown(finding, run)
@@ -417,14 +425,43 @@ function main() {
     return renderSummary(stack, workspace);
   }
 
-  const reportPath = path.join(stack, 'report.json');
-  let fixture = fixtureArg;
-  if (!fixture && fs.existsSync(reportPath)) {
+const KNOWN_FIXTURES = new Set(['seeded-py', 'seeded-ts', 'seeded-js', 'seeded-java', 'seeded-cpp']);
+const SHORT_FIXTURES = { py: 'seeded-py', ts: 'seeded-ts', js: 'seeded-js', java: 'seeded-java', cpp: 'seeded-cpp' };
+
+function resolveFixture(fixtureArg, workspace, reportPath) {
+  let candidate = fixtureArg;
+  if (!candidate && fs.existsSync(reportPath)) {
     try {
       const existing = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
-      fixture = existing.fixture;
+      candidate = existing.fixture;
     } catch (_) {}
   }
+  if (!candidate) {
+    const hostMarker = path.join(workspace, '.sstack-host-repo');
+    if (fs.existsSync(hostMarker)) {
+      try {
+        const text = fs.readFileSync(hostMarker, 'utf8');
+        const match = text.match(/Fixture name:\s*(\S+)/);
+        if (match) {
+          candidate = match[1].replace(/\.$/, '');
+        }
+      } catch (_) {}
+    }
+  }
+  if (candidate) {
+    candidate = candidate.trim();
+    if (SHORT_FIXTURES[candidate]) {
+      return SHORT_FIXTURES[candidate];
+    }
+    if (KNOWN_FIXTURES.has(`seeded-${candidate}`)) {
+      return `seeded-${candidate}`;
+    }
+  }
+  return candidate;
+}
+
+  const reportPath = path.join(stack, 'report.json');
+  let fixture = resolveFixture(fixtureArg, workspace, reportPath);
 
   if (upgradeMode) {
     return upgradeRequests(findingsDir, workspace, fixture);

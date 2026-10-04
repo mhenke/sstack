@@ -163,11 +163,19 @@ def run_eval(
     model: str | None = None,
     prompt_override: str | None = None,
     timeout: int = 600,
+    serial: bool = False,
+    concurrency: int | None = None,
 ) -> int:
     workspace = prepare(fixture)
+    concurrency_instruction = ""
+    if serial:
+        concurrency_instruction = "\nExecute lens attacks serially (one lens at a time) to respect provider rate limits and avoid build collisions."
+    elif concurrency:
+        concurrency_instruction = f"\nLimit concurrent lens attacks to at most {concurrency} to respect provider rate limits and avoid build collisions."
+
     prompt = prompt_override or (
         f"Your workspace root is `{workspace}`.\n"
-        f"Read `skills/sstack/SKILL.md` inside that workspace and execute `/sstack shop` against the codebase.\n"
+        f"Read `skills/sstack/SKILL.md` inside that workspace and execute `/sstack shop` against the codebase.{concurrency_instruction}\n"
         f"All file reads, file edits, and commands must be executed within `{workspace}`.\n"
         f"Report your findings when finished."
     )
@@ -311,6 +319,8 @@ def main() -> int:
     eval_parser.add_argument("--model", help="model name (writes evals/baseline-<model>.json)")
     eval_parser.add_argument("--prompt", help="override default cold agent prompt")
     eval_parser.add_argument("--timeout", type=int, default=600, help="max execution seconds (default 600)")
+    eval_parser.add_argument("--serial", action="store_true", help="instruct agent to evaluate lenses serially")
+    eval_parser.add_argument("--concurrency", type=int, default=None, help="maximum concurrent lens attacks")
     args = parser.parse_args()
     if args.command == "prepare":
         print(prepare(args.fixture))
@@ -332,6 +342,8 @@ def main() -> int:
             model=args.model,
             prompt_override=args.prompt,
             timeout=args.timeout,
+            serial=args.serial,
+            concurrency=args.concurrency,
         )
     else:
         return grade(args.report)

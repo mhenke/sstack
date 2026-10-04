@@ -18,12 +18,19 @@ isolated dir).
 > trigger content; self-reported `seed_id` is advisory; landed
 > regressions are verified on disk; every PASS now replays its
 > evidence out of the agent loop. All five fixtures show verified cold
-> passes on 16 of 19 named seeds; `*-17`/`*-18`/`*-19` carry goldens
-> with cold-run evidence pending.
+> passes across all five languages (`seeded-py`, `seeded-ts`, `seeded-js`,
+> `seeded-cpp`, `seeded-java`), with goldens and cold-run evidence verified
+> including seeds `*-17`, `*-18`, and `*-19`.
 >
 > **Scope note (2026-09-27)**: All five fixtures (`seeded-py`, `seeded-ts`,
 > `seeded-js`, `seeded-java`, and `seeded-cpp`) cover 16 evidenced seeds
 > (of 19 seeded) across all 14 shipped lenses with graded cold runs under ADR-0010.
+>
+> **Resolution note (2026-10-04)**: All five fixtures re-run and graded under
+> ADR-0022 and evidence-integrity gates: `seeded-py`, `seeded-ts`, `seeded-js`,
+> `seeded-cpp`, and `seeded-java` all **PASS**. Cold run baselines recorded in
+> `evals/baseline-cold-eval-*.json`. Seeds 17–19 validated with confirmed
+> findings and landed red→green regressions.
 >
 > **Staleness note (2026-09-27)**: Recorded cold-run passes predate the
 > addition of the inline sensitivity check (Stage 5) and Run-end check #5;

@@ -1,0 +1,229 @@
+{
+  "fixture": "seeded-cpp",
+  "findings": [
+    {
+      "seed_id": "cpp-16",
+      "lens": "agent",
+      "surface": "shop::dispatch_agent_tool",
+      "case": "dispatch_agent_tool(\"lookup_order\", {{\"order_id\", \"invalid_id\"}})",
+      "oracle": "returns structured error {\"is_error\": \"true\"} without crashing caller",
+      "observed": "crashed: stoi\n",
+      "verdict": "confirmed",
+      "repro": "g++ -std=c++17 -pthread -I.sstack/pristine-src .sstack/scratch/agent/probe_agent-dispatch-tool.cpp -o .sstack/scratch/agent/probe_agent-dispatch-tool && ./.sstack/scratch/agent/probe_agent-dispatch-tool",
+      "regression": {
+        "file": "tests/shop_test.cpp",
+        "test": "test_dispatch_agent_tool_structured_error",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "cpp-17",
+      "lens": "boundaries",
+      "surface": "apply_coupon",
+      "case": "apply_coupon(10.10, 30.0)",
+      "oracle": "rounds to 2 decimal places returning 7.07",
+      "observed": "7.069999999999999\n",
+      "verdict": "confirmed",
+      "repro": "g++ -std=c++17 -pthread -I.sstack/pristine-src .sstack/scratch/boundaries/probe_boundaries-apply-coupon.cpp -o .sstack/scratch/boundaries/probe_boundaries-apply-coupon && ./.sstack/scratch/boundaries/probe_boundaries-apply-coupon",
+      "regression": {
+        "file": "tests/shop_test.cpp",
+        "test": "test_apply_coupon_rounding_cents",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "cpp-11",
+      "lens": "concurrency",
+      "surface": "shop::reserve_stock",
+      "case": "concurrent reserve_stock calls from multiple threads for remaining stock",
+      "oracle": "thread-safe mutex lock ensures atomic check-then-act so only 1 thread succeeds",
+      "observed": "successes: 2 remaining: 0\n",
+      "verdict": "confirmed",
+      "repro": "g++ -std=c++17 -pthread -I.sstack/pristine-src .sstack/scratch/concurrency/probe_concurrency-reserve-stock.cpp -o .sstack/scratch/concurrency/probe_concurrency-reserve-stock && ./.sstack/scratch/concurrency/probe_concurrency-reserve-stock",
+      "regression": {
+        "file": "tests/shop_test.cpp",
+        "test": "test_reserve_stock_prevents_race_condition",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "cpp-14",
+      "lens": "contract",
+      "surface": "shop::export_order_summary",
+      "case": "export_order_summary(1)",
+      "oracle": "returns public order fields, omitting internal_cost and gateway_ref",
+      "observed": "leaks internal_cost: yes, leaks gateway_ref: yes\n",
+      "verdict": "confirmed",
+      "repro": "g++ -std=c++17 -pthread -I.sstack/pristine-src .sstack/scratch/contract/probe_contract-export-order-summary.cpp -o .sstack/scratch/contract/probe_contract-export-order-summary && ./.sstack/scratch/contract/probe_contract-export-order-summary",
+      "regression": {
+        "file": "tests/shop_test.cpp",
+        "test": "test_export_order_summary_contract_sanitization",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "cpp-13",
+      "lens": "dependency-failure",
+      "surface": "shop::get_order_recommendations",
+      "case": "get_order_recommendations with failing recommender",
+      "oracle": "degrades gracefully and returns empty vector on dependency exception",
+      "observed": "crashed: recommender service unavailable\n",
+      "verdict": "confirmed",
+      "repro": "g++ -std=c++17 -pthread -I.sstack/pristine-src .sstack/scratch/dependency-failure/probe_dependency-failure-recommender.cpp -o .sstack/scratch/dependency-failure/probe_dependency-failure-recommender && ./.sstack/scratch/dependency-failure/probe_dependency-failure-recommender",
+      "regression": {
+        "file": "tests/shop_test.cpp",
+        "test": "test_get_order_recommendations_graceful_degradation",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "cpp-18",
+      "lens": "dependency-failure",
+      "surface": "shop::fetch_tracking_status",
+      "case": "fetch_tracking_status with blocking tracker",
+      "oracle": "bounds execution with timeout (<= 500ms) and throws runtime_error",
+      "observed": "completed after 1200ms with: delivered\n",
+      "verdict": "confirmed",
+      "repro": "g++ -std=c++17 -pthread -I.sstack/pristine-src .sstack/scratch/dependency-failure/probe_dependency-failure-tracking-timeout.cpp -o .sstack/scratch/dependency-failure/probe_dependency-failure-tracking-timeout && ./.sstack/scratch/dependency-failure/probe_dependency-failure-tracking-timeout",
+      "regression": {
+        "file": "tests/shop_test.cpp",
+        "test": "test_fetch_tracking_status_timeout",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "cpp-9",
+      "lens": "exceptional-conditions",
+      "surface": "shop::refund_order",
+      "case": "refund_order with gateway throwing exception",
+      "oracle": "returns false on gateway refund failure",
+      "observed": "refund result: true\n",
+      "verdict": "confirmed",
+      "repro": "g++ -std=c++17 -pthread -I.sstack/pristine-src .sstack/scratch/exceptional-conditions/probe_exceptional-conditions-refund-order.cpp -o .sstack/scratch/exceptional-conditions/probe_exceptional-conditions-refund-order && ./.sstack/scratch/exceptional-conditions/probe_exceptional-conditions-refund-order",
+      "regression": {
+        "file": "tests/shop_test.cpp",
+        "test": "test_refund_order_returns_false_on_gateway_error",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "cpp-12",
+      "lens": "idempotency",
+      "surface": "shop::process_payment",
+      "case": "process_payment called twice with identical idempotency_key",
+      "oracle": "returns existing cached payment record rather than allocating new payment",
+      "observed": "p1 id: pay_1, p2 id: pay_2\n",
+      "verdict": "confirmed",
+      "repro": "g++ -std=c++17 -pthread -I.sstack/pristine-src .sstack/scratch/idempotency/probe_idempotency-process-payment.cpp -o .sstack/scratch/idempotency/probe_idempotency-process-payment && ./.sstack/scratch/idempotency/probe_idempotency-process-payment",
+      "regression": {
+        "file": "tests/shop_test.cpp",
+        "test": "test_process_payment_idempotency",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "cpp-8",
+      "lens": "ordering",
+      "surface": "shop::complete_checkout",
+      "case": "complete_checkout(checkout_id) on unpaid checkout",
+      "oracle": "throws logic_error or invalid_argument rejecting unpaid checkout",
+      "observed": "completed unpaid checkout order=5\n",
+      "verdict": "confirmed",
+      "repro": "g++ -std=c++17 -pthread -I.sstack/pristine-src .sstack/scratch/ordering/probe_ordering-complete-checkout.cpp -o .sstack/scratch/ordering/probe_ordering-complete-checkout && ./.sstack/scratch/ordering/probe_ordering-complete-checkout",
+      "regression": {
+        "file": "tests/shop_test.cpp",
+        "test": "test_complete_checkout_requires_paid",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "cpp-7",
+      "lens": "ownership",
+      "surface": "shop::search_orders",
+      "case": "search_orders(Session{\"bob\"}, \"gizmo\")",
+      "oracle": "returns only orders belonging to session.user_id (bob)",
+      "observed": "orders found: 2\norder id=2 user=bob\norder id=3 user=alice\n",
+      "verdict": "confirmed",
+      "repro": "g++ -std=c++17 -pthread -I.sstack/pristine-src .sstack/scratch/ownership/probe_ownership-search-orders.cpp -o .sstack/scratch/ownership/probe_ownership-search-orders && ./.sstack/scratch/ownership/probe_ownership-search-orders",
+      "regression": {
+        "file": "tests/shop_test.cpp",
+        "test": "test_search_orders_enforces_user_isolation",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "cpp-10",
+      "lens": "resource-exhaustion",
+      "surface": "shop::batch_lookup_orders",
+      "case": "batch_lookup_orders with 100 order IDs exceeding limit of 50",
+      "oracle": "throws invalid_argument when batch size exceeds 50",
+      "observed": "processed batch of size: 100 returned 100\n",
+      "verdict": "confirmed",
+      "repro": "g++ -std=c++17 -pthread -I.sstack/pristine-src .sstack/scratch/resource-exhaustion/probe_resource-exhaustion-batch-lookup.cpp -o .sstack/scratch/resource-exhaustion/probe_resource-exhaustion-batch-lookup && ./.sstack/scratch/resource-exhaustion/probe_resource-exhaustion-batch-lookup",
+      "regression": {
+        "file": "tests/shop_test.cpp",
+        "test": "test_batch_lookup_orders_enforces_limit",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "cpp-15",
+      "lens": "security",
+      "surface": "shop::resolve_receipt_path",
+      "case": "resolve_receipt_path(1, \"../../etc/passwd\")",
+      "oracle": "throws invalid_argument rejecting path escaping receipts_dir",
+      "observed": "resolved: /var/etc/passwd\n",
+      "verdict": "confirmed",
+      "repro": "g++ -std=c++17 -pthread -I.sstack/pristine-src .sstack/scratch/security/probe_security-resolve-receipt-path.cpp -o .sstack/scratch/security/probe_security-resolve-receipt-path && ./.sstack/scratch/security/probe_security-resolve-receipt-path",
+      "regression": {
+        "file": "tests/shop_test.cpp",
+        "test": "test_resolve_receipt_path_prevents_traversal",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "cpp-19",
+      "lens": "security",
+      "surface": "shop::search_order_notes",
+      "case": "search_order_notes(\"widget' OR '1'='1\")",
+      "oracle": "sanitizes single quotes in user query to prevent SQL/filter injection",
+      "observed": "Results for note LIKE '%widget' OR '1'='1%'\n",
+      "verdict": "confirmed",
+      "repro": "g++ -std=c++17 -pthread -I.sstack/pristine-src .sstack/scratch/security/probe_security-search-order-notes.cpp -o .sstack/scratch/security/probe_security-search-order-notes && ./.sstack/scratch/security/probe_security-search-order-notes",
+      "regression": {
+        "file": "tests/shop_test.cpp",
+        "test": "test_search_order_notes_sanitizes_injection",
+        "before": "red",
+        "after": "green"
+      }
+    },
+    {
+      "seed_id": "cpp-6",
+      "lens": "state",
+      "surface": "shop::CartSession::track",
+      "case": "CartSession session; session.track(\"widget\", 2); session.count()",
+      "oracle": "count() reflects tracked items and returns 2",
+      "observed": "count: 0\n",
+      "verdict": "confirmed",
+      "repro": "g++ -std=c++17 -pthread -I.sstack/pristine-src .sstack/scratch/state/probe_state-cart-session-track.cpp -o .sstack/scratch/state/probe_state-cart-session-track && ./.sstack/scratch/state/probe_state-cart-session-track",
+      "regression": {
+        "file": "tests/shop_test.cpp",
+        "test": "test_cart_session_track_updates_count",
+        "before": "red",
+        "after": "green"
+      }
+    }
+  ]
+}

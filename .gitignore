@@ -2,6 +2,7 @@
 # The durable decisions live in docs/adr/.
 docs/superpowers/
 .superpowers/
+.smart-fix/
 
 # Python
 __pycache__/
