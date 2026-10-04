@@ -34,7 +34,7 @@ script, CLI, or binary wrapper (scope lock).
 - `/sstack <target>` — full lifecycle on a module, file, directory, or function.
 - `/sstack` (bare) — target resolved, never chosen: explicit naming wins, else the
   behaviorally relevant working-tree code diff (`git diff --stat`); a prior terminal
-  command is context, never scope authority — no code diff names a target → ask.
+  command is never scope authority; IDE-only or non-code diffs require asking for a target → ask.
 - `/sstack <stage>` (discover | attack | verify | minimize | test | fix) — enter that
   stage using existing `.sstack/` state.
 - `/sstack learn` — update `.sstack/learn/` from confirmed findings.
@@ -340,8 +340,9 @@ quoted, fix it, and re-run.
   Inconclusive findings are never promoted to regressions.
 
 Before recording a `confirmed` verdict, let the system argue its way
-out: state the strongest case that the observed behavior is correct
-given the surface's contract; if it holds, the oracle is wrong —
+out: reproducing a failed assertion proves behavior, not contract or
+exploit paths. State the strongest case that the observed behavior is
+correct given the surface's contract; if it holds, the oracle is wrong —
 re-read the contract and mark the finding refuted. Then name what
 would make the verdict wrong: a re-run that passes, an oracle that
 permits the observed behavior, a contract inferred rather than read.

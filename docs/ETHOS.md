@@ -18,7 +18,10 @@ confirmed failures into permanent regression tests.
    bound, invariant, rejection — before running anything. "It
    crashes" is not an oracle; "it raises a validation error naming
    the field" is. One oracle, one observable outcome: "throws or
-   returns NaN" is two verdicts wearing one sentence.
+   returns NaN" is two verdicts wearing one sentence. Ground oracles
+   in documented caller invariants: reproducing a failed assertion
+   proves behavior, not contract or production exploit paths; assess
+   reachability separately.
 3. **Never accept an agent's claim as evidence.** Run the real
    command, quote the real output. The agent interprets evidence;
    it does not manufacture it.

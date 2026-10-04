@@ -42,6 +42,11 @@ Report your findings when finished.
 - **Working directory**: All agent tool calls (`read_file`, `write_file`, `bash`) must set `cwd=<prepared-workspace-path>`.
 - **Zero wrappers**: The agent must follow `SKILL.md` and run the emitter directly; creating custom shell wrappers violates the scope lock.
 
+### 3. Windows Sandbox Terminal Environments
+On Windows hosts under VS Code:
+- A sandbox launch using `& '...wxc-exec.exe' '...json'` inside a MINGW64 / Git Bash terminal fails due to a PowerShell/Bash syntax mismatch (`&` is PowerShell's call operator; Bash rejects it as unexpected token syntax).
+- **Fix the root cause**: Match the terminal shell to the command dispatcher (run in a fresh PowerShell terminal). Do **not** disable sandboxing to diagnose or work around a shell syntax error.
+
 For every fixture:
 
 ```bash
