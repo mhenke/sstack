@@ -250,7 +250,7 @@
     @media (min-width: 1024px) { .hero { padding-block: calc(var(--section-y-desktop) + var(--space-4)) var(--section-y-desktop); } }
     .eyebrow { color: var(--accent); font-size: var(--text-sm); font-weight: 600; }
     .hero h1 { margin-top: var(--space-4); font-size: clamp(2.75rem, 6vw + 1rem, 5.5rem); font-weight: 800; max-width: 14ch; }
-    .hero h1 em { color: var(--accent); }
+    .hero h1 em { color: var(--accent); font-style: normal; }
     .hero-sub { margin-top: var(--space-6); max-width: 56ch; color: var(--muted); font-size: var(--text-lg); }
     .hero-actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-8); }
 
@@ -265,13 +265,14 @@
       padding: var(--space-3) var(--space-5); border-bottom: 1px solid var(--border);
       font-family: var(--font-mono); font-size: var(--text-xs); color: var(--muted);
     }
+    .panel-head span { min-width: 0; overflow-wrap: anywhere; }
     .panel-body { padding: var(--space-5); display: grid; gap: var(--space-4); }
     .finding { overflow: hidden; }
     .finding dl { margin: 0; display: grid; }
-    .finding .kv { display: grid; grid-template-columns: 7rem 1fr; gap: var(--space-3); padding: var(--space-2) var(--space-4); font-family: var(--font-mono); font-size: var(--text-sm); }
+    .finding .kv { display: grid; grid-template-columns: minmax(0, 7rem) minmax(0, 1fr); gap: var(--space-3); padding: var(--space-2) var(--space-4); font-family: var(--font-mono); font-size: var(--text-sm); }
     .finding .kv + .kv { border-top: 1px solid var(--border); }
     .finding dt { color: var(--muted); }
-    .finding dd { margin: 0; }
+    .finding dd { margin: 0; overflow-wrap: anywhere; }
     .finding dd .accent { color: var(--accent); }
     .finding dd .codetint { color: var(--code); }
     .verdict-red { color: var(--danger); }
@@ -343,8 +344,8 @@
     .install-note code { color: var(--fg-2); font-size: var(--text-sm); }
     .host-list { list-style: none; margin: var(--space-3) 0 0; padding: 0; display: grid; gap: var(--space-2); font-size: var(--text-sm); }
     .install-label { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--border); color: var(--muted); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.08em; }
-    .host-list li { display: flex; gap: var(--space-2); align-items: baseline; justify-content: space-between; }
-    .host-list code { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--muted); }
+    .host-list li { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: baseline; justify-content: space-between; }
+    .host-list code { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--muted); min-width: 0; }
     .install-card .codeblock { margin: 0; max-width: none; width: 100%; }
     .codeblock {
       margin: var(--space-8) auto 0; max-width: 42rem; min-width: 0;
@@ -407,7 +408,7 @@
     /* ─── Final CTA ─── */
     .final { text-align: center; border-top: 1px solid var(--border); }
     .final h2 { font-size: clamp(2.25rem, 5vw, 3.75rem); font-weight: 800; }
-    .final h2 em { color: var(--accent); }
+    .final h2 em { color: var(--accent); font-style: normal; }
     .final .hero-actions { justify-content: center; }
 
     /* ─── Footer ─── */
@@ -709,7 +710,6 @@
     <section class="section final" aria-labelledby="final-h">
       <div class="container">
         <h2 id="final-h">Break it on <em>purpose</em>.</h2>
-        <p class="section-sub" style="margin-inline:auto;"><a href="https://github.com/garrytan/gstack" style="color:var(--accent)">gstack</a>, <a href="https://github.com/cursor/plugins/tree/main/pstack" style="color:var(--accent)">pstack</a>, sstack. Same suffix, same shape: a SKILL.md your agent reads, a directory you copy in, a slash command you type.</p>
         <div class="hero-actions">
           <a class="btn btn-white" href="#install">Get started</a>
           <a class="btn btn-accent" href="https://github.com/mhenke/sstack#readme">Read the docs</a>

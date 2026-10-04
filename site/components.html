@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>sstack — reference components</title>
+    <title>sstack: reference components</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231f1633'/%3E%3Cpath d='M9 21.5c1.2 1.6 3.4 2.5 6 2.5 3.6 0 6-1.8 6-4.5 0-2.6-1.9-3.9-5.5-4.7-2.6-.6-3.4-1.2-3.4-2.4 0-1.3 1.2-2.2 3-2.2 2 0 3.4.7 4.3 1.8l2-1.7c-1.3-1.7-3.5-2.7-6.3-2.7-3.3 0-5.7 1.9-5.7 4.6 0 2.7 2 4 5.3 4.7 2.7.6 3.6 1.3 3.6 2.6 0 1.5-1.4 2.4-3.3 2.4-2.2 0-3.8-.8-4.7-2.2z' fill='%23fa7faa'/%3E%3C/svg%3E" />
     <link rel="stylesheet" href="fonts/fonts.css" />
     <link rel="stylesheet" href="tokens.css" />
@@ -55,19 +55,20 @@
       /* Hero */
       .eyebrow { color: var(--accent); font-size: var(--text-sm); font-weight: 600; }
       .hero-h { margin-top: var(--space-4); font-size: clamp(2.75rem, 6vw + 1rem, 5.5rem); font-weight: 800; max-width: 14ch; }
-      .hero-h em { color: var(--accent); }
+      .hero-h em { color: var(--accent); font-style: normal; }
       .lead { max-width: 56ch; color: var(--muted); font-size: var(--text-lg); }
 
       /* Findings panel */
       .panel { border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); overflow: hidden; }
       .panel-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-3) var(--space-5); border-bottom: 1px solid var(--border); font-family: var(--font-mono); font-size: var(--text-xs); color: var(--muted); }
+      .panel-head span { min-width: 0; overflow-wrap: anywhere; }
       .panel-body { padding: var(--space-5); display: grid; gap: var(--space-4); }
       .finding { border-radius: var(--radius-md); overflow: hidden; }
       .finding dl { margin: 0; display: grid; }
-      .finding .kv { display: grid; grid-template-columns: 7rem 1fr; gap: var(--space-3); padding: var(--space-2) var(--space-4); font-family: var(--font-mono); font-size: var(--text-sm); }
+      .finding .kv { display: grid; grid-template-columns: minmax(0, 7rem) minmax(0, 1fr); gap: var(--space-3); padding: var(--space-2) var(--space-4); font-family: var(--font-mono); font-size: var(--text-sm); }
       .finding .kv + .kv { border-top: 1px solid var(--border); }
       .finding dt { color: var(--muted); }
-      .finding dd { margin: 0; }
+      .finding dd { margin: 0; overflow-wrap: anywhere; }
       .accent { color: var(--accent); }
       .codetint { color: var(--code); }
       .verdict-red { color: var(--danger); }
@@ -89,10 +90,12 @@
 
       /* Lifecycle rows */
       .rows { border-top: 1px solid var(--border); }
-      .row { display: grid; grid-template-columns: 3rem 14rem 1fr; gap: var(--space-4); align-items: baseline; padding: var(--space-5) 0; border-bottom: 1px solid var(--border); }
+      .row { display: grid; grid-template-columns: 3rem 1fr; gap: var(--space-4); align-items: baseline; padding: var(--space-5) 0; border-bottom: 1px solid var(--border); }
+      @media (min-width: 820px) { .row { grid-template-columns: 3rem 14rem 1fr; } }
       .row .row-no { font-family: var(--font-mono); font-size: var(--text-sm); color: var(--accent); }
       .row h3 { font-size: var(--text-lg); font-weight: 700; }
-      .row p { color: var(--muted); }
+      .row p { color: var(--muted); grid-column: 2; }
+      @media (min-width: 820px) { .row p { grid-column: auto; } }
 
       /* Lens card */
       .lens-card { display: block; text-decoration: none; color: inherit; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); padding: var(--space-5); }
@@ -116,8 +119,8 @@
       .install-note code { color: var(--fg-2); font-size: var(--text-sm); }
       .host-list { list-style: none; margin: var(--space-3) 0 0; padding: 0; display: grid; gap: var(--space-2); font-size: var(--text-sm); }
       .install-label { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--border); color: var(--muted); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.08em; }
-      .host-list li { display: flex; gap: var(--space-2); align-items: baseline; justify-content: space-between; }
-      .host-list code { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--muted); }
+      .host-list li { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: baseline; justify-content: space-between; }
+      .host-list code { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--muted); min-width: 0; }
       .install-card .codeblock { margin: 0; max-width: none; width: 100%; border: 0; background: transparent; }
 
       /* Evidence table — real table ≥640px, stacked cards <640px via
@@ -306,7 +309,7 @@
             <h3>Install the attackers</h3>
             <p class="install-note">Paste into your AI CLI or IDE; the agent does the copying:</p>
             <div class="codeblock">
-              <code id="agents-cmd">Copy the agents/*.md files from https://github.com/mhenke/sstack into ~/.agents/ (create it if missing).</code>
+              <code id="agents-cmd">Copy the agents/*.md files from https://github.com/mhenke/sstack into ~/.agents/ (create it if missing), overwriting files already there.</code>
               <button class="copy-btn" type="button" data-copy="#agents-cmd">copy</button>
             </div>
             <p class="install-note">For VS Code:</p>
@@ -331,14 +334,14 @@
         <h2>External links</h2>
         <div class="stack-4">
           <p class="lead">Every absolute http(s) link carries a ↗ indicator via
-            <code>a[href^="http"]::after</code> — nav, buttons, cards, table,
+            <code>a[href^="http"]::after</code>: nav, buttons, cards, table,
             footer alike. Anchor and relative links do not. The glyph is plain
             inline text (never an inline-block) so it cannot wrap onto its own
             line, and it uses empty alt text (<code>content: "↗" / ""</code>)
             so assistive tech skips it.</p>
-          <p><a href="https://github.com/mhenke/sstack">External link — gets ↗</a></p>
-          <p><a href="#main">Anchor link — no indicator</a></p>
-          <p><a class="btn btn-ghost" href="https://github.com/mhenke/sstack">Button CTA — gets ↗</a></p>
+          <p><a href="https://github.com/mhenke/sstack">External link: gets ↗</a></p>
+          <p><a href="#main">Anchor link: no indicator</a></p>
+          <p><a class="btn btn-ghost" href="https://github.com/mhenke/sstack">Button CTA: gets ↗</a></p>
         </div>
       </section>
 

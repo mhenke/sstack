@@ -37,8 +37,9 @@ Contrast verified arithmetically ([WCAG 2.2](https://www.w3.org/TR/WCAG22/)):
 - Scale: 88/60/30/24/20/16/14/12. Hero uses fluid
   `clamp(2.75rem, 6vw + 1rem, 5.5rem)`; headings `line-height 1.2`,
   body `1.5`.
-- One italic accent word per heading, max. No tracked-out uppercase
-  eyebrows beyond the single hero eyebrow.
+- One accent word per heading, max, always roman (no italics in display
+  type). No tracked-out uppercase eyebrows beyond the single hero
+  eyebrow.
 
 ## Space, radius, rhythm
 
@@ -240,3 +241,19 @@ exactly from `README.md`.
     tightens to `--space-6`. Copy is new, so no em-dash per 24: the
     lead word takes a period. README carries the mirror as a
     blockquote in Running it, per its own oracle blockquote shape.
+28. **Findings panel and lifecycle rows hold at 320px**: the findings
+    `.kv` label column becomes `minmax(0, 7rem)`, values take
+    `overflow-wrap: anywhere`, and `.panel-head` spans shrink-and-wrap —
+    long mono tokens (`apply_discount(`, the findings path) wrapped
+    instead of clipping under the panel's `overflow: hidden`.
+    components.html gains the <820px two-column `.row` fallback
+    index.html already had, and its agents paste-prompt is synced to
+    README verbatim (`, overwriting files already there`).
+    Install-card host lists wrap at the same width (`flex-wrap: wrap`
+    on `.host-list li`): the VS Code agents path folds instead of
+    pushing the page to 339px.
+29. **Accent words are roman, and the family pitch lives once**: heading
+    accent words drop the italic (a recognized generated-page tell; the
+    accent color alone carries the emphasis). The final CTA's
+    gstack/pstack sentence is removed; the footer bar is the single
+    family mention.
