@@ -671,9 +671,10 @@
             <p class="install-note">Only VS Code needs the rename. Full rows: <a href="https://github.com/mhenke/sstack/blob/main/README.md#install-the-attacker-agents">README</a>.</p>
           </div>
         </div>
-        <p class="install-more">Then run it on a scope (<code>/sstack src/checkout.ts</code>): a file, directory, module, or package. Or <code>/sstack harden src/</code> to fill a suite’s missing negative tests.</p>
-        <aside class="callout" aria-label="Harden mode definition">
-          <p><strong>Harden.</strong> <code>/sstack harden src/</code> runs the same lifecycle in gap-filling mode: it measures what the suite’s negative tests already cover and writes the missing ones. A harden test that comes back red is a live bug and flips into the lifecycle; the rest land as hardening tests.</p>
+        <p class="install-more">Then run it on a scope (<code>/sstack src/checkout.ts</code>): a file, directory, module, or package. Use <code>/sstack triage src/</code> to rank attack heat, or <code>/sstack harden src/</code> to fill missing negative tests.</p>
+        <aside class="callout" aria-label="Triage and Harden mode definitions">
+          <p><strong>Triage.</strong> <code>/sstack triage src/</code> ranks surfaces by 90-day git churn, defect adjacency, and impact class to prioritize where to attack first without shrinking the whole-target map.</p>
+          <p style="margin-top:var(--space-2);"><strong>Harden.</strong> <code>/sstack harden src/</code> runs the same lifecycle in gap-filling mode: it measures what the suite’s negative tests already cover and writes the missing ones. A harden test that comes back red is a live bug and flips into the lifecycle; the rest land as hardening tests.</p>
         </aside>
         <p class="install-footnote">Nothing else to install. The evidence emitter is stdlib-only (Python, with Node fallback).</p>
       </div>
