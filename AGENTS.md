@@ -15,7 +15,7 @@ harness (`evals/acceptance.py`). `evals/` holds Python, TypeScript,
 JavaScript, Java, and C++ fixtures that are broken on purpose.
 
 End users install only `skills/` and `agents/`. This file, `docs/`,
-`GLOSSARY.md`, `CONTEXT.md`, and `evals/` exist only in the checkout — nothing a
+`CONTEXT.md`, and `evals/` exist only in the checkout — nothing a
 running sstack agent must obey may live solely here.
 
 ## Rules
@@ -24,7 +24,7 @@ running sstack agent must obey may live solely here.
 
 `skills/` and `agents/` are the end-user product: `npx skills add`
 copies `skills/` (`agents/` drops into the host's own agents
-directory by hand), and nothing else. `AGENTS.md`, `GLOSSARY.md`, `CONTEXT.md`, `docs/`,
+directory by hand), and nothing else. `AGENTS.md`, `CONTEXT.md`, `docs/`,
 `evals/`, `CHANGELOG.md`, and this repo's `.gitignore` are the
 contributor lane and never reach a user.
 
@@ -130,7 +130,6 @@ content, not by seed labels. Full cold agent instructions live in
 - `docs/ARCHITECTURE.md` — lifecycle, eight definitions, lens taxonomy,
   v1 menu
 - `docs/adr/` — why the product is shaped this way
-- `GLOSSARY.md` — domain model, canonical terms and distinctions
 - `CONTEXT.md` — judging vocabulary for eval harness and evidence contract
 - `evals/` — fixtures, goldens, graders, and acceptance evidence
 - `site/` — static project site (single `index.html`, design tokens,

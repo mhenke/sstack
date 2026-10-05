@@ -234,7 +234,6 @@ Full changelog: [`CHANGELOG.md`](CHANGELOG.md).
 
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): what the pack is —
   the eight product nouns, lifecycle stages, lens taxonomy, v0 scope
-- [`GLOSSARY.md`](GLOSSARY.md): domain model — canonical terms and distinctions
 - [`CONTEXT.md`](CONTEXT.md): what the words mean — judging
   vocabulary for the eval harness and evidence contract
 - [`docs/ETHOS.md`](docs/ETHOS.md): the four rules
