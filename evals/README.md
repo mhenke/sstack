@@ -1,13 +1,34 @@
 # Evals
 
-Cold-agent evaluation for sstack.
+Cold-agent evaluation and verification harness for sstack.
 
-## Evals vs. Cold Agent
+## What is an Eval?
 
-- **Eval harness (`evals/acceptance.py`)**: Deterministic local referee (zero LLM calls). Tests baseline fixtures (`test-all`), prepares decontaminated workspaces (`prepare`), grades findings against goldens (`grade`), and verifies evidence integrity (`replay`).
-- **Cold agent**: The live AI model being evaluated. Starts in an isolated sandbox with zero context, no answer key, and no memory; reads `skills/sstack/SKILL.md` cold, executes `/sstack`, and emits evidence.
+sstack is a collection of instructions for AI coding agents: the orchestrator skill in [`skills/sstack/SKILL.md`](../skills/sstack/SKILL.md) and fourteen attacker agent profiles in [`agents/`](../agents/).
+
+Because agent prompt instructions cannot be validated with unit tests alone, sstack evaluates itself through **cold-agent evaluations**:
+- We test whether an AI agent, following only sstack's skill and attacker instructions, can independently discover, minimize, test, and fix real bugs in deliberately broken target repositories.
+- The evaluation is **cold**: the agent starts in an isolated sandbox with zero prior memory, no chat history, and no answer key ([`BUGS.md`](seeded-py/BUGS.md) is stripped).
+- The evaluation is **evidence-gated**: a finding is only accepted if the agent produces machine-reverifiable repro output and a regression test that was **red** on the buggy seed and turns **green** after the code fix.
+
+## Core Concepts
+
+- **Eval harness ([`acceptance.py`](acceptance.py))**: Deterministic local referee (zero LLM calls). Tests fixture baseline health (`test-all`), prepares decontaminated sandboxes (`prepare`), grades agent reports against ground truth (`grade`), and verifies evidence integrity (`replay`).
+- **Cold agent**: The live AI model being evaluated. Starts in an isolated sandbox with zero context, no answer key, and no memory; reads [`skills/sstack/SKILL.md`](../skills/sstack/SKILL.md) cold, executes `/sstack`, and emits evidence.
+- **Target Fixtures** ([`seeded-py`](seeded-py/), [`seeded-ts`](seeded-ts/), [`seeded-js`](seeded-js/), [`seeded-java`](seeded-java/), [`seeded-cpp`](seeded-cpp/)): Five broken codebases covering Python, TypeScript, JavaScript, Java, and C++. Each ships nineteen seeded defects and a [`BUGS.md`](seeded-py/BUGS.md) answer key.
 
 ## Quick start
+
+### Automated Evaluation (Recommended)
+
+Run end-to-end evaluation using your agent CLI:
+
+```bash
+# Automated evaluation with an agent CLI (e.g. Claude Code):
+python3 evals/acceptance.py eval seeded-py --model claude-3-7-sonnet --agent-cmd "claude -p '{prompt}'"
+```
+
+### Manual / Subagent Evaluation Flow
 
 From the repository root:
 
@@ -38,7 +59,7 @@ Report your findings when finished.
 ```
 
 ### 2. Containment Rules
-- **No access to sstack repo or `BUGS.md`**: `prepare` strips `BUGS.md` and initializes a clean git baseline. The cold agent must never read the source repo or answer key.
+- **No access to sstack repo or `BUGS.md`**: `prepare` strips [`BUGS.md`](seeded-py/BUGS.md) and initializes a clean git baseline. The cold agent must never read the source repo or answer key.
 - **Working directory**: All agent tool calls (`read_file`, `write_file`, `bash`) must set `cwd=<prepared-workspace-path>`.
 - **Zero wrappers**: The agent must follow `SKILL.md` and run the emitter directly; creating custom shell wrappers violates the scope lock.
 
@@ -65,17 +86,25 @@ seeded-cpp
 
 ## Commands
 
+### `test <fixture>` / `test-all`
+
+Verifies that the target fixtures compile and that their pre-existing tests pass:
+
+```bash
+python3 evals/acceptance.py test-all
+```
+
 ### `prepare <fixture>`
 
 Creates a temporary workspace and prints its path. The workspace gets:
 
 - one broken fixture
-- the current `skills/sstack/` orchestrator
+- the current [`skills/sstack/`](../skills/sstack/) orchestrator
 - the fourteen peer lens skills
-- the fourteen attacker agents
+- the fourteen attacker agents in [`agents/`](../agents/)
 - `.sstack-host-repo`
 
-It strips `BUGS.md`, `.git`, caches, `node_modules/`, `target/`, and
+It strips [`BUGS.md`](seeded-py/BUGS.md), `.git`, caches, `node_modules/`, `target/`, and
 `build/` (the java workspace gets its JUnit launcher re-fetched). The
 cold agent must run from the printed directory. `.sstack/` is stripped
 too, so a fixture never ships a `config.md` or a lens file: custom
@@ -128,7 +157,7 @@ every evidence file is intact.
 
 Automated end-to-end evaluation against a model or agent CLI (eval-harness-first pattern).
 Prepares the workspace, executes the agent, runs `grade` and `replay`, and records
-`evals/baseline-<model>.json`:
+baseline results:
 
 ```bash
 # Automated evaluation with an agent CLI:
@@ -140,23 +169,26 @@ python3 evals/acceptance.py eval seeded-py
 
 ## Fixtures
 
-| Fixture | Language | Baseline | Cold acceptance |
+| Fixture | Language | Baseline Test Suite | Seeds |
 |---|---|---|---|
-| `seeded-py` | Python | `pytest -q` | PASS — graded 2026-09-27, 16/16 named runs |
-| `seeded-ts` | TypeScript | `bun run test` | PASS — graded 2026-09-27 |
-| `seeded-js` | JavaScript | `npm test` | PASS — graded 2026-09-27 |
-| `seeded-java` | Java | `javac` compile | PASS — graded 2026-09-27 |
-| `seeded-cpp` | C++ | CMake + CTest | PASS — graded 2026-09-27 |
+| [`seeded-py`](seeded-py/) | Python | `pytest -q` | 19 seeds (`py-1`..`py-19`) |
+| [`seeded-ts`](seeded-ts/) | TypeScript | `bun run test` / `vitest` | 19 seeds (`ts-1`..`ts-19`) |
+| [`seeded-js`](seeded-js/) | JavaScript | `npm test` (`node --test`) | 19 seeds (`js-1`..`js-19`) |
+| [`seeded-java`](seeded-java/) | Java | `javac` + JUnit Platform | 19 seeds (`java-1`..`java-19`) |
+| [`seeded-cpp`](seeded-cpp/) | C++ | CMake + CTest | 19 seeds (`cpp-1`..`cpp-19`) |
 
-Each fixture ships sixteen seeded defects and a `BUGS.md` answer
-key — every fixture covers all 14 lenses under ADR-0010 parity.
-All five fixtures carry full 16/16 named verifying run coverage
-(see `ACCEPTANCE.md`). The answer key is never copied into a cold workspace.
+Each fixture ships nineteen seeded defects and a [`BUGS.md`](seeded-py/BUGS.md) answer
+key — every fixture covers all 14 lenses under [ADR-0010](../docs/adr/0010-cross-language-fixture-parity.md) parity.
+The answer key is never copied into a cold workspace.
+
+Per [ADR-0024](../docs/adr/0024-acceptance-authority-stays-in-acceptance-md.md), [`ACCEPTANCE.md`](ACCEPTANCE.md) is the sole authority of record for graded cold acceptance results, verified dates, and historical run logs.
 
 ## Grading and evidence
-- `goldens.jsonl` contains seeded expectations.
-- `graders/seeded_acceptance.py` contains the deterministic grader.
-- `ACCEPTANCE.md` records historical cold runs and known failures.
+
+- [`goldens.jsonl`](goldens.jsonl) contains seeded expectations.
+- [`graders/seeded_acceptance.py`](graders/seeded_acceptance.py) contains the deterministic grader.
+- [`ACCEPTANCE.md`](ACCEPTANCE.md) records historical cold runs, verified baselines, and known failures.
+- Baseline eval artifacts: [`baseline-cold-eval-py.json`](baseline-cold-eval-py.json), [`baseline-cold-eval-ts.json`](baseline-cold-eval-ts.json), [`baseline-cold-eval-js.json`](baseline-cold-eval-js.json), [`baseline-cold-eval-java.json`](baseline-cold-eval-java.json), and [`baseline-cold-eval-cpp.json`](baseline-cold-eval-cpp.json).
 
 A report is not evidence by itself. Evidence requires the report's
 verbatim command output plus a red/green regression result. The

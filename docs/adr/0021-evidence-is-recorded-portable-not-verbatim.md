@@ -6,7 +6,7 @@
 
 ## Context
 
-ADR-0006 made evidence machine-re-verifiable: the emitter executes the
+[ADR-0006](0006-evidence-re-verifiable-by-machine.md) made evidence machine-re-verifiable: the emitter executes the
 repro, records the bytes it captured, and the fingerprint is the hash
 of the recorded output; replay and the grader recompute that hash. The
 ethos reads as "record what happened, verbatim" — and the bytes did
@@ -15,7 +15,7 @@ carried absolute workstation paths, duplicate logs, and timestamps
 (field report, 2026-09-29). The cost was not bloat. A Python traceback
 embeds the checkout's absolute path, so the identical defect
 fingerprinted differently on two machines or two temp checkouts, and
-run-over-run triage diffs (ADR-0019) showed moved paths and moved
+run-over-run triage diffs ([ADR-0019](0019-scan-baseline-for-change-triage.md)) showed moved paths and moved
 clocks as changes — noise indistinguishable from signal at diff time.
 The glossary now names this a **false change**: evidence changing
 under a stable target, the mirror of drift.
@@ -42,7 +42,7 @@ the emitted record, never also pasted into `plan.md`.
 ## Consequences
 
 **Good**: fingerprints become machine-independent, so replay, grading,
-and cross-run comparison agree by construction; ADR-0019 triage diffs
+and cross-run comparison agree by construction; [ADR-0019](0019-scan-baseline-for-change-triage.md) triage diffs
 show only target changes; the rule lives in one place (both emitters,
 mirrored) instead of N consumers; old evidence still grades and
 replays, because fingerprints were always computed over the bytes as

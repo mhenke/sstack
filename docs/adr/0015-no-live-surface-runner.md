@@ -14,13 +14,13 @@ stdlib-only `run_surface.py`/`.js` script that fires HTTP probes at
 the target's own server and feeds the emitter.
 
 The roadmap organizing rule — raise proof quality or lower run cost —
-and the ADR-0013/0014 precedent rejected the runner: the agent can
-already run real commands itself (ADR-0004 delegation), and the
-evidence contract (ADR-0006) already fingerprints any repro command's
+and the [ADR-0013](0013-no-dedicated-pbt-runner.md)/0014 precedent rejected the runner: the agent can
+already run real commands itself ([ADR-0004](0004-delegate-to-target-existing-tools.md) delegation), and the
+evidence contract ([ADR-0006](0006-evidence-re-verifiable-by-machine.md)) already fingerprints any repro command's
 bytes for machine replay. A wrapper script adds zero signal over the
 native command. Its costs are also real: server lifecycle management
 in replay (boot, readiness wait, ports, teardown) is the
-"deterministic helpers are expensive to maintain" trap ADR-0002
+"deterministic helpers are expensive to maintain" trap [ADR-0002](0002-content-only-agent-agnostic-skill.md)
 rejected; none of the five seeded fixtures is a server, so a new
 fixture class plus goldens plus cold runs would be needed to prove it;
 and every cold run would gain a flakiness surface.
@@ -45,7 +45,7 @@ remains absent from the tree.
 Live-surface testing is out of scope entirely, as guidance as well as
 infrastructure. The security and ownership lens rubrics direct the
 agent to test decisions in-process and record runtime-only behaviors
-as checked N/As in `map.md` per ADR-0007.
+as checked N/As in `map.md` per [ADR-0007](0007-optional-deps-degrade-inline.md).
 
 The scope line is one test, not a word list — **the no-socket test**:
 a behavior is in scope if the agent can confirm it by importing code
@@ -75,7 +75,7 @@ the caller's handling. The network is never touched.
 ## Consequences
 
 **Good**
-- Zero new code, zero runtime deps, zero ADR-0002 exposure; the
+- Zero new code, zero runtime deps, zero [ADR-0002](0002-content-only-agent-agnostic-skill.md) exposure; the
   evidence contract is untouched.
 - The source-first identity is unambiguous: every finding is decidable
   from source and reproducible in-process.

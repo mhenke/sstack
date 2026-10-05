@@ -30,7 +30,7 @@ sstack evaluates agent capabilities against deliberately broken fixtures in
 `evals/`. In v0, `evals/seeded-py` was used as the fast development vehicle
 to validate lenses 7 through 14 (`state` through `agent`), growing to 16
 seeded defects (`py-1` through `py-16`) with verified cold passes in
-`evals/ACCEPTANCE.md`.
+[`evals/ACCEPTANCE.md`](../../evals/ACCEPTANCE.md).
 
 However, the non-Python fixtures (`seeded-ts`, `seeded-js`, `seeded-java`,
 `seeded-cpp`) remained frozen at their initial 5 baseline seeds, covering only
@@ -43,7 +43,7 @@ A roadmap item without acceptance evidence is not done, however good the prose i
 
 We will achieve full cross-language fixture parity by extending each non-Python
 fixture (`seeded-ts`, `seeded-js`, `seeded-java`, `seeded-cpp`) to cover all
-14 shipped lenses, adhering to the frozen-seed principle of ADR-0003:
+14 shipped lenses, adhering to the frozen-seed principle of [ADR-0003](0003-eval-gated-acceptance.md):
 
 1. Existing seeds (`ts-1..5`, `js-1..5`, `java-1..5`, `cpp-1..5`) remain
    frozen and immutable.
@@ -54,7 +54,7 @@ fixture (`seeded-ts`, `seeded-js`, `seeded-java`, `seeded-cpp`) to cover all
    `idempotency`, `dependency-failure`, `contract`, `security`, `agent`).
 3. Fixture parity will be phased by language, each gated by cold acceptance
    runs proving negative-control flips (red→green) and out-of-loop replay
-   integrity before claiming coverage in `evals/ACCEPTANCE.md`.
+   integrity before claiming coverage in [`evals/ACCEPTANCE.md`](../../evals/ACCEPTANCE.md).
 
 ## Consequences
 

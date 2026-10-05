@@ -6,7 +6,7 @@
 
 ## Context
 
-ADR-0005 made sstack find-tests-and-fixes: one run attacks, proves,
+[ADR-0005](0005-sstack-finds-tests-and-fixes.md) made sstack find-tests-and-fixes: one run attacks, proves,
 tests, and repairs. The Test stage's hardening path fires only per
 finding, so a surface whose adverse condition already works gets a
 test only if some lens happened to probe it — and a surface no lens
@@ -16,8 +16,8 @@ coverage debt exactly there: nothing is broken, and nothing is tested.
 Harden mode fills those gaps directly: it assesses what the suite
 actually asserts against what the target's contracts admit, and writes
 the missing negative tests even where nothing is broken. This is a
-third position in the project's lineage — audit-only (ADR-0002), then
-find-tests-and-fixes (ADR-0005), now fill-gaps-proactively — and reads
+third position in the project's lineage — audit-only ([ADR-0002](0002-content-only-agent-agnostic-skill.md)), then
+find-tests-and-fixes ([ADR-0005](0005-sstack-finds-tests-and-fixes.md)), now fill-gaps-proactively — and reads
 as drift unless the boundary is recorded.
 
 Three placements were considered:
@@ -31,7 +31,7 @@ Three placements were considered:
   admitted contract families minus extracted assertions. That is an
   A−B assessment, not an attack.
 - **A routing subcommand** — chosen. One routing bullet, body in the
-  on-demand references tier (ADR-0016), reusing Stage 5's hardening
+  on-demand references tier ([ADR-0016](0016-on-demand-references-tier.md)), reusing Stage 5's hardening
   conventions, the emitter, and the flip path unchanged.
 
 ## Decision
@@ -60,7 +60,7 @@ that keep it inside the existing contract:
 - The mode inherits the evidence contract wholesale, so graders,
   replay, and acceptance rules apply without a second track.
 - Control runs are the mode's acceptance mechanism: each cold control
-  run's violations force mechanical run-end checks (ADR-0003's
+  run's violations force mechanical run-end checks ([ADR-0003](0003-eval-gated-acceptance.md)'s
   failures-compound doctrine applied to a mode that mostly writes
   green tests, where over-claiming — not breakage — is the failure
   mode to guard).

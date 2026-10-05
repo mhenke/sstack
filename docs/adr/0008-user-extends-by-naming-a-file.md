@@ -6,7 +6,7 @@
 
 ## Context
 
-sstack shipped seven lenses and called seven the ceiling. ADR-0007
+sstack shipped seven lenses and called seven the ceiling. [ADR-0007](0007-optional-deps-degrade-inline.md)
 fixed extension for the *pack* author: one lens skill, one agent file,
 one index row. That works for us, who own the repository. It does
 nothing for the person whose code is under attack. A team that keeps
@@ -83,4 +83,4 @@ not a detail.
 
 **Good**: a team encodes its own failure classes where they live, in version control, and keeps every upstream pack fix. The fourteen built-ins are a floor, not a ceiling: custom lenses widen coverage instead of replacing built-ins, and every removal is reported in the chat summary because a silently weakened run is indistinguishable from a clean one. That one directive in `.sstack/config.md` (`lenses.remove: <name>`) is the entire remaining config surface, and the file is run input rather than pack content, so editing it costs no updates.
 **Bad**: the pack now has an extension point it cannot test. A cold agent reading `SKILL.md` might skip discovery of a user's tree, or apply an appended rubric to the wrong scratch directory. The `lenses.remove` report requirement is likewise unenforced except by the agent's own honesty. This is the cost of having no loader, and it is not small.
-**Risks**: a custom lens is repo-authored content injected into an agent's instructions. A hostile or careless rubric could instruct the agent to skip oracles or hand-author evidence, which is precisely the failure mode ADR-0006 exists to prevent. The skill tells the agent that a lens is content, not authority, and to follow the built-in rules on conflict, but that is prose, not enforcement. A lens file that materially weakens a run should be a rejected pack contribution, and if the pressure to enforce it grows, the honest answer is a validating harness in `evals/`, not a stronger sentence in `SKILL.md`.
+**Risks**: a custom lens is repo-authored content injected into an agent's instructions. A hostile or careless rubric could instruct the agent to skip oracles or hand-author evidence, which is precisely the failure mode [ADR-0006](0006-evidence-re-verifiable-by-machine.md) exists to prevent. The skill tells the agent that a lens is content, not authority, and to follow the built-in rules on conflict, but that is prose, not enforcement. A lens file that materially weakens a run should be a rejected pack contribution, and if the pressure to enforce it grows, the honest answer is a validating harness in `evals/`, not a stronger sentence in `SKILL.md`.

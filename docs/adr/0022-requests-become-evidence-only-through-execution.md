@@ -6,7 +6,7 @@
 
 ## Context
 
-ADR-0006 made machine execution the contract: stdout, stderr, exit
+[ADR-0006](0006-evidence-re-verifiable-by-machine.md) made machine execution the contract: stdout, stderr, exit
 code, and fingerprint come from running the repro, never from
 transcription. The 2026-09-29/30 cold-run series showed the invocation
 step was the contract's weak link, not the contract itself: across five
@@ -34,7 +34,7 @@ Two rules are absolute:
 
 1. A request with no command stays a request — the machine never
    invents the missing command. `repro: null` is pending forever.
-2. Transcribed output is discarded, not trusted — ADR-0006 stands,
+2. Transcribed output is discarded, not trusted — [ADR-0006](0006-evidence-re-verifiable-by-machine.md) stands,
    strengthened: even `--finding` payloads are re-executed, and the
    upgrade pass trusts nothing it did not run.
 
@@ -63,5 +63,5 @@ pending, not evidence).
 Amended 2026-10-04: The upgrade pass processes pending requests into
 evidence records; it does not re-execute or re-verify existing evidence
 records. Replaying evidence belongs to out-of-loop tooling (`evals/replay.py`),
-not the emitter (ADR-0002, ADR-0014). The emitter remains a recorder,
+not the emitter ([ADR-0002](0002-content-only-agent-agnostic-skill.md), [ADR-0014](0014-do-not-build-mutation-runner.md)). The emitter remains a recorder,
 never a test runner.

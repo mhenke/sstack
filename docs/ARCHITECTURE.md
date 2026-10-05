@@ -32,24 +32,24 @@ report, integrity, drift, and what not to call things — lives in
 [`CONTEXT.md`](../CONTEXT.md).
 
 - **Skill** — the methodology for a stage or subcommand. One entry
-  skill owns routing and rules (`skills/sstack/SKILL.md`); on-demand
-  references live in `skills/sstack/references/` (`harden.md`,
-  `triage.md`, `discover.md`) and load on demand (ADR-0016).
+  skill owns routing and rules ([`skills/sstack/SKILL.md`](../skills/sstack/SKILL.md)); on-demand
+  references live in [`skills/sstack/references/`](../skills/sstack/references/) ([`harden.md`](../skills/sstack/references/harden.md),
+  [`triage.md`](../skills/sstack/references/triage.md), [`discover.md`](../skills/sstack/references/discover.md)) and load on demand ([ADR-0016](adr/0016-on-demand-references-tier.md)).
 - **Lens** — an attack strategy over a failure class. Fourteen peer
   skills ship (`skills/sstack-<lens>/SKILL.md`), loaded inline under
   `### Lens rubric`, never by name, and selected per target by the
   Attack stage. Fourteen is the shipped count; a target repo can add
   any number. See **Custom lens**.
 - **Agent** — a `runSubagent` dispatch handle. One file per shipped
-  lens (`agents/sstack-<lens>-attacker.md`); the orchestrator pastes
+  lens (`agents/sstack-<lens>-attacker.md` in [`agents/`](../agents/)); the orchestrator pastes
   workspace, surface map, rubric, and the Report format block into
   the subagent's message. A subagent starts blank: the paste is the
   carrier; the attacker file keeps field names as fallback.
 - **Runner** — deterministic execution of generated cases. Rejected as
-  infrastructure (ADR-0013, ADR-0014, ADR-0015): the agent runs real
+  infrastructure ([ADR-0013](adr/0013-no-dedicated-pbt-runner.md), [ADR-0014](adr/0014-do-not-build-mutation-runner.md), [ADR-0015](adr/0015-no-live-surface-runner.md)): the agent runs real
   commands itself — the target's own test frameworks — and quotes
   real output through the emitter. `runners/` stays absent, and
-  live-surface testing is out of scope per ADR-0015's **no-socket
+  live-surface testing is out of scope per [ADR-0015](adr/0015-no-live-surface-runner.md)'s **no-socket
   test**: a behavior is in scope only if the agent can confirm it by
   importing code and calling a function; confirming it by launching a
   process and observing real HTTP is out of scope.
@@ -57,7 +57,7 @@ report, integrity, drift, and what not to call things — lives in
   the attack. Errors, degradation, retry bounds, invariants,
   rejections — not only crashes.
 - **Evidence** — observed output vs. oracle, recorded as markdown
-  plus machine JSON in `.sstack/findings/`. `evals/replay.py`
+  plus machine JSON in `.sstack/findings/`. [`evals/replay.py`](../evals/replay.py)
   re-verifies the fingerprint with the agent out of the loop.
 
 
@@ -79,9 +79,9 @@ report, integrity, drift, and what not to call things — lives in
 Negative testing is the domain; lenses explore it. Security is a
 lens, never the identity. The taxonomy is bounded by an entry gate,
 not a count: a lens ships only with seeded defects across all five
-fixtures, goldens, and a graded cold run (ADR-0003), and a candidate
+fixtures, goldens, and a graded cold run ([ADR-0003](adr/0003-eval-gated-acceptance.md)), and a candidate
 overlapping an existing lens's trigger space is absorbed into it
-rather than added. Mutation stays disclosed and unshipped (ADR-0014).
+rather than added. Mutation stays disclosed and unshipped ([ADR-0014](adr/0014-do-not-build-mutation-runner.md)).
 
 | Category | Lens | v0 |
 |---|---|---|
@@ -130,7 +130,7 @@ the rest are the v1 proof-gate menu.
 1. expected-error assertion (v0)
 2. reproducibility — a confirmed finding must reproduce (v0)
 3. controlled fault injection (v1)
-4. mutation — opportunistic target delegation (ADR-0004) / inline sensitivity check (ADR-0014)
+4. mutation — opportunistic target delegation ([ADR-0004](adr/0004-delegate-to-target-existing-tools.md)) / inline sensitivity check ([ADR-0014](adr/0014-do-not-build-mutation-runner.md))
 5. known-bad fixture (v1)
 6. differential comparison (v1)
 7. invariant violation (v1)
@@ -138,16 +138,16 @@ the rest are the v1 proof-gate menu.
 
 ## v0 scope
 
-`skills/sstack/SKILL.md` (orchestrator) + 14 peer lens skills
+[`skills/sstack/SKILL.md`](../skills/sstack/SKILL.md) (orchestrator) + 14 peer lens skills
 (`skills/sstack-<lens>/SKILL.md`) + 14 attacker agents
-(`agents/sstack-<lens>-attacker.md`) + five seeded eval fixtures.
+(`agents/sstack-<lens>-attacker.md` in [`agents/`](../agents/)) + five seeded eval fixtures in [`evals/`](../evals/).
 Discover consumes `create-verification-skill` and
 `maintain-verification-skill`; Attack consumes
 `principle-attack-the-premise`; Test consumes
 `principle-test-behavior-not-implementation`; Fix consumes
 `principle-fix-root-causes` when available, with docs/types/call-sites
 fallback. Every optional dependency carries an inline fallback
-(ADR-0007). Extension is additive and goes two ways: a pack
+([ADR-0007](adr/0007-optional-deps-degrade-inline.md)). Extension is additive and goes two ways: a pack
 extension is one lens skill, one agent file, one index row; a user
 extension is one `sstack-`-prefixed file in their own skills or agents
 tree, appended to an existing attacker's dispatch, with no pack change
@@ -163,4 +163,4 @@ shipped as one example of the first shape.
 - **[pstack](https://github.com/cursor/plugins/tree/main/pstack)** — one launcher skill + on-demand content files.
 - **[impeccable](https://github.com/pbakaus/impeccable)** — `references/` per subcommand; `scripts/`
   evidence layer addable later. (sstack rejects impeccable's
-  audit-not-fix stance per ADR-0005.)
+  audit-not-fix stance per [ADR-0005](adr/0005-sstack-finds-tests-and-fixes.md).)

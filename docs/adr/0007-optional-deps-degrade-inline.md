@@ -12,7 +12,7 @@ property-testing and mutation tools, host subagent dispatch. Cold-run
 experience showed agents silently stalling or skipping stages when a
 named dependency was simply unavailable — the skill said "use X," X
 was not installed, and the run either asked the user or skipped
-coverage. ADR-0004 already commits to delegating to the target's own
+coverage. [ADR-0004](0004-delegate-to-target-existing-tools.md) already commits to delegating to the target's own
 tools; what it left open is what happens when there is nothing to
 delegate to.
 
@@ -29,7 +29,7 @@ reference may not be load-bearing.
 ## Consequences
 
 **Good**: one text works on every host — no Cursor-only assumptions,
-which is ADR-0002's promise kept at the stage level. Runs complete on
+which is [ADR-0002](0002-content-only-agent-agnostic-skill.md)'s promise kept at the stage level. Runs complete on
 partial toolchains instead of stalling on the first missing name.
 
 **Bad**: the skill text grows; every optional feature pays for itself

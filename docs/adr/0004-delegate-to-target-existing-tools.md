@@ -34,7 +34,7 @@ Hand-designing a case a generator would produce is wasted effort, and
 hand-minimizing a case a shrinker would shrink is worse than wasted
 effort: it is slower and less complete.
 
-This ADR does not change ADR-0001, which scoped mutation as a
+This ADR does not change [ADR-0001](0001-negative-testing-is-the-domain.md), which scoped mutation as a
 verification strategy rather than the product's identity. That stands.
 What changes is that sstack should reach for the target's own tooling
 before falling back to its own method.
@@ -61,7 +61,7 @@ should have done instead. Both halves are needed.
 - The resulting regressions match the repo's own idiom, so they survive
   review and keep running under the existing toolchain.
 - The tool stays small. Delegation is prose in the skill, not code in
-  the pack, so ADR-0002's no-runtime constraint survives.
+  the pack, so [ADR-0002](0002-content-only-agent-agnostic-skill.md)'s no-runtime constraint survives.
 - Mutation becomes cheap to offer: the agent invokes PIT or Stryker
   rather than implementing anything.
 

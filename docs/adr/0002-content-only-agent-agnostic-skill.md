@@ -1,6 +1,6 @@
 # ADR-0002: Content-only, agent-agnostic skill pack
 
-**Status**: Accepted (audit-not-fix portion superseded by ADR-0005)
+**Status**: Accepted (audit-not-fix portion superseded by [ADR-0005](0005-sstack-finds-tests-and-fixes.md))
 **Date**: 2026-09-27
 **Deciders**: Mike Henke
 
@@ -36,7 +36,7 @@ on-demand `references/` lens files, in the agent-skills format. No
 CLI, no daemon, no binary, and no runtime dependency beyond standard
 libraries (Python or Node.js). The agent runs real commands and
 quotes real output; evidence is loose markdown under `.sstack/`
-plus a machine JSON view written by the emitter scripts (ADR-0006).
+plus a machine JSON view written by the emitter scripts ([ADR-0006](0006-evidence-re-verifiable-by-machine.md)).
 The pack is host-agnostic and copied into any agent's skills
 directory.
 
@@ -75,6 +75,6 @@ artifacts and never the target's source, config, or secrets.
   text is unambiguous.
 
 **Note (2026-09-28)**: the audit-not-fix stance was superseded by
-ADR-0005, which allows source changes in the Fix stage. Evidence
+[ADR-0005](0005-sstack-finds-tests-and-fixes.md), which allows source changes in the Fix stage. Evidence
 preservation is maintained by requiring a red-then-green regression
 test per finding.

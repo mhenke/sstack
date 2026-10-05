@@ -1,12 +1,12 @@
 # ADR-0005: sstack finds, tests, and fixes
 
-**Status**: Accepted (supersedes the audit-not-fix portion of ADR-0002)
+**Status**: Accepted (supersedes the audit-not-fix portion of [ADR-0002](0002-content-only-agent-agnostic-skill.md))
 **Date**: 2026-09-27
 **Deciders**: Mike Henke
 
 ## Context
 
-ADR-0002 established sstack as an audit, not a refactor. The skill
+[ADR-0002](0002-content-only-agent-agnostic-skill.md) established sstack as an audit, not a refactor. The skill
 attacked, verified, minimized, and reported, but never fixed the
 target's source. The rationale was evidence preservation: if the
 attacker fixes the bug, you cannot prove the test would have caught it.

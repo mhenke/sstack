@@ -31,6 +31,7 @@ the product. For *what* the code does, read [`../ARCHITECTURE.md`](../ARCHITECTU
 | [0021](0021-evidence-is-recorded-portable-not-verbatim.md) | Evidence is recorded portable, not byte-verbatim | Accepted | 2026-09-29 |
 | [0022](0022-requests-become-evidence-only-through-execution.md) | Requests become evidence only through execution | Accepted | 2026-09-30 |
 | [0023](0023-binding-rules-live-inside-the-read-window.md) | Binding rules live inside the cold backend's read window | Accepted | 2026-09-30 |
+| [0024](0024-acceptance-authority-stays-in-acceptance-md.md) | Acceptance authority stays in ACCEPTANCE.md | Accepted | 2026-10-05 |
 
 ## Status
 

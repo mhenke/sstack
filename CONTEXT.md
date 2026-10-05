@@ -2,7 +2,7 @@
 
 Vocabulary for structured negative testing. The eight product nouns
 (Skill, Lens, Agent, Runner, Oracle, Evidence, Customization, Custom lens) live in
-`docs/ARCHITECTURE.md`; this file holds the judging vocabulary — the
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md); this file holds the judging vocabulary — the
 terms the eval harness and the evidence contract turn on.
 
 ## Language
@@ -21,7 +21,7 @@ this fixed seven)
 An angle of attack over a failure class. A noun, not a step. Fourteen
 ship; a target repo adds any number. Which failure class each name
 covers — and the category it sits in — is the taxonomy, not this file's
-enumeration; see `docs/ARCHITECTURE.md`.
+enumeration; see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 The count of attacks is surface × lens, and neither factor is capped.
 _Avoid_: attack type, test type, stage
 
@@ -131,7 +131,7 @@ number of them. Adds a **lens**, never an agent and never a stage: it
 runs on a shipped attacker with its rubric appended, so the built-in
 rubric still applies. `mutation` is a research conclusion, not an
 index row: it was pruned from the lens index because it verifies
-tests rather than attacking code (see `docs/research/MUTATION-RESEARCH.md`).
+tests rather than attacking code (see [`docs/research/MUTATION-RESEARCH.md`](docs/research/MUTATION-RESEARCH.md)).
 _Avoid_: extension, plugin (both imply code the pack loads)
 
 **Decision site**:
@@ -399,7 +399,7 @@ evidence fields. Distinct from FAIL, which is a judged negative.
 _Avoid_: failed, errored
 
 **Acceptance record**:
-`evals/ACCEPTANCE.md` — graded verdicts per fixture with run history.
+[`evals/ACCEPTANCE.md`](evals/ACCEPTANCE.md) — graded verdicts per fixture with run history.
 _Evidence_ alone should not mean this file; evidence is per-finding,
 the record is per-run.
 

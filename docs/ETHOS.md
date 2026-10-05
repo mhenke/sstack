@@ -34,7 +34,7 @@ confirmed failures into permanent regression tests.
 
 - **Live surfaces are out.** A behavior is testable only if the agent
   can confirm it by importing code and calling a function — the
-  **no-socket test** (ADR-0015). Confirming it by launching a
+  **no-socket test** ([ADR-0015](adr/0015-no-live-surface-runner.md)). Confirming it by launching a
   process and observing real HTTP is outside the stack, recorded as
   a checked N/A.
 - **Security** is one lens among many, not the identity of the

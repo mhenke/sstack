@@ -143,7 +143,7 @@ attack angle. Write `sstack-<lens>-attacker.md` into an agents
 directory, paired 1:1 with a lens of the same name.
 
 Copy the shape of a shipped one
-(`agents/sstack-boundaries-attacker.md`): a `name` and `description`
+([`agents/sstack-boundaries-attacker.md`](../agents/sstack-boundaries-attacker.md)): a `name` and `description`
 in frontmatter, then the contract. The dispatch pastes `### Workspace
 root`, `### Surface map`, `### Lens rubric`, and `### Report format`,
 so your file is the fallback when no rubric arrives, not the carrier.
@@ -209,7 +209,7 @@ silently does nothing, and a quietly weaker run reads as a clean one.
   skipped with a note in the report. A run takes attack strategy only
   from paths scoped to the repo under test.
 - **It cannot add a fifteenth shipped lens to the index.** The index in
-  `skills/sstack/SKILL.md` lists what the pack provides. Your lens
+  [`skills/sstack/SKILL.md`](../skills/sstack/SKILL.md) lists what the pack provides. Your lens
   runs alongside it without an index row.
 
 ## Reference

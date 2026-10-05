@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - 2026-10-05
+
+### Fixed
+- **Evals documentation clarity and single authority of record ([`evals/README.md`](evals/README.md), [ADR-0024](docs/adr/0024-acceptance-authority-stays-in-acceptance-md.md))** —
+  resolved GitHub Issues #7 and #8 by restructuring the evals introduction to clearly explain
+  agent prompt evaluations, cold sandboxes, and evidence-gated verification. Stripped duplicate,
+  outdated acceptance status tables and delegated sole authority of record to
+  [`evals/ACCEPTANCE.md`](evals/ACCEPTANCE.md).
+- **Internal markdown link integrity across all documentation** —
+  linked internal files and ADR references across `evals/README.md`, `README.md`, `CONTEXT.md`,
+  `docs/ARCHITECTURE.md`, `docs/ETHOS.md`, `docs/CUSTOMIZING.md`, and all ADRs in `docs/adr/`.
+  Added regression test `test_evals_readme_links_and_authority` in `evals/test_emitter.py`.
+
 ## 0.5.1 - 2026-10-04
 
 ### Added

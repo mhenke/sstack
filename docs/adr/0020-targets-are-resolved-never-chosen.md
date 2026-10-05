@@ -22,7 +22,7 @@ The tension underneath is real and does not dissolve: a whole-module
 target (an Angular `src/`) can exceed one run's attack capacity, so
 one of three things gives — target size, attack coverage, or the
 report's honesty. Choosing target size is what failed three times.
-Choosing honesty is ADR-0019's already-accepted ground: triage
+Choosing honesty is [ADR-0019](0019-scan-baseline-for-change-triage.md)'s already-accepted ground: triage
 prioritizes, it never skips.
 
 ## Decision
@@ -36,11 +36,11 @@ surfaces, never target size.
 
 A run ends every mapped surface attacked or explicitly not-run, and
 the coverage counts carry the ledger. Not-run is a reported state, not
-a shortcut: per ADR-0019, triage reorders the attack and never decides
+a shortcut: per [ADR-0019](0019-scan-baseline-for-change-triage.md), triage reorders the attack and never decides
 a surface out of it. A whole-target map may therefore span runs — the
 next run's Discover reuses the prior `map.md` after re-verifying rows
 against current code, since landed fixes invalidate contracts (the
-ADR-0019 baseline line dates the map; the re-verification dates the
+[ADR-0019](0019-scan-baseline-for-change-triage.md) baseline line dates the map; the re-verification dates the
 rows).
 
 Probes remain per-run instruments, deleted once the run-end checks

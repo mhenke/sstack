@@ -431,6 +431,30 @@ def test_readme_runtime_claim_matches_the_tree():
     assert "emit_findings.py" in readme or "Markdown plus" in readme
 
 
+def test_evals_readme_links_and_authority():
+    """evals/README.md links internal targets cleanly and avoids duplicating
+    acceptance verdicts (ADR-0024)."""
+    evals_readme = ROOT / "evals" / "README.md"
+    assert evals_readme.exists()
+    text = evals_readme.read_text()
+
+    links = re.findall(r"\[([^\]]+)\]\(([^)]+)\)", text)
+    assert len(links) >= 10, "evals/README.md must have relative markdown links"
+    for label, target in links:
+        if target.startswith("http") or target.startswith("#"):
+            continue
+        clean_target = target.split("#")[0]
+        resolved = (evals_readme.parent / clean_target).resolve()
+        assert resolved.exists(), f"Link in evals/README.md [{label}]({target}) does not exist: {resolved}"
+
+    assert "| Cold acceptance |" not in text, (
+        "evals/README.md must not duplicate acceptance verdicts; "
+        "ACCEPTANCE.md is the sole authority of record per ADR-0024"
+    )
+    assert "ACCEPTANCE.md" in text
+    assert "ADR-0024" in text
+
+
 def test_customization_contract_is_documented():
     """A user must be able to extend sstack without editing a file the
     pack ships, and without guessing the naming rule. The contract is

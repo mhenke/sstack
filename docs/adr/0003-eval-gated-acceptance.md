@@ -26,7 +26,7 @@ The design had to answer four questions the demos kept getting wrong:
 
 ## Decision
 
-Acceptance is a **cold-run eval**, recorded in `evals/ACCEPTANCE.md`:
+Acceptance is a **cold-run eval**, recorded in [`evals/ACCEPTANCE.md`](../../evals/ACCEPTANCE.md):
 
 - Five seeded repos (Python/pytest, TypeScript/vitest, JavaScript/node,
   Java/JUnit, C++/CTest), 16 seeded defects each, every bug mapped to

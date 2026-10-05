@@ -20,7 +20,7 @@ lock) or text spans that shatter on any edit above the function. The
 target repo's own git metadata is the source of truth for change —
 rename detection, per-commit history, and blame come free, and a
 baseline that does not exist must degrade to today's full Discover,
-not fail (ADR-0007).
+not fail ([ADR-0007](0007-optional-deps-degrade-inline.md)).
 
 ## Decision
 

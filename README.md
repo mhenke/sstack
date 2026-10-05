@@ -128,7 +128,7 @@ In an agent without slash commands, say the same thing in a prompt:
 "use the sstack skill on src/checkout.ts".
 
 Nothing to install. The agent reads the skills and runs the pack's
-emitter (`skills/sstack/scripts/emit_findings.py`, with `emit_findings.js`
+emitter ([`skills/sstack/scripts/emit_findings.py`](skills/sstack/scripts/emit_findings.py), with [`emit_findings.js`](skills/sstack/scripts/emit_findings.js)
 as the fallback under Node). Both are stdlib-only reference scripts that
 execute the repro, capture output, compute the SHA256 fingerprint, and
 write findings plus `report.json` — and refuse to record anything if a
@@ -145,7 +145,7 @@ there is lost. Full reference:
 
 ### For contributors
 
-`docs/`, `evals/`, and the acceptance record live only in a git
+[`docs/`](docs/), [`evals/`](evals/), and the acceptance record ([`evals/ACCEPTANCE.md`](evals/ACCEPTANCE.md)) live only in a git
 checkout: they are the contributor lane, the place the evidence
 gets produced and audited.
 
@@ -198,11 +198,11 @@ the loop.
 
 | Fixture | Seeds | Current cold evidence |
 |---|---|---|
-| seeded-py | 19 | PASS; ColdEvalPy-Reset (2026-10-04) verified 15 confirmed red→green regressions in tests/test_shop.py, 2 hardening tests, 22/22 suite green, 17/17 replay intact, `grade` pass: true. Seeds 17–19 verified (ColdRequestMode py-17/py-19; ColdEvalPy-Reset py-17/py-18). Baseline: `evals/baseline-cold-eval-py.json`. |
-| seeded-ts | 19 | PASS; ColdEvalTs-Reset (2026-10-04) verified 16 confirmed red→green regressions in tests/shop.test.ts, 22/22 suite green in vitest, 16/16 replay intact, `grade` pass: true, content-matched seeds including ts-17. Baseline: `evals/baseline-cold-eval-ts.json`. |
-| seeded-js | 19 | PASS; ColdEvalJs-2026-10-04 verified 14 confirmed findings, 14 red→green regressions landed, 0 drift, `grade` pass: true, content-matched seeds including js-17. Baseline: `evals/baseline-cold-eval-js.json`. |
-| seeded-java | 19 | PASS; ColdEvalJava-2026-10-04 verified 14 confirmed findings, 14 red→green regressions landed in ShopTest.java, 0 drift, `grade` pass: true, content-matched seeds including java-17 and java-19. Baseline: `evals/baseline-cold-eval-java.json`. |
-| seeded-cpp | 19 | PASS; ColdEvalCpp-2026-10-04 verified 14 confirmed findings, 14 red→green regressions landed in tests/shop_test.cpp, 0 drift, `grade` pass: true, content-matched seeds including cpp-17, cpp-18, cpp-19. Baseline: `evals/baseline-cold-eval-cpp.json`. |
+| seeded-py | 19 | PASS; ColdEvalPy-Reset (2026-10-04) verified 15 confirmed red→green regressions in tests/test_shop.py, 2 hardening tests, 22/22 suite green, 17/17 replay intact, `grade` pass: true. Seeds 17–19 verified (ColdRequestMode py-17/py-19; ColdEvalPy-Reset py-17/py-18). Baseline: [`evals/baseline-cold-eval-py.json`](evals/baseline-cold-eval-py.json). |
+| seeded-ts | 19 | PASS; ColdEvalTs-Reset (2026-10-04) verified 16 confirmed red→green regressions in tests/shop.test.ts, 22/22 suite green in vitest, 16/16 replay intact, `grade` pass: true, content-matched seeds including ts-17. Baseline: [`evals/baseline-cold-eval-ts.json`](evals/baseline-cold-eval-ts.json). |
+| seeded-js | 19 | PASS; ColdEvalJs-2026-10-04 verified 14 confirmed findings, 14 red→green regressions landed, 0 drift, `grade` pass: true, content-matched seeds including js-17. Baseline: [`evals/baseline-cold-eval-js.json`](evals/baseline-cold-eval-js.json). |
+| seeded-java | 19 | PASS; ColdEvalJava-2026-10-04 verified 14 confirmed findings, 14 red→green regressions landed in ShopTest.java, 0 drift, `grade` pass: true, content-matched seeds including java-17 and java-19. Baseline: [`evals/baseline-cold-eval-java.json`](evals/baseline-cold-eval-java.json). |
+| seeded-cpp | 19 | PASS; ColdEvalCpp-2026-10-04 verified 14 confirmed findings, 14 red→green regressions landed in tests/shop_test.cpp, 0 drift, `grade` pass: true, content-matched seeds including cpp-17, cpp-18, cpp-19. Baseline: [`evals/baseline-cold-eval-cpp.json`](evals/baseline-cold-eval-cpp.json). |
 
 All five fixtures (`seeded-py`, `seeded-ts`, `seeded-js`, `seeded-java`, and `seeded-cpp`) are re-run on the current 14-lens set. Earlier waves' failures, including
 fabricated fingerprints and regressions that never landed, are in the
@@ -234,6 +234,7 @@ Full changelog: [`CHANGELOG.md`](CHANGELOG.md).
 
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): what the pack is —
   the eight product nouns, lifecycle stages, lens taxonomy, v0 scope
+- [`GLOSSARY.md`](GLOSSARY.md): domain model — canonical terms and distinctions
 - [`CONTEXT.md`](CONTEXT.md): what the words mean — judging
   vocabulary for the eval harness and evidence contract
 - [`docs/ETHOS.md`](docs/ETHOS.md): the four rules

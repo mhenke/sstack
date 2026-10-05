@@ -6,7 +6,7 @@
 
 ## Context
 
-ADR-0003 defined a finding as evidence-backed: oracle declared before
+[ADR-0003](0003-eval-gated-acceptance.md) defined a finding as evidence-backed: oracle declared before
 the attack, observed output quoted verbatim, a regression that goes
 red on the seed and green after the fix. Every link in that chain was
 verified by the agent that produced it. The acceptance record shows
