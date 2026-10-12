@@ -41,7 +41,7 @@ end; the human gets decision context instead of a guessed behavior;
 rule 4 stays inviolable on harden's red-flip path.
 
 **Bad**: the verdict enum and finding shape change — both emitters,
-CONTEXT.md, and the run-end checks move together, and recorded
+GLOSSARY.md, and the run-end checks move together, and recorded
 cold-run numbers need a staleness note (ADR-0003).
 
 **Risks**: misclassification lanes a real defect as report-only or a
