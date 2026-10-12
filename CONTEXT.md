@@ -64,8 +64,9 @@ is not a weak evidence file, it is a different artifact)
 
 **Finding request**:
 What an agent writes the moment a verdict is known: the seven report
-format fields plus slug, fix, and regression, with `repro` spelled
-as the command string or an object containing `command`. A request
+format fields plus slug, class, decision, fix, and regression, with
+`repro` spelled as the command string or an object containing
+`command`. A request
 is not a finding and not evidence — it is the finding awaiting the
 machine. The emitter's upgrade pass turns requests into evidence by
 executing each repro; a request whose repro carries no executable
@@ -278,14 +279,39 @@ judging term, and it names no artifact.
 _Avoid_: bug (prose only); issue, defect (same looseness)
 
 **Verdict**:
-The judging outcome of one finding: `confirmed`, `refuted`, or
-`inconclusive`. The truthfulness mechanism — every artifact-level word
-(landed regression, hardening test, count) derives from it, so a wrong
-verdict corrupts the whole report. `confirmed` requires a red test
-against pristine source; a test that passes with the fix reverted is
-not a confirmation of anything.
+The judging outcome of one finding: `confirmed`, `refuted`,
+`inconclusive`, or `needs-decision`. The truthfulness mechanism — every
+artifact-level word (landed regression, hardening test, count) derives
+from it, so a wrong verdict corrupts the whole report. `confirmed`
+requires a red test against pristine source; a test that passes with
+the fix reverted is not a confirmation of anything. `needs-decision`
+reproduces its condition but claims no right behavior — its burden is
+decision context, not a red test.
 _Avoid_: status, result (both read as raw outcome, not a judgment
 against an oracle)
+
+**Root-cause class**:
+Why a finding's adverse condition occurred, carried on `confirmed` and
+`needs-decision` findings: `contract-violation` (documented behavior
+contradicted), `contract-gap` (desired behavior undetermined), or
+`upstream-data-process` (condition originates outside the code's
+contract). First match in that order wins; the class is the lane.
+_Avoid_: bug type, category; `class` alone (collides with impact class)
+
+**Needs-decision**:
+The verdict on reproduced adverse behavior whose desired behavior the
+contract does not determine: a request for a human contract decision —
+never a bug claim, never a fix, never counted as a bug found. Carries
+what contract evidence was searched and found silent, and the plausible
+behaviors, never a picked one.
+_Avoid_: question, open finding, business bug
+
+**Lane**:
+What a verdict decides to do with a finding: the **fix lane**
+(`confirmed`, class `contract-violation`) takes the minimal fix and the
+red→green regression; the **decision lane** (`needs-decision`) is
+report-only and lands no test.
+_Avoid_: track, stream, bucket (state containers, not judgments)
 
 **False confirmation**:
 A finding recorded `confirmed` whose regression passes against
