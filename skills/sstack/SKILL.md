@@ -87,6 +87,9 @@ lens: <lens> | verdict: <verdict> | class: <class>  # class appears only on conf
 ## Decision
 <contract searched and silent + plausible behaviors, needs-decision only>
 
+## Fix
+<description, confirmed only>
+
 ## Regression
 `<file>::<test>` — <before> → <after>
 ```
@@ -513,7 +516,7 @@ Write the machine-readable run report to exactly
 reads — one object per finding: `{"fixture", "findings":
 [{"seed_id", "lens", "surface", "case", "oracle", "observed",
 "verdict", "repro", "class", "decision",
-"regression": {"file","test","before","after"}}]}`.
+"regression": {"file","test","before","after"}}]}` (`regression` is `null` on `needs-decision`; `class`/`decision` appear on their verdicts only).
 `seed_id` is an optional free-form label or "other" — a finding's
 content carries its outcome, so nothing depends on the label. The
 emitter in Workspace writes it, per finding, as each case verifies —
@@ -533,6 +536,4 @@ partial.
 ### 7. Learn
 
 Record one line per confirmed failure class in `.sstack/learn/<lens>.md`: `lens | signal | adjacent surfaces to re-test` — prioritization for next Discover, never proof. Keep secrets, transcripts, and one-off instructions out.
-\n\n## Fix
-<description, confirmed only>
 
