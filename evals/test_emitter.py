@@ -903,7 +903,28 @@ def test_needs_decision_requires_decision(tmp_path):
     del finding["decision"]
     result = emit(tmp_path, finding)
     assert result.returncode == 2
-    assert "decision" in result.stderr
+    assert "requires 'decision'" in result.stderr
+
+
+def test_confirmed_rejects_non_violation_class(tmp_path):
+    """confirmed with class contract-gap must be rejected."""
+    finding = base(**{"class": "contract-gap", "verdict": "confirmed"})
+    result = emit(tmp_path, finding)
+    assert result.returncode == 2
+    assert "needs-decision" in result.stderr
+
+
+def test_confirmed_rejects_non_violation_class_js(tmp_path):
+    """confirmed with class contract-gap via JS emitter must be rejected."""
+    finding = base(**{"class": "contract-gap", "verdict": "confirmed"})
+    result = subprocess.run(
+        ["node", str(EMITTER_JS), "--workspace", str(tmp_path)],
+        input=json.dumps(finding),
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 2
+    assert "needs-decision" in result.stderr
 
 
 def test_class_required_on_judged_failures(tmp_path):
@@ -931,7 +952,7 @@ def test_class_rejected_off_judged_failures(tmp_path):
 def test_decision_rejected_off_the_decision_lane(tmp_path):
     result = emit(tmp_path, base(decision="contract checked: none"))
     assert result.returncode == 2
-    assert "decision" in result.stderr
+    assert "decision is only recorded on needs-decision" in result.stderr
 
 
 def test_regression_required_except_needs_decision(tmp_path):

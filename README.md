@@ -234,7 +234,7 @@ Full changelog: [`CHANGELOG.md`](CHANGELOG.md).
 
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): what the pack is —
   the eight product nouns, lifecycle stages, lens taxonomy, v0 scope
-- [`CONTEXT.md`](CONTEXT.md): what the words mean — judging
+- [`GLOSSARY.md`](GLOSSARY.md): what the words mean — judging
   vocabulary for the eval harness and evidence contract
 - [`docs/ETHOS.md`](docs/ETHOS.md): the four rules
 - [`docs/CUSTOMIZING.md`](docs/CUSTOMIZING.md): adding a lens or an

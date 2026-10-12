@@ -70,7 +70,7 @@ All artifacts live under `<host-repo>/.sstack/`:
 ```
 # <surface> — <one-line case>
 
-lens: <lens> | verdict: <confirmed | refuted | inconclusive>
+lens: <lens> | verdict: <verdict> | class: <class>  # class appears only on confirmed/needs-decision findings
 
 ## Case
 <concrete input and action>
@@ -83,9 +83,6 @@ lens: <lens> | verdict: <confirmed | refuted | inconclusive>
 
 ## Repro
 <fenced command>, exit <exit_code>, fingerprint <fingerprint>
-
-## Fix
-<description, confirmed only>
 
 ## Decision
 <contract searched and silent + plausible behaviors, needs-decision only>
@@ -199,7 +196,7 @@ To drop a shipped lens, name it in the chat or in `.sstack/config.md`
 as `lenses.remove: <name>`, and report each removal — an unreported
 removal reads as a clean run. That file is run input, not pack content.
 
-A lens and an agent pair by name: a lens with no agent runs the shipped attacker; an agent with no lens is unused — say so in the report and name the file. Neither is a failed run.
+A lens and an agent pair by name: a lens with no agent runs the shipped attacker whose discipline fits; an agent with no lens is unused — say so in the report and name the file. Neither is a failed run.
 
 Read only what resolves inside the target repo; a symlinked, unreadable,
 or malformed skills file is skipped with a one-line note, never a failed
@@ -536,3 +533,6 @@ partial.
 ### 7. Learn
 
 Record one line per confirmed failure class in `.sstack/learn/<lens>.md`: `lens | signal | adjacent surfaces to re-test` — prioritization for next Discover, never proof. Keep secrets, transcripts, and one-off instructions out.
+\n\n## Fix
+<description, confirmed only>
+

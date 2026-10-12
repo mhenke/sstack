@@ -106,14 +106,19 @@ def read_finding(path: str | None) -> dict:
         finding["repro"] = finding["command"]
     elif isinstance(finding.get("repro"), dict) and finding["repro"].get("command"):
         finding["repro"] = finding["repro"]["command"]
-    missing = [k for k in ("lens", "surface", "case", "oracle", "verdict", "repro") if not finding.get(k)]
-    if missing:
-        raise ValueError(f"missing fields: {', '.join(missing)}")
-    if finding["verdict"] not in VERDICTS:
+    return validate_finding(finding)
+
+
+
+def validate_finding(finding: dict) -> dict:
+    """The lane rules in one place: the --finding path and the upgrade
+    pass reject the same shapes with the same messages."""
+    verdict = finding.get("verdict")
+    if verdict not in VERDICTS:
         raise ValueError(f"verdict must be one of {', '.join(VERDICTS)}")
     # Order preserves pre-class error precedence on old shapes: the
     # regression checks fire before the class checks.
-    if finding["verdict"] == "needs-decision":
+    if verdict == "needs-decision":
         cls = finding.get("class")
         if cls not in CLASSES:
             raise ValueError(f"class must be one of {', '.join(CLASSES)} for needs-decision")
@@ -138,9 +143,13 @@ def read_finding(path: str | None) -> dict:
         if regression[state] not in STATES:
             raise ValueError(f"regression.{state} must be the literal token 'red' or 'green'")
     cls = finding.get("class")
-    if finding["verdict"] == "confirmed":
-        if cls not in CLASSES:
-            raise ValueError(f"class must be one of {', '.join(CLASSES)} for confirmed")
+    if verdict == "confirmed":
+        # Confirmed means the contract was violated as written; a gap or an
+        # upstream data fault is the decision lane's, not a patch's.
+        if cls != "contract-violation":
+            raise ValueError(
+                "confirmed requires class contract-violation — "
+                "contract-gap and upstream-data-process are needs-decision")
     elif cls:
         raise ValueError("class is only recorded on confirmed and needs-decision findings")
     return finding
@@ -399,6 +408,11 @@ def upgrade_requests(findings_dir: Path, workspace: Path, fixture: str | None) -
         if not isinstance(repro, str) or not repro.strip() or not preflight_probe(repro, workspace):
             pending += 1
             continue
+        try:
+            validate_finding(finding)
+        except ValueError as error:
+            print(f"invalid finding: {path.stem}: {error}", file=sys.stderr)
+            return 2
         run = run_repro(repro, workspace)
         record = {k: v for k, v in finding.items() if k != "repro"}
         record.update(run)
