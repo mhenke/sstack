@@ -93,7 +93,8 @@ Run each test as written.
 
 - **Green** — it lands as a hardening test. Emit `verdict: refuted`,
   regression `green → green`.
-- **Red** — the gap hid a live bug. Flip into the lifecycle:
+- **Red** — the gap hid a live bug. Classify it at the verdict like
+  any failure: `contract-violation` flips into the lifecycle —
   1. Snapshot the target's originals into `.sstack/pristine-src/`
      before any fix; replay depends on it.
   2. Rewrite the red matrix as the single-vector atomic test Stage 5
@@ -101,6 +102,10 @@ Run each test as written.
      atomic test, never the matrix.
   3. Minimize, sensitivity check, minimal fix, green — the confirmed
      path, unchanged.
+  `contract-gap` or `upstream-data-process` flips to `needs-decision`:
+  drop the red test from the suite (no snapshot — no fix follows),
+  emit the finding with its `decision` context, and stop. Rule 4
+  below is why: a decision pending is never a red test left behind.
 
 Rule 4 is inviolable: harden never pins a bug with a red test left
 in the suite.

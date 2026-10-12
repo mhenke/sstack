@@ -1,4 +1,11 @@
 # Cold acceptance results — sstack v0
+> **Staleness note (2026-10-12):** recorded cold-run numbers predate
+> the finding-classification text (`needs-decision` verdict, `class`,
+> `decision`; SKILL.md, both emitters). The default lifecycle verdicts
+> are unchanged, so existing verdicts stand. New feature evidence — one
+> cold run producing a classified finding plus the negative control —
+> is required before any claim about the lanes (ADR-0025).
+
 
 Runs: fresh subagent given only a copy of the skills
 (`skills/sstack/` plus the fourteen `skills/sstack-<lens>/` peers) and the
