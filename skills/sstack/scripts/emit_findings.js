@@ -38,6 +38,61 @@ function safeSlug(value, field) {
   return value;
 }
 
+// Validation: The lane rules in one place — matches Python validate_finding exactly (error messages byte-identical)
+function validateFinding(finding) {
+  // The order preserves pre-class error precedence on old shapes: the
+  // regression checks fire before the class checks.
+  if (finding.verdict === 'needs-decision') {
+    const cls = finding.class;
+    if (!CLASSES.has(cls)) {
+      throw new Error(`class must be one of ${Array.from(CLASSES).join(', ')} for needs-decision`);
+    }
+    if (finding.fix) {
+      throw new Error('a needs-decision finding is never fixed');
+    }
+    if (finding.regression) {
+      throw new Error('a needs-decision finding lands no test — regression must be absent');
+    }
+    if (!finding.decision) {
+      throw new Error("needs-decision requires 'decision': the contract evidence searched and found silent, plus the plausible behaviors, never a picked one");
+    }
+    return finding;
+  }
+
+  if (finding.decision) {
+    throw new Error('decision is only recorded on needs-decision findings');
+  }
+
+  const regression = finding.regression;
+  if (!regression || typeof regression !== 'object' || Array.isArray(regression)) {
+    throw new Error('regression must name file, test, before, after');
+  }
+
+  const absent = ['file', 'test', 'before', 'after'].filter((k) => !regression[k]);
+  if (absent.length > 0) {
+    throw new Error(`regression missing: ${absent.join(', ')}`);
+  }
+
+  for (const state of ['before', 'after']) {
+    if (!STATES.has(regression[state])) {
+      throw new Error(`regression.${state} must be the literal token 'red' or 'green'`);
+    }
+  }
+
+  const cls = finding.class;
+  if (finding.verdict === 'confirmed') {
+    // Confirmed means the contract was violated as written; a gap or an
+    // upstream data fault is the decision lane's, not a patch's.
+    if (cls !== 'contract-violation') {
+      throw new Error("confirmed requires class contract-violation — contract-gap and upstream-data-process are needs-decision");
+    }
+  } else if (cls) {
+    throw new Error('class is only recorded on confirmed and needs-decision findings');
+  }
+
+  return finding;
+}
+
 function readFinding(findingPath, rawStdin) {
   let input;
   if (findingPath) {
@@ -91,52 +146,7 @@ JSON
     throw new Error(`verdict must be one of ${Array.from(VERDICTS).join(', ')}`);
   }
 
-  // Order preserves pre-class error precedence on old shapes: the
-  // regression checks fire before the class checks.
-  if (finding.verdict === 'needs-decision') {
-    const cls = finding.class;
-    if (!CLASSES.has(cls)) {
-      throw new Error(`class must be one of ${Array.from(CLASSES).join(', ')} for needs-decision`);
-    }
-    if (finding.fix) {
-      throw new Error('a needs-decision finding is never fixed');
-    }
-    if (finding.regression) {
-      throw new Error('a needs-decision finding lands no test — regression must be absent');
-    }
-    if (!finding.decision) {
-      throw new Error("needs-decision requires 'decision': the contract evidence searched and found silent, plus the plausible behaviors, never a picked one");
-    }
-    return finding;
-  }
-  if (finding.decision) {
-    throw new Error('decision is only recorded on needs-decision findings');
-  }
-  const regression = finding.regression;
-  if (!regression || typeof regression !== 'object' || Array.isArray(regression)) {
-    throw new Error('regression must name file, test, before, after');
-  }
-
-  const absent = ['file', 'test', 'before', 'after'].filter((k) => !regression[k]);
-  if (absent.length > 0) {
-    throw new Error(`regression missing: ${absent.join(', ')}`);
-  }
-
-  for (const state of ['before', 'after']) {
-    if (!STATES.has(regression[state])) {
-      throw new Error(`regression.${state} must be the literal token 'red' or 'green'`);
-    }
-  }
-  const cls = finding.class;
-  if (finding.verdict === 'confirmed') {
-    if (!CLASSES.has(cls)) {
-      throw new Error(`class must be one of ${Array.from(CLASSES).join(', ')} for confirmed`);
-    }
-  } else if (cls) {
-    throw new Error('class is only recorded on confirmed and needs-decision findings');
-  }
-
-  return finding;
+  return validateFinding(finding);
 }
 
 // A scratch probe that does not compile is infrastructure failure, not
@@ -321,7 +331,6 @@ function warnUnlanded(finding, workspace) {
   }
 }
 
-
 // A fingerprint is 16 lowercase hex characters — or absent. The upgrade
 // pass treats any file carrying one as evidence and skips it, so a
 // padded or invented value would otherwise pass the only check that
@@ -360,6 +369,13 @@ function upgradeRequests(findingsDir, workspace, fixture) {
     if (typeof repro !== 'string' || !repro.trim() || !preflightProbe(repro, workspace)) {
       pending += 1;
       continue;
+    }
+    // Validate the finding before executing its repro
+    try {
+      validateFinding(finding);
+    } catch (error) {
+      process.stderr.write(`invalid finding: ${path.basename(file, '.json')}: ${error.message}\n`);
+      return 2;
     }
     const run = runRepro(repro, workspace);
     const record = { ...finding };
