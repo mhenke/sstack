@@ -53,6 +53,7 @@ def base(**over):
         "slug": "t1", "lens": "state", "surface": "Cart.count",
         "case": "track then count", "oracle": "returns 2",
         "verdict": "confirmed", "repro": "echo 0",
+        "class": "contract-violation",
         "fix": "recompute in count()",
         "regression": {"file": "tests/test_x.py", "test": "t",
                        "before": "red", "after": "green"},
@@ -848,3 +849,135 @@ def test_upgrade_requests_accepts_command_key(tmp_path):
     assert len(report["findings"]) == 1
     assert report["findings"][0]["repro"] == "echo 0"
 
+
+
+def decision_finding(**over):
+    finding = {
+        "slug": "t1", "lens": "state", "surface": "Cart.count",
+        "case": "count after clear", "oracle": "documented behavior",
+        "verdict": "needs-decision", "repro": "echo 0",
+        "class": "contract-gap",
+        "decision": "contract checked: docs/cart.md:12 — silent on count-after-clear; "
+                    "options: return 0; raise ValueError",
+    }
+    finding.update(over)
+    return finding
+
+
+def test_needs_decision_emits_without_fix_or_regression(tmp_path):
+    """Decision lane (ADR-0025): reproduced failure, no fix, no test —
+    the finding itself is the artifact."""
+    result = emit(tmp_path, decision_finding())
+    assert result.returncode == 0, result.stderr
+    record = json.loads((tmp_path / ".sstack" / "findings" / "t1.json").read_text())
+    assert record["verdict"] == "needs-decision"
+    assert record["class"] == "contract-gap"
+    assert record["regression"] is None
+    assert record["decision"].startswith("contract checked:")
+    body = (tmp_path / ".sstack" / "findings" / "t1.md").read_text()
+    assert "class: contract-gap" in body
+    assert "## Decision" in body
+    assert "## Regression" not in body
+    report = json.loads((tmp_path / ".sstack" / "report.json").read_text())
+    entry = report["findings"][0]
+    assert entry["class"] == "contract-gap"
+    assert entry["decision"]
+
+
+def test_needs_decision_rejects_fix(tmp_path):
+    result = emit(tmp_path, decision_finding(fix="pick behavior and patch"))
+    assert result.returncode == 2
+    assert "never fixed" in result.stderr
+
+
+def test_needs_decision_rejects_regression(tmp_path):
+    result = emit(tmp_path, decision_finding(
+        regression={"file": "tests/test_x.py", "test": "t",
+                    "before": "red", "after": "green"}))
+    assert result.returncode == 2
+    assert "no test" in result.stderr
+
+
+def test_needs_decision_requires_decision(tmp_path):
+    finding = decision_finding()
+    del finding["decision"]
+    result = emit(tmp_path, finding)
+    assert result.returncode == 2
+    assert "decision" in result.stderr
+
+
+def test_class_required_on_judged_failures(tmp_path):
+    finding = base()
+    del finding["class"]
+    result = emit(tmp_path, finding)
+    assert result.returncode == 2
+    assert "class" in result.stderr
+
+
+def test_class_must_be_a_known_value(tmp_path):
+    result = emit(tmp_path, base(**{"class": "mystery"}))
+    assert result.returncode == 2
+    assert "contract-violation" in result.stderr
+
+
+def test_class_rejected_off_judged_failures(tmp_path):
+    result = emit(tmp_path, base(verdict="refuted", **{"class": "contract-gap"},
+                                 regression={"file": "tests/test_x.py", "test": "t",
+                                             "before": "green", "after": "green"}))
+    assert result.returncode == 2
+    assert "class" in result.stderr
+
+
+def test_decision_rejected_off_the_decision_lane(tmp_path):
+    result = emit(tmp_path, base(decision="contract checked: none"))
+    assert result.returncode == 2
+    assert "decision" in result.stderr
+
+
+def test_regression_required_except_needs_decision(tmp_path):
+    finding = base()
+    finding["regression"] = None
+    result = emit(tmp_path, finding)
+    assert result.returncode == 2
+    assert "regression" in result.stderr
+
+
+def test_summary_counts_the_decision_lane(tmp_path):
+    emit(tmp_path, decision_finding())
+    summary = subprocess.run(
+        [sys.executable, str(EMITTER), "--workspace", str(tmp_path), "--report"],
+        capture_output=True, text=True)
+    assert summary.returncode == 0
+    assert "needs-decision 1" in summary.stdout
+    assert "decision (awaiting your call)" in summary.stdout
+
+
+def test_needs_decision_js_parity(tmp_path):
+    result = subprocess.run(
+        ["node", str(EMITTER_JS), "--workspace", str(tmp_path), "--fixture", "seeded-py"],
+        input=json.dumps(decision_finding()), capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    record = json.loads((tmp_path / ".sstack" / "findings" / "t1.json").read_text())
+    assert record["class"] == "contract-gap"
+    assert record["regression"] is None
+    body = (tmp_path / ".sstack" / "findings" / "t1.md").read_text()
+    assert "## Decision" in body and "## Regression" not in body
+
+
+def test_needs_decision_js_rejects_fix(tmp_path):
+    result = subprocess.run(
+        ["node", str(EMITTER_JS), "--workspace", str(tmp_path), "--fixture", "seeded-py"],
+        input=json.dumps(decision_finding(fix="patch")), capture_output=True, text=True)
+    assert result.returncode == 2
+    assert "never fixed" in result.stderr
+
+
+def test_summary_js_counts_the_decision_lane(tmp_path):
+    subprocess.run(
+        ["node", str(EMITTER_JS), "--workspace", str(tmp_path), "--fixture", "seeded-py"],
+        input=json.dumps(decision_finding()), capture_output=True, text=True)
+    summary = subprocess.run(
+        ["node", str(EMITTER_JS), "--workspace", str(tmp_path), "--report"],
+        capture_output=True, text=True)
+    assert "needs-decision 1" in summary.stdout
+    assert "decision (awaiting your call)" in summary.stdout

@@ -31,8 +31,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-VERDICTS = ("confirmed", "refuted", "inconclusive")
+VERDICTS = ("confirmed", "refuted", "inconclusive", "needs-decision")
 STATES = ("red", "green")
+CLASSES = ("contract-violation", "contract-gap", "upstream-data-process")
 SAFE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 
 # Repro execution is bounded: a hung repro is killed and recorded as
@@ -110,6 +111,23 @@ def read_finding(path: str | None) -> dict:
         raise ValueError(f"missing fields: {', '.join(missing)}")
     if finding["verdict"] not in VERDICTS:
         raise ValueError(f"verdict must be one of {', '.join(VERDICTS)}")
+    # Order preserves pre-class error precedence on old shapes: the
+    # regression checks fire before the class checks.
+    if finding["verdict"] == "needs-decision":
+        cls = finding.get("class")
+        if cls not in CLASSES:
+            raise ValueError(f"class must be one of {', '.join(CLASSES)} for needs-decision")
+        if finding.get("fix"):
+            raise ValueError("a needs-decision finding is never fixed")
+        if finding.get("regression"):
+            raise ValueError("a needs-decision finding lands no test — regression must be absent")
+        if not finding.get("decision"):
+            raise ValueError(
+                "needs-decision requires 'decision': the contract evidence searched and "
+                "found silent, plus the plausible behaviors, never a picked one")
+        return finding
+    if finding.get("decision"):
+        raise ValueError("decision is only recorded on needs-decision findings")
     regression = finding.get("regression")
     if not isinstance(regression, dict):
         raise ValueError("regression must name file, test, before, after")
@@ -119,6 +137,12 @@ def read_finding(path: str | None) -> dict:
     for state in ("before", "after"):
         if regression[state] not in STATES:
             raise ValueError(f"regression.{state} must be the literal token 'red' or 'green'")
+    cls = finding.get("class")
+    if finding["verdict"] == "confirmed":
+        if cls not in CLASSES:
+            raise ValueError(f"class must be one of {', '.join(CLASSES)} for confirmed")
+    elif cls:
+        raise ValueError("class is only recorded on confirmed and needs-decision findings")
     return finding
 
 
@@ -195,10 +219,13 @@ def run_repro(command: str, workspace: Path) -> dict:
 
 def render_markdown(finding: dict, run: dict) -> str:
     observed = (run["stdout"] + run["stderr"]).strip("\n")
+    header = f"lens: {finding['lens']} | verdict: {finding['verdict']}"
+    if finding.get("class"):
+        header += f" | class: {finding['class']}"
     parts = [
         f"# {finding['surface']} — {finding['case']}",
         "",
-        f"lens: {finding['lens']} | verdict: {finding['verdict']}",
+        header,
         "",
         "## Case",
         finding["case"],
@@ -224,14 +251,17 @@ def render_markdown(finding: dict, run: dict) -> str:
         if finding.get("counterexample") is not None:
             pbt_lines.append(f"counterexample: `{finding['counterexample']}`")
         parts += ["", "## PBT", "\n".join(pbt_lines)]
-    regression = finding["regression"]
+    if finding.get("decision"):
+        parts += ["", "## Decision", finding["decision"]]
+    regression = finding.get("regression")
     if finding["verdict"] == "confirmed" and finding.get("fix"):
         parts += ["", "## Fix", finding["fix"]]
-    parts += [
-        "",
-        "## Regression",
-        f"`{regression['file']}::{regression['test']}` — {regression['before']} → {regression['after']}",
-    ]
+    if regression:
+        parts += [
+            "",
+            "## Regression",
+            f"`{regression['file']}::{regression['test']}` — {regression['before']} → {regression['after']}",
+        ]
     return "\n".join(parts) + "\n"
 
 
@@ -258,6 +288,10 @@ def rebuild_report(findings_dir: Path, workspace: Path, fixture: str) -> int:
             entry["seed"] = record["seed"]
         if record.get("counterexample") is not None:
             entry["counterexample"] = record["counterexample"]
+        if record.get("class"):
+            entry["class"] = record["class"]
+        if record.get("decision"):
+            entry["decision"] = record["decision"]
         entries.append(entry)
     if not entries:
         return 0  # no evidence yet: writing an empty report would grade as a clean run
@@ -267,7 +301,9 @@ def rebuild_report(findings_dir: Path, workspace: Path, fixture: str) -> int:
 
 def warn_unlanded(finding: dict, workspace: Path) -> None:
     """Advisory only: during Verify the regression test may legitimately not exist yet."""
-    regression = finding["regression"]
+    regression = finding.get("regression")
+    if not regression:
+        return
     path = workspace / regression["file"]
     if not path.is_file():
         print(f"warning: {regression['file']} not on disk yet", file=sys.stderr)
@@ -284,7 +320,7 @@ def render_summary(stack: Path, workspace: Path) -> int:
         return 2
     data = json.loads(report_path.read_text(encoding="utf-8"))
     findings = data.get("findings", [])
-    counts = {"confirmed": 0, "refuted": 0, "inconclusive": 0}
+    counts = {"confirmed": 0, "refuted": 0, "inconclusive": 0, "needs-decision": 0}
     fixes = landed = hardened = 0
     for f in findings:
         v = f.get("verdict", "inconclusive")
@@ -298,6 +334,8 @@ def render_summary(stack: Path, workspace: Path) -> int:
             kind = f"regression ({rfile}::{rtest}, {'red->green' if on_disk else 'NOT ON DISK'})"
             if on_disk:
                 landed += 1
+        elif v == "needs-decision":
+            kind = "decision (awaiting your call)"
         else:
             kind = f"hardening ({rfile}::{rtest}, {'green' if on_disk else 'NOT ON DISK'})"
             if on_disk:
@@ -307,7 +345,7 @@ def render_summary(stack: Path, workspace: Path) -> int:
         if f.get("fix"):
             fixes += 1
     print(f"confirmed {counts['confirmed']} / refuted {counts['refuted']} / "
-          f"inconclusive {counts['inconclusive']}; fixes applied {fixes}; "
+          f"inconclusive {counts['inconclusive']} / needs-decision {counts['needs-decision']}; fixes applied {fixes}; "
           f"regressions landed {landed}; hardening tests added {hardened}")
     return 0
 
@@ -443,9 +481,13 @@ def main() -> int:
     run = run_repro(finding["repro"], workspace)
     record = {"seed_id": finding.get("seed_id", "other"), "lens": finding["lens"], "surface": finding["surface"],
               "case": finding["case"], "oracle": finding["oracle"], "verdict": finding["verdict"], **run,
-              "regression": finding["regression"], "fixture": fixture}
+              "regression": finding.get("regression"), "fixture": fixture}
     if finding.get("fix"):
         record["fix"] = finding["fix"]
+    if finding.get("class"):
+        record["class"] = finding["class"]
+    if finding.get("decision"):
+        record["decision"] = finding["decision"]
     if finding.get("seed") is not None:
         record["seed"] = finding["seed"]
     if finding.get("counterexample") is not None:

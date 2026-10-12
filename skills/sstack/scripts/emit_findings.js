@@ -17,8 +17,9 @@ const path = require('path');
 const crypto = require('crypto');
 const { spawnSync } = require('child_process');
 
-const VERDICTS = new Set(['confirmed', 'refuted', 'inconclusive']);
+const VERDICTS = new Set(['confirmed', 'refuted', 'inconclusive', 'needs-decision']);
 const STATES = new Set(['red', 'green']);
+const CLASSES = new Set(['contract-violation', 'contract-gap', 'upstream-data-process']);
 const SAFE = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 
 // Repro execution is bounded: a hung repro is killed and recorded as
@@ -90,6 +91,27 @@ JSON
     throw new Error(`verdict must be one of ${Array.from(VERDICTS).join(', ')}`);
   }
 
+  // Order preserves pre-class error precedence on old shapes: the
+  // regression checks fire before the class checks.
+  if (finding.verdict === 'needs-decision') {
+    const cls = finding.class;
+    if (!CLASSES.has(cls)) {
+      throw new Error(`class must be one of ${Array.from(CLASSES).join(', ')} for needs-decision`);
+    }
+    if (finding.fix) {
+      throw new Error('a needs-decision finding is never fixed');
+    }
+    if (finding.regression) {
+      throw new Error('a needs-decision finding lands no test — regression must be absent');
+    }
+    if (!finding.decision) {
+      throw new Error("needs-decision requires 'decision': the contract evidence searched and found silent, plus the plausible behaviors, never a picked one");
+    }
+    return finding;
+  }
+  if (finding.decision) {
+    throw new Error('decision is only recorded on needs-decision findings');
+  }
   const regression = finding.regression;
   if (!regression || typeof regression !== 'object' || Array.isArray(regression)) {
     throw new Error('regression must name file, test, before, after');
@@ -104,6 +126,14 @@ JSON
     if (!STATES.has(regression[state])) {
       throw new Error(`regression.${state} must be the literal token 'red' or 'green'`);
     }
+  }
+  const cls = finding.class;
+  if (finding.verdict === 'confirmed') {
+    if (!CLASSES.has(cls)) {
+      throw new Error(`class must be one of ${Array.from(CLASSES).join(', ')} for confirmed`);
+    }
+  } else if (cls) {
+    throw new Error('class is only recorded on confirmed and needs-decision findings');
   }
 
   return finding;
@@ -177,10 +207,12 @@ function runRepro(command, workspace) {
 
 function renderMarkdown(finding, run) {
   const observed = (run.stdout + run.stderr).replace(/^\n+|\n+$/g, '');
+  const header = `lens: ${finding.lens} | verdict: ${finding.verdict}` +
+    (finding.class ? ` | class: ${finding.class}` : '');
   const parts = [
     `# ${finding.surface} — ${finding.case}`,
     '',
-    `lens: ${finding.lens} | verdict: ${finding.verdict}`,
+    header,
     '',
     '## Case',
     finding.case,
@@ -212,14 +244,19 @@ function renderMarkdown(finding, run) {
   }
 
   const regression = finding.regression;
+  if (finding.decision) {
+    parts.push('', '## Decision', finding.decision);
+  }
   if (finding.verdict === 'confirmed' && finding.fix) {
     parts.push('', '## Fix', finding.fix);
   }
-  parts.push(
-    '',
-    '## Regression',
-    `\`${regression.file}::${regression.test}\` — ${regression.before} → ${regression.after}`
-  );
+  if (regression) {
+    parts.push(
+      '',
+      '## Regression',
+      `\`${regression.file}::${regression.test}\` — ${regression.before} → ${regression.after}`
+    );
+  }
 
   return parts.join('\n') + '\n';
 }
@@ -246,7 +283,7 @@ function rebuildReport(findingsDir, workspace, fixture) {
       observed: record.stdout + record.stderr,
       verdict: record.verdict,
       repro: record.command || record.repro || '',
-      regression: record.regression,
+      regression: (record.regression === undefined ? null : record.regression),
     };
     if (record.seed !== undefined) {
       entry.seed = record.seed;
@@ -254,6 +291,8 @@ function rebuildReport(findingsDir, workspace, fixture) {
     if (record.counterexample !== undefined) {
       entry.counterexample = record.counterexample;
     }
+    if (record.class) { entry.class = record.class; }
+    if (record.decision) { entry.decision = record.decision; }
     entries.push(entry);
   }
 
@@ -270,6 +309,7 @@ function rebuildReport(findingsDir, workspace, fixture) {
 
 function warnUnlanded(finding, workspace) {
   const regression = finding.regression;
+  if (!regression) return;
   const filePath = path.join(workspace, regression.file);
   if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
     process.stderr.write(`warning: ${regression.file} not on disk yet\n`);
@@ -363,7 +403,7 @@ function renderSummary(stack, workspace) {
   }
   const data = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
   const findings = data.findings || [];
-  const counts = { confirmed: 0, refuted: 0, inconclusive: 0 };
+  const counts = { confirmed: 0, refuted: 0, inconclusive: 0, 'needs-decision': 0 };
   let fixes = 0, landed = 0, hardened = 0;
   for (const f of findings) {
     const v = f.verdict || 'inconclusive';
@@ -374,17 +414,24 @@ function renderSummary(stack, workspace) {
     const onDisk = !!(p && fs.existsSync(p) && (!rtest || fs.readFileSync(p, 'utf8').includes(rtest)));
     if (v === 'confirmed') {
       if (onDisk) landed++;
+    } else if (v === 'needs-decision') {
+      // no test lands
     } else if (onDisk) {
       hardened++;
     }
     if (f.fix) fixes++;
-    const kind = v === 'confirmed'
-      ? `regression (${rfile}::${rtest}, ${onDisk ? 'red->green' : 'NOT ON DISK'})`
-      : `hardening (${rfile}::${rtest}, ${onDisk ? 'green' : 'NOT ON DISK'})`;
+    let kind;
+    if (v === 'confirmed') {
+      kind = `regression (${rfile}::${rtest}, ${onDisk ? 'red->green' : 'NOT ON DISK'})`;
+    } else if (v === 'needs-decision') {
+      kind = 'decision (awaiting your call)';
+    } else {
+      kind = `hardening (${rfile}::${rtest}, ${onDisk ? 'green' : 'NOT ON DISK'})`;
+    }
     console.log(`${f.seed_id || 'other'} | ${f.lens || 'other'} | ${f.surface || ''} | ${v} | ${kind}`);
   }
   console.log(`confirmed ${counts.confirmed} / refuted ${counts.refuted} / ` +
-    `inconclusive ${counts.inconclusive}; fixes applied ${fixes}; ` +
+    `inconclusive ${counts.inconclusive} / needs-decision ${counts['needs-decision'] || 0}; fixes applied ${fixes}; ` +
     `regressions landed ${landed}; hardening tests added ${hardened}`);
 }
 
@@ -513,11 +560,17 @@ function resolveFixture(fixtureArg, workspace, reportPath) {
     oracle: finding.oracle,
     verdict: finding.verdict,
     ...run,
-    regression: finding.regression,
+    regression: (finding.regression === undefined ? null : finding.regression),
     fixture,
   };
   if (finding.fix) {
     record.fix = finding.fix;
+  }
+  if (finding.class) {
+    record.class = finding.class;
+  }
+  if (finding.decision) {
+    record.decision = finding.decision;
   }
   if (finding.seed !== undefined) {
     record.seed = finding.seed;
