@@ -313,6 +313,12 @@ red→green regression; the **decision lane** (`needs-decision`) is
 report-only and lands no test.
 _Avoid_: track, stream, bucket (state containers, not judgments)
 
+**Disposition**:
+The run-end accounting that keeps prior findings from rotting: every
+prior `confirmed` finding is replayed through its landed regression or
+blocked with a quoted reason (run-end check 9).
+_Avoid_: status update, follow-up (process talk, not the evidence duty)
+
 **False confirmation**:
 A finding recorded `confirmed` whose regression passes against
 pristine source — a green gap-fill wearing a red claim. Run-end check
