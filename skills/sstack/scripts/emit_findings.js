@@ -122,7 +122,8 @@ function readFinding(findingPath, rawStdin) {
 node scripts/emit_findings.js --workspace <host-repo> --finding finding.json
 {"slug": "checkout-page-zero", "lens": "boundaries", "surface": "checkout",
  "case": "checkout(items=[], page=0)", "oracle": "ValueError naming page",
- "verdict": "confirmed", "repro": "<command that reproduces it>",
+ "verdict": "confirmed", "class": "contract-violation",
+ "repro": "<command that reproduces it>",
  "regression": {"file": "tests/test_checkout.py", "test": "test_page_zero",
                 "before": "red", "after": "green"}}
 JSON

@@ -40,6 +40,7 @@ def finding(**over):
         "case": "paginate(items, 0, 3) with page=0",
         "oracle": "ValueError: page must be >= 1",
         "observed": "returns [] silently", "verdict": "confirmed",
+        "class": "contract-violation",
         "repro": "pytest -q tests/test_shop.py",
         "regression": {"file": "tests/test_shop.py", "test": "test_page_zero",
                        "before": "red", "after": "green"},

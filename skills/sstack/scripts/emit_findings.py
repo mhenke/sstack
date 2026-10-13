@@ -93,7 +93,8 @@ def read_finding(path: str | None) -> dict:
             "python3 scripts/emit_findings.py --workspace <host-repo> --finding finding.json [--fixture <fixture>]\n"
             '{"slug": "checkout-page-zero", "lens": "boundaries", "surface": "checkout",\n'
             ' "case": "checkout(items=[], page=0)", "oracle": "ValueError naming page",\n'
-            ' "verdict": "confirmed", "repro": "<command that reproduces it>",\n'
+            ' "verdict": "confirmed", "class": "contract-violation",\n'
+            ' "repro": "<command that reproduces it>",\n'
             ' "regression": {"file": "tests/test_checkout.py", "test": "test_page_zero",\n'
             '                "before": "red", "after": "green"}}',
             file=sys.stderr,
