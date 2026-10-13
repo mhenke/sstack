@@ -40,6 +40,17 @@ function safeSlug(value, field) {
 
 // Validation: The lane rules in one place — matches Python validate_finding exactly (error messages byte-identical)
 function validateFinding(finding) {
+  const missing = ['lens', 'surface', 'case', 'oracle', 'verdict', 'repro'].filter(
+    (k) => !finding[k]
+  );
+  if (missing.length > 0) {
+    throw new Error(`missing fields: ${missing.join(', ')}`);
+  }
+
+  if (!VERDICTS.has(finding.verdict)) {
+    throw new Error(`verdict must be one of ${Array.from(VERDICTS).join(', ')}`);
+  }
+
   // The order preserves pre-class error precedence on old shapes: the
   // regression checks fire before the class checks.
   if (finding.verdict === 'needs-decision') {
@@ -133,17 +144,6 @@ JSON
     finding.repro = finding.command;
   } else if (finding.repro && typeof finding.repro === 'object' && finding.repro.command) {
     finding.repro = finding.repro.command;
-  }
-
-  const missing = ['lens', 'surface', 'case', 'oracle', 'verdict', 'repro'].filter(
-    (k) => !finding[k]
-  );
-  if (missing.length > 0) {
-    throw new Error(`missing fields: ${missing.join(', ')}`);
-  }
-
-  if (!VERDICTS.has(finding.verdict)) {
-    throw new Error(`verdict must be one of ${Array.from(VERDICTS).join(', ')}`);
   }
 
   return validateFinding(finding);
@@ -365,6 +365,13 @@ function upgradeRequests(findingsDir, workspace, fixture) {
     let repro = finding.repro || finding.command;
     if (repro !== null && typeof repro === 'object') {
       repro = repro.command; // the evidence-view shape nests the command
+    }
+    // Normalize the "command" spelling before validating so the
+    // missing-fields rule sees the shape the --finding path sees.
+    if (!finding.repro && finding.command) {
+      finding.repro = finding.command;
+    } else if (finding.repro && typeof finding.repro === 'object' && finding.repro.command) {
+      finding.repro = finding.repro.command;
     }
     if (typeof repro !== 'string' || !repro.trim() || !preflightProbe(repro, workspace)) {
       pending += 1;
@@ -605,4 +612,4 @@ function resolveFixture(fixtureArg, workspace, reportPath) {
   process.exit(0);
 }
 
-main();
+process.exit(main() ?? 0);

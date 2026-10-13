@@ -113,6 +113,9 @@ def read_finding(path: str | None) -> dict:
 def validate_finding(finding: dict) -> dict:
     """The lane rules in one place: the --finding path and the upgrade
     pass reject the same shapes with the same messages."""
+    missing = [k for k in ("lens", "surface", "case", "oracle", "verdict", "repro") if not finding.get(k)]
+    if missing:
+        raise ValueError(f"missing fields: {', '.join(missing)}")
     verdict = finding.get("verdict")
     if verdict not in VERDICTS:
         raise ValueError(f"verdict must be one of {', '.join(VERDICTS)}")
@@ -405,6 +408,13 @@ def upgrade_requests(findings_dir: Path, workspace: Path, fixture: str | None) -
         # Either way the machine executes it; it never invents one.
         if isinstance(repro, dict):
             repro = repro.get("command")
+        # Requests may spell the command under "command" (string or nested
+        # object); normalize before validating so the missing-fields rule
+        # sees the shape the --finding path sees.
+        if not finding.get("repro") and finding.get("command"):
+            finding["repro"] = finding["command"]
+        elif isinstance(finding.get("repro"), dict) and finding["repro"].get("command"):
+            finding["repro"] = finding["repro"]["command"]
         if not isinstance(repro, str) or not repro.strip() or not preflight_probe(repro, workspace):
             pending += 1
             continue

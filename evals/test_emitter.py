@@ -1002,3 +1002,27 @@ def test_summary_js_counts_the_decision_lane(tmp_path):
         capture_output=True, text=True)
     assert "needs-decision 1" in summary.stdout
     assert "decision (awaiting your call)" in summary.stdout
+
+
+def test_upgrade_rejects_invalid_lane_request(tmp_path):
+    """The upgrade pass enforces the lane rules too (ADR-0025): a
+    needs-decision request carrying a fix is rejected loudly (exit 2),
+    never upgraded into evidence."""
+    findings = tmp_path / ".sstack" / "findings"
+    findings.mkdir(parents=True)
+    (findings / "t1.json").write_text(json.dumps(decision_finding(fix="patch")))
+    result = upgrade(tmp_path)
+    assert result.returncode == 2
+    assert "never fixed" in result.stderr
+    assert not (tmp_path / ".sstack" / "report.json").exists()
+
+
+def test_upgrade_rejects_invalid_lane_request_js(tmp_path):
+    """Node emitter parity: the upgrade pass exits 2 on an invalid lane
+    request — the exit code is not discarded."""
+    findings = tmp_path / ".sstack" / "findings"
+    findings.mkdir(parents=True)
+    (findings / "t1.json").write_text(json.dumps(decision_finding(fix="patch")))
+    result = upgrade(tmp_path, emitter="js")
+    assert result.returncode == 2
+    assert "never fixed" in result.stderr
